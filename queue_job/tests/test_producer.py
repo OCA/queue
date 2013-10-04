@@ -31,8 +31,8 @@ class test_producers(common.TransactionCase):
         """
         Create a record and check if the event is called
         """
-        @on_record_create(model_names='res.partner')
-        def event(session, model_name, record_id):
+        @on_record_create
+        def event(session, model_name, record_id, vals):
             self.recipient.record_id = record_id
 
         record_id = self.model.create(self.cr,
@@ -45,25 +45,26 @@ class test_producers(common.TransactionCase):
         """
         Write on a record and check if the event is called
         """
-        @on_record_write(model_names='res.partner')
-        def event(session, model_name, record_id, fields=None):
+        @on_record_write
+        def event(session, model_name, record_id, vals=None):
             self.recipient.record_id = record_id
-            self.recipient.fields = fields
+            self.recipient.vals = vals
 
+        vals =  {'name': 'Lrrr',
+                    'city': 'Omicron Persei 8'}
         self.model.write(self.cr,
                          self.uid,
                          self.partner_id,
-                         {'name': 'Lrrr',
-                          'city': 'Omicron Persei 8'})
+                         vals)
         self.assertEqual(self.recipient.record_id, self.partner_id)
-        self.assertItemsEqual(self.recipient.fields, ['name', 'city'])
+        self.assertDictEqual(self.recipient.vals, vals)
         on_record_write.unsubscribe(event)
 
     def test_on_record_unlink(self):
         """
         Unlink a record and check if the event is called
         """
-        @on_record_unlink(model_names='res.partner')
+        @on_record_unlink
         def event(session, model_name, record_id):
             if model_name == 'res.partner':
                 self.recipient.record_id = record_id
@@ -79,8 +80,6 @@ class test_producers(common.TransactionCase):
         If no consumer is registered on the event for the model,
         the event should not be fired at all
         """
-        # clear all the registered events
-        on_record_write._consumers = {None: set()}
         with mock.patch.object(on_record_write, 'fire'):
             record_id = self.model.write(self.cr,
                                          self.uid,
