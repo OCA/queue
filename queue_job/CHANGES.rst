@@ -4,8 +4,8 @@ Changelog
 2.0.1.dev0
 ~~~~~~~~~~
 
-* Add the possibility to use 'Modifiers' functions in the 'direct
-  mappings' (details in the documentation of the Mapper class)
+* Add a new optional keyword argument 'description' to the delay function of a job. If given, the description is used as name of the queue.job model stored in OpenErp 
+and displayed in the list of jobs.
 
 2.0.1 (2013-09-12)
 ~~~~~~~~~~~~~~~~~~
