@@ -1,8 +1,15 @@
 Changelog
 ---------
 
-2.0.1.dev0
-~~~~~~~~~~
+2.1.1 (2014-02-06)
+~~~~~~~~~~~~~~~~~~
+
+* A user can be blocked because he has no access to the model queue.job when a
+  job has been delayed. The creation of a job is low level and should not be
+  restrained by the accesses of the user. (lp:1276182)
+
+2.1.0 (2014-01-15 - warning: breaks compatibility)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Add a new optional keyword argument 'description' to the delay() function of a
   job.  If given, the description is used as name of the queue.job record stored
