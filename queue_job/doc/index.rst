@@ -39,7 +39,6 @@ Core Features
 .. _OpenERP: http://www.openerp.com
 .. _Camptocamp: http://www.camptocamp.com
 .. _Akretion: http://www.akretion.com
-.. _`source code is available on Launchpad`: https://code.launchpad.net/openerp-connector
 =======
 .. _`source code is available on GitHub`: https://github.com/OCA/connector
 .. _`AGPL version 3`: http://www.gnu.org/licenses/agpl-3.0.html
