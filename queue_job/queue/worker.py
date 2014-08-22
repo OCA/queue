@@ -31,8 +31,7 @@ from StringIO import StringIO
 from psycopg2 import OperationalError, ProgrammingError
 
 import openerp
-from openerp.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
-from openerp.service import db
+from openerp.osv.osv import PG_CONCURRENCY_ERRORS_TO_RETRY
 from openerp.tools import config
 from .queue import JobsQueue
 from ..session import ConnectorSessionHandler
@@ -178,17 +177,16 @@ class Worker(threading.Thread):
 
         Wait for jobs and execute them sequentially.
         """
-        with openerp.api.Environment.manage():
-            while 1:
-                # check if the worker has to exit (db destroyed, connector
-                # uninstalled)
-                if self.watcher.worker_lost(self):
-                    break
-                job = self.queue.dequeue()
-                try:
-                    self.run_job(job)
-                except:
-                    continue
+        while 1:
+            # check if the worker has to exit (db destroyed, connector
+            # uninstalled)
+            if self.watcher.worker_lost(self):
+                break
+            job = self.queue.dequeue()
+            try:
+                self.run_job(job)
+            except:
+                continue
 
     def enqueue_job_uuid(self, job_uuid):
         """ Enqueue a job:
@@ -262,7 +260,11 @@ class WorkerWatcher(threading.Thread):
         if config['db_name']:
             db_names = config['db_name'].split(',')
         else:
-            db_names = db.exp_list(True)
+            services = openerp.netsvc.ExportService._services
+            if services.get('db'):
+                db_names = services['db'].exp_list(True)
+            else:
+                db_names = []
         available_db_names = []
         for db_name in db_names:
             session_hdl = ConnectorSessionHandler(db_name,
@@ -275,8 +277,8 @@ class WorkerWatcher(threading.Thread):
                                "AND state = %s", ('connector', 'installed'),
                                log_exceptions=False)
                 except ProgrammingError as err:
-                    if unicode(err).startswith('relation "ir_module_module"'
-                                               ' does not exist'):
+                    no_db_error = 'relation "ir_module_module" does not exist'
+                    if unicode(err).startswith(no_db_error):
                         _logger.debug('Database %s is not an OpenERP database,'
                                       ' connector worker not started', db_name)
                     else:
@@ -305,12 +307,11 @@ class WorkerWatcher(threading.Thread):
 
     def run(self):
         """ `WorkerWatcher`'s main loop """
-        with openerp.api.Environment.manage():
-            while 1:
-                self._update_workers()
-                for db_name, worker in self._workers.items():
-                    self.check_alive(db_name, worker)
-                time.sleep(WAIT_CHECK_WORKER_ALIVE)
+        while 1:
+            self._update_workers()
+            for db_name, worker in self._workers.items():
+                self.check_alive(db_name, worker)
+            time.sleep(WAIT_CHECK_WORKER_ALIVE)
 
     def check_alive(self, db_name, worker):
         """ Check if the the worker is still alive and notify
