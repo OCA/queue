@@ -119,8 +119,7 @@ class TestBaseImportConnector(common.TransactionCase):
         self._check_import_result()
 
     def test_async_import_small_misaligned_chunks(self):
-        """ Chunk size larger than record but
-        not a multiple of file length. """
+        """ Chunk size larger than record. """
         res = self._do_import('account.move.csv', use_connector=True,
                               chunk_size=4)
         self.assertFalse(res, repr(res))
@@ -180,8 +179,8 @@ class TestBaseImportConnector(common.TransactionCase):
         self._check_import_result()
 
     def test_async_import_smaller_aligned_chunks(self):
-        """ Chunks aligned on record boundaries
-        and multliple of file length. """
+        """ Chunks aligned on record boundaries.
+        Last chunk ends exactly at file end. """
         res = self._do_import('account.move.csv', use_connector=True,
                               chunk_size=3)
         self.assertFalse(res, repr(res))
