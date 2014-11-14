@@ -5,7 +5,7 @@ to import files in the background using the OCA/connector
 framework.
 
 The user is presented with a new checkbox in the import
-screen. When selected the import is delayed in a background
+screen. When selected, the import is delayed in a background
 job.
 
 This job in turn splits the CSV file in chunks of minimum 
