@@ -1,0 +1,10 @@
+date,journal_id/id,name,period_id/id,ref,line_id/account_id/id,line_id/name,line_id/debit,line_id/credit,line_id/partner_id/id
+2014-11-08,account.sales_journal,TEST-1,account.period_11,SAJ/2014/005,account.a_recv,/,525,,base.res_partner_9
+,,,,,account.a_sale,Ergonomic Mouse,,75,base.res_partner_9
+,,,,,account.a_sale,TypeMatrix Dvorak Keyboard,,450,base.res_partner_9
+2014-11-15,account.sales_journal,TEST-2,account.period_11,SAJ/2014/004,account.a_recv,/,500,,base.res_partner_2
+,,,,,account.a_sale,Desktop Lamp,,100,base.res_partner_2
+,,,,,account.a_sale,Desktop Computer Table,,400,base.res_partner_2
+2014-11-08,account.sales_journal,TEST-3,account.period_11,SAJ/2014/003,account.a_recv,/,525,,base.res_partner_2
+,,,,,account.a_sale,Ergonomic Mouse,,75,base.res_partner_2
+,,,,,account.a_sale,TypeMatrix Dvorak Keyboard,,450,base.res_partner_2
