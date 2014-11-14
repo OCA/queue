@@ -1,5 +1,4 @@
-Odoo Asynchronous import module
-===============================
+# Odoo Asynchronous import module
 
 This module extends the standard CSV import functionality
 to import files in the background using the OCA/connector
@@ -19,8 +18,7 @@ being imported is stored as an attachment to the job, making
 it easy to download it, fix it and run a new import, possibly
 in synchronous mode since the chunks are small.
 
-Scope
-=====
+## Scope
 
 Any file that can be imported by the standard import mechanism
 can also be imported in the background.
@@ -30,6 +28,7 @@ asynchronous. It does not attempt to transform the data nor
 automate ETL flows.
 
 Other modules may benefit from this infrastructure in the following way
+(as illustrated in the test suite):
 
 1. create an instance of `base_import.import` and populate its fields
    (`res_model`, `file`, `file_name`),
@@ -37,16 +36,14 @@ Other modules may benefit from this infrastructure in the following way
    (`header`, `encoding`, `separator`, `quoting`,
    `use_connector`, `chunk_size`).
 
-Known limitations
-=================
+## Known limitations
 
 * There is currently no user interface to control the chunk size,
   which is currently 100 by default. Should this proves to be an issue,
   it is easy to add an option to extend the import screen.
 * Validation cannot be run in the background.
 
-Credits
-=======
+## Credits
 
 Sébastien Beau (Akretion) authored the initial prototype.
 
