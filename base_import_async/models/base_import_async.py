@@ -115,8 +115,8 @@ def _extract_records(session, model_obj, fields, data, chunk_size):
         yield row_from, len(data) - 1
 
 
-def related_attachment(session, job):
-    attachment_id = job.args[1]
+def related_attachment(session, thejob):
+    attachment_id = thejob.args[1]
 
     action = {
         'name': _("Attachment"),
@@ -191,14 +191,14 @@ def split_file(session, model_name, translated_model_name,
 class BaseImportConnector(TransientModel):
     _inherit = 'base_import.import'
 
-    def do(self, cr, uid, id, fields, options, dryrun=False, context=None):
+    def do(self, cr, uid, id_, fields, options, dryrun=False, context=None):
         if dryrun or not options.get(OPT_USE_CONNECTOR):
             # normal import
             return super(BaseImportConnector, self).do(
-                cr, uid, id, fields, options, dryrun=dryrun, context=context)
+                cr, uid, id_, fields, options, dryrun=dryrun, context=context)
 
         # asynchronous import
-        (record,) = self.browse(cr, uid, [id], context=context)
+        (record,) = self.browse(cr, uid, [id_], context=context)
         try:
             data, import_fields = self._convert_import_data(
                 record, fields, options, context=context)
@@ -216,7 +216,7 @@ class BaseImportConnector(TransientModel):
         if search_result:
             translated_model_name = search_result[0][1]
         else:
-            self.pool[record.res_model]._description
+            translated_model_name = self.pool[record.res_model]._description
         description = _("Import %s from file %s") % \
             (translated_model_name, record.file_name)
 
