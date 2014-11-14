@@ -66,17 +66,15 @@ def _create_csv_attachment(session, fields, data, options, file_name):
     for row in data:
         writer.writerow(_encode(row, encoding))
     # create attachment
-    att_id = session.pool['ir.attachment'].create(session.cr, session.uid, {
+    att_id = session.create('ir.attachment', {
         'name': file_name,
-        # TODO: better way?
-        'datas': f.getvalue().encode('base64'),
-    }, context=session.context)
+        'datas': f.getvalue().encode('base64')
+    })
     return att_id
 
 
 def _read_csv_attachment(session, att_id, options):
-    att = session.pool['ir.attachment'].\
-        browse(session.cr, session.uid, att_id, context=session.context)
+    att = session.browse('ir.attachment', att_id)
     f = StringIO(att.datas.decode('base64'))
     reader = csv.reader(f,
                         delimiter=options.get(OPT_SEPARATOR),
@@ -88,13 +86,11 @@ def _read_csv_attachment(session, att_id, options):
 
 
 def _link_attachment_to_job(session, job_uuid, att_id):
-    job_ids = session.pool['queue.job'].\
-        search(session.cr, session.uid, [('uuid', '=', job_uuid)],
-               context=session.context)
-    session.pool['ir.attachment'].write(session.cr, session.uid, att_id, {
+    job_ids = session.search('queue.job', [('uuid', '=', job_uuid)])
+    session.write('ir.attachment', att_id, {
         'res_model': 'queue.job',
         'res_id': job_ids[0],
-    }, context=session.context)
+    })
 
 
 def _extract_records(session, model_obj, fields, data, chunk_size):
