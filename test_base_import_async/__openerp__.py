@@ -22,7 +22,7 @@
 {
     'name': 'Test suite for base_import_async',
     'version': '1.0',
-    'author': ['ACSONE SA/NV'],
+    'author': 'ACSONE SA/NV, Odoo Community Association (OCA)',
     'license': 'AGPL-3',
     'category': 'Generic Modules',
     'description': """Test suite for base_import_async.
