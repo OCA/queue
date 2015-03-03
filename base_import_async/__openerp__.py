@@ -24,7 +24,7 @@
 {
     'name': 'Asynchronous Import',
     'version': '1.0',
-    'author': ['Akretion', 'ACSONE SA/NV'],
+    'author': 'Akretion, ACSONE SA/NV, Odoo Community Association (OCA)',
     'license': 'AGPL-3',
     'category': 'Generic Modules',
     'depends': [
