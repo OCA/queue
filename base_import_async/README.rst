@@ -1,4 +1,8 @@
-# Odoo Asynchronous import module
+.. image:: https://img.shields.io/badge/licence-AGPL--3-blue.svg
+    :alt: License: AGPL-3
+
+Odoo Asynchronous import module
+===============================
 
 This module extends the standard CSV import functionality
 to import files in the background using the OCA/connector
@@ -18,7 +22,8 @@ being imported is stored as an attachment to the job, making
 it easy to download it, fix it and run a new import, possibly
 in synchronous mode since the chunks are small.
 
-## Scope
+Scope
+-----
 
 Any file that can be imported by the standard import mechanism
 can also be imported in the background.
@@ -36,14 +41,19 @@ Other modules may benefit from this infrastructure in the following way
    (`header`, `encoding`, `separator`, `quoting`,
    `use_connector`, `chunk_size`).
 
-## Known limitations
+Known limitations
+=================
 
 * There is currently no user interface to control the chunk size,
   which is currently 100 by default. Should this proves to be an issue,
   it is easy to add an option to extend the import screen.
 * Validation cannot be run in the background.
 
-## Credits
+Credits
+=======
+
+Contributors
+------------
 
 Sébastien Beau (Akretion) authored the initial prototype.
 
@@ -57,3 +67,18 @@ Other contributors include:
 * David Béal (Akretion)
 * Jonathan Nemry (ACSONE)
 * Laurent Mignon (ACSONE)
+
+Maintainer
+----------
+
+.. image:: http://odoo-community.org/logo.png
+   :alt: Odoo Community Association
+   :target: http://odoo-community.org
+
+This module is maintained by the OCA.
+
+OCA, or the Odoo Community Association, is a nonprofit organization whose
+mission is to support the collaborative development of Odoo features and
+promote its widespread use.
+
+To contribute to this module, please visit http://odoo-community.org.
