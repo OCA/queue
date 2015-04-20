@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-#   Module for OpenERP
+#   Module for Odoo
 #   Copyright (C) 2014 ACSONE SA/NV (http://acsone.eu).
 #   Copyright (C) 2013 Akretion (http://www.akretion.com).
 #   @author Stéphane Bidoul <stephane.bidoul@acsone.eu>
