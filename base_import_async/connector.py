@@ -22,5 +22,6 @@
 #
 ###############################################################################
 
-from . import models
-from . import connector
+from openerp.addons.connector.connector import install_in_connector
+
+install_in_connector()
