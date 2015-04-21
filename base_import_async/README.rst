@@ -8,6 +8,9 @@ This module extends the standard CSV import functionality
 to import files in the background using the OCA/connector
 framework.
 
+Usage
+=====
+
 The user is presented with a new checkbox in the import
 screen. When selected, the import is delayed in a background
 job.
@@ -21,9 +24,6 @@ user can read the error in the job status. The CSV chunk
 being imported is stored as an attachment to the job, making
 it easy to download it, fix it and run a new import, possibly
 in synchronous mode since the chunks are small.
-
-Scope
------
 
 Any file that can be imported by the standard import mechanism
 can also be imported in the background.
@@ -41,8 +41,8 @@ Other modules may benefit from this infrastructure in the following way
    (`header`, `encoding`, `separator`, `quoting`,
    `use_connector`, `chunk_size`).
 
-Known limitations
-=================
+Known issues / Roadmap
+======================
 
 * There is currently no user interface to control the chunk size,
   which is currently 100 by default. Should this proves to be an issue,
