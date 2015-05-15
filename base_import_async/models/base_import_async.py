@@ -42,6 +42,8 @@ OPT_ENCODING = 'encoding'
 # options defined in base_import_async/import.js
 OPT_USE_CONNECTOR = 'use_connector'
 OPT_CHUNK_SIZE = 'chunk_size'
+# option not available in UI, but usable from scripts
+OPT_PRIORITY = 'priority'
 
 INIT_PRIORITY = 100
 DEFAULT_CHUNK_SIZE = 100
@@ -149,7 +151,7 @@ def split_file(session, model_name, translated_model_name,
     model_obj = session.pool[model_name]
     fields, data = _read_csv_attachment(session, att_id, options)
     padding = len(str(len(data)))
-    priority = INIT_PRIORITY
+    priority = options.get(OPT_PRIORITY, INIT_PRIORITY)
     if options.get(OPT_HAS_HEADER):
         header_offset = 1
     else:
