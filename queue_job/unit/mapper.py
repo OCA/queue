@@ -238,6 +238,24 @@ def backend_to_m2o(field, binding=None, with_inactive=False):
         return value
     return modifier
 
+def _mapping_field_name(mapping_attr):
+    """
+    Get the mapping field name. Goes through the function modifiers.
+    Ex: [(none(convert(field_name, str)), out_field_name)]
+    """
+    attr_name = mapping_attr
+
+    if callable(mapping_attr):
+        for cell in mapping_attr.func_closure:
+            contents = cell.cell_contents
+            # type object (ex 'bool', 'str') are callable but doesn't have
+            # attribute 'func_closure'
+            if callable(contents) and type(contents) != type:
+                attr_name = _mapping_field_name(contents)
+            else:
+                attr_name = contents
+    return attr_name
+
 
 MappingDefinition = namedtuple('MappingDefinition',
                                ['changed_by',
@@ -295,28 +313,23 @@ class MetaMapper(MetaConnectorUnit):
 
     def __init__(cls, name, bases, attrs):
         """
-        Build a ``changed_by_fields`` list of synchronized fields with mapper.
+        Build a ``_changed_by_fields`` list of synchronized fields with mapper.
         It takes in account the ``direct`` fields and the fields declared in
         the decorator : ``changed_by``.
         """
-        changed_by_fields = []
+        changed_by_fields = set([])
         if attrs.get('direct'):
             for from_attr, to_attr in attrs['direct']:
-                attr_name = from_attr
-                # Support if the direct mapping has a function modifier
-                if callable(from_attr):
-                    for cell in from_attr.func_closure:
-                        contents = cell.cell_contents
-                        if not callable(contents):
-                            attr_name = contents
-                changed_by_fields.append(attr_name)
+                attr_name = _mapping_field_name(from_attr)
+                changed_by_fields.add(attr_name)
         for method_name, method_def in attrs['_map_methods'].iteritems():
-            changed_by_fields += list(method_def[0])
+            changed_by_fields = changed_by_fields.union(method_def[0])
         for base in bases:
-            if hasattr(base, 'changed_by_fields') and base.changed_by_fields:
-                changed_by_fields += base.changed_by_fields
-        cls.changed_by_fields = list(set(changed_by_fields))
+            if hasattr(base, '_changed_by_fields') and base._changed_by_fields:
+                changed_by_fields = changed_by_fields.union(base._changed_by_fields)
+        cls._changed_by_fields = changed_by_fields
         super(MetaMapper, cls).__init__(name, bases, attrs)
+
 
 
 class MapChild(ConnectorUnit):
@@ -695,9 +708,11 @@ class Mapper(ConnectorUnit):
         result = {}
         for from_attr, to_attr in self.direct:
             if callable(from_attr):  # in a modifier
-                # the name of the attribute is the first arg of the
-                # closure
-                attr_name = from_attr.__closure__[0].cell_contents
+                # the name of the attribute is the first arg the original
+                # function. BUT the argument order seems to be not enforced
+                # by python in the closure so we use the first non callable
+                # cell_contents in the closure as attr_name
+                attr_name = _mapping_field_name(from_attr)
             else:
                 attr_name = from_attr
 
@@ -711,14 +726,15 @@ class Mapper(ConnectorUnit):
             mapping_changed_by = definition.changed_by
             if (not fields or not mapping_changed_by or
                     mapping_changed_by.intersection(fields)):
+                if definition.only_create and not for_create:
+                    continue
                 values = meth(map_record.source)
                 if not values:
                     continue
                 if not isinstance(values, dict):
                     raise ValueError('%s: invalid return value for the '
                                      'mapping method %s' % (values, meth))
-                if not definition.only_create or for_create:
-                    result.update(values)
+                result.update(values)
 
         for from_attr, to_attr, model_name in self.children:
             if (not fields or from_attr in fields):
