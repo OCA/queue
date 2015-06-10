@@ -68,15 +68,15 @@ def _create_csv_attachment(session, fields, data, options, file_name):
     for row in data:
         writer.writerow(_encode(row, encoding))
     # create attachment
-    att_id = session.create('ir.attachment', {
+    attachment = session.env['ir.attachment'].create({
         'name': file_name,
         'datas': f.getvalue().encode('base64')
     })
-    return att_id
+    return attachment.id
 
 
 def _read_csv_attachment(session, att_id, options):
-    att = session.browse('ir.attachment', att_id)
+    att = session.env['ir.attachment'].browse(att_id)
     f = StringIO(att.datas.decode('base64'))
     reader = csv.reader(f,
                         delimiter=options.get(OPT_SEPARATOR),
@@ -88,10 +88,10 @@ def _read_csv_attachment(session, att_id, options):
 
 
 def _link_attachment_to_job(session, job_uuid, att_id):
-    job_ids = session.search('queue.job', [('uuid', '=', job_uuid)])
-    session.write('ir.attachment', att_id, {
+    job = session.env['queue.job'].search([('uuid', '=', job_uuid)], limit=1)
+    session.env['ir.attachment'].browse(att_id).write({
         'res_model': 'queue.job',
-        'res_id': job_ids[0],
+        'res_id': job.id,
     })
 
 
