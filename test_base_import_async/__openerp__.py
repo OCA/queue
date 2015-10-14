@@ -33,6 +33,6 @@
         'base_import_async',
         'account',
     ],
-    'installable': True,
+    'installable': False,
     'application': False,
 }
