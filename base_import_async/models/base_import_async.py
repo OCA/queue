@@ -189,14 +189,15 @@ def split_file(session, model_name, translated_model_name,
 class BaseImportConnector(TransientModel):
     _inherit = 'base_import.import'
 
-    def do(self, cr, uid, id_, fields, options, dryrun=False, context=None):
+    def do(self, cr, uid, res_id, fields, options, dryrun=False, context=None):
         if dryrun or not options.get(OPT_USE_CONNECTOR):
             # normal import
             return super(BaseImportConnector, self).do(
-                cr, uid, id_, fields, options, dryrun=dryrun, context=context)
+                cr, uid, res_id, fields, options, dryrun=dryrun,
+                context=context)
 
         # asynchronous import
-        (record,) = self.browse(cr, uid, [id_], context=context)
+        (record,) = self.browse(cr, uid, [res_id], context=context)
         try:
             data, import_fields = self._convert_import_data(
                 record, fields, options, context=context)
