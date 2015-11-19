@@ -79,8 +79,8 @@ def _read_csv_attachment(session, att_id, options):
     att = session.env['ir.attachment'].browse(att_id)
     f = StringIO(att.datas.decode('base64'))
     reader = csv.reader(f,
-                        delimiter=options.get(OPT_SEPARATOR),
-                        quotechar=options.get(OPT_QUOTING))
+                        delimiter=str(options.get(OPT_SEPARATOR)),
+                        quotechar=str(options.get(OPT_QUOTING)))
     encoding = options.get(OPT_ENCODING, 'utf-8')
     fields = _decode(reader.next(), encoding)
     data = [_decode(row, encoding) for row in reader]
