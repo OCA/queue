@@ -61,8 +61,8 @@ def _create_csv_attachment(session, fields, data, options, file_name):
     # write csv
     f = StringIO()
     writer = csv.writer(f,
-                        delimiter=options.get(OPT_SEPARATOR),
-                        quotechar=options.get(OPT_QUOTING))
+                        delimiter=str(options.get(OPT_SEPARATOR)),
+                        quotechar=str(options.get(OPT_QUOTING)))
     encoding = options.get(OPT_ENCODING, 'utf-8')
     writer.writerow(_encode(fields, encoding))
     for row in data:
