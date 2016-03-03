@@ -34,7 +34,7 @@
         'account',
     ],
     'data': [
-        'test/data.xml',
+        'tests/data.xml',
     ],
     'installable': True,
     'application': False,
