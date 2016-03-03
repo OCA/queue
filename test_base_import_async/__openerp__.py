@@ -21,7 +21,7 @@
 ###############################################################################
 {
     'name': 'Test suite for base_import_async',
-    'version': '8.0.1.0.0',
+    'version': '9.0.1.0.0',
     'author': 'ACSONE SA/NV, Odoo Community Association (OCA)',
     'license': 'AGPL-3',
     'category': 'Generic Modules',
@@ -33,6 +33,9 @@
         'base_import_async',
         'account',
     ],
-    'installable': False,
+    'data': [
+        'test/data.xml',
+    ],
+    'installable': True,
     'application': False,
 }

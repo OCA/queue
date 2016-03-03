@@ -37,13 +37,12 @@ class TestBaseImportConnector(common.TransactionCase):
         'date',
         'journal_id/id',
         'name',
-        'period_id/id',
         'ref',
-        'line_id/account_id/id',
-        'line_id/name',
-        'line_id/debit',
-        'line_id/credit',
-        'line_id/partner_id/id',
+        'line_ids/account_id/id',
+        'line_ids/name',
+        'line_ids/debit',
+        'line_ids/credit',
+        'line_ids/partner_id/id',
     ]
     OPTIONS = {
         OPT_SEPARATOR: ',',
