@@ -1,9 +1,13 @@
-openerp.base_import_async = function (instance) {
+odoo.define('base_import_async.import', function (require) {
+    "use strict";
 
-    var QWeb = instance.web.qweb;
-    var _t = instance.web._t;
+    var core = require('web.core');
+    var _t = core._t;
+    require('base_import.import');
 
-    instance.web.DataImport.include({
+    var DataImport = core.action_registry.get('import');
+
+    DataImport = DataImport.include({
 
         import_options: function () {
             var options = this._super.apply(this, arguments);
@@ -20,4 +24,5 @@ openerp.base_import_async = function (instance) {
         },
 
     });
-};
+
+});
