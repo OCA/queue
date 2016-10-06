@@ -37,6 +37,6 @@
     'qweb': [
         'static/src/xml/import.xml',
     ],
-    'installable': True,
+    'installable': False,
     'application': False,
 }
