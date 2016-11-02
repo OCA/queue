@@ -337,7 +337,8 @@ class TestJobsOthers(common.TransactionCase):
         with jobify(method, retry_pattern=test_pattern):
             with mock.patch(datetime_path, autospec=True) as mock_datetime:
                 mock_datetime.now.return_value = datetime(
-                        2015, 6, 1, 15, 10, 0)
+                    2015, 6, 1, 15, 10, 0
+                )
                 test_job = Job(method, max_retries=0)
                 test_job.retry += 1
                 test_job.postpone(self.env)
