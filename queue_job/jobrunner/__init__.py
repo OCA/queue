@@ -1,27 +1,7 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#     This file is part of queue_job, an Odoo module.
-#
-#     Author: Stéphane Bidoul <stephane.bidoul@acsone.eu>
-#     Copyright (c) 2015 ACSONE SA/NV (<http://acsone.eu>)
-#
-#     queue_job is free software: you can redistribute it and/or
-#     modify it under the terms of the GNU Affero General Public License
-#     as published by the Free Software Foundation, either version 3 of
-#     the License, or (at your option) any later version.
-#
-#     queue_job is distributed in the hope that it will be useful,
-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#     GNU Affero General Public License for more details.
-#
-#     You should have received a copy of the
-#     GNU Affero General Public License
-#     along with queue_job.
-#     If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Copyright (c) 2015-2016 ACSONE SA/NV (<http://acsone.eu>)
+# Copyright 2016 Camptocamp SA
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 import logging
 import os
