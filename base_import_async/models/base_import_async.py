@@ -26,13 +26,13 @@ import csv
 import os
 from cStringIO import StringIO
 
-from openerp.models import TransientModel
-from openerp.models import fix_import_export_id_paths
-from openerp.tools.translate import _
+from odoo.models import TransientModel
+from odoo.models import fix_import_export_id_paths
+from odoo.tools.translate import _
 
-from openerp.addons.connector.queue.job import job, related_action
-from openerp.addons.connector.session import ConnectorSession
-from openerp.addons.connector.exception import FailedJobError
+from odoo.addons.connector.queue.job import job, related_action
+from odoo.addons.connector.session import ConnectorSession
+from odoo.addons.connector.exception import FailedJobError
 
 # options defined in base_import/import.js
 OPT_HAS_HEADER = 'headers'
@@ -100,11 +100,8 @@ def _extract_records(session, model_obj, fields, data, chunk_size):
     in chunks of minimum chunk_size """
     fields = map(fix_import_export_id_paths, fields)
     row_from = 0
-    for rows in model_obj._extract_records(session.cr,
-                                           session.uid,
-                                           fields,
-                                           data,
-                                           context=session.context):
+    for rows in model_obj._extract_records(fields,
+                                           data):
         rows = rows[1]['rows']
         if rows['to'] - row_from + 1 >= chunk_size:
             yield row_from, rows['to']
@@ -130,13 +127,10 @@ def related_attachment(session, thejob):
 @job
 @related_action(action=related_attachment)
 def import_one_chunk(session, res_model, att_id, options):
-    model_obj = session.pool[res_model]
+    model_obj = session.env[res_model]
     fields, data = _read_csv_attachment(session, att_id, options)
-    result = model_obj.load(session.cr,
-                            session.uid,
-                            fields,
-                            data,
-                            context=session.context)
+    result = model_obj.load(fields,
+                            data)
     error_message = [message['message'] for message in result['messages']
                      if message['type'] == 'error']
     if error_message:
@@ -148,7 +142,7 @@ def import_one_chunk(session, res_model, att_id, options):
 def split_file(session, model_name, translated_model_name,
                att_id, options, file_name="file.csv"):
     """ Split a CSV attachment in smaller import jobs """
-    model_obj = session.pool[model_name]
+    model_obj = session.env[model_name]
     fields, data = _read_csv_attachment(session, att_id, options)
     padding = len(str(len(data)))
     priority = options.get(OPT_PRIORITY, INIT_PRIORITY)
@@ -189,19 +183,18 @@ def split_file(session, model_name, translated_model_name,
 class BaseImportConnector(TransientModel):
     _inherit = 'base_import.import'
 
-    def do(self, cr, uid, res_id, fields, options, dryrun=False, context=None):
+    def do(self, fields, options, dryrun=False):
         if dryrun or not options.get(OPT_USE_CONNECTOR):
             # normal import
             return super(BaseImportConnector, self).do(
-                cr, uid, res_id, fields, options, dryrun=dryrun,
-                context=context)
+                fields, options, dryrun=dryrun)
 
         # asynchronous import
-        (record,) = self.browse(cr, uid, [res_id], context=context)
         try:
-            data, import_fields = self._convert_import_data(
-                record, fields, options, context=context)
-        except ValueError, e:
+            data, import_fields = self._convert_import_data(fields, options)
+            # Parse date and float field
+            data = self._parse_import_data(data, import_fields, options)
+        except ValueError as e:
             return [{
                 'type': 'error',
                 'message': unicode(e),
@@ -210,28 +203,27 @@ class BaseImportConnector(TransientModel):
 
         # get the translated model name to build
         # a meaningful job description
-        search_result = self.pool['ir.model'].name_search(
-            cr, uid, args=[('model', '=', record.res_model)], context=context)
+        search_result = self.env['ir.model'].name_search(self._name)
         if search_result:
             translated_model_name = search_result[0][1]
         else:
-            translated_model_name = self.pool[record.res_model]._description
+            translated_model_name = self._description
         description = _("Import %s from file %s") % \
-            (translated_model_name, record.file_name)
+            (translated_model_name, self.file_name)
 
         # create a CSV attachment and enqueue the job
-        session = ConnectorSession(cr, uid, context)
+        session = ConnectorSession(self.env.cr, self.env.uid, context=self.env.context)
         att_id = _create_csv_attachment(session,
                                         import_fields,
                                         data,
                                         options,
-                                        record.file_name)
+                                        self.file_name)
         job_uuid = split_file.delay(session,
-                                    record.res_model,
+                                    self.res_model,
                                     translated_model_name,
                                     att_id,
                                     options,
-                                    file_name=record.file_name,
+                                    file_name=self.file_name,
                                     description=description)
         _link_attachment_to_job(session, job_uuid, att_id)
 
