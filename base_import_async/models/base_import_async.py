@@ -212,7 +212,8 @@ class BaseImportConnector(TransientModel):
             (translated_model_name, self.file_name)
 
         # create a CSV attachment and enqueue the job
-        session = ConnectorSession(self.env.cr, self.env.uid, context=self.env.context)
+        session = ConnectorSession(self.env.cr, self.env.uid,
+                                   context=self.env.context)
         att_id = _create_csv_attachment(session,
                                         import_fields,
                                         data,
