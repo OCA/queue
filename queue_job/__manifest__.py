@@ -19,5 +19,4 @@
           'data/queue_data.xml',
           ],
  'installable': True,
- 'application': True,
  }
