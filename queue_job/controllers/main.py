@@ -56,13 +56,13 @@ class RunJobController(http.Controller):
         #       where state=enqueid and id=
         job.set_started()
         job.store()
-        http.request.env.commit()
+        http.request.env.cr.commit()
 
         _logger.debug('%s started', job)
-        job.perform(env)
+        job.perform()
         job.set_done()
         job.store()
-        http.request.env.commit()
+        http.request.env.cr.commit()
         _logger.debug('%s done', job)
 
     @http.route('/connector/runjob', type='http', auth='none')
