@@ -118,10 +118,10 @@ class RunJobController(http.Controller):
             buff = StringIO()
             traceback.print_exc(file=buff)
             _logger.error(buff.getvalue())
+            # Use a new cusor to change job
 
             job.set_failed(exc_info=buff.getvalue())
-            job.store()
-            env.cr.commit()
+            job.store(use_new_cursor=True)
             raise
 
         return ""
