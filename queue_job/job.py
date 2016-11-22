@@ -648,13 +648,12 @@ def job(func=None, default_channel='root', retry_pattern=None):
     if not _is_model_method(func):
         raise TypeError('@job can only be used on methods of Models')
 
-    inner_func = func.__func__
     delay_func = delay_from_model
 
-    inner_func.delayable = True
-    inner_func.delay = delay_func
-    inner_func.retry_pattern = retry_pattern
-    inner_func.default_channel = default_channel
+    func.delayable = True
+    func.delay = delay_func
+    func.retry_pattern = retry_pattern
+    func.default_channel = default_channel
     JOB_REGISTRY.add(func)
     return func
 
