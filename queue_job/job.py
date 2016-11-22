@@ -645,9 +645,6 @@ def job(func=None, default_channel='root', retry_pattern=None):
         "retry_pattern must be a dict"
     )
 
-    if not _is_model_method(func):
-        raise TypeError('@job can only be used on methods of Models')
-
     delay_func = delay_from_model
 
     func.delayable = True
