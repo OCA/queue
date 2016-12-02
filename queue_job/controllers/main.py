@@ -10,7 +10,7 @@ from cStringIO import StringIO
 from psycopg2 import OperationalError
 
 import odoo
-from odoo import _, http, tools
+from odoo import _, api, http, tools
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
 from ..job import Job, ENQUEUED
@@ -118,10 +118,15 @@ class RunJobController(http.Controller):
             buff = StringIO()
             traceback.print_exc(file=buff)
             _logger.error(buff.getvalue())
-
-            job.set_failed(exc_info=buff.getvalue())
-            job.store()
-            env.cr.commit()
+            job.env.clear()
+            with odoo.api.Environment.manage():
+                with odoo.registry(job.env.cr.dbname).cursor() as new_cr:
+                    new_env = api.Environment(new_cr, job.env.uid,
+                                              job.env.context)
+                    job.env = new_env
+                    job.set_failed(exc_info=buff.getvalue())
+                    job.store()
+                    new_env.cr.commit()
             raise
 
         return ""
