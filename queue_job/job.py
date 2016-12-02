@@ -11,8 +11,6 @@ from datetime import datetime, timedelta
 
 import odoo
 
-from odoo import registry
-
 from .exception import (NoSuchJobError,
                         FailedJobError,
                         RetryableJobError)
@@ -246,15 +244,9 @@ class Job(object):
         return new_job
 
     @staticmethod
-    def db_record_from_uuid(env, job_uuid, use_new_cursor=False):
+    def db_record_from_uuid(env, job_uuid):
         model = env['queue.job'].sudo()
-        if use_new_cursor:
-            cr = registry(model.env.cr.dbname).cursor()
-            model = model.with_env(model.env(cr=cr))
         record = model.search([('uuid', '=', job_uuid)], limit=1)
-        if use_new_cursor:
-            cr.commit()
-            cr.close()
         return record.with_env(env)
 
     def __init__(self, func,
@@ -373,7 +365,7 @@ class Job(object):
             raise
         return self.result
 
-    def store(self, use_new_cursor=False):
+    def store(self):
         """ Store the Job """
         vals = {'state': self.state,
                 'priority': self.priority,
@@ -405,33 +397,20 @@ class Job(object):
         if self.eta:
             vals['eta'] = dt_to_string(self.eta)
 
-        db_record = self.db_record(use_new_cursor=use_new_cursor)
+        db_record = self.db_record()
         if db_record:
-            if use_new_cursor:
-                cr = registry(db_record.env.cr.dbname).cursor()
-                db_record.with_env(db_record.env(cr=cr)).write(vals)
-                cr.commit()
-                cr.close()
-            else:
-                db_record.write(vals)
+            db_record.write(vals)
         else:
             date_created = dt_to_string(self.date_created)
             vals.update({'uuid': self.uuid,
                          'name': self.description,
                          'date_created': date_created,
                          })
-            if use_new_cursor:
-                cr = registry(self.job_model.env.cr.dbname).cursor()
-                self.job_model.with_env(
-                    self.job_model.db_record.env(cr=cr)).sudo().create(vals)
-                cr.commit()
-                cr.close()
-            else:
-                self.job_model.sudo().create(vals)
 
-    def db_record(self, use_new_cursor=False):
-        return self.db_record_from_uuid(self.env, self.uuid,
-                                        use_new_cursor=use_new_cursor)
+            self.job_model.sudo().create(vals)
+
+    def db_record(self):
+        return self.db_record_from_uuid(self.env, self.uuid)
 
     @property
     def func(self):
