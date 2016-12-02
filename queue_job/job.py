@@ -297,6 +297,7 @@ class Job(object):
 
         self.env = env
         self.job_model = self.env['queue.job']
+        self.job_model_name = 'queue.job'
 
         self.state = PENDING
 
@@ -407,7 +408,7 @@ class Job(object):
                          'date_created': date_created,
                          })
 
-            self.job_model.sudo().create(vals)
+            self.env[self.job_model_name].sudo().create(vals)
 
     def db_record(self):
         return self.db_record_from_uuid(self.env, self.uuid)
