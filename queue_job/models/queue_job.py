@@ -14,9 +14,18 @@ from ..fields import JobSerialized
 
 _logger = logging.getLogger(__name__)
 
+from odoo.models import MetaModel
+
 
 def channel_func_name(method):
-    return '<%s>.%s' % (method.im_class._name, method.__name__)
+    method_class = False
+    for key, value in method.func_globals.iteritems():
+        if isinstance(value, MetaModel):
+            method_class = key
+            break
+    if not method_class:
+        raise TypeError('@job can only be used on methods of Models')
+    return '<%s>.%s' % (method_class, method.__name__)
 
 
 class QueueJob(models.Model):

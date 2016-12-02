@@ -297,6 +297,7 @@ class Job(object):
 
         self.env = env
         self.job_model = self.env['queue.job']
+        self.job_model_name = 'queue.job'
 
         self.state = PENDING
 
@@ -407,7 +408,7 @@ class Job(object):
                          'date_created': date_created,
                          })
 
-            self.job_model.sudo().create(vals)
+            self.env[self.job_model_name].sudo().create(vals)
 
     def db_record(self):
         return self.db_record_from_uuid(self.env, self.uuid)
@@ -624,16 +625,12 @@ def job(func=None, default_channel='root', retry_pattern=None):
         "retry_pattern must be a dict"
     )
 
-    if not _is_model_method(func):
-        raise TypeError('@job can only be used on methods of Models')
-
-    inner_func = func.__func__
     delay_func = delay_from_model
 
-    inner_func.delayable = True
-    inner_func.delay = delay_func
-    inner_func.retry_pattern = retry_pattern
-    inner_func.default_channel = default_channel
+    func.delayable = True
+    func.delay = delay_func
+    func.retry_pattern = retry_pattern
+    func.default_channel = default_channel
     JOB_REGISTRY.add(func)
     return func
 
