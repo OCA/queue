@@ -14,13 +14,11 @@ from ..fields import JobSerialized
 
 _logger = logging.getLogger(__name__)
 
-from odoo.models import MetaModel
-
 
 def channel_func_name(method):
     method_class = False
     for key, value in method.func_globals.iteritems():
-        if isinstance(value, MetaModel):
+        if isinstance(value, models.MetaModel):
             method_class = key
             break
     if not method_class:
