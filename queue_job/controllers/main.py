@@ -73,7 +73,7 @@ class RunJobController(http.Controller):
 
     @http.route('/queue_job/runjob', type='http', auth='none')
     def runjob(self, db, job_uuid, **kw):
-
+        http.request.session.db = db
         env = http.request.env(user=odoo.SUPERUSER_ID)
 
         def retry_postpone(job, message, seconds=None):
