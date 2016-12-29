@@ -7,8 +7,7 @@ from datetime import datetime, timedelta
 
 from odoo import models, fields, api, exceptions, _
 
-from ..job import STATES, DONE, PENDING, Job, JOB_REGISTRY
-from ..utils import get_odoo_module, is_module_installed
+from ..job import STATES, DONE, PENDING, Job, job
 from ..exception import RetryableJobError
 from ..fields import JobSerialized
 
@@ -16,14 +15,7 @@ _logger = logging.getLogger(__name__)
 
 
 def channel_func_name(method):
-    method_class = False
-    for key, value in method.func_globals.iteritems():
-        if isinstance(value, models.MetaModel):
-            method_class = key
-            break
-    if not method_class:
-        raise TypeError('@job can only be used on methods of Models')
-    return '<%s>.%s' % (method_class, method.__name__)
+    return '<%s>.%s' % (method.im_class._name, method.__name__)
 
 
 class QueueJob(models.Model):
@@ -131,15 +123,15 @@ class QueueJob(models.Model):
         """ Change the state of the `Job` object itself so it
         will change the other fields (date, result, ...)
         """
-        for job in self:
-            job = Job.load(job.env, job.uuid)
+        for record in self:
+            job_ = Job.load(record.env, record.uuid)
             if state == DONE:
-                job.set_done(result=result)
+                job_.set_done(result=result)
             elif state == PENDING:
-                job.set_pending(result=result)
+                job_.set_pending(result=result)
             else:
                 raise ValueError('State not supported: %s' % state)
-            job.store()
+            job_.store()
 
     @api.multi
     def button_done(self):
@@ -159,11 +151,11 @@ class QueueJob(models.Model):
             # subscribe the users now to avoid to subscribe them
             # at every job creation
             self._subscribe_users()
-            for job in self:
-                msg = job._message_failed_job()
+            for record in self:
+                msg = record._message_failed_job()
                 if msg:
-                    job.message_post(body=msg,
-                                     subtype='queue_job.mt_job_failed')
+                    record.message_post(body=msg,
+                                        subtype='queue_job.mt_job_failed')
         return res
 
     @api.multi
@@ -212,6 +204,7 @@ class QueueJob(models.Model):
         jobs.unlink()
         return True
 
+    @job
     @api.multi
     def testing_method(self, *args, **kwargs):
         """ Method used for tests
@@ -283,11 +276,11 @@ class JobChannel(models.Model):
     ]
 
     @api.multi
-    @api.depends('name', 'parent_id', 'parent_id.name')
+    @api.depends('name', 'parent_id.complete_name')
     def _compute_complete_name(self):
         for record in self:
-            if not record.name:
-                return  # new record
+            # if not record.name:
+            #     return  # new record
             channel = record
             parts = [channel.name]
             while channel.parent_id:
@@ -369,16 +362,8 @@ class JobFunction(models.Model):
         return channel
 
     @api.model
-    def _register_jobs(self):
-        for func in JOB_REGISTRY:
-            if not is_module_installed(self.env, get_odoo_module(func)):
-                continue
-            func_name = channel_func_name(func)
-            if not self.search_count([('name', '=', func_name)]):
-                channel = self._find_or_create_channel(func.default_channel)
-                self.create({'name': func_name, 'channel_id': channel.id})
-
-    @api.model
-    def _setup_complete(self):
-        super(JobFunction, self)._setup_complete()
-        self._register_jobs()
+    def _register_job(self, job_method):
+        func_name = channel_func_name(job_method)
+        if not self.search_count([('name', '=', func_name)]):
+            channel = self._find_or_create_channel(job_method.default_channel)
+            self.create({'name': func_name, 'channel_id': channel.id})

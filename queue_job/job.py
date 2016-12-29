@@ -520,9 +520,6 @@ class Job(object):
         return action(**self.func.kwargs)
 
 
-JOB_REGISTRY = set()
-
-
 def _is_model_method(func):
     return (inspect.ismethod(func) and
             isinstance(func.im_class, odoo.models.MetaModel))
@@ -631,7 +628,6 @@ def job(func=None, default_channel='root', retry_pattern=None):
     func.delay = delay_func
     func.retry_pattern = retry_pattern
     func.default_channel = default_channel
-    JOB_REGISTRY.add(func)
     return func
 
 
