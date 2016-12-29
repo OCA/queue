@@ -696,12 +696,7 @@ def related_action(action=None, **kwargs):
 
     """
     def decorate(func):
-        if not _is_model_method(func):
-            raise ValueError('@related_action can only be used on methods of '
-                             'Models')
-
-        inner_func = func.__func__
-        inner_func.related_action = action
-        inner_func.kwargs = kwargs
+        func.related_action = action
+        func.kwargs = kwargs
         return func
     return decorate
