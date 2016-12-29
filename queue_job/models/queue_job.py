@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 from odoo import models, fields, api, exceptions, _
 
-from ..job import STATES, DONE, PENDING, Job, job
+from ..job import STATES, DONE, PENDING, Job, job, related_action
 from ..exception import RetryableJobError
 from ..fields import JobSerialized
 
@@ -205,6 +205,7 @@ class QueueJob(models.Model):
         return True
 
     @job
+    @related_action(action='testing_related_method')
     @api.multi
     def testing_method(self, *args, **kwargs):
         """ Method used for tests
@@ -219,13 +220,6 @@ class QueueJob(models.Model):
 
     @api.multi
     def testing_related_method(self, **kwargs):
-        if 'url' in kwargs:
-            subject = self.args[0]
-            return {
-                'type': 'ir.actions.act_url',
-                'target': 'new',
-                'url': kwargs['url'].format(subject=subject),
-            }
         return self, kwargs
 
 
