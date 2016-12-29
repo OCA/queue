@@ -4,7 +4,7 @@
 
 import odoo.tests.common as common
 from odoo.addons.queue_job.job import Job
-from .common import start_jobify, stop_jobify, related_actionify
+from .common import related_actionify
 
 
 class TestRelatedAction(common.TransactionCase):
@@ -13,11 +13,6 @@ class TestRelatedAction(common.TransactionCase):
     def setUp(self):
         super(TestRelatedAction, self).setUp()
         self.method = self.env['queue.job'].testing_method
-        start_jobify(self.method)
-
-    def tearDown(self):
-        super(TestRelatedAction, self).tearDown()
-        stop_jobify(self.method)
 
     def test_no_related_action(self):
         """ Job without related action """
