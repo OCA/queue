@@ -6,7 +6,7 @@
 Job Queue
 =========
 
-This addons adds an integrated Job Queue to Odoo.
+This addon adds an integrated Job Queue to Odoo.
 
 It allows to postpone method calls executed asynchronously.
 
@@ -128,7 +128,7 @@ Bug Tracker
 ===========
 
 Bugs are tracked on `GitHub Issues
-<https://github.com/OCA/{project_repo}/issues>`_. In case of trouble, please
+<https://github.com/OCA/queue/issues>`_. In case of trouble, please
 check there if your issue has already been reported. If you spotted it first,
 help us smashing it by providing a detailed and welcomed feedback.
 

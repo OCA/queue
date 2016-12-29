@@ -2,6 +2,8 @@
 # Copyright 2016 Camptocamp
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
+import inspect
+
 from odoo import models, api
 from ..job import DelayableRecordset
 
@@ -9,6 +11,17 @@ from ..job import DelayableRecordset
 class Base(models.AbstractModel):
     """ The base model, which is implicitly inherited by all models. """
     _inherit = 'base'
+
+    @api.model_cr
+    def _register_hook(self):
+        """ register marked jobs """
+        super(Base, self)._register_hook()
+        job_methods = [method for __, method
+                       in inspect.getmembers(self, predicate=inspect.ismethod)
+                       if getattr(method, 'delayable', None)]
+        for job_method in job_methods:
+            self.env['queue.job.function']._register_job(job_method)
+        # add_to_job_registry(job_methods)
 
     @api.multi
     def with_delay(self, priority=None, eta=None,
