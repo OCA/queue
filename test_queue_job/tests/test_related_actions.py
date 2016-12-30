@@ -12,7 +12,14 @@ class TestRelatedAction(common.TransactionCase):
     def setUp(self):
         super(TestRelatedAction, self).setUp()
         self.model = self.env['test.related.action']
-        self.method = self.env['queue.job'].testing_method
+        self.method = self.env['test.queue.job'].testing_method
+
+    def test_return(self):
+        """ Job with related action check if action returns correctly """
+        job = Job(self.method)
+        act_job, act_kwargs = job.related_action()
+        self.assertEqual(act_job, job.db_record())
+        self.assertEqual(act_kwargs, {})
 
     def test_no_related_action(self):
         """ Job without related action """
