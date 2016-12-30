@@ -4,7 +4,7 @@
 
 {'name': 'Job Queue',
  'version': '10.0.1.0.0',
- 'author': 'Camptocamp,Acsone,Odoo Community Association (OCA)',
+ 'author': 'Camptocamp,ACSONE SA/NV,Odoo Community Association (OCA)',
  'website': 'http://odoo-connector.com',
  'license': 'AGPL-3',
  'category': 'Generic Modules',
