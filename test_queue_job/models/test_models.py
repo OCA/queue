@@ -67,6 +67,12 @@ class TestQueueJob(models.Model):
     def mapped(self, func):
         return super(TestQueueJob, self).mapped(func)
 
+    @job
+    def job_alter_mutable(self, mutable_arg, mutable_kwarg=None):
+        mutable_arg.append(2)
+        mutable_kwarg['b'] = 2
+        return mutable_arg, mutable_kwarg
+
 
 class TestQueueChannel(models.Model):
 

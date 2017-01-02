@@ -380,6 +380,28 @@ class TestJobs(common.TransactionCase):
         self.assertEquals(job_instance.method_name, 'mapped')
         self.assertEquals(['test1', 'test2'], job_instance.perform())
 
+    def test_job_with_mutable_arguments(self):
+        """ Job with mutable arguments do not mutate on perform() """
+        delayable = self.env['test.queue.job'].with_delay()
+        job_instance = delayable.job_alter_mutable([1], mutable_kwarg={'a': 1})
+        self.assertTrue(job_instance)
+        result = job_instance.perform()
+        self.assertEquals(
+            result,
+            ([1, 2], {'a': 1, 'b': 2})
+        )
+        job_instance.set_done()
+        # at this point, the 'args' and 'kwargs' of the job instance
+        # might have been modified, but they must never be modified in
+        # the queue_job table after their creation, so a new 'load' will
+        # get the initial values.
+        job_instance.store()
+        # jobs are always loaded before being performed, so we simulate
+        # this behavior here to check if we have the correct initial arguments
+        job_instance = Job.load(self.env, job_instance.uuid)
+        self.assertEquals(([1],), job_instance.args)
+        self.assertEquals({'mutable_kwarg': {'a': 1}}, job_instance.kwargs)
+
 
 class TestJobModel(common.TransactionCase):
 
