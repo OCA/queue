@@ -380,12 +380,6 @@ class Job(object):
                 'date_started': False,
                 'date_done': False,
                 'eta': False,
-                'model_name': self.model_name,
-                'method_name': self.method_name,
-                'record_ids': self.recordset.ids,
-                # TODO: use custom serializer for recordsets
-                'args': self.args,
-                'kwargs': self.kwargs,
                 }
 
         dt_to_string = odoo.fields.Datetime.to_string
@@ -403,9 +397,16 @@ class Job(object):
             db_record.write(vals)
         else:
             date_created = dt_to_string(self.date_created)
+            # The following values must never be modified after the
+            # creation of the job
             vals.update({'uuid': self.uuid,
                          'name': self.description,
                          'date_created': date_created,
+                         'model_name': self.model_name,
+                         'method_name': self.method_name,
+                         'record_ids': self.recordset.ids,
+                         'args': self.args,
+                         'kwargs': self.kwargs,
                          })
 
             self.env[self.job_model_name].sudo().create(vals)
