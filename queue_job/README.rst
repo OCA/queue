@@ -62,13 +62,32 @@ Be sure to have the ``requests`` library.
 Configuration
 =============
 
-* Set the following environment variables:
+* Using environment variables and command line:
 
-  - ``ODOO_CONNECTOR_CHANNELS=root:4`` (or any other channels configuration)
-  - optional if ``xmlrpc_port`` is not set: ``ODOO_CONNECTOR_PORT=8069``
+ * Adjust environment variables (optional):
 
-* Start Odoo with ``--load=web,web_kanban,queue_job``
-  and ``--workers`` greater than 1. [1]_
+  - ``ODOO_QUEUE_JOB_CHANNELS=root:4``
+
+   - or any other channels configuration. The default is ``root:1``
+
+  - if ``xmlrpc_port`` is not set: ``ODOO_CONNECTOR_PORT=8069``
+
+ * Start Odoo with ``--load=web,web_kanban,queue_job``
+   and ``--workers`` greater than 1. [1]_
+
+
+* Using the Odoo configuration file:
+
+.. code-block:: ini
+
+  [options]
+  (...)
+  workers = 4
+  server_wide_modules = web,web_kanban,queue_job
+
+  (...)
+  [queue_job]
+  channels = root:4
 
 * Confirm the runner is starting correctly by checking the odoo log file:
 
