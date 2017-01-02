@@ -22,13 +22,52 @@ How does it work?
 How to use it?
 --------------
 
-* Set the following environment variables:
+* Optionally adjust your configuration through environment variables:
 
-  - ``ODOO_CONNECTOR_CHANNELS=root:4`` (or any other channels configuration)
-  - optional if ``xmlrpc_port`` is not set: ``ODOO_CONNECTOR_PORT=8069``
+  - set ``ODOO_QUEUE_JOB_CHANNELS=root:4`` (or any other channels
+    configuration) if you don't want the default ``root:1``.
+
+  - if ``xmlrpc-port`` is not set, you can set it for the jobrunner only with:
+    ``ODOO_CONNECTOR_PORT=8069``.
+
+* Alternatively, configure the channels through the Odoo configuration
+  file, like:
+
+.. code-block:: ini
+
+  [queue_job]
+  channels = root:4
+
+* Or, if using ``anybox.recipe.odoo``, add this to your buildout configuration:
+
+.. code-block:: ini
+
+  [odoo]
+  recipe = anybox.recipe.odoo
+  (...)
+  queue_job.channels = root:4
 
 * Start Odoo with ``--load=web,web_kanban,queue_job``
-  and ``--workers`` greater than 1. [2]_
+  and ``--workers`` greater than 1 [2]_, or set the ``server_wide_modules``
+  option in The Odoo configuration file:
+
+.. code-block:: ini
+
+  [options]
+  (...)
+  workers = 4
+  server_wide_modules = web,web_kanban,queue_job
+  (...)
+
+* Or, if using ``anybox.recipe.odoo``:
+
+.. code-block:: ini
+
+  [odoo]
+  recipe = anybox.recipe.odoo
+  (...)
+  options.workers = 4
+  options.server_wide_modules = web,web_kanban,queue_job
 
 * Confirm the runner is starting correctly by checking the odoo log file:
 
@@ -89,6 +128,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import requests
 
 import odoo
+from odoo.tools import config
 
 from .channels import ChannelManager, PENDING, ENQUEUED, NOT_DONE
 
@@ -96,6 +136,24 @@ SELECT_TIMEOUT = 60
 ERROR_RECOVERY_DELAY = 5
 
 _logger = logging.getLogger(__name__)
+
+
+# Unfortunately, it is not possible to extend the Odoo
+# server command line arguments, so we resort to environment variables
+# to configure the runner (channels mostly).
+#
+# On the other hand, the odoo configuration file can be extended at will,
+# so we check it in addition to the environment variables.
+
+
+def _channels():
+    return (
+        os.environ.get('ODOO_QUEUE_JOB_CHANNELS') or
+        os.environ.get('ODOO_CONNECTOR_CHANNELS') or
+        config.misc.get("queue_job", {}).get("channels") or
+        config.misc.get("options-connector", {}).get("channels") or
+        "root:1"
+    )
 
 
 def _datetime_to_epoch(dt):
@@ -222,9 +280,11 @@ class Database(object):
 
 class QueueJobRunner(object):
 
-    def __init__(self, port=8069, channel_config_string='root:1'):
+    def __init__(self, port=8069, channel_config_string=None):
         self.port = port
         self.channel_manager = ChannelManager()
+        if channel_config_string is None:
+            channel_config_string = _channels()
         self.channel_manager.simple_configure(channel_config_string)
         self.db_by_name = {}
         self._stop = False
