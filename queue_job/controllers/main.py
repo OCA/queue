@@ -65,12 +65,6 @@ class RunJobController(http.Controller):
         http.request.env.cr.commit()
         _logger.debug('%s done', job)
 
-    @http.route('/connector/runjob', type='http', auth='none')
-    def old_runjob(self, db, job_uuid, **kw):
-        _logger.warning('/connector/runjob is deprecated, the new route is'
-                        '/queue_job/runjob')
-        return self.runjob(db, job_uuid, **kw)
-
     @http.route('/queue_job/runjob', type='http', auth='none')
     def runjob(self, db, job_uuid, **kw):
         http.request.session.db = db
