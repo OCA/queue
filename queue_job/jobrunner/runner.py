@@ -28,7 +28,7 @@ How to use it?
     configuration) if you don't want the default ``root:1``.
 
   - if ``xmlrpc-port`` is not set, you can set it for the jobrunner only with:
-    ``ODOO_CONNECTOR_PORT=8069``.
+    ``ODOO_QUEUE_JOB_PORT=8069``.
 
 * Alternatively, configure the channels through the Odoo configuration
   file, like:
@@ -149,9 +149,7 @@ _logger = logging.getLogger(__name__)
 def _channels():
     return (
         os.environ.get('ODOO_QUEUE_JOB_CHANNELS') or
-        os.environ.get('ODOO_CONNECTOR_CHANNELS') or
         config.misc.get("queue_job", {}).get("channels") or
-        config.misc.get("options-connector", {}).get("channels") or
         "root:1"
     )
 

@@ -28,7 +28,7 @@ class QueueJobRunnerThread(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.daemon = True
-        port = os.environ.get('ODOO_CONNECTOR_PORT') or config['xmlrpc_port']
+        port = os.environ.get('ODOO_QUEUE_JOB_PORT') or config['xmlrpc_port']
         self.runner = QueueJobRunner(port or 8069)
 
     def run(self):
