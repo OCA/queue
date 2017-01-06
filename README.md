@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/OCA/queue.svg?branch=10.0)](https://travis-ci.org/OCA/queue)
-[![Coverage Status](https://coveralls.io/repos/OCA/queue/badge.png?branch=10.0)](https://coveralls.io/r/OCA/queue?branch=10.0)
+[![codecov](https://codecov.io/gh/OCA/queue/branch/10.0/graph/badge.svg)](https://codecov.io/gh/OCA/queue)
+
 
 Odoo Queue Modules
 ==================
@@ -8,3 +9,13 @@ Asynchronous Job Queue. Delay Model methods in asynchronous jobs, executed in
 the background as soon as possible or on a schedule.  Support Channels to
 segregates jobs in different queues with different capacities. Not alike the
 scheduled tasks, a job captures arguments for later processing.
+
+
+[//]: # (addons)
+This part will be replaced when running the oca-gen-addons-table script from OCA/maintainer-tools.
+[//]: # (end addons)
+
+Translation Status
+------------------
+[![Transifex Status](https://www.transifex.com/projects/p/OCA-queue-10-0/chart/image_png)](https://www.transifex.com/projects/p/OCA-queue-10-0)
+
