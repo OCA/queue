@@ -590,13 +590,15 @@ class Channel(object):
             wakeup_time = child.get_wakeup_time(wakeup_time)
         return wakeup_time
 
+
 def split_strip(s, sep, maxsplit=-1):
     """Split string and strip each component.
 
-    >>> ChannelManager.split_strip("foo: bar baz\\n: fred:", ":")
+    >>> split_strip("foo: bar baz\\n: fred:", ":")
     ['foo', 'bar baz', 'fred', '']
     """
     return [x.strip() for x in s.split(sep, maxsplit)]
+
 
 class ChannelManager(object):
     """ High level interface for channels
