@@ -12,7 +12,13 @@ scheduled tasks, a job captures arguments for later processing.
 
 
 [//]: # (addons)
-This part will be replaced when running the oca-gen-addons-table script from OCA/maintainer-tools.
+Available addons
+----------------
+addon | version | summary
+--- | --- | ---
+[queue_job](queue_job/) | 10.0.1.0.0 | Job Queue
+[test_queue_job](test_queue_job/) | 10.0.1.0.0 | Queue Job Tests
+
 [//]: # (end addons)
 
 Translation Status
