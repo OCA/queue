@@ -7,7 +7,7 @@ Odoo Queue Modules
 
 Asynchronous Job Queue. Delay Model methods in asynchronous jobs, executed in
 the background as soon as possible or on a schedule.  Support Channels to
-segregates jobs in different queues with different capacities. Not alike the
+segregates jobs in different queues with different capacities. Unlike
 scheduled tasks, a job captures arguments for later processing.
 
 
