@@ -241,6 +241,14 @@ class Job(object):
                       kwargs=kwargs, priority=priority, eta=eta,
                       max_retries=max_retries, description=description)
         new_job.store()
+        _logger.debug(
+            "enqueued %s:%s(*%r, **%r) with uuid: %s",
+            new_job.recordset,
+            new_job.method_name,
+            new_job.args,
+            new_job.kwargs,
+            new_job.uuid
+        )
         return new_job
 
     @staticmethod
