@@ -180,6 +180,39 @@ class TestJobsOnTestingMethod(common.TransactionCase):
         stored = self.queue_job.search([('uuid', '=', test_job.uuid)])
         self.assertEqual(len(stored), 1)
 
+    @mock.patch.object(Job, 'db_record_from_uuid',
+                       wraps=Job.db_record_from_uuid)
+    def test_db_record(self, mocked):
+        job = Job(self.method)
+        self.assertFalse(job.db_record, "job should have no db_record yet")
+        mocked.assert_called_once_with(self.env, job.uuid)
+
+        mocked.reset_mock()
+        self.assertFalse(job.db_record,
+                            "job should still have no db_record yet")
+        mocked.assert_called_once_with(self.env, job.uuid)
+
+        job.store()
+
+        mocked.reset_mock()
+        self.assertTrue(job.db_record, "Job should have a db_record now")
+        mocked.assert_called_once_with(self.env, job.uuid)
+
+        mocked.reset_mock()
+        self.assertTrue(job.db_record, "Job should have kept a db_record")
+        # the second valid attribute access should not call
+        # `db_record_from_uuid`
+        mocked.assert_not_called()
+
+    @mock.patch('uuid.uuid4',
+                return_value=u'f91fdc38-b645-4b7c-9701-e642566add65')
+    def test_uuid(self, mocked):
+        job = Job(self.method)
+        mocked.assert_not_called()
+        self.assertEqual(job.uuid, u'f91fdc38-b645-4b7c-9701-e642566add65')
+        self.assertEqual(job.uuid, u'f91fdc38-b645-4b7c-9701-e642566add65')
+        mocked.assert_called_once_with()
+
     def test_read(self):
         eta = datetime.now() + timedelta(hours=5)
         test_job = Job(self.method,
@@ -490,7 +523,7 @@ class TestJobModel(common.TransactionCase):
         result = test_job.perform()
         key_present = 'job_uuid' in result
         self.assertTrue(key_present)
-        self.assertEqual(result['job_uuid'], test_job._uuid)
+        self.assertEqual(result['job_uuid'], test_job.__dict__['uuid'])
 
 
 class TestJobStorageMultiCompany(common.TransactionCase):

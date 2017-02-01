@@ -33,6 +33,35 @@ RETRY_INTERVAL = 10 * 60  # seconds
 
 _logger = logging.getLogger(__name__)
 
+class cached_truthy_property(object):
+    """
+    Decorator and descriptor for wrapping getters which results should be
+    cached directly in the instance, bypassing the getter thereafter.
+
+    But only if the result is "Truthy".
+
+    By assigning a truthy value directly in the instance, this "non-data"
+    accessor is ignored on the next attribute lookup of the same name.
+    """
+
+    def __init__(self, fget):
+        self.fget = fget
+        self.name = fget.func_name
+
+    def __get__(self, obj, cls=None):
+        getter = self.fget.__get__(obj, cls)
+        if obj is None:
+            # for the benefit of interactive shells, return the original
+            # unbound (actually, class-bound) method
+            return getter
+        result = self.fget(obj)
+
+        if result:
+            # setattr(obj, name, result) also works, but this is faster as of
+            # Python 2.7.6:
+            obj.__dict__[self.name] = result
+
+        return result
 
 class DelayableRecordset(object):
     """ Allow to delay a method for a recordset
@@ -316,7 +345,8 @@ class Job(object):
         else:
             self.max_retries = max_retries
 
-        self._uuid = job_uuid
+        if job_uuid:
+            self.uuid = job_uuid
 
         self.args = args
         self.kwargs = kwargs
@@ -400,9 +430,8 @@ class Job(object):
         if self.eta:
             vals['eta'] = dt_to_string(self.eta)
 
-        db_record = self.db_record()
-        if db_record:
-            db_record.write(vals)
+        if self.db_record:
+            self.db_record.write(vals)
         else:
             date_created = dt_to_string(self.date_created)
             # The following values must never be modified after the
@@ -419,6 +448,7 @@ class Job(object):
 
             self.env[self.job_model_name].sudo().create(vals)
 
+    @cached_truthy_property
     def db_record(self):
         return self.db_record_from_uuid(self.env, self.uuid)
 
@@ -437,12 +467,10 @@ class Job(object):
         else:
             return '%s.%s' % (self.model_name, self.func.__name__)
 
-    @property
+    @cached_truthy_property
     def uuid(self):
         """Job ID, this is an UUID """
-        if self._uuid is None:
-            self._uuid = unicode(uuid.uuid4())
-        return self._uuid
+        return unicode(uuid.uuid4())
 
     @property
     def eta(self):

@@ -18,7 +18,7 @@ class TestRelatedAction(common.TransactionCase):
         """ Job with related action check if action returns correctly """
         job = Job(self.method)
         act_job, act_kwargs = job.related_action()
-        self.assertEqual(act_job, job.db_record())
+        self.assertEqual(act_job, job.db_record)
         self.assertEqual(act_kwargs, {})
 
     def test_no_related_action(self):
@@ -35,7 +35,7 @@ class TestRelatedAction(common.TransactionCase):
     def test_kwargs(self):
         """ Job with related action check if action propagates kwargs """
         job_ = Job(self.model.testing_related_action__kwargs)
-        self.assertEqual(job_.related_action(), (job_.db_record(), {'b': 4}))
+        self.assertEqual(job_.related_action(), (job_.db_record, {'b': 4}))
 
     def test_store_related_action(self):
         """ Call the related action on the model """
