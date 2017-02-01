@@ -180,6 +180,8 @@ class Job(object):
 
     """
 
+    job_model_name = 'queue.job'
+
     @classmethod
     def load(cls, env, job_uuid):
         """ Read a job from the Database"""
@@ -251,9 +253,9 @@ class Job(object):
         )
         return new_job
 
-    @staticmethod
-    def db_record_from_uuid(env, job_uuid):
-        model = env['queue.job'].sudo()
+    @classmethod
+    def db_record_from_uuid(cls, env, job_uuid):
+        model = env[cls.job_model_name].sudo()
         record = model.search([('uuid', '=', job_uuid)], limit=1)
         return record.with_env(env)
 
@@ -304,8 +306,7 @@ class Job(object):
         self.recordset = recordset
 
         self.env = env
-        self.job_model = self.env['queue.job']
-        self.job_model_name = 'queue.job'
+        self.job_model = self.env[self.job_model_name]
 
         self.state = PENDING
 
@@ -338,10 +339,9 @@ class Job(object):
         if 'company_id' in env.context:
             company_id = env.context['company_id']
         else:
-            company_model = env['res.company']
-            company_model = company_model.sudo(self.user_id)
+            company_model = env['res.company'].sudo(self.user_id)
             company_id = company_model._company_default_get(
-                object='queue.job',
+                object=self.job_model_name,
                 field='company_id'
             ).id
         self.company_id = company_id
@@ -524,8 +524,8 @@ class Job(object):
             return None
         if not isinstance(self.func.related_action, basestring):
             raise ValueError('related_action must be the name of the '
-                             'method on queue.job as string')
-        action = getattr(self.db_record(), self.func.related_action)
+                             'method on %s as string' % (self.job_model_name,))
+        action = getattr(self.db_record, self.func.related_action)
         return action(**self.func.kwargs)
 
 
