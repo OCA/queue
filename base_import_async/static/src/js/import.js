@@ -11,14 +11,14 @@ odoo.define('base_import_async.import', function (require) {
 
         import_options: function () {
             var options = this._super.apply(this, arguments);
-            options.use_connector = this.$('input.oe_import_connector').prop('checked');
+            options.use_queue = this.$('input.oe_import_queue').prop('checked');
             return options;
         },
 
         onimported: function () {
             var self = this;
-            if (this.$('input.oe_import_connector').prop('checked')) {
-                this.do_notify(_t("Your request is being processed"), _t("You can check the status of this job in menu 'Connector / Jobs'."));
+            if (this.$('input.oe_import_queue').prop('checked')) {
+                this.do_notify(_t("Your request is being processed"), _t("You can check the status of this job in menu 'Queue / Jobs'."));
             }
             this._super.apply(this, arguments);
         },
