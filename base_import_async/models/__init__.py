@@ -22,4 +22,5 @@
 #
 ###############################################################################
 
-from . import base_import_async
+from . import base_import_import
+from . import queue_job
