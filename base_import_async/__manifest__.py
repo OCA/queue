@@ -29,7 +29,7 @@
     'category': 'Generic Modules',
     'depends': [
         'base_import',
-        'connector',
+        'queue_job',
     ],
     'data': [
         'views/base_import_async.xml',
@@ -38,5 +38,4 @@
         'static/src/xml/import.xml',
     ],
     'installable': True,
-    'application': False,
 }
