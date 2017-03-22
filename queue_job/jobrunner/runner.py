@@ -219,16 +219,14 @@ class Database(object):
 
     def _has_queue_job(self):
         with closing(self.conn.cursor()) as cr:
-            try:
-                cr.execute("SELECT 1 FROM ir_module_module "
-                           "WHERE name=%s AND state=%s",
-                           ('queue_job', 'installed'))
-            except psycopg2.ProgrammingError as err:
-                if unicode(err).startswith('relation "ir_module_module" '
-                                           'does not exist'):
-                    return False
-                else:
-                    raise
+            cr.execute("SELECT 1 FROM pg_tables WHERE tablename=%s",
+                       ('ir_module_module',))
+            if not cr.fetchone():
+                return False
+            cr.execute(
+                "SELECT 1 FROM ir_module_module WHERE name=%s AND state=%s",
+                ('queue_job', 'installed')
+            )
             return cr.fetchone()
 
     def _initialize(self):
