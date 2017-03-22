@@ -25,7 +25,7 @@ import os
 import odoo.tests.common as common
 from odoo.addons.base_import_async.models.base_import_import import (
     OPT_HAS_HEADER, OPT_QUOTING, OPT_SEPARATOR,
-    OPT_CHUNK_SIZE, OPT_USE_CONNECTOR
+    OPT_CHUNK_SIZE, OPT_USE_QUEUE
 )
 from odoo.addons.queue_job.job import Job
 
@@ -59,7 +59,7 @@ class TestBaseImportConnector(common.TransactionCase):
         file_name = os.path.join(os.path.dirname(__file__), file_name)
         return open(file_name).read()
 
-    def _do_import(self, file_name, use_connector, chunk_size=None):
+    def _do_import(self, file_name, use_queue, chunk_size=None):
         data = self._read_test_file(file_name)
         importer = self.import_obj.create({
             'res_model': 'account.move',
@@ -67,7 +67,7 @@ class TestBaseImportConnector(common.TransactionCase):
             'file_name': file_name,
         })
         options = dict(self.OPTIONS)
-        options[OPT_USE_CONNECTOR] = use_connector
+        options[OPT_USE_QUEUE] = use_queue
         options[OPT_CHUNK_SIZE] = chunk_size
         return importer.do(self.FIELDS, options)
 
@@ -78,13 +78,13 @@ class TestBaseImportConnector(common.TransactionCase):
 
     def test_normal_import(self):
         """ Test the standard import still works. """
-        res = self._do_import('account.move.csv', use_connector=False)
+        res = self._do_import('account.move.csv', use_queue=False)
         self.assertFalse(res, repr(res))
         self._check_import_result()
 
     def test_async_import(self):
         """ Basic asynchronous import test with default large chunk size. """
-        res = self._do_import('account.move.csv', use_connector=True)
+        res = self._do_import('account.move.csv', use_queue=True)
         self.assertFalse(res, repr(res))
         # no moves should be created yet
         move_count = self.move_obj.search(
@@ -110,7 +110,7 @@ class TestBaseImportConnector(common.TransactionCase):
 
     def test_async_import_small_misaligned_chunks(self):
         """ Chunk size larger than record. """
-        res = self._do_import('account.move.csv', use_connector=True,
+        res = self._do_import('account.move.csv', use_queue=True,
                               chunk_size=4)
         self.assertFalse(res, repr(res))
         # but we must have one job to split the file
@@ -135,7 +135,7 @@ class TestBaseImportConnector(common.TransactionCase):
 
     def test_async_import_smaller_misaligned_chunks(self):
         """ Chunk size smaller than record. """
-        res = self._do_import('account.move.csv', use_connector=True,
+        res = self._do_import('account.move.csv', use_queue=True,
                               chunk_size=2)
         self.assertFalse(res, repr(res))
         # but we must have one job to split the file
@@ -165,7 +165,7 @@ class TestBaseImportConnector(common.TransactionCase):
     def test_async_import_smaller_aligned_chunks(self):
         """ Chunks aligned on record boundaries.
         Last chunk ends exactly at file end. """
-        res = self._do_import('account.move.csv', use_connector=True,
+        res = self._do_import('account.move.csv', use_queue=True,
                               chunk_size=3)
         self.assertFalse(res, repr(res))
         # but we must have one job to split the file
