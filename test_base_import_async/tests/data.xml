@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>
-	<!-- hack to set an xmlid on some demo data that have non in v9 -->
+<odoo>
+  	<!-- hack to set an xmlid on some demo data that have non in v9 -->
 	<record id="testjournal" model="ir.model.data">
             <field name="res_id" search="[('code','=','MISC')]" model="account.journal"/>
             <field name="model">ir.model.fields</field>
@@ -23,5 +22,4 @@
             <field name="name">a_sale_xmlid</field>
             <field name="noupdate">True</field>
         </record>
-    </data>
-</openerp>
+</odoo>
