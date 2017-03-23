@@ -90,22 +90,23 @@ class BaseImportImport(TransientModel):
             (translated_model_name, self.file_name)
         att_id = self._create_csv_attachment(
             import_fields, data, options, self.file_name)
-        job_uuid = self.with_delay(description=description)._split_file(
+        delayed_job = self.with_delay(description=description)._split_file(
             model_name=self.res_model,
             translated_model_name=translated_model_name,
             att_id=att_id,
             options=options,
             file_name=self.file_name
         )
-        self._link_attachment_to_job(job_uuid, att_id)
+        self._link_attachment_to_job(delayed_job, att_id)
         return []
 
     @api.model
-    def _link_attachment_to_job(self, job_uuid, att_id):
-        job = self.env['queue.job'].search([('uuid', '=', job_uuid)], limit=1)
+    def _link_attachment_to_job(self, delayed_job, att_id):
+        queue_job = self.env['queue.job'].search(
+            [('uuid', '=', delayed_job.uuid)], limit=1)
         self.env['ir.attachment'].browse(att_id).write({
             'res_model': 'queue.job',
-            'res_id': job.id,
+            'res_id': queue_job.id,
         })
 
     @api.model
@@ -183,12 +184,12 @@ class BaseImportImport(TransientModel):
             att_id = self._create_csv_attachment(
                 fields, data[row_from:row_to + 1], options,
                 file_name=root + '-' + chunk + ext)
-            job_uuid = self.with_delay(
+            delayed_job = self.with_delay(
                 description=description, priority=priority)._import_one_chunk(
                     model_name=model_name,
                     att_id=att_id,
                     options=options)
-            self._link_attachment_to_job(job_uuid, att_id)
+            self._link_attachment_to_job(delayed_job, att_id)
             priority += 1
 
     @api.model
