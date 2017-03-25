@@ -12,6 +12,7 @@ scheduled tasks, a job captures arguments for later processing.
 
 
 [//]: # (addons)
+
 Available addons
 ----------------
 addon | version | summary
