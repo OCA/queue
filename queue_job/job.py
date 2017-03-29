@@ -52,12 +52,13 @@ class DelayableRecordset(object):
     """
 
     def __init__(self, recordset, priority=None, eta=None,
-                 max_retries=None, description=None):
+                 max_retries=None, description=None, channel=None):
         self.recordset = recordset
         self.priority = priority
         self.eta = eta
         self.max_retries = max_retries
         self.description = description
+        self.channel = channel
 
     def __getattr__(self, name):
         if name in self.recordset:
@@ -80,7 +81,8 @@ class DelayableRecordset(object):
                                priority=self.priority,
                                max_retries=self.max_retries,
                                eta=self.eta,
-                               description=self.description)
+                               description=self.description,
+                               channel=self.channel)
         return delay
 
     def __str__(self):
@@ -178,6 +180,11 @@ class Job(object):
 
         Model recordset when we are on a delayed Model method
 
+    .. attribute::channel
+
+        The complete name of the channel to use to process the job. If
+        provided it overrides the one defined on the job's function.
+
     """
 
     @classmethod
@@ -203,7 +210,7 @@ class Job(object):
 
         job_ = cls(method, args=args, kwargs=kwargs,
                    priority=stored.priority, eta=eta, job_uuid=stored.uuid,
-                   description=stored.name)
+                   description=stored.name, channel=stored.channel)
 
         if stored.date_created:
             job_.date_created = dt_from_string(stored.date_created)
@@ -230,7 +237,8 @@ class Job(object):
 
     @classmethod
     def enqueue(cls, func, args=None, kwargs=None,
-                priority=None, eta=None, max_retries=None, description=None):
+                priority=None, eta=None, max_retries=None, description=None,
+                channel=None):
         """Create a Job and enqueue it in the queue. Return the job uuid.
 
         This expects the arguments specific to the job to be already extracted
@@ -239,7 +247,8 @@ class Job(object):
         """
         new_job = cls(func=func, args=args,
                       kwargs=kwargs, priority=priority, eta=eta,
-                      max_retries=max_retries, description=description)
+                      max_retries=max_retries, description=description,
+                      channel=channel)
         new_job.store()
         _logger.debug(
             "enqueued %s:%s(*%r, **%r) with uuid: %s",
@@ -260,7 +269,7 @@ class Job(object):
     def __init__(self, func,
                  args=None, kwargs=None, priority=None,
                  eta=None, job_uuid=None, max_retries=None,
-                 description=None):
+                 description=None, channel=None):
         """ Create a Job
 
         :param func: function to execute
@@ -280,6 +289,7 @@ class Job(object):
             the job state to 'failed'. A value of 0 means infinite retries.
         :param description: human description of the job. If None, description
             is computed from the function doc or name
+        :param channel: The complete channel name to use to process the job.
         :param env: Odoo Environment
         :type env: :class:`odoo.api.Environment`
         """
@@ -347,6 +357,7 @@ class Job(object):
         self.company_id = company_id
         self._eta = None
         self.eta = eta
+        self.channel = channel
 
     def perform(self):
         """ Execute the job.
@@ -416,6 +427,10 @@ class Job(object):
                          'args': self.args,
                          'kwargs': self.kwargs,
                          })
+            # it the channel is not specified, lets the job_model compute
+            # the right one to use
+            if self.channel:
+                vals.update({'channel': self.channel})
 
             self.env[self.job_model_name].sudo().create(vals)
 

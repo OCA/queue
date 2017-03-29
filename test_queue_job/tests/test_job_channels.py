@@ -68,6 +68,8 @@ class TestJobChannels(common.TransactionCase):
         test_job.store()
         stored = self.env['queue.job'].search([('uuid', '=', test_job.uuid)])
         self.assertEquals(stored.channel, 'root')
+        job_read = Job.load(self.env, test_job.uuid)
+        self.assertEquals(job_read.channel, 'root')
 
         channel = self.channel_model.create(
             {'name': 'sub', 'parent_id': self.root_channel.id}
@@ -78,6 +80,12 @@ class TestJobChannels(common.TransactionCase):
         test_job.store()
         stored = self.env['queue.job'].search([('uuid', '=', test_job.uuid)])
         self.assertEquals(stored.channel, 'root.sub')
+
+        # it's also possible to override the channel
+        test_job = Job(method, channel='root.sub.sub.sub')
+        test_job.store()
+        stored = self.env['queue.job'].search([('uuid', '=', test_job.uuid)])
+        self.assertEquals(stored.channel, test_job.channel)
 
     def test_default_channel(self):
         self.env['queue.job.function'].search([]).unlink()
