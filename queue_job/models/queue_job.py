@@ -70,19 +70,32 @@ class QueueJob(models.Model):
              "Retries are infinite when empty.",
     )
     channel_method_name = fields.Char(readonly=True,
-                                      compute='_compute_channel',
+                                      compute='_compute_job_function',
                                       store=True)
     job_function_id = fields.Many2one(comodel_name='queue.job.function',
-                                      compute='_compute_channel',
+                                      compute='_compute_job_function',
                                       string='Job Function',
                                       readonly=True,
                                       store=True)
-    # for searching without JOIN on channels
-    channel = fields.Char(compute='_compute_channel', store=True, index=True)
+
+    channel = fields.Char(compute='_compute_channel',
+                          inverse='_inverse_channel',
+                          store=True,
+                          index=True)
+
+    @api.multi
+    def _inverse_channel(self):
+        self.filtered(lambda a: not a.channel)._compute_channel()
+
+    @api.multi
+    @api.depends('job_function_id.channel_id')
+    def _compute_channel(self):
+        for record in self:
+            record.channel = record.job_function_id.channel
 
     @api.multi
     @api.depends('model_name', 'method_name', 'job_function_id.channel_id')
-    def _compute_channel(self):
+    def _compute_job_function(self):
         for record in self:
             model = self.env[record.model_name]
             method = getattr(model, record.method_name)
@@ -91,7 +104,6 @@ class QueueJob(models.Model):
             function = func_model.search([('name', '=', channel_method_name)])
             record.channel_method_name = channel_method_name
             record.job_function_id = function
-            record.channel = record.job_function_id.channel
 
     @api.multi
     @api.depends('model_name', 'method_name', 'record_ids', 'args', 'kwargs')

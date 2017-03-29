@@ -25,7 +25,8 @@ class Base(models.AbstractModel):
 
     @api.multi
     def with_delay(self, priority=None, eta=None,
-                   max_retries=None, description=None):
+                   max_retries=None, description=None,
+                   channel=None):
         """ Return a ``DelayableRecordset``
 
         The returned instance allow to enqueue any method of the recordset's
@@ -48,6 +49,9 @@ class Base(models.AbstractModel):
                             infinite retries.  Default is 5.
         :param description: human description of the job. If None, description
                             is computed from the function doc or name
+        :param channel: the complete name of the channel to use to process
+                        the function. If specified it overrides the one
+                        defined on the function
         :return: instance of a DelayableRecordset
         :rtype: :class:`odoo.addons.queue_job.job.DelayableRecordset`
 
@@ -55,4 +59,5 @@ class Base(models.AbstractModel):
         return DelayableRecordset(self, priority=priority,
                                   eta=eta,
                                   max_retries=max_retries,
-                                  description=description)
+                                  description=description,
+                                  channel=channel)
