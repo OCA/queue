@@ -492,6 +492,12 @@ class TestJobModel(common.TransactionCase):
         self.assertTrue(key_present)
         self.assertEqual(result['job_uuid'], test_job._uuid)
 
+    def test_override_channel(self):
+        delayable = self.env['test.queue.job'].with_delay(
+            channel='root.sub.sub')
+        test_job = delayable.testing_method(return_context=True)
+        self.assertEqual('root.sub.sub', test_job.channel)
+
 
 class TestJobStorageMultiCompany(common.TransactionCase):
     """ Test storage of jobs """
