@@ -3,6 +3,9 @@
 # license agpl-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 import json
+from datetime import datetime, date
+
+import dateutil
 
 from odoo import fields, models
 
@@ -32,6 +35,12 @@ class JobEncoder(json.JSONEncoder):
             return {'_type': 'odoo_recordset',
                     'model': obj._name,
                     'ids': obj.ids}
+        elif isinstance(obj, datetime):
+            return {'_type': 'datetime_isoformat',
+                    'value': obj.isoformat()}
+        elif isinstance(obj, date):
+            return {'_type': 'date_isoformat',
+                    'value': obj.isoformat()}
         return json.JSONEncoder.default(self, obj)
 
 
@@ -52,4 +61,8 @@ class JobDecoder(json.JSONDecoder):
         type_ = obj['_type']
         if type_ == 'odoo_recordset':
             return self.env[obj['model']].browse(obj['ids'])
+        elif type_ == 'datetime_isoformat':
+            return dateutil.parser.parse(obj['value'])
+        elif type_ == 'date_isoformat':
+            return dateutil.parser.parse(obj['value']).date()
         return obj
