@@ -161,7 +161,9 @@ class QueueJob(models.Model):
         if vals.get('state') == 'failed':
             # subscribe the users now to avoid to subscribe them
             # at every job creation
-            self._subscribe_users()
+            domain = self._subscribe_users_domain()
+            users = self.env['res.users'].search(domain)
+            self.message_subscribe_users(user_ids=users.ids)
             for record in self:
                 msg = record._message_failed_job()
                 if msg:
@@ -170,7 +172,7 @@ class QueueJob(models.Model):
         return res
 
     @api.multi
-    def _subscribe_users(self):
+    def _subscribe_users_domain(self):
         """ Subscribe all users having the 'Queue Job Manager' group """
         group = self.env.ref('queue_job.group_queue_job_manager')
         if not group:
@@ -179,8 +181,7 @@ class QueueJob(models.Model):
         domain = [('groups_id', '=', group.id)]
         if companies:
             domain.append(('company_id', 'child_of', companies.ids))
-        users = self.env['res.users'].search(domain)
-        self.message_subscribe_users(user_ids=users.ids)
+        return domain
 
     @api.multi
     def _message_failed_job(self):
