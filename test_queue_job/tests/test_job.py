@@ -548,6 +548,11 @@ class TestJobStorageMultiCompany(common.TransactionCase):
              "groups_id": [(4, grp_queue_job_manager)]
              })
 
+    def _subscribe_users(self, stored):
+        domain = stored._subscribe_users_domain()
+        users = self.env['res.users'].search(domain)
+        stored.message_subscribe_users(user_ids=users.ids)
+
     def _create_job(self, env):
         self.cr.execute('delete from queue_job')
         env['test.queue.job'].with_delay().testing_method()
@@ -592,7 +597,7 @@ class TestJobStorageMultiCompany(common.TransactionCase):
         no_company_context = dict(self.env.context, company_id=None)
         no_company_env = self.env(context=no_company_context)
         stored = self._create_job(no_company_env)
-        stored._subscribe_users()
+        self._subscribe_users(stored)
         users = User.search(
             [('groups_id', '=', self.ref('queue_job.group_queue_job_manager'))]
         )
@@ -610,7 +615,8 @@ class TestJobStorageMultiCompany(common.TransactionCase):
                                  company_id=self.other_company_a.id)
         company_a_env = self.env(context=company_a_context)
         stored = self._create_job(company_a_env)
-        stored.sudo(self.other_user_a.id)._subscribe_users()
+        stored.sudo(self.other_user_a.id)
+        self._subscribe_users(stored)
         # 2 because admin + self.other_partner_a
         self.assertEqual(len(stored.message_follower_ids), 2)
         users = User.browse([SUPERUSER_ID, self.other_user_a.id])
