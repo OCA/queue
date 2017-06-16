@@ -272,6 +272,7 @@
 
     <menuitem id="menu_queue_job_root"
         name="Job Queue"
+        web_icon="queue,static/description/icon.png"
         groups="group_queue_job_manager"/>
 
     <menuitem id="menu_queue"
