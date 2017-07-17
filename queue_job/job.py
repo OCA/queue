@@ -195,6 +195,9 @@ class Job(object):
             raise NoSuchJobError(
                 'Job %s does no longer exist in the storage.' % job_uuid)
 
+        if stored.user_id != env.user:
+            stored = stored.sudo(stored.user_id)
+
         args = stored.args
         kwargs = stored.kwargs
         method_name = stored.method_name
