@@ -34,7 +34,9 @@ class JobEncoder(json.JSONEncoder):
         if isinstance(obj, models.BaseModel):
             return {'_type': 'odoo_recordset',
                     'model': obj._name,
-                    'ids': obj.ids}
+                    'ids': obj.ids,
+                    'uid': obj.env.uid,
+                    }
         elif isinstance(obj, datetime):
             return {'_type': 'datetime_isoformat',
                     'value': obj.isoformat()}
@@ -60,7 +62,10 @@ class JobDecoder(json.JSONDecoder):
             return obj
         type_ = obj['_type']
         if type_ == 'odoo_recordset':
-            return self.env[obj['model']].browse(obj['ids'])
+            model = self.env[obj['model']]
+            if obj.get('uid'):
+                model = model.sudo(obj['uid'])
+            return model.browse(obj['ids'])
         elif type_ == 'datetime_isoformat':
             return dateutil.parser.parse(obj['value'])
         elif type_ == 'date_isoformat':
