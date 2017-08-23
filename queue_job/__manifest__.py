@@ -3,12 +3,13 @@
 
 
 {'name': 'Job Queue',
- 'version': '10.0.1.0.0',
+ 'version': '11.0.1.0.0',
  'author': 'Camptocamp,ACSONE SA/NV,Odoo Community Association (OCA)',
  'website': 'https://github.com/OCA/queue/queue_job',
  'license': 'AGPL-3',
  'category': 'Generic Modules',
- 'depends': ['mail'
+ 'depends': ['mail',
+             'base_sparse_field'
              ],
  'external_dependencies': {'python': ['requests'
                                       ],
