@@ -21,7 +21,7 @@ class QueueJob(models.Model):
     """ Job status and result """
     _name = 'queue.job'
     _description = 'Queue Job'
-    _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _log_access = False
 
     _order = 'date_created DESC, date_done DESC'
