@@ -17,10 +17,13 @@ def migrate(cr, version):
         SET state='to upgrade'
         WHERE name='connector'
     """)
-    from openupgradelib import openupgrade
-    openupgrade.rename_xmlids(
-        cr, [
-            ('queue_job.group_connector_manager',
-             'queue_job.group_queue_job_manager',)
-        ],
-    )
+    try:
+        from openupgradelib import openupgrade
+        openupgrade.rename_xmlids(
+            cr, [
+                ('queue_job.group_connector_manager',
+                 'queue_job.group_queue_job_manager',)
+            ],
+        )
+    except ImportError:
+        pass
