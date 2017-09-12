@@ -12,4 +12,4 @@ class ResUsers(models.Model):
                                    help='If this flag is checked and the'
                                         ' user is Connector Manager, he will'
                                         ' receive job notifications.',
-                                   select=True)
+                                   index=True)
