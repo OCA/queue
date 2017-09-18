@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright 2017 Tecnativa - Vicent Cubells
+# Copyright 2017-2018 Tecnativa - Pedro M. Baeza
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
+from odoo import api, SUPERUSER_ID
 
 
 def migrate(cr, version):
@@ -25,5 +28,11 @@ def migrate(cr, version):
                  'queue_job.group_queue_job_manager',)
             ],
         )
+        # Pre-create column for avoiding the computation over non loaded models
+        env = api.Environment(cr, SUPERUSER_ID, {})
+        openupgrade.add_fields(env, [
+            ('channel_method_name', 'queue.job', 'queue_job', 'char', False,
+             'queue_job'),
+        ])
     except ImportError:
-        pass
+        raise Exception("You need openupgradelib for performing the migration")
