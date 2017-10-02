@@ -60,7 +60,7 @@ class TestJobChannels(common.TransactionCase):
 
         method = self.env['test.queue.channel'].job_a
         self.env['queue.job.function']._register_job(method)
-        path_a = '<%s>.%s' % (method.im_class._name, method.__name__)
+        path_a = '<%s>.%s' % (method.__self__.__class__._name, method.__name__)
         job_func = self.function_model.search([('name', '=', path_a)])
         self.assertEquals(job_func.channel, 'root')
 
@@ -95,7 +95,7 @@ class TestJobChannels(common.TransactionCase):
         self.env['queue.job.function']._register_job(method)
         self.assertEquals(method.default_channel, 'root.sub.subsub')
 
-        path_a = '<%s>.%s' % (method.im_class._name, method.__name__)
+        path_a = '<%s>.%s' % (method.__self__.__class__._name, method.__name__)
         job_func = self.function_model.search([('name', '=', path_a)])
 
         channel = job_func.channel_id
