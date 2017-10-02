@@ -134,7 +134,7 @@ class ChannelJob(object):
 
     Here are some examples.
 
-    j1 comes before j2 before it has a smaller date_created
+    j1 comes before j2 because it has a smaller date_created
 
     >>> j1 = ChannelJob(None, None, 1,
     ...                 seq=0, date_created=1, priority=9, eta=None)
