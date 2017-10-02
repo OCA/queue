@@ -95,8 +95,8 @@ class RunJobController(http.Controller):
                 _logger.debug('%s OperationalError, postponed', job)
 
         except NothingToDoJob as err:
-            if unicode(err):
-                msg = unicode(err)
+            if str(err):
+                msg = str(err)
             else:
                 msg = _('Job interrupted and set to Done: nothing to do.')
             job.set_done(msg)
@@ -105,7 +105,7 @@ class RunJobController(http.Controller):
 
         except RetryableJobError as err:
             # delay the job later, requeue
-            retry_postpone(job, unicode(err), seconds=err.seconds)
+            retry_postpone(job, str(err), seconds=err.seconds)
             _logger.debug('%s postponed', job)
 
         except (FailedJobError, Exception):
