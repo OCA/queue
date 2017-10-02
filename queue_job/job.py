@@ -391,7 +391,7 @@ class Job(object):
                 'exc_info': self.exc_info,
                 'user_id': self.user_id or self.env.uid,
                 'company_id': self.company_id,
-                'result': unicode(self.result) if self.result else False,
+                'result': str(self.result) if self.result else False,
                 'date_enqueued': False,
                 'date_started': False,
                 'date_done': False,
@@ -453,7 +453,7 @@ class Job(object):
     def uuid(self):
         """Job ID, this is an UUID """
         if self._uuid is None:
-            self._uuid = unicode(uuid.uuid4())
+            self._uuid = str(uuid.uuid4())
         return self._uuid
 
     @property
