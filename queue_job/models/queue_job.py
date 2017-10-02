@@ -113,7 +113,7 @@ class QueueJob(models.Model):
             model = repr(self.env[record.model_name].browse(record_ids))
             args = [repr(arg) for arg in record.args]
             kwargs = ['%s=%r' % (key, val) for key, val
-                      in record.kwargs.iteritems()]
+                      in record.kwargs.items()]
             all_args = ', '.join(args + kwargs)
             record.func_string = (
                 "%s.%s(%s)" % (model, record.method_name, all_args)

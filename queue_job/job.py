@@ -507,7 +507,7 @@ class Job(object):
         retry_pattern = self.func.retry_pattern
         if not seconds and retry_pattern:
             # ordered from higher to lower count of retries
-            patt = sorted(retry_pattern.iteritems(), key=lambda t: t[0])
+            patt = sorted(retry_pattern.items(), key=lambda t: t[0])
             seconds = RETRY_INTERVAL
             for retry_count, postpone_seconds in patt:
                 if self.retry >= retry_count:
