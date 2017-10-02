@@ -534,7 +534,7 @@ class Job(object):
             return None
         if not self.func.related_action:
             return None
-        if not isinstance(self.func.related_action, basestring):
+        if not isinstance(self.func.related_action, str):
             raise ValueError('related_action must be the name of the '
                              'method on queue.job as string')
         action = getattr(self.db_record(), self.func.related_action)
