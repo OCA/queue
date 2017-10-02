@@ -381,7 +381,7 @@ class Job(object):
                 new_exc = FailedJobError("Max. retries (%d) reached: %s" %
                                          (self.max_retries, value or type_)
                                          )
-                raise new_exc.__class__, new_exc, traceback
+                raise new_exc.__class__(new_exc).with_traceback(traceback)
             raise
         return self.result
 
