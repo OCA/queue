@@ -91,9 +91,6 @@ class DelayableRecordset(object):
             getattr(self.recordset, '_ids', "")
         )
 
-    def __unicode__(self):
-        return unicode(str(self))
-
     __repr__ = __str__
 
 
