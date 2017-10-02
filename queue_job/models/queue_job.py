@@ -14,7 +14,7 @@ _logger = logging.getLogger(__name__)
 
 
 def channel_func_name(method):
-    return '<%s>.%s' % (method.im_class._name, method.__name__)
+    return '<%s>.%s' % (method.__self__._name, method.__name__)
 
 
 class QueueJob(models.Model):
