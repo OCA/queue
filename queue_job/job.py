@@ -300,14 +300,13 @@ class Job(object):
 
         assert isinstance(kwargs, dict), "%s: kwargs are not a dict" % kwargs
 
-        if (not inspect.ismethod(func) or
-                not isinstance(func.im_class, odoo.models.MetaModel)):
+        if not _is_model_method(func):
             raise TypeError("Job accepts only methods of Models")
 
-        recordset = func.im_self
+        recordset = func.__self__
         env = recordset.env
-        self.model_name = func.im_class._name
-        self.method_name = func.im_func.func_name
+        self.model_name = recordset._name
+        self.method_name = func.__name__
         self.recordset = recordset
 
         self.env = env
@@ -543,7 +542,7 @@ class Job(object):
 
 def _is_model_method(func):
     return (inspect.ismethod(func) and
-            isinstance(func.im_class, odoo.models.MetaModel))
+            isinstance(func.__self__.__class__, odoo.models.MetaModel))
 
 
 def job(func=None, default_channel='root', retry_pattern=None):
