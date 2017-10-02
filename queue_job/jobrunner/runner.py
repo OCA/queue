@@ -378,7 +378,7 @@ class QueueJobRunner(object):
         _logger.info("graceful stop requested")
         self._stop = True
         # wakeup the select() in wait_notification
-        os.write(self._stop_pipe[1], '.')
+        os.write(self._stop_pipe[1], b'.')
 
     def run(self):
         _logger.info("starting")
