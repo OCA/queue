@@ -16,13 +16,13 @@ class TestJson(common.TransactionCase):
         partner = self.env(user=demo_user).ref('base.main_partner')
         value = ['a', 1, partner]
         value_json = json.dumps(value, cls=JobEncoder)
-        expected = (
-            '["a", 1, '
-            '{"uid": %s, "_type": "odoo_recordset", '
-            '"model": "res.partner", '
-            '"ids": [%s]}]' % (demo_user.id, partner.id)
-        )
-        self.assertEqual(value_json, expected)
+        expected = ["a", 1, {
+            "uid": demo_user.id,
+            "_type": "odoo_recordset",
+            "model": "res.partner",
+            "ids": [partner.id],
+        }]
+        self.assertEqual(json.loads(value_json), expected)
 
     def test_decoder_recordset(self):
         demo_user = self.env.ref('base.user_demo')
@@ -48,9 +48,12 @@ class TestJson(common.TransactionCase):
     def test_encoder_datetime(self):
         value = ['a', 1, datetime(2017, 4, 19, 8, 48, 50, 1)]
         value_json = json.dumps(value, cls=JobEncoder)
-        expected = ('["a", 1, {"_type": "datetime_isoformat", '
-                    '"value": "2017-04-19T08:48:50.000001"}]')
-        self.assertEqual(value_json, expected)
+        expected = [
+            "a", 1,
+            {"_type": "datetime_isoformat",
+             "value": "2017-04-19T08:48:50.000001"}
+        ]
+        self.assertEqual(json.loads(value_json), expected)
 
     def test_decoder_datetime(self):
         value_json = ('["a", 1, {"_type": "datetime_isoformat",'
@@ -62,9 +65,11 @@ class TestJson(common.TransactionCase):
     def test_encoder_date(self):
         value = ['a', 1, date(2017, 4, 19)]
         value_json = json.dumps(value, cls=JobEncoder)
-        expected = ('["a", 1, {"_type": "date_isoformat", '
-                    '"value": "2017-04-19"}]')
-        self.assertEqual(value_json, expected)
+        expected = [
+            "a", 1,
+            {"_type": "date_isoformat", "value": "2017-04-19"}
+        ]
+        self.assertEqual(json.loads(value_json), expected)
 
     def test_decoder_date(self):
         value_json = ('["a", 1, {"_type": "date_isoformat",'
