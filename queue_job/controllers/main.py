@@ -5,7 +5,7 @@
 
 import logging
 import traceback
-from cStringIO import StringIO
+from io import StringIO
 
 from psycopg2 import OperationalError
 
