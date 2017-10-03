@@ -6,7 +6,7 @@ cache:
     - $HOME/.cache/pip
 
 python:
-  - "3.4"
+  - "3.5"
 
 addons:
   apt:
