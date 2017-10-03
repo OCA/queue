@@ -91,9 +91,6 @@ class DelayableRecordset(object):
             getattr(self.recordset, '_ids', "")
         )
 
-    def __unicode__(self):
-        return unicode(str(self))
-
     __repr__ = __str__
 
 
@@ -303,14 +300,13 @@ class Job(object):
 
         assert isinstance(kwargs, dict), "%s: kwargs are not a dict" % kwargs
 
-        if (not inspect.ismethod(func) or
-                not isinstance(func.im_class, odoo.models.MetaModel)):
+        if not _is_model_method(func):
             raise TypeError("Job accepts only methods of Models")
 
-        recordset = func.im_self
+        recordset = func.__self__
         env = recordset.env
-        self.model_name = func.im_class._name
-        self.method_name = func.im_func.func_name
+        self.model_name = recordset._name
+        self.method_name = func.__name__
         self.recordset = recordset
 
         self.env = env
@@ -381,7 +377,7 @@ class Job(object):
                 new_exc = FailedJobError("Max. retries (%d) reached: %s" %
                                          (self.max_retries, value or type_)
                                          )
-                raise new_exc.__class__, new_exc, traceback
+                raise new_exc from err
             raise
         return self.result
 
@@ -394,7 +390,7 @@ class Job(object):
                 'exc_info': self.exc_info,
                 'user_id': self.user_id or self.env.uid,
                 'company_id': self.company_id,
-                'result': unicode(self.result) if self.result else False,
+                'result': str(self.result) if self.result else False,
                 'date_enqueued': False,
                 'date_started': False,
                 'date_done': False,
@@ -456,7 +452,7 @@ class Job(object):
     def uuid(self):
         """Job ID, this is an UUID """
         if self._uuid is None:
-            self._uuid = unicode(uuid.uuid4())
+            self._uuid = str(uuid.uuid4())
         return self._uuid
 
     @property
@@ -511,7 +507,7 @@ class Job(object):
         retry_pattern = self.func.retry_pattern
         if not seconds and retry_pattern:
             # ordered from higher to lower count of retries
-            patt = sorted(retry_pattern.iteritems(), key=lambda t: t[0])
+            patt = sorted(retry_pattern.items(), key=lambda t: t[0])
             seconds = RETRY_INTERVAL
             for retry_count, postpone_seconds in patt:
                 if self.retry >= retry_count:
@@ -537,7 +533,7 @@ class Job(object):
             return None
         if not self.func.related_action:
             return None
-        if not isinstance(self.func.related_action, basestring):
+        if not isinstance(self.func.related_action, str):
             raise ValueError('related_action must be the name of the '
                              'method on queue.job as string')
         action = getattr(self.db_record(), self.func.related_action)
@@ -546,7 +542,7 @@ class Job(object):
 
 def _is_model_method(func):
     return (inspect.ismethod(func) and
-            isinstance(func.im_class, odoo.models.MetaModel))
+            isinstance(func.__self__.__class__, odoo.models.MetaModel))
 
 
 def job(func=None, default_channel='root', retry_pattern=None):

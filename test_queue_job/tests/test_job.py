@@ -266,13 +266,9 @@ class TestJobsOnTestingMethod(common.TransactionCase):
         test_job.user_id = 1
         test_job.store()
         job_read = Job.load(self.env, test_job.uuid)
-        # the job's args and description have been created as bytestring but
-        # are decoded to utf8 by the ORM so make them comparable
-        self.assertEqual(job_read.args, ('öô¿‽'.decode('utf8'),
-                                         'ñě'.decode('utf8')))
-        self.assertEqual(job_read.kwargs, {'c': 'ßø'.decode('utf8')})
-        self.assertEqual(job_read.description,
-                         "My dé^Wdescription".decode('utf8'))
+        self.assertEqual(job_read.args, ('öô¿‽', 'ñě'))
+        self.assertEqual(job_read.kwargs, {'c': 'ßø'})
+        self.assertEqual(job_read.description, "My dé^Wdescription")
 
     def test_job_delay(self):
         self.cr.execute('delete from queue_job')

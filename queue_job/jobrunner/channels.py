@@ -2,7 +2,7 @@
 # Copyright (c) 2015-2016 ACSONE SA/NV (<http://acsone.eu>)
 # Copyright 2015-2016 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
-
+from functools import total_ordering
 from heapq import heappush, heappop
 import logging
 from weakref import WeakValueDictionary
@@ -120,6 +120,7 @@ class SafeSet(set):
             pass
 
 
+@total_ordering
 class ChannelJob(object):
     """A channel job is attached to a channel and holds the properties of a
     job that are necessary to prioritise them.
@@ -133,7 +134,7 @@ class ChannelJob(object):
 
     Here are some examples.
 
-    j1 comes before j2 before it has a smaller date_created
+    j1 comes before j2 because it has an earlier date_created
 
     >>> j1 = ChannelJob(None, None, 1,
     ...                 seq=0, date_created=1, priority=9, eta=None)
@@ -185,8 +186,9 @@ class ChannelJob(object):
 
     Comparison excluding eta:
 
-    >>> j1.cmp_no_eta(j2)
-    -1
+    >>> j1.sorting_key_ignoring_eta() < j2.sorting_key_ignoring_eta()
+    True
+
     """
 
     def __init__(self, db_name, channel, uuid,
@@ -208,19 +210,19 @@ class ChannelJob(object):
     def __hash__(self):
         return id(self)
 
-    def cmp_no_eta(self, other):
-        return (cmp(self.priority, other.priority) or
-                cmp(self.date_created, other.date_created) or
-                cmp(self.seq, other.seq))
+    def sorting_key(self):
+        return self.eta, self.priority, self.date_created, self.seq
 
-    def __cmp__(self, other):
+    def sorting_key_ignoring_eta(self):
+        return self.priority, self.date_created, self.seq
+
+    def __lt__(self, other):
         if self.eta and not other.eta:
-            return -1
+            return True
         elif not self.eta and other.eta:
-            return 1
+            return False
         else:
-            return (cmp(self.eta, other.eta) or
-                    self.cmp_no_eta(other))
+            return self.sorting_key() < other.sorting_key()
 
 
 class ChannelQueue(object):
@@ -335,7 +337,9 @@ class ChannelQueue(object):
         if self.sequential and len(self._eta_queue) and len(self._queue):
             eta_job = self._eta_queue[0]
             job = self._queue[0]
-            if eta_job.cmp_no_eta(job) < 0:
+
+            if (eta_job.sorting_key_ignoring_eta() <
+                    job.sorting_key_ignoring_eta()):
                 # eta ignored, the job with eta has higher priority
                 # than the job without eta; since it's a sequential
                 # queue we wait until eta
@@ -449,7 +453,7 @@ class Channel(object):
         return self.children.get(subchannel_name)
 
     def __str__(self):
-        capacity = u'∞' if self.capacity is None else str(self.capacity)
+        capacity = '∞' if self.capacity is None else str(self.capacity)
         return "%s(C:%s,Q:%d,R:%d,F:%d)" % (self.fullname,
                                             capacity,
                                             len(self._queue),

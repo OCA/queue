@@ -14,14 +14,14 @@ _logger = logging.getLogger(__name__)
 
 
 def channel_func_name(method):
-    return '<%s>.%s' % (method.im_class._name, method.__name__)
+    return '<%s>.%s' % (method.__self__._name, method.__name__)
 
 
 class QueueJob(models.Model):
     """ Job status and result """
     _name = 'queue.job'
     _description = 'Queue Job'
-    _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _log_access = False
 
     _order = 'date_created DESC, date_done DESC'
@@ -113,7 +113,7 @@ class QueueJob(models.Model):
             model = repr(self.env[record.model_name].browse(record_ids))
             args = [repr(arg) for arg in record.args]
             kwargs = ['%s=%r' % (key, val) for key, val
-                      in record.kwargs.iteritems()]
+                      in record.kwargs.items()]
             all_args = ', '.join(args + kwargs)
             record.func_string = (
                 "%s.%s(%s)" % (model, record.method_name, all_args)

@@ -43,6 +43,7 @@ running.
 
 
 Features:
+
 * Views for jobs, jobs are stored in PostgreSQL
 * Jobrunner: execute the jobs, highly efficient thanks to PostgreSQL's NOTIFY
 * Channels: give a capacity for the root channel and its sub-channels and
@@ -75,7 +76,7 @@ Configuration
 
   - if ``xmlrpc_port`` is not set: ``ODOO_QUEUE_JOB_PORT=8069``
 
- * Start Odoo with ``--load=web,web_kanban,queue_job``
+ * Start Odoo with ``--load=web,base_sparse_field,queue_job``
    and ``--workers`` greater than 1. [1]_
 
 
