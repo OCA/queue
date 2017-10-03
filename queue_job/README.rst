@@ -43,6 +43,7 @@ running.
 
 
 Features:
+
 * Views for jobs, jobs are stored in PostgreSQL
 * Jobrunner: execute the jobs, highly efficient thanks to PostgreSQL's NOTIFY
 * Channels: give a capacity for the root channel and its sub-channels and
