@@ -2,7 +2,7 @@
 # Copyright 2016 Cédric Pigeon
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 {'name': 'Queue Job Subscribe',
- 'version': '10.0.1.0.0',
+ 'version': '11.0.1.0.0',
  'author': 'Acsone SA/NV,'
            'Odoo Community Association (OCA)',
  'website': 'https://github.com/OCA/queue_job',
@@ -15,5 +15,5 @@
  'data': [
      'views/res_users_view.xml',
  ],
- 'installable': False,
+ 'installable': True,
  }
