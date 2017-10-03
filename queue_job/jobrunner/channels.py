@@ -338,7 +338,8 @@ class ChannelQueue(object):
             eta_job = self._eta_queue[0]
             job = self._queue[0]
 
-            if eta_job.sorting_key_ignoring_eta() < job.sorting_key_ignoring_eta():
+            if (eta_job.sorting_key_ignoring_eta() <
+                    job.sorting_key_ignoring_eta()):
                 # eta ignored, the job with eta has higher priority
                 # than the job without eta; since it's a sequential
                 # queue we wait until eta
