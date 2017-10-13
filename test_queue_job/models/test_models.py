@@ -33,7 +33,6 @@ class QueueJob(models.Model):
 class TestQueueJob(models.Model):
 
     _name = 'test.queue.job'
-    _inherit = 'base'
     _description = "Test model for queue.job"
 
     name = fields.Char()
@@ -78,7 +77,6 @@ class TestQueueJob(models.Model):
 class TestQueueChannel(models.Model):
 
     _name = 'test.queue.channel'
-    _inherit = 'base'
     _description = "Test model for queue.channel"
 
     @job
@@ -97,7 +95,6 @@ class TestQueueChannel(models.Model):
 class TestRelatedAction(models.Model):
 
     _name = 'test.related.action'
-    _inherit = 'base'
     _description = "Test model for related actions"
 
     @job
