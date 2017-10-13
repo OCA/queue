@@ -82,7 +82,7 @@ How to use it?
   start immediately and in parallel.
 
 * Tip: to enable debug logging for the queue job, use
-  ``--log-handler=odoo.addons.queue_job:DEBUG``
+  ``--log-handler=openerp.addons.queue_job:DEBUG``
 
 Caveat
 ------
@@ -122,13 +122,14 @@ import os
 import select
 import threading
 import time
+import urlparse
 
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import requests
 
-import odoo
-from odoo.tools import config
+import openerp
+from openerp.tools import config
 
 from .channels import ChannelManager, PENDING, ENQUEUED, NOT_DONE
 
@@ -144,6 +145,37 @@ _logger = logging.getLogger(__name__)
 #
 # On the other hand, the odoo configuration file can be extended at will,
 # so we check it in addition to the environment variables.
+
+
+def connection_info_for(db_or_uri):
+    """ parse the given `db_or_uri` and return a 2-tuple (dbname, connection_params)
+
+    Connection params are either a dictionary with a single key ``dsn``
+    containing a connection URI, or a dictionary containing connection
+    parameter keywords which psycopg2 can build a key/value connection string
+    (dsn) from
+
+    :param str db_or_uri: database name or postgres dsn
+    :rtype: (str, dict)
+    """
+    if db_or_uri.startswith(('postgresql://', 'postgres://')):
+        # extract db from uri
+        us = urlparse.urlsplit(db_or_uri)
+        if len(us.path) > 1:
+            db_name = us.path[1:]
+        elif us.username:
+            db_name = us.username
+        else:
+            db_name = us.hostname
+        return db_name, {'dsn': db_or_uri}
+
+    connection_info = {'database': db_or_uri}
+    for p in ('host', 'port', 'user', 'password'):
+        cfg = config['db_' + p]
+        if cfg:
+            connection_info[p] = cfg
+
+    return db_or_uri, connection_info
 
 
 def _channels():
@@ -169,7 +201,7 @@ def _async_http_get(port, db_name, job_uuid):
     # Method to set failed job (due to timeout, etc) as pending,
     # to avoid keeping it as enqueued.
     def set_job_pending():
-        connection_info = odoo.sql_db.connection_info_for(db_name)[1]
+        connection_info = connection_info_for(db_name)[1]
         conn = psycopg2.connect(**connection_info)
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         with closing(conn.cursor()) as cr:
@@ -208,7 +240,7 @@ class Database(object):
 
     def __init__(self, db_name):
         self.db_name = db_name
-        connection_info = odoo.sql_db.connection_info_for(db_name)[1]
+        connection_info = connection_info_for(db_name)[1]
         self.conn = psycopg2.connect(**connection_info)
         self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         self.has_queue_job = self._has_queue_job()
@@ -292,10 +324,10 @@ class QueueJobRunner(object):
         self._stop_pipe = os.pipe()
 
     def get_db_names(self):
-        if odoo.tools.config['db_name']:
-            db_names = odoo.tools.config['db_name'].split(',')
+        if openerp.tools.config['db_name']:
+            db_names = openerp.tools.config['db_name'].split(',')
         else:
-            db_names = odoo.service.db.exp_list(True)
+            db_names = openerp.service.db.exp_list(True)
         return db_names
 
     def close_databases(self, remove_jobs=True):

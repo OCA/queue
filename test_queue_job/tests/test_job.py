@@ -5,15 +5,15 @@
 from datetime import datetime, timedelta
 import mock
 
-from odoo import SUPERUSER_ID
-import odoo.tests.common as common
+from openerp import SUPERUSER_ID
+import openerp.tests.common as common
 
-from odoo.addons.queue_job.exception import (
+from openerp.addons.queue_job.exception import (
     FailedJobError,
     NoSuchJobError,
     RetryableJobError,
 )
-from odoo.addons.queue_job.job import (
+from openerp.addons.queue_job.job import (
     Job,
     RETRY_INTERVAL,
     PENDING,
@@ -48,7 +48,7 @@ class TestJobsOnTestingMethod(common.TransactionCase):
 
     def test_eta_integer(self):
         """ When an `eta` is an integer, it adds n seconds up to now """
-        datetime_path = 'odoo.addons.queue_job.job.datetime'
+        datetime_path = 'openerp.addons.queue_job.job.datetime'
         with mock.patch(datetime_path, autospec=True) as mock_datetime:
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
             job_a = Job(self.method, eta=60)
@@ -56,7 +56,7 @@ class TestJobsOnTestingMethod(common.TransactionCase):
 
     def test_eta_timedelta(self):
         """ When an `eta` is a timedelta, it adds it up to now """
-        datetime_path = 'odoo.addons.queue_job.job.datetime'
+        datetime_path = 'openerp.addons.queue_job.job.datetime'
         with mock.patch(datetime_path, autospec=True) as mock_datetime:
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
             delta = timedelta(hours=3)
@@ -123,7 +123,7 @@ class TestJobsOnTestingMethod(common.TransactionCase):
 
     def test_set_enqueued(self):
         job_a = Job(self.method)
-        datetime_path = 'odoo.addons.queue_job.job.datetime'
+        datetime_path = 'openerp.addons.queue_job.job.datetime'
         with mock.patch(datetime_path, autospec=True) as mock_datetime:
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
             job_a.set_enqueued()
@@ -135,7 +135,7 @@ class TestJobsOnTestingMethod(common.TransactionCase):
 
     def test_set_started(self):
         job_a = Job(self.method)
-        datetime_path = 'odoo.addons.queue_job.job.datetime'
+        datetime_path = 'openerp.addons.queue_job.job.datetime'
         with mock.patch(datetime_path, autospec=True) as mock_datetime:
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
             job_a.set_started()
@@ -146,7 +146,7 @@ class TestJobsOnTestingMethod(common.TransactionCase):
 
     def test_set_done(self):
         job_a = Job(self.method)
-        datetime_path = 'odoo.addons.queue_job.job.datetime'
+        datetime_path = 'openerp.addons.queue_job.job.datetime'
         with mock.patch(datetime_path, autospec=True) as mock_datetime:
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
             job_a.set_done(result='test')
@@ -165,7 +165,7 @@ class TestJobsOnTestingMethod(common.TransactionCase):
 
     def test_postpone(self):
         job_a = Job(self.method)
-        datetime_path = 'odoo.addons.queue_job.job.datetime'
+        datetime_path = 'openerp.addons.queue_job.job.datetime'
         with mock.patch(datetime_path, autospec=True) as mock_datetime:
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
             job_a.postpone(result='test', seconds=60)
@@ -318,7 +318,7 @@ class TestJobs(common.TransactionCase):
 
     def test_retry_pattern(self):
         """ When we specify a retry pattern, the eta must follow it"""
-        datetime_path = 'odoo.addons.queue_job.job.datetime'
+        datetime_path = 'openerp.addons.queue_job.job.datetime'
         method = self.env['test.queue.job'].job_with_retry_pattern
         with mock.patch(datetime_path, autospec=True) as mock_datetime:
             mock_datetime.now.return_value = datetime(

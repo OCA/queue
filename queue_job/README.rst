@@ -16,8 +16,8 @@ Example:
 
 .. code-block:: python
 
-  from odoo import models, fields, api
-  from odoo.addons.queue_job.job import job
+  from openerp import models, fields, api
+  from openerp.addons.queue_job.job import job
 
   class MyModel(models.Model):
      _name = 'my.model'
@@ -105,7 +105,7 @@ Configuration
   start immediately and in parallel.
 
 * Tip: to enable debug logging for the queue job, use
-  ``--log-handler=odoo.addons.queue_job:DEBUG``
+  ``--log-handler=openerp.addons.queue_job:DEBUG``
 
 .. [1] It works with the threaded Odoo server too, although this way
        of running Odoo is obviously not for production purposes.
@@ -119,7 +119,7 @@ To use this module, you need to:
 
 .. image:: https://odoo-community.org/website/image/ir.attachment/5784_f2813bd/datas
    :alt: Try me on Runbot
-   :target: https://runbot.odoo-community.org/runbot/230/10.0
+   :target: https://runbot.odoo-community.org/runbot/230/8.0
 
 Known issues / Roadmap
 ======================

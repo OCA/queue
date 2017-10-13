@@ -536,7 +536,7 @@ class Channel(object):
         :param now: the current datetime in seconds
 
         :return: iterator of
-                 :class:`odoo.addons.queue_job.jobrunner.ChannelJob`
+                 :class:`openerp.addons.queue_job.jobrunner.ChannelJob`
         """
         # enqueue jobs of children channels
         for child in self.children.values():

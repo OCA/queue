@@ -2,9 +2,9 @@
 # Copyright 2016 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
-from odoo import api, fields, models
-from odoo.addons.queue_job.job import job, related_action
-from odoo.addons.queue_job.exception import RetryableJobError
+from openerp import api, fields, models
+from openerp.addons.queue_job.job import job, related_action
+from openerp.addons.queue_job.exception import RetryableJobError
 
 
 class QueueJob(models.Model):
