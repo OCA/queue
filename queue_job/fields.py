@@ -6,8 +6,9 @@ import json
 from datetime import datetime, date
 
 import dateutil
+import dateutil.parser
 
-from odoo import fields, models
+from openerp import fields, models
 
 
 class JobSerialized(fields.Field):
@@ -25,6 +26,19 @@ class JobSerialized(fields.Field):
             return value
         else:
             return json.loads(value, cls=JobDecoder, env=record.env)
+
+
+def convert_to_column(value):
+    return json.dumps(value, cls=JobEncoder)
+
+
+def convert_to_cache(value, env):
+    # cache format: dict
+    value = value or {}
+    if isinstance(value, dict):
+        return value
+    else:
+        return json.loads(value, cls=JobDecoder, env=env)
 
 
 class JobEncoder(json.JSONEncoder):

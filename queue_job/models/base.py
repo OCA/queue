@@ -3,8 +3,8 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 import inspect
-
-from odoo import models, api
+import openerp
+from openerp import models, api, SUPERUSER_ID
 from ..job import DelayableRecordset
 
 
@@ -12,15 +12,16 @@ class Base(models.AbstractModel):
     """ The base model, which is implicitly inherited by all models. """
     _inherit = 'base'
 
-    @api.model_cr
-    def _register_hook(self):
+    def _register_hook(self, cr):
         """ register marked jobs """
-        super(Base, self)._register_hook()
+        super(Base, self)._register_hook(cr)
         job_methods = [method for __, method
                        in inspect.getmembers(self, predicate=inspect.ismethod)
                        if getattr(method, 'delayable', None)]
+
+        env = openerp.api.Environment(cr, SUPERUSER_ID, {})
         for job_method in job_methods:
-            self.env['queue.job.function']._register_job(job_method)
+            env['queue.job.function']._register_job(job_method)
         # add_to_job_registry(job_methods)
 
     @api.multi
@@ -30,7 +31,7 @@ class Base(models.AbstractModel):
         """ Return a ``DelayableRecordset``
 
         The returned instance allow to enqueue any method of the recordset's
-        Model which is decorated by :func:`~odoo.addons.queue_job.job.job`.
+        Model which is decorated by :func:`~openerp.addons.queue_job.job.job`.
 
         Usage::
 
@@ -53,7 +54,7 @@ class Base(models.AbstractModel):
                         the function. If specified it overrides the one
                         defined on the function
         :return: instance of a DelayableRecordset
-        :rtype: :class:`odoo.addons.queue_job.job.DelayableRecordset`
+        :rtype: :class:`openerp.addons.queue_job.job.DelayableRecordset`
 
         """
         return DelayableRecordset(self, priority=priority,

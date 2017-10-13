@@ -5,10 +5,10 @@
 import logging
 from datetime import datetime, timedelta
 
-from odoo import models, fields, api, exceptions, _
+from openerp import models, fields, api, exceptions, _
 
 from ..job import STATES, DONE, PENDING, Job
-from ..fields import JobSerialized
+from ..fields import convert_to_cache, convert_to_column
 
 _logger = logging.getLogger(__name__)
 
@@ -42,8 +42,8 @@ class QueueJob(models.Model):
     model_name = fields.Char(string='Model', readonly=True)
     method_name = fields.Char(readonly=True)
     record_ids = fields.Serialized(readonly=True)
-    args = JobSerialized(readonly=True)
-    kwargs = JobSerialized(readonly=True)
+    args = fields.Text(readonly=True)
+    kwargs = fields.Text(readonly=True)
     func_string = fields.Char(string='Task', compute='_compute_func_string',
                               readonly=True, store=True)
 
@@ -111,9 +111,14 @@ class QueueJob(models.Model):
         for record in self:
             record_ids = record.record_ids
             model = repr(self.env[record.model_name].browse(record_ids))
-            args = [repr(arg) for arg in record.args]
-            kwargs = ['%s=%r' % (key, val) for key, val
-                      in record.kwargs.iteritems()]
+            args = [
+                repr(arg) for arg in convert_to_cache(record.args, self.env)
+            ]
+            kwargs = [
+                '%s=%r' % (key, val)
+                for key, val in convert_to_cache(record.kwargs, self.env)
+                .iteritems()
+            ]
             all_args = ', '.join(args + kwargs)
             record.func_string = (
                 "%s.%s(%s)" % (model, record.method_name, all_args)
@@ -154,6 +159,14 @@ class QueueJob(models.Model):
     def requeue(self):
         self._change_job_state(PENDING)
         return True
+
+    @api.model
+    def create(self, vals):
+        if 'args' in vals:
+            vals['args'] = convert_to_column(vals['args'])
+        if 'kwargs' in vals:
+            vals['kwargs'] = convert_to_column(vals['kwargs'])
+        return super(QueueJob, self).create(vals)
 
     @api.multi
     def write(self, vals):

@@ -28,7 +28,7 @@ class RetryableJobError(JobError):
 
     The job will be retried after the given number of seconds.  If seconds is
     empty, it will be retried according to the ``retry_pattern`` of the job or
-    by :const:`odoo.addons.queue_job.job.RETRY_INTERVAL` if nothing is defined.
+    by :const:`openerp.addons.queue_job.job.RETRY_INTERVAL` if nothing is defined.
 
     If ``ignore_retry`` is True, the retry counter will not be increased.
     """

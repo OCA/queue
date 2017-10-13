@@ -8,8 +8,8 @@ import os
 from threading import Thread
 import time
 
-from odoo.service import server
-from odoo.tools import config
+from openerp.service import server
+from openerp.tools import config
 
 from .runner import QueueJobRunner
 

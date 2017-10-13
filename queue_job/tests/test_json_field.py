@@ -5,8 +5,8 @@
 from datetime import datetime, date
 import json
 
-from odoo.tests import common
-from odoo.addons.queue_job.fields import JobEncoder, JobDecoder
+from openerp.tests import common
+from openerp.addons.queue_job.fields import JobEncoder, JobDecoder
 
 
 class TestJson(common.TransactionCase):
