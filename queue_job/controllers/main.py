@@ -71,7 +71,6 @@ class RunJobController(http.Controller):
         env = http.request.env(user=odoo.SUPERUSER_ID)
 
         def retry_postpone(job, message, seconds=None):
-            env.cr.rollback()
 
             with odoo.api.Environment.manage():
                 with odoo.registry(job.env.cr.dbname).cursor() as new_cr:
