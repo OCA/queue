@@ -188,7 +188,8 @@ def _async_http_get(port, db_name, job_uuid):
         try:
             # we are not interested in the result, so we set a short timeout
             # but not too short so we trap and log hard configuration errors
-            response = requests.get(url, timeout=1)
+            # CGT: timeout must be hight enought to wait for server startup
+            response = requests.get(url, timeout=15)
 
             # raise_for_status will result in either nothing, a Client Error
             # for HTTP Response codes between 400 and 500 or a Server Error
