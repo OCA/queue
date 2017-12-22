@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="queue.job.channel" id="channel_root_ir_cron">
+        <field name="name">ir_cron</field>
+        <field name="parent_id" ref="queue_job.channel_root"/>
+    </record>
+</odoo>
