@@ -31,6 +31,7 @@ class QueueJob(models.Model):
     _order = 'date_created DESC, date_done DESC'
 
     _removal_interval = 30  # days
+    _default_related_action = 'related_action_open_record'
 
     uuid = fields.Char(string='UUID',
                        readonly=True,
@@ -129,7 +130,7 @@ class QueueJob(models.Model):
         job = Job.load(self.env, self.uuid)
         action = job.related_action()
         if action is None:
-            raise exceptions.Warning(_('No action available for this job'))
+            raise exceptions.UserError(_('No action available for this job'))
         return action
 
     @api.multi
@@ -218,6 +219,40 @@ class QueueJob(models.Model):
         )
         jobs.unlink()
         return True
+
+    @api.multi
+    def related_action_open_record(self):
+        """Open a form view with the record(s) of the job.
+
+        For instance, for a job on a ``product.product``, it will open a
+        ``product.product`` form view with the product record(s) concerned by
+        the job. If the job concerns more than one record, it opens them in a
+        list.
+
+        This is the default related action.
+
+        """
+        self.ensure_one()
+        model_name = self.model_name
+        records = self.env[model_name].browse(self.record_ids).exists()
+        if not records:
+            return None
+        action = {
+            'name': _('Related Record'),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': records._name,
+        }
+        if len(records) == 1:
+            action['res_id'] = records.id
+        else:
+            action.update({
+                'name': _('Related Records'),
+                'view_mode': 'tree,form',
+                'domain': [('id', 'in', records.ids)],
+            })
+        return action
 
 
 class RequeueJob(models.TransientModel):

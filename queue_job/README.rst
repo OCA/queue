@@ -16,11 +16,14 @@ Job Queue
 .. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github
     :target: https://github.com/OCA/queue/tree/11.0/queue_job
     :alt: OCA/queue
-.. |badge4| image:: https://img.shields.io/badge/runbot-Try%20me-875A7B.png
+.. |badge4| image:: https://img.shields.io/badge/weblate-Translate%20me-F47D42.png
+    :target: https://translation.odoo-community.org/projects/queue-11-0/queue-11-0-queue_job
+    :alt: Translate me on Weblate
+.. |badge5| image:: https://img.shields.io/badge/runbot-Try%20me-875A7B.png
     :target: https://runbot.odoo-community.org/runbot/230/11.0
     :alt: Try me on Runbot
 
-|badge1| |badge2| |badge3| |badge4| 
+|badge1| |badge2| |badge3| |badge4| |badge5| 
 
 This addon adds an integrated Job Queue to Odoo.
 
@@ -172,6 +175,13 @@ Changelog
     forbidden and will likely break the structure of the README.rst
     or other documents where this fragment is included. ]
 
+Next
+~~~~
+
+* [ADD] Default "related action" for jobs, opening a form or list view (when
+  the job is linked to respectively one record on several).
+  (`#46 <https://github.com/OCA/queue/pull/46>`_)
+
 11.0.1.1.0 (2018-05-25)
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -187,14 +197,15 @@ Changelog
 * [FIX] Correct automatic registration of channels and job functions
   (`#69 <https://github.com/OCA/queue/pull/69>`_)
 * [FIX] Correct compatibility with ``@property`` methods
-  (`#50 <https://github.com/OCA/queue/pull/50>`_) and (`#69 <https://github.com/OCA/queue/pull/69>`__)
+  (`#50 <https://github.com/OCA/queue/pull/50>`_ and `#69 <https://github.com/OCA/queue/pull/69>`__)
 
 Bug Tracker
 ===========
 
 Bugs are tracked on `GitHub Issues <https://github.com/OCA/queue/issues>`_.
 In case of trouble, please check there if your issue has already been reported.
-If you spotted it first, help us smashing it by providing a detailed and welcomed feedback.
+If you spotted it first, help us smashing it by providing a detailed and welcomed
+`feedback <https://github.com/OCA/queue/issues/new?body=module:%20queue_job%0Aversion:%2011.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
 
 Do not contact contributors directly about support or help with technical issues.
 
