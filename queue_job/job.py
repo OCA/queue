@@ -528,15 +528,20 @@ class Job(object):
             self.result = result
 
     def related_action(self):
-        if not hasattr(self.func, 'related_action'):
-            return None
-        if not self.func.related_action:
-            return None
-        if not isinstance(self.func.related_action, str):
+        record = self.db_record()
+        if hasattr(self.func, 'related_action'):
+            funcname = self.func.related_action
+            # decorator is set but empty: disable the default one
+            if not funcname:
+                return None
+        else:
+            funcname = record._default_related_action
+        if not isinstance(funcname, str):
             raise ValueError('related_action must be the name of the '
                              'method on queue.job as string')
-        action = getattr(self.db_record(), self.func.related_action)
-        return action(**self.func.kwargs)
+        action = getattr(record, funcname)
+        action_kwargs = getattr(self.func, 'kwargs', {})
+        return action(**action_kwargs)
 
 
 def _is_model_method(func):
