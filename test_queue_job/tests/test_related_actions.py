@@ -3,51 +3,138 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 import odoo.tests.common as common
-from odoo.addons.queue_job.job import Job
+
+from odoo import exceptions
 
 
-class TestRelatedAction(common.TransactionCase):
+class TestRelatedAction(common.SavepointCase):
     """ Test Related Actions """
 
-    def setUp(self):
-        super(TestRelatedAction, self).setUp()
-        self.model = self.env['test.related.action']
-        self.method = self.env['test.queue.job'].testing_method
+    @classmethod
+    def setUpClass(cls):
+        super(TestRelatedAction, cls).setUpClass()
+        cls.model = cls.env['test.related.action']
+        cls.record = cls.model.create({})
+        cls.records = cls.record + cls.model.create({})
 
-    def test_return(self):
+    def test_attributes(self):
         """ Job with related action check if action returns correctly """
-        job = Job(self.method)
-        act_job, act_kwargs = job.related_action()
-        self.assertEqual(act_job, job.db_record())
-        self.assertEqual(act_kwargs, {})
+        job_ = self.record.with_delay().testing_related_action__kwargs()
+        act_job, act_kwargs = job_.related_action()
+        self.assertEqual(act_job, job_.db_record())
+        self.assertEqual(act_kwargs, {'b': 4})
 
-    def test_no_related_action(self):
-        """ Job without related action """
-        job = Job(self.model.testing_related_action__no)
-        self.assertIsNone(job.related_action())
+    def test_decorator_empty(self):
+        """ Job with decorator without value disable the default action
 
-    def test_return_none(self):
-        """ Job with related action returning None """
+        The function is::
+
+            @job
+            @related_action()  # default action returns None
+            def testing_related_action__return_none(self):
+                return
+
+        """
         # default action returns None
-        job = Job(self.model.testing_related_action__return_none)
-        self.assertIsNone(job.related_action())
+        job_ = self.record.with_delay().testing_related_action__return_none()
+        self.assertIsNone(job_.related_action())
 
-    def test_kwargs(self):
-        """ Job with related action check if action propagates kwargs """
-        job_ = Job(self.model.testing_related_action__kwargs)
-        self.assertEqual(job_.related_action(), (job_.db_record(), {'b': 4}))
+    def test_model_no_action(self):
+        """Model shows an error when no action exist"""
+        job_ = self.record.with_delay().testing_related_action__return_none()
+        with self.assertRaises(exceptions.UserError):
+            # db_record is the 'job.queue' record on which we click on the
+            # button to open the related action
+            job_.db_record().open_related_action()
 
-    def test_store_related_action(self):
-        """ Call the related action on the model """
-        job = Job(self.model.testing_related_action__store,
-                  args=('Discworld',))
-        job.store()
-        stored_job = self.env['queue.job'].search(
-            [('uuid', '=', job.uuid)]
+    def test_default_no_record(self):
+        """Default related action called when no decorator is set
+
+        When called on no record.
+
+        The function is::
+
+            @job
+            def testing_related_action__no(self):
+                return
+
+        """
+        job_ = self.model.with_delay().testing_related_action__no()
+        expected = None
+        self.assertEquals(job_.related_action(), expected)
+
+    def test_model_default_no_record(self):
+        """Model shows an error when using the default action and we have no
+        record linke to the job"""
+        job_ = self.model.with_delay().testing_related_action__no()
+        with self.assertRaises(exceptions.UserError):
+            # db_record is the 'job.queue' record on which we click on the
+            # button to open the related action
+            job_.db_record().open_related_action()
+
+    def test_default_one_record(self):
+        """Default related action called when no decorator is set
+
+        When called on one record.
+
+        The function is::
+
+            @job
+            def testing_related_action__no(self):
+                return
+
+        """
+        job_ = self.record.with_delay().testing_related_action__no()
+        expected = {
+            'name': 'Related Record',
+            'res_id': self.record.id,
+            'res_model': self.record._name,
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'view_type': 'form',
+        }
+        self.assertEquals(job_.related_action(), expected)
+
+    def test_default_several_record(self):
+        """Default related action called when no decorator is set
+
+        When called on several record.
+
+        The function is::
+
+            @job
+            def testing_related_action__no(self):
+                return
+
+        """
+        job_ = self.records.with_delay().testing_related_action__no()
+        expected = {
+            'name': 'Related Records',
+            'domain': [('id', 'in', self.records.ids)],
+            'res_model': self.record._name,
+            'type': 'ir.actions.act_window',
+            'view_mode': 'tree,form',
+            'view_type': 'form',
+        }
+        self.assertEquals(job_.related_action(), expected)
+
+    def test_decorator(self):
+        """Call the related action on the model
+
+        The function is::
+
+            @job
+            @related_action(action='testing_related__url',
+                            url='https://en.wikipedia.org/wiki/{subject}')
+            def testing_related_action__store(self):
+                return
+
+        """
+        job_ = self.record.with_delay().testing_related_action__store(
+            'Discworld'
         )
-        self.assertEqual(len(stored_job), 1)
         expected = {'type': 'ir.actions.act_url',
                     'target': 'new',
                     'url': 'https://en.wikipedia.org/wiki/Discworld',
                     }
-        self.assertEquals(stored_job.open_related_action(), expected)
+        self.assertEquals(job_.related_action(), expected)
