@@ -6,6 +6,11 @@ import logging
 from datetime import datetime, timedelta
 
 from odoo import models, fields, api, exceptions, _
+# Import `Serialized` field straight to avoid:
+# * remember to use --load=base_sparse_field...
+# * make pytest happy
+# * make everybody happy :
+from odoo.addons.base_sparse_field.models.fields import Serialized
 
 from ..job import STATES, DONE, PENDING, Job
 from ..fields import JobSerialized
@@ -41,7 +46,7 @@ class QueueJob(models.Model):
 
     model_name = fields.Char(string='Model', readonly=True)
     method_name = fields.Char(readonly=True)
-    record_ids = fields.Serialized(readonly=True)
+    record_ids = Serialized(readonly=True)
     args = JobSerialized(readonly=True)
     kwargs = JobSerialized(readonly=True)
     func_string = fields.Char(string='Task', compute='_compute_func_string',
