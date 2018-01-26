@@ -76,7 +76,7 @@ Configuration
 
   - if ``xmlrpc_port`` is not set: ``ODOO_QUEUE_JOB_PORT=8069``
 
- * Start Odoo with ``--load=web,base_sparse_field,queue_job``
+ * Start Odoo with ``--load=web,queue_job``
    and ``--workers`` greater than 1. [1]_
 
 
