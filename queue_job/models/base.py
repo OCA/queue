@@ -16,18 +16,11 @@ class Base(models.AbstractModel):
     def _register_hook(self):
         """ register marked jobs """
         super(Base, self)._register_hook()
-        job_methods = set()
-        for attr_name in dir(self):
-            # _cache on models is a lazy_property which raises an
-            # AssertionError when called on a empty model, just skip it.
-            if attr_name == '_cache':
-                continue
-            try:
-                attr = getattr(self, attr_name)
-            except AttributeError:
-                continue
-            if inspect.ismethod(attr) and getattr(attr, 'delayable', None):
-                job_methods.add(attr)
+        job_methods = [
+            method for __, method
+            in inspect.getmembers(self.__class__, predicate=inspect.ismethod)
+            if getattr(method, 'delayable', None)
+        ]
         for job_method in job_methods:
             self.env['queue.job.function']._register_job(job_method)
 
