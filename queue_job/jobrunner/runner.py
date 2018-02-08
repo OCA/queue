@@ -24,11 +24,13 @@ How to use it?
 
 * Optionally adjust your configuration through environment variables:
 
-  - set ``ODOO_QUEUE_JOB_CHANNELS=root:4`` (or any other channels
-    configuration) if you don't want the default ``root:1``.
-
-  - if ``xmlrpc-port`` is not set, you can set it for the jobrunner only with:
-    ``ODOO_QUEUE_JOB_PORT=8069``.
+  - ``ODOO_QUEUE_JOB_CHANNELS=root:4`` (or any other channels
+    configuration), default ``root:1``.
+  - ``ODOO_QUEUE_JOB_SCHEME=https``, default ``http``.
+  - ``ODOO_QUEUE_JOB_HOST=load-balancer``, default ``localhost``.
+  - ``ODOO_QUEUE_JOB_PORT=443``, default ``xmlrpc-port`` or 8069.
+  - ``ODOO_QUEUE_JOB_HTTP_AUTH_USER=jobrunner``, default empty.
+  - ``ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t``, default empty.
 
 * Alternatively, configure the channels through the Odoo configuration
   file, like:
@@ -37,6 +39,11 @@ How to use it?
 
   [queue_job]
   channels = root:4
+  scheme = https
+  host = load-balancer
+  port = 443
+  http_auth_user = jobrunner
+  http_auth_password = s3cr3t
 
 * Or, if using ``anybox.recipe.odoo``, add this to your buildout configuration:
 
@@ -46,6 +53,11 @@ How to use it?
   recipe = anybox.recipe.odoo
   (...)
   queue_job.channels = root:4
+  queue_job.scheme = https
+  queue_job.host = load-balancer
+  queue_job.port = 443
+  queue_job.http_auth_user = jobrunner
+  queue_job.http_auth_password = s3cr3t
 
 * Start Odoo with ``--load=web,web_kanban,queue_job``
   and ``--workers`` greater than 1 [2]_, or set the ``server_wide_modules``
@@ -165,7 +177,7 @@ def _odoo_now():
     return _datetime_to_epoch(dt)
 
 
-def _async_http_get(port, db_name, job_uuid):
+def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
     # Method to set failed job (due to timeout, etc) as pending,
     # to avoid keeping it as enqueued.
     def set_job_pending():
@@ -183,12 +195,15 @@ def _async_http_get(port, db_name, job_uuid):
     #       if this was python3 I would be doing this with
     #       asyncio, aiohttp and aiopg
     def urlopen():
-        url = ('http://localhost:%s/queue_job/runjob?db=%s&job_uuid=%s' %
-               (port, db_name, job_uuid))
+        url = ('%s://%s:%s/queue_job/runjob?db=%s&job_uuid=%s' %
+               (scheme, host, port, db_name, job_uuid))
         try:
+            auth = None
+            if user:
+                auth = (user, password)
             # we are not interested in the result, so we set a short timeout
             # but not too short so we trap and log hard configuration errors
-            response = requests.get(url, timeout=1)
+            response = requests.get(url, timeout=1, auth=auth)
 
             # raise_for_status will result in either nothing, a Client Error
             # for HTTP Response codes between 400 and 500 or a Server Error
@@ -281,8 +296,18 @@ class Database(object):
 
 class QueueJobRunner(object):
 
-    def __init__(self, port=8069, channel_config_string=None):
+    def __init__(self,
+                 scheme='http',
+                 host='localhost',
+                 port=8069,
+                 user=None,
+                 password=None,
+                 channel_config_string=None):
+        self.scheme = scheme
+        self.host = host
         self.port = port
+        self.user = user
+        self.password = password
         self.channel_manager = ChannelManager()
         if channel_config_string is None:
             channel_config_string = _channels()
@@ -328,7 +353,13 @@ class QueueJobRunner(object):
             _logger.info("asking Odoo to run job %s on db %s",
                          job.uuid, job.db_name)
             self.db_by_name[job.db_name].set_job_enqueued(job.uuid)
-            _async_http_get(self.port, job.db_name, job.uuid)
+            _async_http_get(self.scheme,
+                            self.host,
+                            self.port,
+                            self.user,
+                            self.password,
+                            job.db_name,
+                            job.uuid)
 
     def process_notifications(self):
         for db in self.db_by_name.values():
