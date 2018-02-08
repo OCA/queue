@@ -28,8 +28,23 @@ class QueueJobRunnerThread(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.daemon = True
-        port = os.environ.get('ODOO_QUEUE_JOB_PORT') or config['http_port']
-        self.runner = QueueJobRunner(port or 8069)
+        scheme = (os.environ.get('ODOO_QUEUE_JOB_SCHEME') or
+                  config.misc.get("queue_job", {}).get('scheme'))
+        host = (os.environ.get('ODOO_QUEUE_JOB_HOST') or
+                config.misc.get("queue_job", {}).get('host') or
+                config['http_interface'])
+        port = (os.environ.get('ODOO_QUEUE_JOB_PORT') or
+                config.misc.get("queue_job", {}).get('port') or
+                config['http_port'])
+        user = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_USER') or
+                config.misc.get("queue_job", {}).get('http_auth_user'))
+        password = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD') or
+                    config.misc.get("queue_job", {}).get('http_auth_password'))
+        self.runner = QueueJobRunner(scheme or 'http',
+                                     host or 'localhost',
+                                     port or 8069,
+                                     user,
+                                     password)
 
     def run(self):
         # sleep a bit to let the workers start at ease
