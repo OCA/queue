@@ -41,7 +41,7 @@ class IrCron(models.Model):
 
     @api.model
     def _callback(self, model_name, method_name, args, job_id):
-        cron = self.env['ir.cron'].browse(job_id)
+        cron = self.env['ir.cron'].sudo().browse(job_id)
         if cron.run_as_queue_job:
             return self.with_delay(
                 priority=cron.priority,
