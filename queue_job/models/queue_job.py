@@ -303,6 +303,18 @@ class RequeueJob(models.TransientModel):
         return {'type': 'ir.actions.act_window_close'}
 
 
+class SetJobsToDone(models.TransientModel):
+    _inherit = 'queue.requeue.job'
+    _name = 'queue.jobs.to.done'
+    _description = 'Set all selected jobs to done'
+
+    @api.multi
+    def set_done(self):
+        jobs = self.job_ids
+        jobs.button_done()
+        return {'type': 'ir.actions.act_window_close'}
+
+
 class JobChannel(models.Model):
     _name = 'queue.job.channel'
     _description = 'Job Channels'
