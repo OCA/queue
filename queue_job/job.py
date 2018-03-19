@@ -52,13 +52,15 @@ class DelayableRecordset(object):
     """
 
     def __init__(self, recordset, priority=None, eta=None,
-                 max_retries=None, description=None, channel=None):
+                 max_retries=None, description=None, channel=None,
+                 identity_key=None):
         self.recordset = recordset
         self.priority = priority
         self.eta = eta
         self.max_retries = max_retries
         self.description = description
         self.channel = channel
+        self.identity_key = identity_key
 
     def __getattr__(self, name):
         if name in self.recordset:
@@ -82,7 +84,8 @@ class DelayableRecordset(object):
                                max_retries=self.max_retries,
                                eta=self.eta,
                                description=self.description,
-                               channel=self.channel)
+                               channel=self.channel,
+                               identity_key=self.identity_key)
         return delay
 
     def __str__(self):
@@ -185,6 +188,12 @@ class Job(object):
         The complete name of the channel to use to process the job. If
         provided it overrides the one defined on the job's function.
 
+    .. attribute::identity_key
+
+        A key referencing the job, multiple job with the same key will not
+        be added to a channel if the existing job with the same key is not yet
+        started or executed.
+
     """
 
     @classmethod
@@ -233,22 +242,38 @@ class Job(object):
         job_.max_retries = stored.max_retries
         if stored.company_id:
             job_.company_id = stored.company_id.id
+        job_.identity_key = stored.identity_key
         return job_
+
+    @classmethod
+    def exist_duplicate_job(cls, env, identity_key):
+        """Check if a job to be executed with the same key exists."""
+        jobs = env['queue.job'].search(
+            [('identity_key', '=', identity_key),
+             ('state', 'in', [PENDING, ENQUEUED])],
+            limit=1
+        )
+        return bool(len(jobs))
 
     @classmethod
     def enqueue(cls, func, args=None, kwargs=None,
                 priority=None, eta=None, max_retries=None, description=None,
-                channel=None):
+                channel=None, identity_key=None):
         """Create a Job and enqueue it in the queue. Return the job uuid.
 
         This expects the arguments specific to the job to be already extracted
         from the ones to pass to the job function.
 
         """
+
+        recordset = func.im_self
+        env = recordset.env
+        if identity_key and cls.exist_duplicate_job(env, identity_key):
+            return
         new_job = cls(func=func, args=args,
                       kwargs=kwargs, priority=priority, eta=eta,
                       max_retries=max_retries, description=description,
-                      channel=channel)
+                      channel=channel, identity_key=identity_key)
         new_job.store()
         _logger.debug(
             "enqueued %s:%s(*%r, **%r) with uuid: %s",
@@ -269,7 +294,7 @@ class Job(object):
     def __init__(self, func,
                  args=None, kwargs=None, priority=None,
                  eta=None, job_uuid=None, max_retries=None,
-                 description=None, channel=None):
+                 description=None, channel=None, identity_key=None):
         """ Create a Job
 
         :param func: function to execute
@@ -290,6 +315,7 @@ class Job(object):
         :param description: human description of the job. If None, description
             is computed from the function doc or name
         :param channel: The complete channel name to use to process the job.
+        :param identity_key: A hash to uniquely identify a job.
         :param env: Odoo Environment
         :type env: :class:`odoo.api.Environment`
         """
@@ -336,6 +362,8 @@ class Job(object):
 
         self.date_created = datetime.now()
         self._description = description
+
+        self.identity_key = identity_key
 
         self.date_enqueued = None
         self.date_started = None
@@ -399,8 +427,8 @@ class Job(object):
                 'date_started': False,
                 'date_done': False,
                 'eta': False,
+                'identity_key': False,
                 }
-
         dt_to_string = odoo.fields.Datetime.to_string
         if self.date_enqueued:
             vals['date_enqueued'] = dt_to_string(self.date_enqueued)
@@ -410,6 +438,8 @@ class Job(object):
             vals['date_done'] = dt_to_string(self.date_done)
         if self.eta:
             vals['eta'] = dt_to_string(self.eta)
+        if self.identity_key:
+            vals['identity_key'] = self.identity_key
 
         db_record = self.db_record()
         if db_record:

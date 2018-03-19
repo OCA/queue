@@ -295,6 +295,17 @@ class TestJobsOnTestingMethod(common.TransactionCase):
             (('a',), {'k': 1})
         )
 
+    def test_job_identity_key(self):
+        id_key = 'e294e8444453b09d59bdb6efbfec1323'
+        test_job_1 = Job(self.method,
+                         priority=15,
+                         description="Test I am the first one",
+                         identity_key=id_key)
+        test_job_1.user_id = 1
+        test_job_1.store()
+        job1 = Job.load(self.env, test_job_1.uuid)
+        self.assertEqual(job1.identity_key, id_key)
+
 
 class TestJobs(common.TransactionCase):
     """ Test jobs on other methods or with different job configuration """
@@ -379,6 +390,15 @@ class TestJobs(common.TransactionCase):
         self.assertEquals(job_instance.model_name, 'test.queue.job')
         self.assertEquals(job_instance.method_name, 'mapped')
         self.assertEquals(['test1', 'test2'], job_instance.perform())
+
+    def test_job_no_duplicate(self):
+        """ If a job with same identity key in queue do not add a new one """
+        id_key = 'e294e8444453b09d59bdb6efbfec1323'
+        rec1 = self.env['test.queue.job'].create({'name': 'test1'})
+        job_1 = rec1.with_delay(identity_key=id_key).mapped('name')
+        self.assertTrue(job_1)
+        job_2 = rec1.with_delay(identity_key=id_key).mapped('name')
+        self.assertFalse(job_2)
 
     def test_job_with_mutable_arguments(self):
         """ Job with mutable arguments do not mutate on perform() """
