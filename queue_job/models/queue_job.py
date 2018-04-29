@@ -218,7 +218,9 @@ class QueueJob(models.Model):
         clean_query = """ delete from queue_job where state = 'done'
             and date_done <
             (now() at time zone 'utc') -
-            (interval ' days') """ % self._removal_interval
+            (interval '%s days') """ % self._removal_interval
+        
+        _logger.info("cleaning jobs with following query %s")
 
         self.env.cr.execute(clean_query)
 
