@@ -220,7 +220,7 @@ class QueueJob(models.Model):
             (now() at time zone 'utc') -
             (interval '%s days') """ % self._removal_interval
         
-        _logger.info("cleaning jobs with following query %s")
+        _logger.info("cleaning jobs with following query %s" % clean_query)
 
         self.env.cr.execute(clean_query)
 
