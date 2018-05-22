@@ -17,11 +17,11 @@ class Base(models.AbstractModel):
         super(Base, self)._register_hook()
         job_methods = [
             method for __, method
-            in inspect.getmembers(self.__class__, predicate=inspect.ismethod)
+            in inspect.getmembers(self.__class__, predicate=inspect.isfunction)
             if getattr(method, 'delayable', None)
         ]
         for job_method in job_methods:
-            self.env['queue.job.function']._register_job(job_method)
+            self.env['queue.job.function']._register_job(self, job_method)
 
     @api.multi
     def with_delay(self, priority=None, eta=None,
