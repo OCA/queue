@@ -41,9 +41,15 @@ class TestJobChannels(common.TransactionCase):
         self.env['queue.job.channel'].search([('name', '!=', 'root')]).unlink()
 
         method_a = self.env['test.queue.channel'].job_a
-        self.env['queue.job.function']._register_job(method_a)
+        self.env['queue.job.function']._register_job(
+            self.env['test.queue.channel'],
+            method_a
+        )
         method_b = self.env['test.queue.channel'].job_b
-        self.env['queue.job.function']._register_job(method_b)
+        self.env['queue.job.function']._register_job(
+            self.env['test.queue.channel'],
+            method_b
+        )
 
         path_a = '<test.queue.channel>.job_a'
         path_b = '<test.queue.channel>.job_b'
@@ -59,7 +65,10 @@ class TestJobChannels(common.TransactionCase):
         self.env['queue.job.channel'].search([('name', '!=', 'root')]).unlink()
 
         method = self.env['test.queue.channel'].job_a
-        self.env['queue.job.function']._register_job(method)
+        self.env['queue.job.function']._register_job(
+            self.env['test.queue.channel'],
+            method
+        )
         path_a = '<%s>.%s' % (method.__self__.__class__._name, method.__name__)
         job_func = self.function_model.search([('name', '=', path_a)])
         self.assertEquals(job_func.channel, 'root')
@@ -92,7 +101,10 @@ class TestJobChannels(common.TransactionCase):
         self.env['queue.job.channel'].search([('name', '!=', 'root')]).unlink()
 
         method = self.env['test.queue.channel'].job_sub_channel
-        self.env['queue.job.function']._register_job(method)
+        self.env['queue.job.function']._register_job(
+            self.env['test.queue.channel'],
+            method
+        )
         self.assertEquals(method.default_channel, 'root.sub.subsub')
 
         path_a = '<%s>.%s' % (method.__self__.__class__._name, method.__name__)
