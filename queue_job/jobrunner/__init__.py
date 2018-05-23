@@ -69,6 +69,30 @@ class QueueJobRunnerThread(Thread):
         self.runner.stop()
 
 
+class WorkerJobRunner(server.Worker):
+    """ Jobrunner workers """
+
+    def __init__(self, multi):
+        super(WorkerJobRunner, self).__init__(multi)
+        self.watchdog_timeout = None
+        port = os.environ.get("ODOO_CONNECTOR_PORT") or config["xmlrpc_port"]
+        base_url = port and "http://localhost:%s" % port or "http://localhost:8069"
+        self.runner = QueueJobRunner(base_url)
+
+    def sleep(self):
+        pass
+
+    def signal_handler(self, sig, frame):
+        _logger.debug("WorkerJobRunner (%s) received signal %s", self.pid, sig)
+        super(WorkerJobRunner, self).signal_handler(sig, frame)
+        self.runner.stop()
+
+    def process_work(self):
+        _logger.debug("WorkerJobRunner (%s) starting up", self.pid)
+        time.sleep(START_DELAY)
+        self.runner.run()
+
+
 runner_thread = None
 
 
@@ -91,26 +115,37 @@ def _start_runner_thread(server_type):
             )
 
 
-orig_prefork_start = server.PreforkServer.start
-orig_prefork_stop = server.PreforkServer.stop
+orig_prefork__init__ = server.PreforkServer.__init__
+orig_prefork_process_spawn = server.PreforkServer.process_spawn
+orig_prefork_worker_pop = server.PreforkServer.worker_pop
 orig_threaded_start = server.ThreadedServer.start
 orig_threaded_stop = server.ThreadedServer.stop
 
 
-def prefork_start(server, *args, **kwargs):
-    res = orig_prefork_start(server, *args, **kwargs)
-    _start_runner_thread("prefork server")
+def prefork__init__(server, app):
+    res = orig_prefork__init__(server, app)
+    server.jobrunner = {}
     return res
 
 
-def prefork_stop(server, graceful=True):
-    global runner_thread
-    if runner_thread:
-        runner_thread.stop()
-    res = orig_prefork_stop(server, graceful)
-    if runner_thread:
-        runner_thread.join()
-        runner_thread = None
+def prefork_process_spawn(server):
+    orig_prefork_process_spawn(server)
+    if not hasattr(server, "jobrunner"):
+        # if 'queue_job' is not in server wide modules, PreforkServer is
+        # not initialized with a 'jobrunner' attribute, skip this
+        return
+    if not server.jobrunner and _is_runner_enabled():
+        server.worker_spawn(WorkerJobRunner, server.jobrunner)
+
+
+def prefork_worker_pop(server, pid):
+    res = orig_prefork_worker_pop(server, pid)
+    if not hasattr(server, "jobrunner"):
+        # if 'queue_job' is not in server wide modules, PreforkServer is
+        # not initialized with a 'jobrunner' attribute, skip this
+        return res
+    if pid in server.jobrunner:
+        server.jobrunner.pop(pid)
     return res
 
 
@@ -131,7 +166,8 @@ def threaded_stop(server):
     return res
 
 
-server.PreforkServer.start = prefork_start
-server.PreforkServer.stop = prefork_stop
+server.PreforkServer.__init__ = prefork__init__
+server.PreforkServer.process_spawn = prefork_process_spawn
+server.PreforkServer.worker_pop = prefork_worker_pop
 server.ThreadedServer.start = threaded_start
 server.ThreadedServer.stop = threaded_stop
