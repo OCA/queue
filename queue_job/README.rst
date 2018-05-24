@@ -87,7 +87,7 @@ Configuration
   [options]
   (...)
   workers = 4
-  server_wide_modules = web,web_kanban,queue_job
+  server_wide_modules = web,queue_job
 
   (...)
   [queue_job]
