@@ -26,7 +26,7 @@ class QueueJob(models.Model):
 
     _order = 'date_created DESC, date_done DESC'
 
-    _removal_interval = 5  # days
+    _removal_interval = 30  # days
 
     uuid = fields.Char(string='UUID',
                        readonly=True,
@@ -209,19 +209,11 @@ class QueueJob(models.Model):
 
         Called from a cron.
         """
-        # POOR PERFORMANCES ON LARGE DATASETS
-        # deadline = datetime.now() - timedelta(days=self._removal_interval)
-        # jobs = self.search(
-        #     [('date_done', '<=', fields.Datetime.to_string(deadline))],
-        # )
-        # jobs.unlink()
-        clean_query = """ delete from queue_job where state = 'done'
-            and date_done <
-            (now() at time zone 'utc') -
-            (interval ' days') """ % self._removal_interval
-
-        self.env.cr.execute(clean_query)
-
+        deadline = datetime.now() - timedelta(days=self._removal_interval)
+        jobs = self.search(
+            [('date_done', '<=', fields.Datetime.to_string(deadline))],
+        )
+        jobs.unlink()
         return True
 
 
