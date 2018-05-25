@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # copyright 2016 Camptocamp
 # license agpl-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
