@@ -17,8 +17,8 @@ from ..fields import JobSerialized
 _logger = logging.getLogger(__name__)
 
 
-def channel_func_name(method):
-    return '<%s>.%s' % (method.__self__._name, method.__name__)
+def channel_func_name(model, method):
+    return '<%s>.%s' % (model._name, method.__name__)
 
 
 class QueueJob(models.Model):
@@ -102,7 +102,7 @@ class QueueJob(models.Model):
         for record in self:
             model = self.env[record.model_name]
             method = getattr(model, record.method_name)
-            channel_method_name = channel_func_name(method)
+            channel_method_name = channel_func_name(model, method)
             func_model = self.env['queue.job.function']
             function = func_model.search([('name', '=', channel_method_name)])
             record.channel_method_name = channel_method_name
@@ -352,8 +352,8 @@ class JobFunction(models.Model):
         return channel
 
     @api.model
-    def _register_job(self, job_method):
-        func_name = channel_func_name(job_method)
+    def _register_job(self, model, job_method):
+        func_name = channel_func_name(model, job_method)
         if not self.search_count([('name', '=', func_name)]):
             channel = self._find_or_create_channel(job_method.default_channel)
             self.create({'name': func_name, 'channel_id': channel.id})
