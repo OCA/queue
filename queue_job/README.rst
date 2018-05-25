@@ -95,7 +95,7 @@ Configuration
 
 * Confirm the runner is starting correctly by checking the odoo log file:
 
-.. code-block:: none
+.. code-block::
 
   ...INFO...queue_job.jobrunner.runner: starting
   ...INFO...queue_job.jobrunner.runner: initializing database connections
