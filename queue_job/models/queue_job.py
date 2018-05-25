@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2013-2016 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
@@ -53,18 +52,17 @@ class QueueJob(models.Model):
                               readonly=True, store=True)
 
     state = fields.Selection(STATES,
-                             string='State',
                              readonly=True,
                              required=True,
                              index=True)
     priority = fields.Integer()
     exc_info = fields.Text(string='Exception Info', readonly=True)
-    result = fields.Text(string='Result', readonly=True)
+    result = fields.Text(readonly=True)
 
     date_created = fields.Datetime(string='Created Date', readonly=True)
     date_started = fields.Datetime(string='Start Date', readonly=True)
     date_enqueued = fields.Datetime(string='Enqueue Time', readonly=True)
-    date_done = fields.Datetime(string='Date Done', readonly=True)
+    date_done = fields.Datetime(readonly=True)
 
     eta = fields.Datetime(string='Execute only after')
     retry = fields.Integer(string='Current try')
@@ -252,7 +250,6 @@ class JobChannel(models.Model):
 
     name = fields.Char()
     complete_name = fields.Char(compute='_compute_complete_name',
-                                string='Complete Name',
                                 store=True,
                                 readonly=True)
     parent_id = fields.Many2one(comodel_name='queue.job.channel',

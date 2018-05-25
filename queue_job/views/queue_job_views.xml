@@ -81,9 +81,9 @@
         <field name="name">queue.job.tree</field>
         <field name="model">queue.job</field>
         <field name="arch" type="xml">
-            <tree string="Jobs" create="false"
-                    delete="false"
-                    colors="red:state == 'failed';gray:state == 'done'">
+            <tree create="false" delete="false"
+                  decoration-danger="state == 'failed'"
+                  decoration-muted="state == 'done'">
                 <field name="name"/>
                 <field name="model_name"/>
                 <field name="state"/>
@@ -189,7 +189,7 @@
         <field name="name">queue.job.channel.tree</field>
         <field name="model">queue.job.channel</field>
         <field name="arch" type="xml">
-            <tree string="Channels">
+            <tree>
                 <field name="complete_name"/>
             </tree>
         </field>
@@ -233,7 +233,7 @@
         <field name="name">queue.job.function.tree</field>
         <field name="model">queue.job.function</field>
         <field name="arch" type="xml">
-            <tree string="Job Functions" create="false" delete="false">
+            <tree create="false" delete="false">
                 <field name="name"/>
                 <field name="channel_id"/>
             </tree>
