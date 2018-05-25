@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # copyright 2016 Camptocamp
 # license agpl-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
@@ -6,6 +5,9 @@ from datetime import datetime, date
 import json
 
 from odoo.tests import common
+
+# pylint: disable=odoo-addons-relative-import
+# we are testing, we want to test as we were an external consumer of the API
 from odoo.addons.queue_job.fields import JobEncoder, JobDecoder
 
 
