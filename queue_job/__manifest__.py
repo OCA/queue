@@ -2,7 +2,7 @@
 
 
 {'name': 'Job Queue',
- 'version': '11.0.1.0.1',
+ 'version': '11.0.1.1.0',
  'author': 'Camptocamp,ACSONE SA/NV,Odoo Community Association (OCA)',
  'website': 'https://github.com/OCA/queue/queue_job',
  'license': 'AGPL-3',
