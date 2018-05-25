@@ -19,4 +19,6 @@
           'data/queue_data.xml',
           ],
  'installable': True,
+ 'development_status': 'Mature',
+ 'maintainers': ['guewen'],
  }
