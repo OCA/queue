@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015-2016 ACSONE SA/NV (<http://acsone.eu>)
 # Copyright 2015-2016 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
@@ -231,6 +230,10 @@ class Database(object):
             self._initialize()
 
     def close(self):
+        # pylint: disable=except-pass
+        # if close fail for any reason, it's either because it's already closed
+        # and we don't care, or for any reason but anyway it will be closed on
+        # del
         try:
             self.conn.close()
         except:
@@ -277,6 +280,10 @@ class Database(object):
             cr.execute("LISTEN queue_job")
 
     def select_jobs(self, where, args):
+        # pylint: disable=sql-injection
+        # the checker thinks we are injecting values but we are not, we are
+        # adding the where conditions, values are added later properly with
+        # parameters
         query = ("SELECT channel, uuid, id as seq, date_created, "
                  "priority, EXTRACT(EPOCH FROM eta), state "
                  "FROM queue_job WHERE %s" %
