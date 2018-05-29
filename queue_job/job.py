@@ -552,7 +552,8 @@ def _is_model_method(func):
             isinstance(func.__self__.__class__, odoo.models.MetaModel))
 
 
-def job(func=None, default_channel='root', retry_pattern=None):
+def job(func=None, default_channel='root', retry_pattern=None,
+        on_enqueue=None, on_start=None, on_done=None, on_failure=None):
     """ Decorator for jobs.
 
     Optional argument:
@@ -567,6 +568,14 @@ def job(func=None, default_channel='root', retry_pattern=None):
                           is provided, jobs will be retried after
                           :const:`RETRY_INTERVAL` seconds.
     :type retry_pattern: dict(retry_count,retry_eta_seconds)
+    :param on_enqueue: name of the method on ``queue.job`` to call on enqueue
+    :type on_enqueue: str
+    :param on_start: name of the method on ``queue.job`` to call on start
+    :type on_start: str
+    :param on_done: name of the method on ``queue.job`` to call on done
+    :type on_done: str
+    :param on_failure: name of the method on ``queue.job`` to call on failure
+    :type on_failure: str
 
     Indicates that a method of a Model can be delayed in the Job Queue.
 
@@ -628,6 +637,55 @@ def job(func=None, default_channel='root', retry_pattern=None):
 
         env['a.model'].with_delay().retryable_example()
 
+    It can be user-friendly to pop a notification to the user when an
+    action will be done in background and/or when it's done.
+
+    The following events are triggered:
+
+    * A new job is enqueued
+    * Job started
+    * Job finished
+    * Job failed
+
+    You can also send a simple notification with :func:`notify`` or
+    :func:`notify_warn`:
+
+    .. code-block:: python
+
+            from odoo.addons.queue_job.job import job, notify
+
+            @api.multi
+            @job(on_done=notify(message='Partner exported'))
+            def export_partner(self):
+                # ...
+
+    For more advanced messages, you can also create methods on the
+    ``queue.job`` model and refer to them with a string. From these
+    hook methods, you can call ``QueueJob.notify()`` or
+    ``QueueJob.notify_warn()``.
+
+    Example usage:
+
+    .. code-block:: python
+
+        class QueueJob(models.Model):
+            _inherit = 'queue.job'
+
+            @api.multi
+            def on_export_partner_done(self):
+                self.ensure_one()
+                model = self.model_name
+                partner = self.env[model].browse(self.record_ids)
+                message = _('Partner %s exported') % partner.name
+                self.notify(message=message)
+
+        class ResPartner(models.Model):
+            _inherit = 'res.partner'
+
+            @api.multi
+            @job(on_done='on_export_partner_done')
+            def export_partner(self):
+                # ...
 
     See also: :py:func:`related_action` a related action can be attached
     to a job
@@ -655,6 +713,10 @@ def job(func=None, default_channel='root', retry_pattern=None):
     func.delay = delay_func
     func.retry_pattern = retry_pattern
     func.default_channel = default_channel
+    func.on_enqueue = on_enqueue
+    func.on_start = on_start
+    func.on_done = on_done
+    func.on_failure = on_failure
     return func
 
 
