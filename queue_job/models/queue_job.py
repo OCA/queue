@@ -32,6 +32,8 @@ class QueueJob(models.Model):
 
     _removal_interval = 30  # days
 
+    _notify_default_title = _('Background processing')
+
     uuid = fields.Char(string='UUID',
                        readonly=True,
                        index=True,
@@ -219,42 +221,31 @@ class QueueJob(models.Model):
         jobs.unlink()
         return True
 
-    QUEUE_JOB_NOTIFY_TITLE = _('Background processing')
-
-    # TODO: factorize
-    # TODO: accept message as function taking job as arg
-    # TODO: group similar notifications in one notif?
-    def notify_job_created(self, message=None):
-        self.ensure_one()
+    # TODO: group similar notifications in one notif? -> if yes, do be done in JS
+    @api.multi
+    def notify(self, title=None, message=None, sticky=False, **kwargs):
         payload = {
-            'title': self.QUEUE_JOB_NOTIFY_TITLE,
-            'message': message or _('<b>%s</b> is created.') % (self.name,),
-            'sticky': False,
+            'title': self._notify_default_title,
+            'message': message,
+            'sticky': sticky,
+            **kwargs,
         }
         job_user_id = self.user_id.id
-        channel = 'notify_queue_job_created_%s' % (job_user_id,)
+        # TODO use web_notify
+        channel = 'notify_queue_job_notify_%s' % (job_user_id,)
         self.env['bus.bus'].sendone(channel, payload)
 
-    def notify_job_done(self, message=None):
-        self.ensure_one()
+    @api.multi
+    def notify_warn(self, title=None, message=None, sticky=False, **kwargs):
         payload = {
-            'title': self.QUEUE_JOB_NOTIFY_TITLE,
-            'message': message or _('<b>%s</b> is done.') % (self.name,),
-            'sticky': False,
+            'title': self._notify_default_title,
+            'message': message,
+            'sticky': sticky,
+            **kwargs,
         }
         job_user_id = self.user_id.id
-        channel = 'notify_queue_job_done_%s' % (job_user_id,)
-        self.env['bus.bus'].sendone(channel, payload)
-
-    def notify_job_failed(self, message=None):
-        self.ensure_one()
-        payload = {
-            'title': self.QUEUE_JOB_NOTIFY_TITLE,
-            'message': message or _('<b>%s</b> is failed.') % (self.name,),
-            'sticky': False,
-        }
-        job_user_id = self.user_id.id
-        channel = 'notify_queue_job_failed_%s' % (job_user_id,)
+        # TODO use web_notify
+        channel = 'notify_queue_job_warn_%s' % (job_user_id,)
         self.env['bus.bus'].sendone(channel, payload)
 
 
