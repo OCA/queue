@@ -255,7 +255,7 @@ class Job(object):
             new_job.kwargs,
             new_job.uuid
         )
-        self.trigger_state_change(CREATED)
+        new_job.trigger_event_change(CREATED)
         return new_job
 
     @staticmethod
@@ -435,14 +435,16 @@ class Job(object):
             sudo_job_model = self.env[self.job_model_name].sudo()
             self._db_record = sudo_job_model.create(vals)
 
-    def trigger_state_change(self, state):
+    def trigger_event_change(self, event):
         events = {
             CREATED: self.func.on_create,
             STARTED: self.func.on_start,
             DONE: self.func.on_done,
             FAILED: self.func.on_failure,
         }
-        action = events[state]
+        action = events[event]
+        if not action:
+            return
         if isinstance(action, str):
             try:
                 getattr(self.db_record(), action)()
@@ -450,8 +452,13 @@ class Job(object):
                 _logger.error(
                     '%s could not be called when the job became "%s"'
                     ' because this method does not exist on queue.job',
-                    action, state
+                    action, event
                 )
+        else:
+            if isinstance(action, NotifyWarnMessage):
+                self.db_record().notify_warn(**action)
+            else:
+                self.db_record().notify(**action)
 
     def db_record(self):
         if not self._db_record:
@@ -514,7 +521,7 @@ class Job(object):
     def set_started(self):
         self.state = STARTED
         self.date_started = datetime.now()
-        self.trigger_state_change(STARTED)
+        self.trigger_event_change(STARTED)
 
     def set_done(self, result=None):
         self.state = DONE
@@ -522,13 +529,13 @@ class Job(object):
         self.date_done = datetime.now()
         if result is not None:
             self.result = result
-        self.trigger_state_change(DONE)
+        self.trigger_event_change(DONE)
 
     def set_failed(self, exc_info=None):
         self.state = FAILED
         if exc_info is not None:
             self.exc_info = exc_info
-        self.trigger_state_change(FAILED)
+        self.trigger_event_change(FAILED)
 
     def __repr__(self):
         return '<Job %s, priority:%d>' % (self.uuid, self.priority)
@@ -816,3 +823,40 @@ def related_action(action=None, **kwargs):
         func.kwargs = kwargs
         return func
     return decorate
+
+
+class NotifyMessage(dict):
+    """Used as a normal dict
+
+    Used to differentiate normal notifications and warn notifications
+    """
+
+
+class NotifyWarnMessage(dict):
+    """Used as a normal dict
+
+    Used to differentiate normal notifications and warn notifications
+    """
+
+
+def _prepare_notify_content(message, title=None, sticky=None, **kwargs):
+    message = {'message': message}
+    if title is not None:
+        message['title'] = title
+    if sticky is not None:
+        message['sticky'] = sticky
+    if kwargs:
+        message.update(**kwargs)
+    return message
+
+
+def notify(message, title=None, sticky=None, **kwargs):
+    return NotifyMessage(**_prepare_notify_content(
+        message, title=title, sticky=sticky, **kwargs
+    ))
+
+
+def notify_warn(message, title=None, sticky=None, **kwargs):
+    return NotifyWarnMessage(**_prepare_notify_content(
+        message, title=title, sticky=sticky, **kwargs
+    ))
