@@ -1,7 +1,7 @@
 # Copyright 2016 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.addons.queue_job.job import job, related_action
 from odoo.addons.queue_job.exception import RetryableJobError
 
@@ -28,6 +28,14 @@ class QueueJob(models.Model):
             'url': kwargs['url'].format(subject=subject),
         }
 
+    @api.multi
+    def on_test_queue_job_testing_method_done(self):
+        self.ensure_one()
+        message = _('Job %s executed with args %s and kwargs %s') % (
+            self.uuid, self.args, self.kwargs
+        )
+        self.notify(message=message)
+
 
 class TestQueueJob(models.Model):
 
@@ -36,7 +44,7 @@ class TestQueueJob(models.Model):
 
     name = fields.Char()
 
-    @job
+    @job(on_done='on_test_queue_job_testing_method_done')
     @related_action(action='testing_related_method')
     @api.multi
     def testing_method(self, *args, **kwargs):

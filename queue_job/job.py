@@ -14,6 +14,7 @@ from .exception import (NoSuchJobError,
                         FailedJobError,
                         RetryableJobError)
 
+CREATED = 'created'  # not a real state, used only for the on_* events
 PENDING = 'pending'
 ENQUEUED = 'enqueued'
 DONE = 'done'
@@ -254,7 +255,7 @@ class Job(object):
             new_job.kwargs,
             new_job.uuid
         )
-        new_job.db_record().notify_job_created()
+        self.trigger_state_change(CREATED)
         return new_job
 
     @staticmethod
@@ -304,6 +305,7 @@ class Job(object):
             raise TypeError("Job accepts only methods of Models")
 
         self._db_record = None
+        self._func = None
 
         recordset = func.__self__
         env = recordset.env
@@ -433,6 +435,24 @@ class Job(object):
             sudo_job_model = self.env[self.job_model_name].sudo()
             self._db_record = sudo_job_model.create(vals)
 
+    def trigger_state_change(self, state):
+        events = {
+            CREATED: self.func.on_create,
+            STARTED: self.func.on_start,
+            DONE: self.func.on_done,
+            FAILED: self.func.on_failure,
+        }
+        action = events[state]
+        if isinstance(action, str):
+            try:
+                getattr(self.db_record(), action)()
+            except AttributeError:
+                _logger.error(
+                    '%s could not be called when the job became "%s"'
+                    ' because this method does not exist on queue.job',
+                    action, state
+                )
+
     def db_record(self):
         if not self._db_record:
             self._db_record = self.db_record_from_uuid(self.env, self.uuid)
@@ -440,9 +460,11 @@ class Job(object):
 
     @property
     def func(self):
-        recordset = self.recordset.with_context(job_uuid=self.uuid)
-        recordset = recordset.sudo(self.user_id)
-        return getattr(recordset, self.method_name)
+        if not self._func:
+            recordset = self.recordset.with_context(job_uuid=self.uuid)
+            recordset = recordset.sudo(self.user_id)
+            self._func = getattr(recordset, self.method_name)
+        return self._func
 
     @property
     def description(self):
@@ -492,6 +514,7 @@ class Job(object):
     def set_started(self):
         self.state = STARTED
         self.date_started = datetime.now()
+        self.trigger_state_change(STARTED)
 
     def set_done(self, result=None):
         self.state = DONE
@@ -499,13 +522,13 @@ class Job(object):
         self.date_done = datetime.now()
         if result is not None:
             self.result = result
-        self.db_record().notify_job_done()
+        self.trigger_state_change(DONE)
 
     def set_failed(self, exc_info=None):
         self.state = FAILED
         if exc_info is not None:
             self.exc_info = exc_info
-        self.db_record().notify_job_failed()
+        self.trigger_state_change(FAILED)
 
     def __repr__(self):
         return '<Job %s, priority:%d>' % (self.uuid, self.priority)
@@ -553,7 +576,7 @@ def _is_model_method(func):
 
 
 def job(func=None, default_channel='root', retry_pattern=None,
-        on_enqueue=None, on_start=None, on_done=None, on_failure=None):
+        on_create=None, on_start=None, on_done=None, on_failure=None):
     """ Decorator for jobs.
 
     Optional argument:
@@ -568,8 +591,8 @@ def job(func=None, default_channel='root', retry_pattern=None,
                           is provided, jobs will be retried after
                           :const:`RETRY_INTERVAL` seconds.
     :type retry_pattern: dict(retry_count,retry_eta_seconds)
-    :param on_enqueue: name of the method on ``queue.job`` to call on enqueue
-    :type on_enqueue: str
+    :param on_create: name of the method on ``queue.job`` to call on creation
+    :type on_create: str
     :param on_start: name of the method on ``queue.job`` to call on start
     :type on_start: str
     :param on_done: name of the method on ``queue.job`` to call on done
@@ -692,8 +715,12 @@ def job(func=None, default_channel='root', retry_pattern=None,
 
     """
     if func is None:
-        return functools.partial(job, default_channel=default_channel,
-                                 retry_pattern=retry_pattern)
+        return functools.partial(
+            job, default_channel=default_channel,
+            retry_pattern=retry_pattern,
+            on_create=on_create, on_start=on_start, on_done=on_done,
+            on_failure=on_failure
+        )
 
     def delay_from_model(*args, **kwargs):
         raise AttributeError(
@@ -713,7 +740,7 @@ def job(func=None, default_channel='root', retry_pattern=None,
     func.delay = delay_func
     func.retry_pattern = retry_pattern
     func.default_channel = default_channel
-    func.on_enqueue = on_enqueue
+    func.on_create = on_create
     func.on_start = on_start
     func.on_done = on_done
     func.on_failure = on_failure
