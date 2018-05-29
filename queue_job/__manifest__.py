@@ -8,7 +8,8 @@
  'license': 'AGPL-3',
  'category': 'Generic Modules',
  'depends': ['mail',
-             'base_sparse_field'
+             'bus',
+             'base_sparse_field',
              ],
  'external_dependencies': {'python': ['requests'
                                       ],
@@ -16,6 +17,7 @@
  'data': ['security/security.xml',
           'security/ir.model.access.csv',
           'views/queue_job_views.xml',
+          'views/queue_job.xml',
           'data/queue_data.xml',
           ],
  'installable': True,

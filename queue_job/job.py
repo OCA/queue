@@ -254,6 +254,7 @@ class Job(object):
             new_job.kwargs,
             new_job.uuid
         )
+        new_job.db_record().notify_job_created()
         return new_job
 
     @staticmethod
@@ -301,6 +302,8 @@ class Job(object):
 
         if not _is_model_method(func):
             raise TypeError("Job accepts only methods of Models")
+
+        self._db_record = None
 
         recordset = func.__self__
         env = recordset.env
@@ -427,10 +430,13 @@ class Job(object):
             if self.channel:
                 vals.update({'channel': self.channel})
 
-            self.env[self.job_model_name].sudo().create(vals)
+            sudo_job_model = self.env[self.job_model_name].sudo()
+            self._db_record = sudo_job_model.create(vals)
 
     def db_record(self):
-        return self.db_record_from_uuid(self.env, self.uuid)
+        if not self._db_record:
+            self._db_record = self.db_record_from_uuid(self.env, self.uuid)
+        return self._db_record
 
     @property
     def func(self):
@@ -493,11 +499,13 @@ class Job(object):
         self.date_done = datetime.now()
         if result is not None:
             self.result = result
+        self.db_record().notify_job_done()
 
     def set_failed(self, exc_info=None):
         self.state = FAILED
         if exc_info is not None:
             self.exc_info = exc_info
+        self.db_record().notify_job_failed()
 
     def __repr__(self):
         return '<Job %s, priority:%d>' % (self.uuid, self.priority)
