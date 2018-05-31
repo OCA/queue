@@ -73,6 +73,8 @@ Features:
 * Related Actions: link an action on the job view, such as open the record
   concerned by the job
 
+**Table of contents**
+
 .. contents::
    :local:
 
