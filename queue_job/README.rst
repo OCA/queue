@@ -105,12 +105,12 @@ Configuration
 
   [options]
   (...)
-  workers = 4
-  server_wide_modules = web,web_kanban,queue_job
+  workers = 6
+  server_wide_modules = web,queue_job
 
   (...)
   [queue_job]
-  channels = root:4
+  channels = root:2
 
 * Confirm the runner is starting correctly by checking the odoo log file:
 
