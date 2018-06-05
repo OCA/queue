@@ -187,7 +187,7 @@ Changelog
 * [FIX] Correct automatic registration of channels and job functions
   (`#69 <https://github.com/OCA/queue/pull/69>`_)
 * [FIX] Correct compatibility with ``@property`` methods
-  (`#50 <https://github.com/OCA/queue/pull/50>`_) and (`#69 <https://github.com/OCA/queue/pull/69>`_)
+  (`#50 <https://github.com/OCA/queue/pull/50>`_) and (`#69 <https://github.com/OCA/queue/pull/69>`__)
 
 Bug Tracker
 ===========
