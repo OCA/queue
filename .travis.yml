@@ -16,6 +16,7 @@ addons:
       - python-simplejson
       - python-serial
       - python-yaml
+      - nsca-client
 
 env:
   global:
