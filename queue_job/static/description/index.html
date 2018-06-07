@@ -414,29 +414,30 @@ concerned by the job</li>
 <p><strong>Table of contents</strong></p>
 <div class="contents local topic" id="contents">
 <ul class="simple">
-<li><a class="reference internal" href="#installation" id="id10">Installation</a></li>
-<li><a class="reference internal" href="#configuration" id="id11">Configuration</a></li>
-<li><a class="reference internal" href="#usage" id="id12">Usage</a></li>
-<li><a class="reference internal" href="#known-issues-roadmap" id="id13">Known issues / Roadmap</a></li>
-<li><a class="reference internal" href="#changelog" id="id14">Changelog</a><ul>
-<li><a class="reference internal" href="#id3" id="id15">11.0.1.1.0 (2018-05-25)</a></li>
+<li><a class="reference internal" href="#installation" id="id11">Installation</a></li>
+<li><a class="reference internal" href="#configuration" id="id12">Configuration</a></li>
+<li><a class="reference internal" href="#usage" id="id13">Usage</a></li>
+<li><a class="reference internal" href="#known-issues-roadmap" id="id14">Known issues / Roadmap</a></li>
+<li><a class="reference internal" href="#changelog" id="id15">Changelog</a><ul>
+<li><a class="reference internal" href="#next" id="id16">Next</a></li>
+<li><a class="reference internal" href="#id4" id="id17">11.0.1.1.0 (2018-05-25)</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#bug-tracker" id="id16">Bug Tracker</a></li>
-<li><a class="reference internal" href="#credits" id="id17">Credits</a><ul>
-<li><a class="reference internal" href="#authors" id="id18">Authors</a></li>
-<li><a class="reference internal" href="#contributors" id="id19">Contributors</a></li>
-<li><a class="reference internal" href="#maintainers" id="id20">Maintainers</a></li>
+<li><a class="reference internal" href="#bug-tracker" id="id18">Bug Tracker</a></li>
+<li><a class="reference internal" href="#credits" id="id19">Credits</a><ul>
+<li><a class="reference internal" href="#authors" id="id20">Authors</a></li>
+<li><a class="reference internal" href="#contributors" id="id21">Contributors</a></li>
+<li><a class="reference internal" href="#maintainers" id="id22">Maintainers</a></li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="section" id="installation">
-<h1><a class="toc-backref" href="#id10">Installation</a></h1>
+<h1><a class="toc-backref" href="#id11">Installation</a></h1>
 <p>Be sure to have the <tt class="docutils literal">requests</tt> library.</p>
 </div>
 <div class="section" id="configuration">
-<h1><a class="toc-backref" href="#id11">Configuration</a></h1>
+<h1><a class="toc-backref" href="#id12">Configuration</a></h1>
 <ul class="simple">
 <li>Using environment variables and command line:<ul>
 <li>Adjust environment variables (optional):<ul>
@@ -485,14 +486,14 @@ of running Odoo is obviously not for production purposes.</td></tr>
 </table>
 </div>
 <div class="section" id="usage">
-<h1><a class="toc-backref" href="#id12">Usage</a></h1>
+<h1><a class="toc-backref" href="#id13">Usage</a></h1>
 <p>To use this module, you need to:</p>
 <ol class="arabic simple">
 <li>Go to <tt class="docutils literal">Job Queue</tt> menu</li>
 </ol>
 </div>
 <div class="section" id="known-issues-roadmap">
-<h1><a class="toc-backref" href="#id13">Known issues / Roadmap</a></h1>
+<h1><a class="toc-backref" href="#id14">Known issues / Roadmap</a></h1>
 <ul class="simple">
 <li>After creating a new database or installing <tt class="docutils literal">queue_job</tt> on an
 existing database, Odoo must be restarted for the runner to detect it.</li>
@@ -513,7 +514,7 @@ or by running the following SQL statement <em>before starting Odoo</em>:</li>
 </pre>
 </div>
 <div class="section" id="changelog">
-<h1><a class="toc-backref" href="#id14">Changelog</a></h1>
+<h1><a class="toc-backref" href="#id15">Changelog</a></h1>
 <!-- [ The change log. The goal of this file is to help readers
 understand changes between version. The primary audience is
 end users and integrators. Purely technical changes such as
@@ -523,8 +524,16 @@ This file may contain ONE level of section titles, underlined
 with the ~ (tilde) character. Other section markers are
 forbidden and will likely break the structure of the README.rst
 or other documents where this fragment is included. ] -->
-<div class="section" id="id3">
-<h2><a class="toc-backref" href="#id15">11.0.1.1.0 (2018-05-25)</a></h2>
+<div class="section" id="next">
+<h2><a class="toc-backref" href="#id16">Next</a></h2>
+<ul class="simple">
+<li>[ADD] Default “related action” for jobs, opening a form or list view (when
+the job is linked to respectively one record on several).
+(<a class="reference external" href="https://github.com/OCA/queue/pull/46">#46</a>)</li>
+</ul>
+</div>
+<div class="section" id="id4">
+<h2><a class="toc-backref" href="#id17">11.0.1.1.0 (2018-05-25)</a></h2>
 <ul class="simple">
 <li>[ADD] New neat OCA readme file format
 (<a class="reference external" href="https://github.com/OCA/queue/pull/71">#71</a>)</li>
@@ -543,23 +552,23 @@ new session per job
 </div>
 </div>
 <div class="section" id="bug-tracker">
-<h1><a class="toc-backref" href="#id16">Bug Tracker</a></h1>
+<h1><a class="toc-backref" href="#id18">Bug Tracker</a></h1>
 <p>Bugs are tracked on <a class="reference external" href="https://github.com/OCA/queue/issues">GitHub Issues</a>.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us smashing it by providing a detailed and welcomed feedback.</p>
 <p>Do not contact contributors directly about support or help with technical issues.</p>
 </div>
 <div class="section" id="credits">
-<h1><a class="toc-backref" href="#id17">Credits</a></h1>
+<h1><a class="toc-backref" href="#id19">Credits</a></h1>
 <div class="section" id="authors">
-<h2><a class="toc-backref" href="#id18">Authors</a></h2>
+<h2><a class="toc-backref" href="#id20">Authors</a></h2>
 <ul class="simple">
 <li>Camptocamp</li>
 <li>ACSONE SA/NV</li>
 </ul>
 </div>
 <div class="section" id="contributors">
-<h2><a class="toc-backref" href="#id19">Contributors</a></h2>
+<h2><a class="toc-backref" href="#id21">Contributors</a></h2>
 <ul class="simple">
 <li>Guewen Baconnier &lt;<a class="reference external" href="mailto:guewen.baconnier&#64;camptocamp.com">guewen.baconnier&#64;camptocamp.com</a>&gt;</li>
 <li>Stéphane Bidoul &lt;<a class="reference external" href="mailto:stephane.bidoul&#64;acsone.eu">stephane.bidoul&#64;acsone.eu</a>&gt;</li>
@@ -571,7 +580,7 @@ If you spotted it first, help us smashing it by providing a detailed and welcome
 </ul>
 </div>
 <div class="section" id="maintainers">
-<h2><a class="toc-backref" href="#id20">Maintainers</a></h2>
+<h2><a class="toc-backref" href="#id22">Maintainers</a></h2>
 <p>This module is maintained by the OCA.</p>
 <a class="reference external image-reference" href="https://odoo-community.org"><img alt="Odoo Community Association" src="https://odoo-community.org/logo.png" /></a>
 <p>OCA, or the Odoo Community Association, is a nonprofit organization whose
