@@ -150,7 +150,22 @@
                 </group>
                 <footer>
                     <button name="requeue" string="Requeue" type="object" class="oe_highlight"/>
-                    or
+                    <button string="Cancel" class="oe_link" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_set_jobs_done" model="ir.ui.view">
+        <field name="name">Requeue Jobs</field>
+        <field name="model">queue.jobs.to.done</field>
+        <field name="arch" type="xml">
+            <form string="Set jobs done">
+                <group string="The selected jobs will be set to done.">
+                    <field name="job_ids" nolabel="1"/>
+                </group>
+                <footer>
+                    <button name="set_done" string="Set to done" type="object" class="oe_highlight"/>
                     <button string="Cancel" class="oe_link" special="cancel"/>
                 </footer>
             </form>
@@ -171,6 +186,24 @@
         <field name="name">Requeue Jobs</field>
         <field name="key2">client_action_multi</field>
         <field name="value" eval="'ir.actions.act_window,' + str(ref('action_requeue_job'))"/>
+        <field name="key">action</field>
+        <field name="model">queue.job</field>
+    </record>
+
+    <record id="action_set_jobs_done" model="ir.actions.act_window">
+        <field name="name">Set jobs to done</field>
+        <field name="res_model">queue.jobs.to.done</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_set_jobs_done"/>
+        <field name="target">new</field>
+    </record>
+
+    <record id="action_set_jobs_done_values" model="ir.values">
+        <field name="model_id" ref="model_queue_job" />
+        <field name="name">Set jobs to done</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value" eval="'ir.actions.act_window,' + str(ref('action_set_jobs_done'))"/>
         <field name="key">action</field>
         <field name="model">queue.job</field>
     </record>
