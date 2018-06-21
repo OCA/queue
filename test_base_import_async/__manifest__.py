@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ###############################################################################
 #
 #   Module for OpenERP
@@ -21,11 +20,12 @@
 ###############################################################################
 {
     'name': 'Test suite for base_import_async',
-    'version': '10.0.1.0.0',
+    'version': '11.0.1.0.0',
     'author': 'ACSONE SA/NV, Odoo Community Association (OCA)',
     'license': 'AGPL-3',
+    'website': 'https://github.com/OCA/queue',
     'category': 'Generic Modules',
-    'description': """Test suite for base_import_async.
+    'summary': """Test suite for base_import_async.
 
     Normally you don't need to install this.
     """,

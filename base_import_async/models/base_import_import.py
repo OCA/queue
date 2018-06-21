@@ -1,33 +1,15 @@
-# -*- coding: utf-8 -*-
-###############################################################################
-#
-#   Module for Odoo
-#   Copyright (C) 2014 ACSONE SA/NV (http://acsone.eu).
-#   Copyright (C) 2013 Akretion (http://www.akretion.com).
-#   @author Stéphane Bidoul <stephane.bidoul@acsone.eu>
-#   @author Sébastien BEAU <sebastien.beau@akretion.com>
-#
-#   This program is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU Affero General Public License as
-#   published by the Free Software Foundation, either version 3 of the
-#   License, or (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU Affero General Public License for more details.
-#
-#   You should have received a copy of the GNU Affero General Public License
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-###############################################################################
+# Copyright (C) 2014 ACSONE SA/NV (http://acsone.eu).
+# Copyright (C) 2013 Akretion (http://www.akretion.com).
+# @author Stéphane Bidoul <stephane.bidoul@acsone.eu>
+# @author Sébastien BEAU <sebastien.beau@akretion.com>
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 import csv
-import os
-from cStringIO import StringIO
+from os.path import splitext
+from base64 import encodebytes, decodebytes
+from io import StringIO
 
-from odoo import api, _
-from odoo.models import TransientModel
+from odoo import api, models, _
 from odoo.models import fix_import_export_id_paths
 
 from odoo.addons.queue_job.job import job, related_action
@@ -48,15 +30,7 @@ INIT_PRIORITY = 100
 DEFAULT_CHUNK_SIZE = 100
 
 
-def _encode(row, encoding):
-    return [cell.encode(encoding) for cell in row]
-
-
-def _decode(row, encoding):
-    return [cell.decode(encoding) for cell in row]
-
-
-class BaseImportImport(TransientModel):
+class BaseImportImport(models.TransientModel):
     _inherit = 'base_import.import'
 
     @api.multi
@@ -74,7 +48,7 @@ class BaseImportImport(TransientModel):
         except ValueError as e:
             return [{
                 'type': 'error',
-                'message': unicode(e),
+                'message': str(e),
                 'record': False,
             }]
 
@@ -117,13 +91,14 @@ class BaseImportImport(TransientModel):
                             delimiter=str(options.get(OPT_SEPARATOR)),
                             quotechar=str(options.get(OPT_QUOTING)))
         encoding = options.get(OPT_ENCODING, 'utf-8')
-        writer.writerow(_encode(fields, encoding))
+        writer.writerow(fields)
         for row in data:
-            writer.writerow(_encode(row, encoding))
+            writer.writerow(row)
         # create attachment
+        datas = encodebytes(f.getvalue().encode(encoding))
         attachment = self.env['ir.attachment'].create({
             'name': file_name,
-            'datas': f.getvalue().encode('base64'),
+            'datas': datas,
             'datas_fname': file_name
         })
         return attachment.id
@@ -131,20 +106,22 @@ class BaseImportImport(TransientModel):
     @api.model
     def _read_csv_attachment(self, att_id, options):
         att = self.env['ir.attachment'].browse(att_id)
-        f = StringIO(att.datas.decode('base64'))
+        decoded_datas = decodebytes(att.datas)
+        encoding = options.get(OPT_ENCODING, 'utf-8')
+        f = StringIO(decoded_datas.decode(encoding))
         reader = csv.reader(f,
                             delimiter=str(options.get(OPT_SEPARATOR)),
                             quotechar=str(options.get(OPT_QUOTING)))
-        encoding = options.get(OPT_ENCODING, 'utf-8')
-        fields = _decode(reader.next(), encoding)
-        data = [_decode(row, encoding) for row in reader]
+
+        fields = next(reader)
+        data = [row for row in reader]
         return fields, data
 
     @api.model
     def _extract_records(self, model_obj, fields, data, chunk_size):
         """ Split the data on record boundaries,
         in chunks of minimum chunk_size """
-        fields = map(fix_import_export_id_paths, fields)
+        fields = list(map(fix_import_export_id_paths, fields))
         row_from = 0
         for rows in model_obj._extract_records(fields,
                                                data):
@@ -180,7 +157,7 @@ class BaseImportImport(TransientModel):
                                          row_from + 1 + header_offset,
                                          row_to + 1 + header_offset)
             # create a CSV attachment and enqueue the job
-            root, ext = os.path.splitext(file_name)
+            root, ext = splitext(file_name)
             att_id = self._create_csv_attachment(
                 fields, data[row_from:row_to + 1], options,
                 file_name=root + '-' + chunk + ext)
