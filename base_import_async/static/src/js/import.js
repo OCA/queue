@@ -3,11 +3,9 @@ odoo.define('base_import_async.import', function (require) {
 
     var core = require('web.core');
     var _t = core._t;
-    require('base_import.import');
+    var DataImport = require('base_import.import').DataImport;
 
-    var DataImport = core.action_registry.get('import');
-
-    DataImport = DataImport.include({
+    DataImport.include({
 
         import_options: function () {
             var options = this._super.apply(this, arguments);
@@ -16,9 +14,11 @@ odoo.define('base_import_async.import', function (require) {
         },
 
         onimported: function () {
-            var self = this;
             if (this.$('input.oe_import_queue').prop('checked')) {
-                this.do_notify(_t("Your request is being processed"), _t("You can check the status of this job in menu 'Queue / Jobs'."));
+                this.do_notify(
+                    _t("Your request is being processed"),
+                    _t("You can check the status of this job in menu 'Queue / Jobs'.")
+                );
             }
             this._super.apply(this, arguments);
         },
