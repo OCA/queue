@@ -26,4 +26,4 @@ Other modules may benefit from this infrastructure in the following way
    (`res_model`, `file`, `file_name`),
 2. invoke the `do` method with appropriate options
    (`header`, `encoding`, `separator`, `quoting`,
-   `use_connector`, `chunk_size`).
+   `use_queue`, `chunk_size`).

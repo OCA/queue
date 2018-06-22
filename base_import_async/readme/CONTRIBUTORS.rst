@@ -10,3 +10,4 @@ Other contributors include:
 * David Béal (Akretion)
 * Jonathan Nemry (ACSONE)
 * Laurent Mignon (ACSONE)
+* Dennis Sluijk (Onestein)
