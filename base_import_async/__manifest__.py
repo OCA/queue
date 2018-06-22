@@ -6,8 +6,7 @@
 
 {
     'name': 'Asynchronous Import',
-    'summary': 'This module extends the standard CSV import '
-               'functionality to import files in the background',
+    'summary': 'Import CSV files in the background',
     'version': '11.0.1.0.0',
     'author': 'Akretion, ACSONE SA/NV, Odoo Community Association (OCA)',
     'license': 'AGPL-3',
