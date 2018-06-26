@@ -5,9 +5,9 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 import csv
+import base64
 from os.path import splitext
-from base64 import encodebytes, decodebytes
-from io import StringIO
+from io import StringIO, TextIOWrapper, BytesIO
 
 from odoo import api, models, _
 from odoo.models import fix_import_export_id_paths
@@ -96,7 +96,7 @@ class BaseImportImport(models.TransientModel):
         for row in data:
             writer.writerow(row)
         # create attachment
-        datas = encodebytes(f.getvalue().encode(encoding))
+        datas = base64.encodebytes(f.getvalue().encode(encoding))
         attachment = self.env['ir.attachment'].create({
             'name': file_name,
             'datas': datas,
@@ -106,9 +106,9 @@ class BaseImportImport(models.TransientModel):
 
     @api.model
     def _read_csv_attachment(self, attachment, options):
-        decoded_datas = decodebytes(attachment.datas)
+        decoded_datas = base64.decodebytes(attachment.datas)
         encoding = options.get(OPT_ENCODING, 'utf-8')
-        f = StringIO(decoded_datas.decode(encoding))
+        f = TextIOWrapper(BytesIO(decoded_datas), encoding=encoding)
         reader = csv.reader(f,
                             delimiter=str(options.get(OPT_SEPARATOR)),
                             quotechar=str(options.get(OPT_QUOTING)))
