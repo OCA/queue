@@ -75,6 +75,14 @@ Known issues / Roadmap
   it is easy to add an option to extend the import screen.
 * Validation cannot be run in the background.
 
+Changelog
+=========
+
+11.0.1.0.0 (2018-06-26)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* [BREAKING] In the `do` method the `use_connector` option has changed to `use_queue`.
+
 Bug Tracker
 ===========
 
