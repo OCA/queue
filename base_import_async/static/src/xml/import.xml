@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-extend="ImportView">
+        <t t-jquery="#oe_import_has_header" t-operation="before">
+            <div title="When checked, the import will be executed as a background job, 
+after splitting your file in small chunks that will be processed independently. 
+Use this to import very large files.">
+                <input type="checkbox" class="oe_import_queue"
+                       id="oe_import_queue"/>
+                <label for="oe_import_queue">Import in the background</label>
+            </div>
+        </t>
+    </t>
+</templates>
