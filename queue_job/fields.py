@@ -22,8 +22,7 @@ class JobSerialized(fields.Field):
         value = value or {}
         if isinstance(value, dict):
             return value
-        else:
-            return json.loads(value, cls=JobDecoder, env=record.env)
+        return json.loads(value, cls=JobDecoder, env=record.env)
 
 
 class JobEncoder(json.JSONEncoder):
