@@ -247,7 +247,7 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
             response.raise_for_status()
         except requests.Timeout:
             set_job_pending()
-        except:
+        except Exception:
             _logger.exception("exception in GET %s", url)
             session.cookies.clear()
             set_job_pending()
@@ -274,7 +274,7 @@ class Database(object):
         # del
         try:
             self.conn.close()
-        except:
+        except Exception:
             pass
         self.conn = None
 
@@ -374,7 +374,7 @@ class QueueJobRunner(object):
                 if remove_jobs:
                     self.channel_manager.remove_db(db_name)
                 db.close()
-            except:
+            except Exception:
                 _logger.warning('error closing database %s',
                                 db_name, exc_info=True)
         self.db_by_name = {}
@@ -473,7 +473,7 @@ class QueueJobRunner(object):
                     self.wait_notification()
             except KeyboardInterrupt:
                 self.stop()
-            except:
+            except Exception:
                 _logger.exception("exception: sleeping %ds and retrying",
                                   ERROR_RECOVERY_DELAY)
                 self.close_databases()
