@@ -3,6 +3,7 @@
 
 import inspect
 import functools
+import hashlib
 import logging
 import uuid
 import sys
@@ -53,13 +54,15 @@ class DelayableRecordset(object):
     """
 
     def __init__(self, recordset, priority=None, eta=None,
-                 max_retries=None, description=None, channel=None):
+                 max_retries=None, description=None, channel=None,
+                 identity_key=None):
         self.recordset = recordset
         self.priority = priority
         self.eta = eta
         self.max_retries = max_retries
         self.description = description
         self.channel = channel
+        self.identity_key = identity_key
 
     def __getattr__(self, name):
         if name in self.recordset:
@@ -83,7 +86,8 @@ class DelayableRecordset(object):
                                max_retries=self.max_retries,
                                eta=self.eta,
                                description=self.description,
-                               channel=self.channel)
+                               channel=self.channel,
+                               identity_key=self.identity_key)
         return delay
 
     def __str__(self):
@@ -93,6 +97,51 @@ class DelayableRecordset(object):
         )
 
     __repr__ = __str__
+
+
+def identity_exact(job_):
+    """Identity function using the model, method and all arguments as key
+
+    When used, this identity key will have the effect that when a job should be
+    created and a pending job with the exact same recordset and arguments, the
+    second will not be created.
+
+    It should be used with the ``identity_key`` argument:
+
+    .. python::
+
+        from odoo.addons.queue_job.job import identity_exact
+
+        # [...]
+            delayable = self.with_delay(identity_key=identity_exact)
+            delayable.export_record(force=True)
+
+    Alternative identity keys can be built using the various fields of the job.
+    For example, you could compute a hash using only some arguments of
+    the job.
+
+    .. python::
+
+        def identity_example(job_):
+            hasher = hashlib.sha1()
+            hasher.update(job_.model_name)
+            hasher.update(job_.method_name)
+            hasher.update(str(sorted(job_.recordset.ids)))
+            hasher.update(str(job_.args[1]))
+            hasher.update(str(job_.kwargs.get('foo', '')))
+            return hasher.hexdigest()
+
+    Usually you will probably always want to include at least the name of the
+    model and method.
+    """
+    hasher = hashlib.sha1()
+    hasher.update(job_.model_name.encode('utf-8'))
+    hasher.update(job_.method_name.encode('utf-8'))
+    hasher.update(str(sorted(job_.recordset.ids)).encode('utf-8'))
+    hasher.update(str(job_.args).encode('utf-8'))
+    hasher.update(str(sorted(job_.kwargs.items())).encode('utf-8'))
+
+    return hasher.hexdigest()
 
 
 class Job(object):
@@ -185,8 +234,14 @@ class Job(object):
 
         The complete name of the channel to use to process the job. If
         provided it overrides the one defined on the job's function.
-    """
 
+    .. attribute::identity_key
+
+        A key referencing the job, multiple job with the same key will not
+        be added to a channel if the existing job with the same key is not yet
+        started or executed.
+
+    """
     @classmethod
     def load(cls, env, job_uuid):
         """Read a job from the Database"""
@@ -194,12 +249,19 @@ class Job(object):
         if not stored:
             raise NoSuchJobError(
                 'Job %s does no longer exist in the storage.' % job_uuid)
+        return cls._load_from_db_record(stored)
+
+    @classmethod
+    def _load_from_db_record(cls, job_db_record):
+        stored = job_db_record
+        env = job_db_record.env
 
         args = stored.args
         kwargs = stored.kwargs
         method_name = stored.method_name
 
         model = env[stored.model_name]
+
         recordset = model.browse(stored.record_ids)
         method = getattr(recordset, method_name)
 
@@ -209,7 +271,8 @@ class Job(object):
 
         job_ = cls(method, args=args, kwargs=kwargs,
                    priority=stored.priority, eta=eta, job_uuid=stored.uuid,
-                   description=stored.name, channel=stored.channel)
+                   description=stored.name, channel=stored.channel,
+                   identity_key=stored.identity_key)
 
         if stored.date_created:
             job_.date_created = stored.date_created
@@ -232,21 +295,45 @@ class Job(object):
         job_.max_retries = stored.max_retries
         if stored.company_id:
             job_.company_id = stored.company_id.id
+        job_.identity_key = stored.identity_key
         return job_
+
+    def job_record_with_same_identity_key(self):
+        """Check if a job to be executed with the same key exists."""
+        existing = self.env['queue.job'].sudo().search(
+            [('identity_key', '=', self.identity_key),
+             ('state', 'in', [PENDING, ENQUEUED])],
+            limit=1
+        )
+        return existing
 
     @classmethod
     def enqueue(cls, func, args=None, kwargs=None,
                 priority=None, eta=None, max_retries=None, description=None,
-                channel=None):
+                channel=None, identity_key=None):
         """Create a Job and enqueue it in the queue. Return the job uuid.
 
         This expects the arguments specific to the job to be already extracted
         from the ones to pass to the job function.
+
+        If the identity key is the same than the one in a pending job,
+        no job is created and the existing job is returned
+
         """
         new_job = cls(func=func, args=args,
                       kwargs=kwargs, priority=priority, eta=eta,
                       max_retries=max_retries, description=description,
-                      channel=channel)
+                      channel=channel, identity_key=identity_key)
+        if new_job.identity_key:
+            existing = new_job.job_record_with_same_identity_key()
+            if existing:
+                _logger.debug(
+                    'a job has not been enqueued due to having '
+                    'the same identity key (%s) than job %s',
+                    new_job.identity_key,
+                    existing.uuid
+                )
+                return Job._load_from_db_record(existing)
         new_job.store()
         _logger.debug(
             "enqueued %s:%s(*%r, **%r) with uuid: %s",
@@ -267,8 +354,8 @@ class Job(object):
     def __init__(self, func,
                  args=None, kwargs=None, priority=None,
                  eta=None, job_uuid=None, max_retries=None,
-                 description=None, channel=None):
-        """Create a Job
+                 description=None, channel=None, identity_key=None):
+        """ Create a Job
 
         :param func: function to execute
         :type func: function
@@ -288,6 +375,9 @@ class Job(object):
         :param description: human description of the job. If None, description
             is computed from the function doc or name
         :param channel: The complete channel name to use to process the job.
+        :param identity_key: A hash to uniquely identify a job, or a function
+                             that returns this hash (the function takes the job
+                             as argument)
         :param env: Odoo Environment
         :type env: :class:`odoo.api.Environment`
         """
@@ -333,6 +423,15 @@ class Job(object):
 
         self.date_created = datetime.now()
         self._description = description
+
+        if isinstance(identity_key, str):
+            self._identity_key = identity_key
+            self._identity_key_func = None
+        else:
+            # we'll compute the key on the fly when called
+            # from the function
+            self._identity_key = None
+            self._identity_key_func = identity_key
 
         self.date_enqueued = None
         self.date_started = None
@@ -396,6 +495,7 @@ class Job(object):
                 'date_started': False,
                 'date_done': False,
                 'eta': False,
+                'identity_key': False,
                 }
 
         if self.date_enqueued:
@@ -406,6 +506,8 @@ class Job(object):
             vals['date_done'] = self.date_done
         if self.eta:
             vals['eta'] = self.eta
+        if self.identity_key:
+            vals['identity_key'] = self.identity_key
 
         db_record = self.db_record()
         if db_record:
@@ -438,6 +540,24 @@ class Job(object):
         recordset = self.recordset.with_context(job_uuid=self.uuid)
         recordset = recordset.sudo(self.user_id)
         return getattr(recordset, self.method_name)
+
+    @property
+    def identity_key(self):
+        if self._identity_key is None:
+            if self._identity_key_func:
+                self._identity_key = self._identity_key_func(self)
+        return self._identity_key
+
+    @identity_key.setter
+    def identity_key(self, value):
+        if isinstance(value, str):
+            self._identity_key = value
+            self._identity_key_func = None
+        else:
+            # we'll compute the key on the fly when called
+            # from the function
+            self._identity_key = None
+            self._identity_key_func = value
 
     @property
     def description(self):
