@@ -88,6 +88,21 @@ class QueueJob(models.Model):
                           store=True,
                           index=True)
 
+    identity_key = fields.Char()
+
+    @api.model_cr
+    def init(self):
+        self._cr.execute(
+            'SELECT indexname FROM pg_indexes WHERE indexname = %s ',
+            ('queue_job_identity_key_state_partial_index',)
+        )
+        if not self._cr.fetchone():
+            self._cr.execute(
+                "CREATE INDEX queue_job_identity_key_state_partial_index "
+                "ON queue_job (identity_key) WHERE state in ('pending', "
+                "'enqueued') AND identity_key IS NOT NULL;"
+            )
+
     @api.multi
     def _inverse_channel(self):
         for record in self:
@@ -185,7 +200,7 @@ class QueueJob(models.Model):
         """Subscribe all users having the 'Queue Job Manager' group"""
         group = self.env.ref('queue_job.group_queue_job_manager')
         if not group:
-            return
+            return None
         companies = self.mapped('company_id')
         domain = [('groups_id', '=', group.id)]
         if companies:
@@ -382,9 +397,8 @@ class JobFunction(models.Model):
             parent_channel = channel
             channel = channel_model.search([
                 ('name', '=', channel_name),
-                ('parent_id', '=', parent_channel.id)],
-                limit=1,
-            )
+                ('parent_id', '=', parent_channel.id),
+            ], limit=1)
             if not channel:
                 channel = channel_model.create({
                     'name': channel_name,

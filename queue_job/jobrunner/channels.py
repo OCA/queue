@@ -221,8 +221,7 @@ class ChannelJob(object):
             return True
         elif not self.eta and other.eta:
             return False
-        else:
-            return self.sorting_key() < other.sorting_key()
+        return self.sorting_key() < other.sorting_key()
 
 
 class ChannelQueue(object):
@@ -330,11 +329,11 @@ class ChannelQueue(object):
         self._queue.remove(job)
 
     def pop(self, now):
-        while len(self._eta_queue) and self._eta_queue[0].eta <= now:
+        while self._eta_queue and self._eta_queue[0].eta <= now:
             eta_job = self._eta_queue.pop()
             eta_job.eta = None
             self._queue.add(eta_job)
-        if self.sequential and len(self._eta_queue) and len(self._queue):
+        if self.sequential and self._eta_queue and self._queue:
             eta_job = self._eta_queue[0]
             job = self._queue[0]
 
@@ -343,11 +342,11 @@ class ChannelQueue(object):
                 # eta ignored, the job with eta has higher priority
                 # than the job without eta; since it's a sequential
                 # queue we wait until eta
-                return
+                return None
         return self._queue.pop()
 
     def get_wakeup_time(self, wakeup_time=0):
-        if len(self._eta_queue):
+        if self._eta_queue:
             if not wakeup_time:
                 wakeup_time = self._eta_queue[0].eta
             else:
@@ -875,7 +874,7 @@ class ChannelManager(object):
                 capacity = config_items[1]
                 try:
                     config['capacity'] = int(capacity)
-                except:
+                except Exception:
                     raise ValueError('Invalid channel config %s: '
                                      'invalid capacity %s' %
                                      (config_string, capacity))
