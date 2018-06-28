@@ -4,6 +4,7 @@
 
 import inspect
 import functools
+import hashlib
 import logging
 import uuid
 import sys
@@ -100,6 +101,51 @@ class DelayableRecordset(object):
     __repr__ = __str__
 
 
+def identity_exact(job_):
+    """Identity function using the model, method and all arguments as key
+
+    When used, this identity key will have the effect that when a job should be
+    created and a pending job with the exact same recordset and arguments, the
+    second will not be created.
+
+    It should be used with the ``identity_key`` argument:
+
+    .. python::
+
+        from odoo.addons.queue_job.job import identity_exact
+
+        # [...]
+            delayable = self.with_delay(identity_key=identity_exact)
+            delayable.export_record(force=True)
+
+    Alternative identity keys can be built using the various fields of the job.
+    For example, you could compute a hash using only some arguments of
+    the job.
+
+    .. python::
+
+        def identity_example(job_):
+            hasher = hashlib.sha1()
+            hasher.update(job_.model_name)
+            hasher.update(job_.method_name)
+            hasher.update(str(sorted(job_.recordset.ids)))
+            hasher.update(unicode(job_.args[1]))
+            hasher.update(unicode(job_.kwargs.get('foo', '')))
+            return hasher.hexdigest()
+
+    Usually you will probably always want to include at least the name of the
+    model and method.
+    """
+    hasher = hashlib.sha1()
+    hasher.update(job_.model_name)
+    hasher.update(job_.method_name)
+    hasher.update(str(sorted(job_.recordset.ids)))
+    hasher.update(unicode(job_.args))
+    hasher.update(unicode(sorted(job_.kwargs.items())))
+
+    return hasher.hexdigest()
+
+
 class Job(object):
     """ A Job is a task to execute.
 
@@ -192,10 +238,11 @@ class Job(object):
 
         A key referencing the job, multiple job with the same key will not
         be added to a channel if the existing job with the same key is not yet
-        started or executed.
+        started or executed. The identity key can be a string or a function
+        with one parameter - the job - that returns the hash. Read the
+        documentation of :func:`identity_exact`.
 
     """
-
     @classmethod
     def load(cls, env, job_uuid):
         """ Read a job from the Database"""
@@ -203,12 +250,19 @@ class Job(object):
         if not stored:
             raise NoSuchJobError(
                 'Job %s does no longer exist in the storage.' % job_uuid)
+        return cls._load_from_db_record(stored)
+
+    @classmethod
+    def _load_from_db_record(cls, job_db_record):
+        stored = job_db_record
+        env = job_db_record.env
 
         args = stored.args
         kwargs = stored.kwargs
         method_name = stored.method_name
 
         model = env[stored.model_name]
+
         recordset = model.browse(stored.record_ids)
         method = getattr(recordset, method_name)
 
@@ -219,7 +273,8 @@ class Job(object):
 
         job_ = cls(method, args=args, kwargs=kwargs,
                    priority=stored.priority, eta=eta, job_uuid=stored.uuid,
-                   description=stored.name, channel=stored.channel)
+                   description=stored.name, channel=stored.channel,
+                   identity_key=stored.identity_key)
 
         if stored.date_created:
             job_.date_created = dt_from_string(stored.date_created)
@@ -242,38 +297,44 @@ class Job(object):
         job_.max_retries = stored.max_retries
         if stored.company_id:
             job_.company_id = stored.company_id.id
-        job_.identity_key = stored.identity_key
         return job_
 
-    @classmethod
-    def exist_duplicate_job(cls, env, identity_key):
+    def job_record_with_same_identity_key(self):
         """Check if a job to be executed with the same key exists."""
-        jobs = env['queue.job'].search(
-            [('identity_key', '=', identity_key),
+        existing = self.env['queue.job'].search(
+            [('identity_key', '=', self.identity_key),
              ('state', 'in', [PENDING, ENQUEUED])],
             limit=1
         )
-        return bool(len(jobs))
+        return existing
 
     @classmethod
     def enqueue(cls, func, args=None, kwargs=None,
                 priority=None, eta=None, max_retries=None, description=None,
                 channel=None, identity_key=None):
-        """Create a Job and enqueue it in the queue. Return the job uuid.
+        """Create a Job and enqueue it in the queue. Return the job.
 
         This expects the arguments specific to the job to be already extracted
         from the ones to pass to the job function.
 
-        """
+        If the identity key is the same than the one in a pending job,
+        no job is created and the existing job is returned
 
-        recordset = func.im_self
-        env = recordset.env
-        if identity_key and cls.exist_duplicate_job(env, identity_key):
-            return
+        """
         new_job = cls(func=func, args=args,
                       kwargs=kwargs, priority=priority, eta=eta,
                       max_retries=max_retries, description=description,
                       channel=channel, identity_key=identity_key)
+        if new_job.identity_key:
+            existing = new_job.job_record_with_same_identity_key()
+            if existing:
+                _logger.debug(
+                    'a job has not been enqueued due to having '
+                    'the same identity key (%s) than job %s',
+                    new_job.identity_key,
+                    existing.uuid
+                )
+                return Job._load_from_db_record(existing)
         new_job.store()
         _logger.debug(
             "enqueued %s:%s(*%r, **%r) with uuid: %s",
@@ -315,7 +376,9 @@ class Job(object):
         :param description: human description of the job. If None, description
             is computed from the function doc or name
         :param channel: The complete channel name to use to process the job.
-        :param identity_key: A hash to uniquely identify a job.
+        :param identity_key: A hash to uniquely identify a job, or a function
+                             that returns this hash (the function takes the job
+                             as argument)
         :param env: Odoo Environment
         :type env: :class:`odoo.api.Environment`
         """
@@ -363,7 +426,14 @@ class Job(object):
         self.date_created = datetime.now()
         self._description = description
 
-        self.identity_key = identity_key
+        if isinstance(identity_key, basestring):
+            self._identity_key = identity_key
+            self._identity_key_func = None
+        else:
+            # we'll compute the key on the fly when called
+            # from the function
+            self._identity_key = None
+            self._identity_key_func = identity_key
 
         self.date_enqueued = None
         self.date_started = None
@@ -472,6 +542,13 @@ class Job(object):
         recordset = self.recordset.with_context(job_uuid=self.uuid)
         recordset = recordset.sudo(self.user_id)
         return getattr(recordset, self.method_name)
+
+    @property
+    def identity_key(self):
+        if self._identity_key is None:
+            if self._identity_key_func:
+                self._identity_key = self._identity_key_func(self)
+        return self._identity_key
 
     @property
     def description(self):
