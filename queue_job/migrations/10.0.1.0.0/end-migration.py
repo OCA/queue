@@ -13,7 +13,7 @@ def migrate(cr, version):
         return
     env = api.Environment(cr, SUPERUSER_ID, {})
     QueueJob = env['queue.job']
-    groups = QueueJob.read_groups(
+    groups = QueueJob.read_group(
         [], ['model_name', 'method_name'], ['model_name', 'method_name'],
         lazy=False,
     )
