@@ -186,8 +186,11 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
     if not session.cookies:
         # obtain an anonymous session
         _logger.info("obtaining an anonymous session for the job runner")
-        url = ('http://localhost:%s/queue_job/session' % (port,))
-        response = session.get(url, timeout=30)
+        url = ('%s://%s:%s/queue_job/session' % (scheme, host, port))
+        auth = None
+        if user:
+            auth = (user, password)
+        response = session.get(url, timeout=30, auth=auth)
         response.raise_for_status()
 
     # Method to set failed job (due to timeout, etc) as pending,
