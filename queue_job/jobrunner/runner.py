@@ -26,10 +26,15 @@ How to use it?
   - ``ODOO_QUEUE_JOB_CHANNELS=root:4`` (or any other channels
     configuration), default ``root:1``.
   - ``ODOO_QUEUE_JOB_SCHEME=https``, default ``http``.
-  - ``ODOO_QUEUE_JOB_HOST=load-balancer``, default ``localhost``.
-  - ``ODOO_QUEUE_JOB_PORT=443``, default ``xmlrpc-port`` or 8069.
+  - ``ODOO_QUEUE_JOB_HOST=load-balancer``, default ``http_interface``
+    or ``localhost`` if unset.
+  - ``ODOO_QUEUE_JOB_PORT=443``, default ``http_port`` or 8069 if unset.
   - ``ODOO_QUEUE_JOB_HTTP_AUTH_USER=jobrunner``, default empty.
   - ``ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t``, default empty.
+  - ``ODOO_QUEUE_JOB_JOBRUNNER_DB_HOST=master-db``, default ``db_host``
+    or ``False`` if unset.
+  - ``ODOO_QUEUE_JOB_JOBRUNNER_DB_PORT=5432``, default ``db_port``
+    or ``False`` if unset.
 
 * Alternatively, configure the channels through the Odoo configuration
   file, like:
@@ -43,6 +48,8 @@ How to use it?
   port = 443
   http_auth_user = jobrunner
   http_auth_password = s3cr3t
+  jobrunner_db_host = master-db
+  jobrunner_db_port = 5432
 
 * Or, if using ``anybox.recipe.odoo``, add this to your buildout configuration:
 
@@ -179,6 +186,20 @@ def _odoo_now():
     return _datetime_to_epoch(dt)
 
 
+def _connection_info_for(db_name):
+    db_or_uri, connection_info = odoo.sql_db.connection_info_for(db_name)
+
+    for p in ('host', 'port'):
+        cfg = (os.environ.get('ODOO_QUEUE_JOB_JOBRUNNER_DB_%s' % p.upper()) or
+               config.misc
+               .get("queue_job", {}).get('jobrunner_db_' + p))
+
+        if cfg:
+            connection_info[p] = cfg
+
+    return connection_info
+
+
 session = requests.Session()
 
 
@@ -196,7 +217,7 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
     # Method to set failed job (due to timeout, etc) as pending,
     # to avoid keeping it as enqueued.
     def set_job_pending():
-        connection_info = odoo.sql_db.connection_info_for(db_name)[1]
+        connection_info = _connection_info_for(db_name)
         conn = psycopg2.connect(**connection_info)
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         with closing(conn.cursor()) as cr:
@@ -239,7 +260,7 @@ class Database(object):
 
     def __init__(self, db_name):
         self.db_name = db_name
-        connection_info = odoo.sql_db.connection_info_for(db_name)[1]
+        connection_info = _connection_info_for(db_name)
         self.conn = psycopg2.connect(**connection_info)
         self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         self.has_queue_job = self._has_queue_job()
