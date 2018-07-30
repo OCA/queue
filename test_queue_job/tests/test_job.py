@@ -2,6 +2,8 @@
 # Copyright 2016 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
+import hashlib
+
 from datetime import datetime, timedelta
 import mock
 
@@ -21,6 +23,7 @@ from odoo.addons.queue_job.job import (
     STARTED,
     DONE,
     FAILED,
+    identity_exact,
 )
 
 
@@ -295,6 +298,36 @@ class TestJobsOnTestingMethod(common.TransactionCase):
             (('a',), {'k': 1})
         )
 
+    def test_job_identity_key_str(self):
+        id_key = 'e294e8444453b09d59bdb6efbfec1323'
+        test_job_1 = Job(self.method,
+                         priority=15,
+                         description="Test I am the first one",
+                         identity_key=id_key)
+        test_job_1.user_id = 1
+        test_job_1.store()
+        job1 = Job.load(self.env, test_job_1.uuid)
+        self.assertEqual(job1.identity_key, id_key)
+
+    def test_job_identity_key_func_exact(self):
+        hasher = hashlib.sha1()
+        hasher.update('test.queue.job')
+        hasher.update('testing_method')
+        hasher.update(str(sorted([])))
+        hasher.update(unicode((1, 'foo')))
+        hasher.update(unicode(sorted({'bar': 'baz'}.items())))
+        expected_key = hasher.hexdigest()
+
+        test_job_1 = Job(self.method,
+                         args=[1, 'foo'],
+                         kwargs={'bar': 'baz'},
+                         identity_key=identity_exact)
+        self.assertEqual(test_job_1.identity_key, expected_key)
+        test_job_1.store()
+
+        job1 = Job.load(self.env, test_job_1.uuid)
+        self.assertEqual(job1.identity_key, expected_key)
+
 
 class TestJobs(common.TransactionCase):
     """ Test jobs on other methods or with different job configuration """
@@ -379,6 +412,16 @@ class TestJobs(common.TransactionCase):
         self.assertEquals(job_instance.model_name, 'test.queue.job')
         self.assertEquals(job_instance.method_name, 'mapped')
         self.assertEquals(['test1', 'test2'], job_instance.perform())
+
+    def test_job_identity_key_no_duplicate(self):
+        """ If a job with same identity key in queue do not add a new one """
+        id_key = 'e294e8444453b09d59bdb6efbfec1323'
+        rec1 = self.env['test.queue.job'].create({'name': 'test1'})
+        job_1 = rec1.with_delay(identity_key=id_key).mapped('name')
+
+        self.assertTrue(job_1)
+        job_2 = rec1.with_delay(identity_key=id_key).mapped('name')
+        self.assertEqual(job_2.uuid, job_1.uuid)
 
     def test_job_with_mutable_arguments(self):
         """ Job with mutable arguments do not mutate on perform() """
