@@ -426,7 +426,7 @@ class Channel(object):
         self._queue.sequential = val
 
     def configure(self, config):
-        """ Configure a channel from a dictionary.
+        """Configure a channel from a dictionary.
 
         Supported keys are:
 
@@ -443,7 +443,7 @@ class Channel(object):
 
     @property
     def fullname(self):
-        """ The full name of the channel, in dot separated notation. """
+        """The full name of the channel, in dot separated notation."""
         if self.parent:
             return self.parent.fullname + '.' + self.name
         else:
@@ -461,7 +461,7 @@ class Channel(object):
                                             len(self._failed))
 
     def remove(self, job):
-        """ Remove a job from the channel. """
+        """Remove a job from the channel."""
         self._queue.remove(job)
         self._running.remove(job)
         self._failed.remove(job)
@@ -469,7 +469,7 @@ class Channel(object):
             self.parent.remove(job)
 
     def set_done(self, job):
-        """ Mark a job as done.
+        """Mark a job as done.
 
         This removes it from the channel queue.
         """
@@ -478,7 +478,7 @@ class Channel(object):
                       job.uuid, self)
 
     def set_pending(self, job):
-        """ Mark a job as pending.
+        """Mark a job as pending.
 
         This puts the job in the channel queue and remove it
         from parent channels queues.
@@ -493,7 +493,7 @@ class Channel(object):
                           job.uuid, self)
 
     def set_running(self, job):
-        """ Mark a job as running.
+        """Mark a job as running.
 
         This also marks the job as running in parent channels.
         """
@@ -507,7 +507,7 @@ class Channel(object):
                           job.uuid, self)
 
     def set_failed(self, job):
-        """ Mark the job as failed. """
+        """Mark the job as failed. """
         if job not in self._failed:
             self._queue.remove(job)
             self._running.remove(job)
@@ -527,7 +527,7 @@ class Channel(object):
         return len(self._running) < self.capacity
 
     def get_jobs_to_run(self, now):
-        """ Get jobs that are ready to run in channel.
+        """Get jobs that are ready to run in channel.
 
         This works by enqueuing jobs that are ready to run in children
         channels, then yielding jobs from the channel queue until
@@ -605,7 +605,7 @@ def split_strip(s, sep, maxsplit=-1):
 
 
 class ChannelManager(object):
-    """ High level interface for channels
+    """High level interface for channels
 
     This class handles:
 
@@ -799,7 +799,6 @@ class ChannelManager(object):
     >>> cm.notify(db, 'S', 'S3', 3, 0, 10, None, 'done')
     >>> pp(list(cm.get_jobs_to_run(now=105)))
     []
-
     """
 
     def __init__(self):
