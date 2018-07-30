@@ -27,7 +27,7 @@ PG_RETRY = 5  # seconds
 class RunJobController(http.Controller):
 
     def _load_job(self, env, job_uuid):
-        """ Reload a job from the backend """
+        """Reload a job from the backend"""
         try:
             job = Job.load(env, job_uuid)
         except NoSuchJobError:
@@ -66,7 +66,7 @@ class RunJobController(http.Controller):
 
     @http.route('/queue_job/session', type='http', auth="none")
     def session(self):
-        """ Used by the jobrunner to spawn a session
+        """Used by the jobrunner to spawn a session
 
         The queue jobrunner uses anonymous sessions when it calls
         ``/queue_job/runjob``.  To avoid having thousands of anonymous

@@ -3,27 +3,27 @@
 
 
 class BaseQueueJobError(Exception):
-    """ Base queue job error """
+    """Base queue job error"""
 
 
 class JobError(BaseQueueJobError):
-    """ A job had an error """
+    """A job had an error"""
 
 
 class NoSuchJobError(JobError):
-    """ The job does not exist. """
+    """The job does not exist."""
 
 
 class NotReadableJobError(JobError):
-    """ The job cannot be read from the storage. """
+    """The job cannot be read from the storage."""
 
 
 class FailedJobError(JobError):
-    """ A job had an error having to be resolved. """
+    """A job had an error having to be resolved."""
 
 
 class RetryableJobError(JobError):
-    """ A job had an error but can be retried.
+    """A job had an error but can be retried.
 
     The job will be retried after the given number of seconds.  If seconds is
     empty, it will be retried according to the ``retry_pattern`` of the job or
@@ -40,8 +40,8 @@ class RetryableJobError(JobError):
 
 # TODO: remove support of NothingToDo: too dangerous
 class NothingToDoJob(JobError):
-    """ The Job has nothing to do. """
+    """The Job has nothing to do."""
 
 
 class ChannelNotFound(BaseQueueJobError):
-    """ A channel could not be found """
+    """A channel could not be found"""
