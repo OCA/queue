@@ -22,7 +22,7 @@ def channel_func_name(model, method):
 
 
 class QueueJob(models.Model):
-    """ Job status and result """
+    """Model storing the jobs to be executed."""
     _name = 'queue.job'
     _description = 'Queue Job'
     _inherit = ['mail.thread', 'mail.activity.mixin']
@@ -125,7 +125,7 @@ class QueueJob(models.Model):
 
     @api.multi
     def open_related_action(self):
-        """ Open the related action associated to the job """
+        """Open the related action associated to the job"""
         self.ensure_one()
         job = Job.load(self.env, self.uuid)
         action = job.related_action()
@@ -135,8 +135,10 @@ class QueueJob(models.Model):
 
     @api.multi
     def _change_job_state(self, state, result=None):
-        """ Change the state of the `Job` object itself so it
-        will change the other fields (date, result, ...)
+        """Change the state of the `Job` object
+
+        Changing the state of the Job will automatically change some fields
+        (date, result, ...).
         """
         for record in self:
             job_ = Job.load(record.env, record.uuid)
@@ -177,7 +179,7 @@ class QueueJob(models.Model):
 
     @api.multi
     def _subscribe_users_domain(self):
-        """ Subscribe all users having the 'Queue Job Manager' group """
+        """Subscribe all users having the 'Queue Job Manager' group"""
         group = self.env.ref('queue_job.group_queue_job_manager')
         if not group:
             return
@@ -189,7 +191,7 @@ class QueueJob(models.Model):
 
     @api.multi
     def _message_failed_job(self):
-        """ Return a message which will be posted on the job when it is failed.
+        """Return a message which will be posted on the job when it is failed.
 
         It can be inherited to allow more precise messages based on the
         exception informations.
@@ -202,14 +204,15 @@ class QueueJob(models.Model):
 
     @api.model
     def _needaction_domain_get(self):
-        """ Returns the domain to filter records that require an action
-            :return: domain or False is no action
+        """Returns the domain to filter records that require an action
+
+        :return: domain or False is no action
         """
         return [('state', '=', 'failed')]
 
     @api.model
     def autovacuum(self):
-        """ Delete all jobs done since more than ``_removal_interval`` days.
+        """Delete all jobs done since more than ``_removal_interval`` days.
 
         Called from a cron.
         """
