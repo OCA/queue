@@ -8,12 +8,16 @@ from ..job import DelayableRecordset
 
 
 class Base(models.AbstractModel):
-    """ The base model, which is implicitly inherited by all models. """
+    """The base model, which is implicitly inherited by all models.
+
+    A new :meth:`~with_delay` method is added on all Odoo Models, allowing to
+    postpone the execution of a job method in an asynchronous process.
+    """
     _inherit = 'base'
 
     @api.model_cr
     def _register_hook(self):
-        """ register marked jobs """
+        """Register marked jobs"""
         super(Base, self)._register_hook()
         job_methods = [
             method for __, method
@@ -27,7 +31,7 @@ class Base(models.AbstractModel):
     def with_delay(self, priority=None, eta=None,
                    max_retries=None, description=None,
                    channel=None):
-        """ Return a ``DelayableRecordset``
+        """Return a ``DelayableRecordset``
 
         The returned instance allow to enqueue any method of the recordset's
         Model which is decorated by :func:`~odoo.addons.queue_job.job.job`.
@@ -54,7 +58,6 @@ class Base(models.AbstractModel):
                         defined on the function
         :return: instance of a DelayableRecordset
         :rtype: :class:`odoo.addons.queue_job.job.DelayableRecordset`
-
         """
         return DelayableRecordset(self, priority=priority,
                                   eta=eta,
