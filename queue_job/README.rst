@@ -246,7 +246,7 @@ promote its widespread use.
     :target: https://github.com/guewen
     :alt: guewen
 
-Current `maintainer <https://odoo-community.org/page/maintainer-role>`_:
+Current `maintainer <https://odoo-community.org/page/maintainer-role>`__:
 
 |maintainer-guewen| 
 
