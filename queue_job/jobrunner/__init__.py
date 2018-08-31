@@ -3,7 +3,6 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import logging
-import os
 from threading import Thread
 import time
 
@@ -37,28 +36,7 @@ class QueueJobRunnerThread(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.daemon = True
-        scheme = os.environ.get("ODOO_QUEUE_JOB_SCHEME") or queue_job_config.get(
-            "scheme"
-        )
-        host = (
-            os.environ.get("ODOO_QUEUE_JOB_HOST")
-            or queue_job_config.get("host")
-            or config["http_interface"]
-        )
-        port = (
-            os.environ.get("ODOO_QUEUE_JOB_PORT")
-            or queue_job_config.get("port")
-            or config["http_port"]
-        )
-        user = os.environ.get("ODOO_QUEUE_JOB_HTTP_AUTH_USER") or queue_job_config.get(
-            "http_auth_user"
-        )
-        password = os.environ.get(
-            "ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD"
-        ) or queue_job_config.get("http_auth_password")
-        self.runner = QueueJobRunner(
-            scheme or "http", host or "localhost", port or 8069, user, password
-        )
+        self.runner = QueueJobRunner.from_environ_or_config()
 
     def run(self):
         # sleep a bit to let the workers start at ease
@@ -75,9 +53,7 @@ class WorkerJobRunner(server.Worker):
     def __init__(self, multi):
         super(WorkerJobRunner, self).__init__(multi)
         self.watchdog_timeout = None
-        port = os.environ.get("ODOO_CONNECTOR_PORT") or config["xmlrpc_port"]
-        base_url = port and "http://localhost:%s" % port or "http://localhost:8069"
-        self.runner = QueueJobRunner(base_url)
+        self.runner = QueueJobRunner.from_environ_or_config()
 
     def sleep(self):
         pass
