@@ -14,6 +14,7 @@ from .exception import (NoSuchJobError,
                         FailedJobError,
                         RetryableJobError)
 
+
 PENDING = 'pending'
 ENQUEUED = 'enqueued'
 DONE = 'done'
@@ -34,7 +35,7 @@ _logger = logging.getLogger(__name__)
 
 
 class DelayableRecordset(object):
-    """ Allow to delay a method for a recordset
+    """Allow to delay a method for a recordset
 
     Usage::
 
@@ -47,7 +48,8 @@ class DelayableRecordset(object):
     The method call will be processed asynchronously in the job queue, with
     the passed arguments.
 
-
+    This class will generally not be used directly, it is used internally
+    by :meth:`~odoo.addons.queue_job.models.base.Base.with_delay`
     """
 
     def __init__(self, recordset, priority=None, eta=None,
@@ -94,7 +96,10 @@ class DelayableRecordset(object):
 
 
 class Job(object):
-    """ A Job is a task to execute.
+    """A Job is a task to execute. It is the in-memory representation of a job.
+
+    Jobs are stored in the ``queue.job`` Odoo Model, but they are handled
+    through this class.
 
     .. attribute:: uuid
 
@@ -180,12 +185,11 @@ class Job(object):
 
         The complete name of the channel to use to process the job. If
         provided it overrides the one defined on the job's function.
-
     """
 
     @classmethod
     def load(cls, env, job_uuid):
-        """ Read a job from the Database"""
+        """Read a job from the Database"""
         stored = cls.db_record_from_uuid(env, job_uuid)
         if not stored:
             raise NoSuchJobError(
@@ -239,7 +243,6 @@ class Job(object):
 
         This expects the arguments specific to the job to be already extracted
         from the ones to pass to the job function.
-
         """
         new_job = cls(func=func, args=args,
                       kwargs=kwargs, priority=priority, eta=eta,
@@ -266,7 +269,7 @@ class Job(object):
                  args=None, kwargs=None, priority=None,
                  eta=None, job_uuid=None, max_retries=None,
                  description=None, channel=None):
-        """ Create a Job
+        """Create a Job
 
         :param func: function to execute
         :type func: function
@@ -355,7 +358,7 @@ class Job(object):
         self.channel = channel
 
     def perform(self):
-        """ Execute the job.
+        """Execute the job.
 
         The job is executed with the user which has initiated it.
         """
@@ -381,7 +384,7 @@ class Job(object):
         return self.result
 
     def store(self):
-        """ Store the Job """
+        """Store the Job"""
         vals = {'state': self.state,
                 'priority': self.priority,
                 'retry': self.retry,
@@ -518,9 +521,12 @@ class Job(object):
         return seconds
 
     def postpone(self, result=None, seconds=None):
-        """ Write an estimated time arrival to n seconds
+        """Postpone the job
+
+        Write an estimated time arrival to n seconds
         later than now. Used when an retryable exception
-        want to retry a job later. """
+        want to retry a job later.
+        """
         eta_seconds = self._get_retry_seconds(seconds)
         self.eta = timedelta(seconds=eta_seconds)
         self.exc_info = None
@@ -550,7 +556,9 @@ def _is_model_method(func):
 
 
 def job(func=None, default_channel='root', retry_pattern=None):
-    """ Decorator for jobs.
+    """Decorator for job methods.
+
+    It enables the possibility to use a Model's method as a job function.
 
     Optional argument:
 
@@ -628,7 +636,6 @@ def job(func=None, default_channel='root', retry_pattern=None):
 
     See also: :py:func:`related_action` a related action can be attached
     to a job
-
     """
     if func is None:
         return functools.partial(job, default_channel=default_channel,
@@ -656,7 +663,7 @@ def job(func=None, default_channel='root', retry_pattern=None):
 
 
 def related_action(action=None, **kwargs):
-    """ Attach a *Related Action* to a job.
+    """Attach a *Related Action* to a job (decorator)
 
     A *Related Action* will appear as a button on the Odoo view.
     The button will execute the action, usually it will open the
