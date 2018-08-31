@@ -310,8 +310,8 @@ class JobChannel(models.Model):
     @api.depends('name', 'parent_id.complete_name')
     def _compute_complete_name(self):
         for record in self:
-            # if not record.name:
-            #     return  # new record
+            if not record.name:
+                continue  # new record
             channel = record
             parts = [channel.name]
             while channel.parent_id:
