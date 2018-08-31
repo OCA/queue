@@ -659,6 +659,18 @@ msgid "User ID"
 msgstr "Benutzer"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__website_message_ids
+#, fuzzy
+#| msgid "Messages"
+msgid "Website Messages"
+msgstr "Nachrichten"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__website_message_ids
+msgid "Website communication history"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_requeue_job
 msgid "Wizard to requeue a selection of jobs"
 msgstr "Assistent zur erneuten Einreihung einer Job-Auswahl"
