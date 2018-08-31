@@ -361,6 +361,29 @@ class QueueJobRunner(object):
         self._stop = False
         self._stop_pipe = os.pipe()
 
+    @classmethod
+    def from_environ_or_config(cls):
+        scheme = (os.environ.get('ODOO_QUEUE_JOB_SCHEME') or
+                  config.misc.get("queue_job", {}).get('scheme'))
+        host = (os.environ.get('ODOO_QUEUE_JOB_HOST') or
+                config.misc.get("queue_job", {}).get('host') or
+                config['http_interface'])
+        port = (os.environ.get('ODOO_QUEUE_JOB_PORT') or
+                config.misc.get("queue_job", {}).get('port') or
+                config['http_port'])
+        user = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_USER') or
+                config.misc.get("queue_job", {}).get('http_auth_user'))
+        password = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD') or
+                    config.misc.get("queue_job", {}).get('http_auth_password'))
+        runner = cls(
+            scheme=scheme or 'http',
+            host=host or 'localhost',
+            port=port or 8069,
+            user=user,
+            password=password
+        )
+        return runner
+
     def get_db_names(self):
         if odoo.tools.config['db_name']:
             db_names = odoo.tools.config['db_name'].split(',')
