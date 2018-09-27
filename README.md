@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/OCA/queue.svg?branch=11.0)](https://travis-ci.org/OCA/queue)
-[![codecov](https://codecov.io/gh/OCA/queue/branch/11.0/graph/badge.svg)](https://codecov.io/gh/OCA/queue)
+[![Build Status](https://travis-ci.org/OCA/queue.svg?branch=12.0)](https://travis-ci.org/OCA/queue)
+[![codecov](https://codecov.io/gh/OCA/queue/branch/12.0/graph/badge.svg)](https://codecov.io/gh/OCA/queue)
 
 
 Odoo Queue Modules
@@ -12,20 +12,9 @@ scheduled tasks, a job captures arguments for later processing.
 
 
 [//]: # (addons)
-
-Available addons
-----------------
-addon | version | summary
---- | --- | ---
-[base_import_async](base_import_async/) | 11.0.1.0.0 | Import CSV files in the background
-[queue_job](queue_job/) | 11.0.1.1.0 | Job Queue
-[queue_job_subscribe](queue_job_subscribe/) | 11.0.1.0.0 | Control which users are subscribed to queue job notifications
-[test_base_import_async](test_base_import_async/) | 11.0.1.0.0 | Test suite for base_import_async. Normally you don't need to install this.
-[test_queue_job](test_queue_job/) | 11.0.1.0.0 | Queue Job Tests
-
 [//]: # (end addons)
 
 Translation Status
 ------------------
-[![Transifex Status](https://www.transifex.com/projects/p/OCA-queue-11-0/chart/image_png)](https://www.transifex.com/projects/p/OCA-queue-11-0)
+[![Transifex Status](https://www.transifex.com/projects/p/OCA-queue-12-0/chart/image_png)](https://www.transifex.com/projects/p/OCA-queue-12-0)
 
