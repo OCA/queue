@@ -20,5 +20,5 @@
     'data': [
         'tests/data.xml',
     ],
-    'installable': True,
+    'installable': False,
 }
