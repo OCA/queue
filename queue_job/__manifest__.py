@@ -18,7 +18,7 @@
           'views/queue_job_views.xml',
           'data/queue_data.xml',
           ],
- 'installable': True,
+ 'installable': False,
  'development_status': 'Mature',
  'maintainers': ['guewen'],
  }
