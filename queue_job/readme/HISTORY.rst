@@ -11,23 +11,7 @@
 Next
 ~~~~
 
-* [ADD] Default "related action" for jobs, opening a form or list view (when
-  the job is linked to respectively one record on several).
-  (`#46 <https://github.com/OCA/queue/pull/46>`_)
-
-11.0.1.1.0 (2018-05-25)
+12.0.1.0.0 (2018-10-02)
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-* [ADD] New neat OCA readme file format
-  (`#71 <https://github.com/OCA/queue/pull/71>`_)
-* [ADD] The Jobrunner will keep the same Web Session and no longer generate a
-  new session per job
-  (`#54 <https://github.com/OCA/queue/pull/54>`_)
-* [ADD] Configurable scheme, host and HTTP authentication
-  (`#51 <https://github.com/OCA/queue/pull/51>`_)
-* [ADD] ``base_sparse_field`` does not longer need to be set in ``--load``
-  (`#47 <https://github.com/OCA/queue/pull/47>`_)
-* [FIX] Correct automatic registration of channels and job functions
-  (`#69 <https://github.com/OCA/queue/pull/69>`_)
-* [FIX] Correct compatibility with ``@property`` methods
-  (`#50 <https://github.com/OCA/queue/pull/50>`_ and `#69 <https://github.com/OCA/queue/pull/69>`__)
+* [MIGRATION] from 11.0 branched at rev. b0945be

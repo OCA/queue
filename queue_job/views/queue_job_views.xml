@@ -119,9 +119,9 @@
                 <filter name="failed" string="Failed"
                     domain="[('state', '=', 'failed')]"/>
                 <group expand="0" string="Group By">
-                    <filter string="Channel" context="{'group_by': 'channel'}" />
-                    <filter string="Job Function" context="{'group_by': 'job_function_id'}" />
-                    <filter string="State" context="{'group_by': 'state'}" />
+                    <filter name="group_by_channel" string="Channel" context="{'group_by': 'channel'}" />
+                    <filter name="group_by_job_function_id" string="Job Function" context="{'group_by': 'job_function_id'}" />
+                    <filter name="group_by_state" string="State" context="{'group_by': 'state'}" />
                 </group>
             </search>
         </field>
@@ -248,7 +248,7 @@
                 <field name="name"/>
                 <field name="channel_id"/>
                 <group expand="0" string="Group By">
-                    <filter string="Channel" context="{'group_by': 'channel_id'}" />
+                    <filter name="group_by_channel" string="Channel" context="{'group_by': 'channel_id'}" />
                 </group>
             </search>
         </field>
