@@ -82,6 +82,7 @@ class QueueJob(models.Model):
                                       readonly=True,
                                       store=True)
 
+    override_channel = fields.Char()
     channel = fields.Char(compute='_compute_channel',
                           inverse='_inverse_channel',
                           store=True,
@@ -89,13 +90,15 @@ class QueueJob(models.Model):
 
     @api.multi
     def _inverse_channel(self):
-        self.filtered(lambda a: not a.channel)._compute_channel()
+        for record in self:
+            record.override_channel = record.channel
 
     @api.multi
     @api.depends('job_function_id.channel_id')
     def _compute_channel(self):
         for record in self:
-            record.channel = record.job_function_id.channel
+            record.channel = (record.override_channel or
+                              record.job_function_id.channel)
 
     @api.multi
     @api.depends('model_name', 'method_name', 'job_function_id.channel_id')
