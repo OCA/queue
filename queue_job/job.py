@@ -203,26 +203,25 @@ class Job(object):
         recordset = model.browse(stored.record_ids)
         method = getattr(recordset, method_name)
 
-        dt_from_string = odoo.fields.Datetime.from_string
         eta = None
         if stored.eta:
-            eta = dt_from_string(stored.eta)
+            eta = stored.eta
 
         job_ = cls(method, args=args, kwargs=kwargs,
                    priority=stored.priority, eta=eta, job_uuid=stored.uuid,
                    description=stored.name, channel=stored.channel)
 
         if stored.date_created:
-            job_.date_created = dt_from_string(stored.date_created)
+            job_.date_created = stored.date_created
 
         if stored.date_enqueued:
-            job_.date_enqueued = dt_from_string(stored.date_enqueued)
+            job_.date_enqueued = stored.date_enqueued
 
         if stored.date_started:
-            job_.date_started = dt_from_string(stored.date_started)
+            job_.date_started = stored.date_started
 
         if stored.date_done:
-            job_.date_done = dt_from_string(stored.date_done)
+            job_.date_done = stored.date_done
 
         job_.state = stored.state
         job_.result = stored.result if stored.result else None
@@ -399,21 +398,20 @@ class Job(object):
                 'eta': False,
                 }
 
-        dt_to_string = odoo.fields.Datetime.to_string
         if self.date_enqueued:
-            vals['date_enqueued'] = dt_to_string(self.date_enqueued)
+            vals['date_enqueued'] = self.date_enqueued
         if self.date_started:
-            vals['date_started'] = dt_to_string(self.date_started)
+            vals['date_started'] = self.date_started
         if self.date_done:
-            vals['date_done'] = dt_to_string(self.date_done)
+            vals['date_done'] = self.date_done
         if self.eta:
-            vals['eta'] = dt_to_string(self.eta)
+            vals['eta'] = self.eta
 
         db_record = self.db_record()
         if db_record:
             db_record.write(vals)
         else:
-            date_created = dt_to_string(self.date_created)
+            date_created = self.date_created
             # The following values must never be modified after the
             # creation of the job
             vals.update({'uuid': self.uuid,
