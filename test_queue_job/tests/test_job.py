@@ -546,7 +546,7 @@ class TestJobStorageMultiCompany(common.TransactionCase):
     def _subscribe_users(self, stored):
         domain = stored._subscribe_users_domain()
         users = self.env['res.users'].search(domain)
-        stored.message_subscribe_users(user_ids=users.ids)
+        stored.message_subscribe(partner_ids=users.mapped('partner_id').ids)
 
     def _create_job(self, env):
         self.cr.execute('delete from queue_job')
@@ -593,7 +593,7 @@ class TestJobStorageMultiCompany(common.TransactionCase):
         no_company_env = self.env(context=no_company_context)
         stored = self._create_job(no_company_env)
         self._subscribe_users(stored)
-        users = User.search(
+        users = User.with_context(active_test=False).search(
             [('groups_id', '=', self.ref('queue_job.group_queue_job_manager'))]
         )
         self.assertEqual(len(stored.message_follower_ids), len(users))
