@@ -169,7 +169,7 @@ class QueueJob(models.Model):
             # at every job creation
             domain = self._subscribe_users_domain()
             users = self.env['res.users'].search(domain)
-            self.message_subscribe_users(user_ids=users.ids)
+            self.message_subscribe(partner_ids=users.mapped('partner_id').ids)
             for record in self:
                 msg = record._message_failed_job()
                 if msg:
