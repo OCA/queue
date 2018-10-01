@@ -221,7 +221,7 @@ class QueueJob(models.Model):
         """
         deadline = datetime.now() - timedelta(days=self._removal_interval)
         jobs = self.search(
-            [('date_done', '<=', fields.Datetime.to_string(deadline))],
+            [('date_done', '<=', deadline)],
         )
         jobs.unlink()
         return True
