@@ -29,6 +29,7 @@ class TestBaseImportAsync(common.TransactionCase):
         OPT_SEPARATOR: ',',
         OPT_QUOTING: '"',
         OPT_HAS_HEADER: True,
+        'date_format': '%Y-%m-%d',
     }
 
     def setUp(self):
@@ -51,7 +52,7 @@ class TestBaseImportAsync(common.TransactionCase):
         options = dict(self.OPTIONS)
         options[OPT_USE_QUEUE] = use_queue
         options[OPT_CHUNK_SIZE] = chunk_size
-        return importer.do(self.FIELDS, options)
+        return importer.do(self.FIELDS, self.FIELDS, options)
 
     def _check_import_result(self):
         move_count = self.move_obj.search_count(
@@ -61,7 +62,7 @@ class TestBaseImportAsync(common.TransactionCase):
     def test_normal_import(self):
         """ Test the standard import still works. """
         res = self._do_import('account.move.csv', use_queue=False)
-        self.assertFalse(res, repr(res))
+        self.assertFalse(res['messages'], repr(res))
         self._check_import_result()
 
     def test_async_import(self):
@@ -77,14 +78,14 @@ class TestBaseImportAsync(common.TransactionCase):
         self.assertEqual(len(split_job), 1)
         # job names are important
         self.assertEqual(split_job.name,
-                         "Import Account Entry from file account.move.csv")
+                         "Import Journal Entries from file account.move.csv")
         # perform job
         Job.load(self.env, split_job.uuid).perform()
         # check one job has been generated to load the file (one chunk)
         load_job = self.job_obj.search([('id', '!=', split_job.id)])
         self.assertEqual(len(load_job), 1)
         self.assertEqual(load_job.name,
-                         "Import Account Entry from file account.move.csv - "
+                         "Import Journal Entries from file account.move.csv - "
                          "#0 - lines 2 to 10")
         # perform job
         Job.load(self.env, load_job.uuid).perform()
@@ -105,10 +106,10 @@ class TestBaseImportAsync(common.TransactionCase):
             [('id', '!=', split_job.id)], order='name')
         self.assertEqual(len(load_jobs), 2)
         self.assertEqual(load_jobs[0].name,
-                         "Import Account Entry from file account.move.csv - "
+                         "Import Journal Entries from file account.move.csv - "
                          "#0 - lines 2 to 7")
         self.assertEqual(load_jobs[1].name,
-                         "Import Account Entry from file account.move.csv - "
+                         "Import Journal Entries from file account.move.csv - "
                          "#1 - lines 8 to 10")
         # perform job
         Job.load(self.env, load_jobs[0].uuid).perform()
@@ -130,13 +131,13 @@ class TestBaseImportAsync(common.TransactionCase):
             [('id', '!=', split_job.id)], order='name')
         self.assertEqual(len(load_jobs), 3)
         self.assertEqual(load_jobs[0].name,
-                         "Import Account Entry from file account.move.csv - "
+                         "Import Journal Entries from file account.move.csv - "
                          "#0 - lines 2 to 4")
         self.assertEqual(load_jobs[1].name,
-                         "Import Account Entry from file account.move.csv - "
+                         "Import Journal Entries from file account.move.csv - "
                          "#1 - lines 5 to 7")
         self.assertEqual(load_jobs[2].name,
-                         "Import Account Entry from file account.move.csv - "
+                         "Import Journal Entries from file account.move.csv - "
                          "#2 - lines 8 to 10")
         # perform job
         Job.load(self.env, load_jobs[0].uuid).perform()
@@ -160,13 +161,13 @@ class TestBaseImportAsync(common.TransactionCase):
             [('id', '!=', split_job.id)], order='name')
         self.assertEqual(len(load_jobs), 3)
         self.assertEqual(load_jobs[0].name,
-                         "Import Account Entry from file account.move.csv - "
+                         "Import Journal Entries from file account.move.csv - "
                          "#0 - lines 2 to 4")
         self.assertEqual(load_jobs[1].name,
-                         "Import Account Entry from file account.move.csv - "
+                         "Import Journal Entries from file account.move.csv - "
                          "#1 - lines 5 to 7")
         self.assertEqual(load_jobs[2].name,
-                         "Import Account Entry from file account.move.csv - "
+                         "Import Journal Entries from file account.move.csv - "
                          "#2 - lines 8 to 10")
         # perform job
         Job.load(self.env, load_jobs[0].uuid).perform()

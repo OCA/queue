@@ -4,7 +4,7 @@
 
 {
     'name': 'Test suite for base_import_async',
-    'version': '11.0.1.0.0',
+    'version': '12.0.1.0.0',
     'author': 'ACSONE SA/NV, Odoo Community Association (OCA)',
     'license': 'AGPL-3',
     'website': 'https://github.com/OCA/queue',
@@ -20,5 +20,5 @@
     'data': [
         'tests/data.xml',
     ],
-    'installable': False,
+    'installable': True,
 }
