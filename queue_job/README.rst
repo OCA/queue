@@ -181,6 +181,8 @@ Next
 * [ADD] Default "related action" for jobs, opening a form or list view (when
   the job is linked to respectively one record on several).
   (`#46 <https://github.com/OCA/queue/pull/46>`_)
+* [FIX] Error when creating a job channel manually
+  (`#96 <https://github.com/OCA/queue/pull/96>`_)
 
 11.0.1.1.0 (2018-05-25)
 ~~~~~~~~~~~~~~~~~~~~~~~
