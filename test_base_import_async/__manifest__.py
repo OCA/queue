@@ -3,17 +3,22 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
-    "name": "Test suite for base_import_async",
-    "version": "11.0.1.0.0",
-    "author": "ACSONE SA/NV, Odoo Community Association (OCA)",
-    "license": "AGPL-3",
-    "website": "https://github.com/OCA/queue",
-    "category": "Generic Modules",
-    "summary": """Test suite for base_import_async.
+    'name': 'Test suite for base_import_async',
+    'version': '12.0.1.0.0',
+    'author': 'ACSONE SA/NV, Odoo Community Association (OCA)',
+    'license': 'AGPL-3',
+    'website': 'https://github.com/OCA/queue',
+    'category': 'Generic Modules',
+    'summary': """Test suite for base_import_async.
 
     Normally you don't need to install this.
     """,
-    "depends": ["base_import_async", "account"],
-    "data": ["tests/data.xml"],
-    "installable": False,
+    'depends': [
+        'base_import_async',
+        'account',
+    ],
+    'data': [
+        'tests/data.xml',
+    ],
+    'installable': True,
 }

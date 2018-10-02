@@ -33,10 +33,11 @@ class BaseImportImport(models.TransientModel):
     _inherit = "base_import.import"
 
     @api.multi
-    def do(self, fields, options, dryrun=False):
+    def do(self, fields, columns, options, dryrun=False):
         if dryrun or not options.get(OPT_USE_QUEUE):
             # normal import
-            return super(BaseImportImport, self).do(fields, options, dryrun=dryrun)
+            return super(BaseImportImport, self).do(
+                fields, columns, options, dryrun=dryrun)
 
         # asynchronous import
         try:
