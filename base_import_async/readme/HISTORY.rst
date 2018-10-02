@@ -1,4 +1,4 @@
-11.0.1.0.0 (2018-06-26)
+12.0.1.0.0 (2018-10-20)
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-* [BREAKING] In the `do` method the `use_connector` option has changed to `use_queue`.
+* [MIGRATION] from 11.0 branched at rev. b0945be
