@@ -21,4 +21,5 @@
         'tests/data.xml',
     ],
     'installable': True,
+    'development_status': 'Stable',
 }
