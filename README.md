@@ -12,6 +12,17 @@ scheduled tasks, a job captures arguments for later processing.
 
 
 [//]: # (addons)
+
+Unported addons
+---------------
+addon | version | summary
+--- | --- | ---
+[base_import_async](base_import_async/) | 11.0.1.0.0 (unported) | Import CSV files in the background
+[queue_job](queue_job/) | 11.0.1.1.0 (unported) | Job Queue
+[queue_job_subscribe](queue_job_subscribe/) | 11.0.1.0.0 (unported) | Control which users are subscribed to queue job notifications
+[test_base_import_async](test_base_import_async/) | 11.0.1.0.0 (unported) | Test suite for base_import_async. Normally you don't need to install this.
+[test_queue_job](test_queue_job/) | 11.0.1.0.0 (unported) | Queue Job Tests
+
 [//]: # (end addons)
 
 Translation Status
