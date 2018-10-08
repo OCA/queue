@@ -82,20 +82,38 @@ class QueueJob(models.Model):
                                       readonly=True,
                                       store=True)
 
+    override_channel = fields.Char()
     channel = fields.Char(compute='_compute_channel',
                           inverse='_inverse_channel',
                           store=True,
                           index=True)
 
+    identity_key = fields.Char()
+
+    @api.model_cr
+    def init(self):
+        self._cr.execute(
+            'SELECT indexname FROM pg_indexes WHERE indexname = %s ',
+            ('queue_job_identity_key_state_partial_index',)
+        )
+        if not self._cr.fetchone():
+            self._cr.execute(
+                "CREATE INDEX queue_job_identity_key_state_partial_index "
+                "ON queue_job (identity_key) WHERE state in ('pending', "
+                "'enqueued') AND identity_key IS NOT NULL;"
+            )
+
     @api.multi
     def _inverse_channel(self):
-        self.filtered(lambda a: not a.channel)._compute_channel()
+        for record in self:
+            record.override_channel = record.channel
 
     @api.multi
     @api.depends('job_function_id.channel_id')
     def _compute_channel(self):
         for record in self:
-            record.channel = record.job_function_id.channel
+            record.channel = (record.override_channel or
+                              record.job_function_id.channel)
 
     @api.multi
     @api.depends('model_name', 'method_name', 'job_function_id.channel_id')
@@ -169,7 +187,7 @@ class QueueJob(models.Model):
             # at every job creation
             domain = self._subscribe_users_domain()
             users = self.env['res.users'].search(domain)
-            self.message_subscribe_users(user_ids=users.ids)
+            self.message_subscribe(partner_ids=users.mapped('partner_id').ids)
             for record in self:
                 msg = record._message_failed_job()
                 if msg:
@@ -182,7 +200,7 @@ class QueueJob(models.Model):
         """Subscribe all users having the 'Queue Job Manager' group"""
         group = self.env.ref('queue_job.group_queue_job_manager')
         if not group:
-            return
+            return None
         companies = self.mapped('company_id')
         domain = [('groups_id', '=', group.id)]
         if companies:
@@ -218,7 +236,7 @@ class QueueJob(models.Model):
         """
         deadline = datetime.now() - timedelta(days=self._removal_interval)
         jobs = self.search(
-            [('date_done', '<=', fields.Datetime.to_string(deadline))],
+            [('date_done', '<=', deadline)],
         )
         jobs.unlink()
         return True
@@ -307,8 +325,8 @@ class JobChannel(models.Model):
     @api.depends('name', 'parent_id.complete_name')
     def _compute_complete_name(self):
         for record in self:
-            # if not record.name:
-            #     return  # new record
+            if not record.name:
+                continue  # new record
             channel = record
             parts = [channel.name]
             while channel.parent_id:
@@ -379,9 +397,8 @@ class JobFunction(models.Model):
             parent_channel = channel
             channel = channel_model.search([
                 ('name', '=', channel_name),
-                ('parent_id', '=', parent_channel.id)],
-                limit=1,
-            )
+                ('parent_id', '=', parent_channel.id),
+            ], limit=1)
             if not channel:
                 channel = channel_model.create({
                     'name': channel_name,
