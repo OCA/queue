@@ -18,12 +18,19 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#. module: mail_connector_queue
-#: field:mail.mail,mail_job_priority:0
-msgid "Mail job priority"
+#. module: mail_queue_job
+#: model:ir.model.fields,field_description:mail_queue_job.field_mail_mail_mail_job_priority
+msgid "Mail Job Priority"
 msgstr ""
 
-#. module: mail_connector_queue
-#: model:ir.model,name:mail_connector_queue.model_mail_mail
+#. module: mail_queue_job
+#: model:ir.model,name:mail_queue_job.model_mail_mail
 msgid "Outgoing Mails"
 msgstr "Courriels à envoyer"
+
+#. module: mail_queue_job
+#: model:ir.model.fields,help:mail_queue_job.field_mail_mail_mail_job_priority
+msgid ""
+"Send the email with a priority level.\n"
+"0 being the higher priority. Default is 10"
+msgstr ""
