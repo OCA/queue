@@ -19,15 +19,20 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 
-#. module: mail_connector_queue
-#: field:mail.mail,mail_job_priority:0
-msgid "Mail job priority"
-msgstr ""
+#. module: mail_queue_job
+#: model:ir.model.fields,field_description:mail_queue_job.field_mail_mail_mail_job_priority
+#, fuzzy
+msgid "Mail Job Priority"
+msgstr "Prioritet"
 
-#. module: mail_connector_queue
-#: model:ir.model,name:mail_connector_queue.model_mail_mail
+#. module: mail_queue_job
+#: model:ir.model,name:mail_queue_job.model_mail_mail
 msgid "Outgoing Mails"
 msgstr ""
 
-#~ msgid "Priority"
-#~ msgstr "Prioritet"
+#. module: mail_queue_job
+#: model:ir.model.fields,help:mail_queue_job.field_mail_mail_mail_job_priority
+msgid ""
+"Send the email with a priority level.\n"
+"0 being the higher priority. Default is 10"
+msgstr ""
