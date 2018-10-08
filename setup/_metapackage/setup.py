@@ -9,6 +9,7 @@ setuptools.setup(
     version=version,
     install_requires=[
         'odoo11-addon-base_import_async',
+        'odoo11-addon-mail_queue_job',
         'odoo11-addon-queue_job',
         'odoo11-addon-queue_job_subscribe',
         'odoo11-addon-test_base_import_async',
