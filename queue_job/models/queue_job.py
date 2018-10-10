@@ -179,20 +179,23 @@ class QueueJob(models.Model):
         self._change_job_state(PENDING)
         return True
 
+    def _message_post_on_failure(self):
+        # subscribe the users now to avoid to subscribe them
+        # at every job creation
+        domain = self._subscribe_users_domain()
+        users = self.env['res.users'].search(domain)
+        self.message_subscribe(partner_ids=users.mapped('partner_id').ids)
+        for record in self:
+            msg = record._message_failed_job()
+            if msg:
+                record.message_post(body=msg,
+                                    subtype='queue_job.mt_job_failed')
+
     @api.multi
     def write(self, vals):
         res = super(QueueJob, self).write(vals)
         if vals.get('state') == 'failed':
-            # subscribe the users now to avoid to subscribe them
-            # at every job creation
-            domain = self._subscribe_users_domain()
-            users = self.env['res.users'].search(domain)
-            self.message_subscribe(partner_ids=users.mapped('partner_id').ids)
-            for record in self:
-                msg = record._message_failed_job()
-                if msg:
-                    record.message_post(body=msg,
-                                        subtype='queue_job.mt_job_failed')
+            self._message_post_on_failure()
         return res
 
     @api.multi
