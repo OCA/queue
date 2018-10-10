@@ -11,6 +11,9 @@
 Next
 ~~~~
 
+* [REF] Extract a method handling the post of a message when a job is failed,
+  allowing to modify this behavior from addons
+
 12.0.1.0.0 (2018-10-02)
 ~~~~~~~~~~~~~~~~~~~~~~~
 
