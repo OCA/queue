@@ -17,6 +17,12 @@ Next
   the job is linked to respectively one record on several).
   (`#79 <https://github.com/OCA/queue/pull/79>`_, backport from `#46 <https://github.com/OCA/queue/pull/46>`_)
 
+10.0.1.1.3
+~~~~~~~~~~
+
+* [REF] Extract a method handling the post of a message when a job is failed,
+  allowing to modify this behavior from addons (Backport of `#108 <https://github.com/OCA/queue/pull/108>`)
+
 10.0.1.0.0
 ~~~~~~~~~~
 
