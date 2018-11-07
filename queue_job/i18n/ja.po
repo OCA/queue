@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2018-11-01 13:31+0000\n"
+"PO-Revision-Date: 2018-11-08 09:45+0000\n"
 "Last-Translator: Yoshi Tashiro <tashiro@roomsfor.hk>\n"
 "Language-Team: none\n"
 "Language: ja\n"
@@ -222,7 +222,7 @@ msgstr "ID"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_identity_key
 msgid "Identity Key"
-msgstr ""
+msgstr "特定キー"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job_channel
@@ -304,7 +304,7 @@ msgstr "最終更新日"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_account_bank_statement_import_journal_creation_check_manual_sequencing
 msgid "Manual Numbering"
-msgstr ""
+msgstr "手動採番"
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:170
@@ -315,34 +315,34 @@ msgstr "%s より手動で完了にされました"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_max_retries
 msgid "Max. retries"
-msgstr ""
+msgstr "最大リトライ"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_method_name
 msgid "Method Name"
-msgstr ""
+msgstr "メソッド名"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_model_name
 msgid "Model"
-msgstr ""
+msgstr "モデル"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function_name
 msgid "Name"
-msgstr ""
+msgstr "名称"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_account_bank_statement_import_journal_creation_check_next_number
 msgid "Next Check Number"
-msgstr ""
+msgstr "次のチェック番号"
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:148
 #, python-format
 msgid "No action available for this job"
-msgstr ""
+msgstr "このジョブにはアクションがありません"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_parent_id
@@ -364,7 +364,7 @@ msgstr "保留"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_priority
 msgid "Priority"
-msgstr ""
+msgstr "優先度"
 
 #. module: queue_job
 #: model:ir.ui.menu,name:queue_job.menu_queue
@@ -379,7 +379,7 @@ msgstr "キュージョブ"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_record_ids
 msgid "Record"
-msgstr ""
+msgstr "レコード"
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -401,12 +401,12 @@ msgstr "関連レコード"
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_requeue_job
 msgid "Requeue"
-msgstr ""
+msgstr "再キュー"
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Requeue Job"
-msgstr ""
+msgstr "キュージョブ"
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_requeue_job
@@ -434,12 +434,12 @@ msgstr "「完了」にする"
 #: code:addons/queue_job/models/queue_job.py:217
 #, python-format
 msgid "Something bad happened during the execution of the job. More details in the 'Exception Information' section."
-msgstr ""
+msgstr "ジョブ実行時に問題が発生しました。「例外情報」セクションで詳細をご確認ください。"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_date_started
 msgid "Start Date"
-msgstr ""
+msgstr "開始日"
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_queue_job_search
@@ -468,6 +468,8 @@ msgstr ""
 msgid "The job will fail if the number of tries reach the max. retries.\n"
 "Retries are infinite when empty."
 msgstr ""
+"トライ数が最大リトライに達するとジョブは失敗になります。\n"
+"最大リトライの設定がない場合は、無限にリトライしようとします。"
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_requeue_job
@@ -492,7 +494,7 @@ msgstr "選択されたジョブを再キューするウィザード"
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_base
 msgid "base"
-msgstr ""
+msgstr "base"
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_requeue_job
