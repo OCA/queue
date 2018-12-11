@@ -2,9 +2,13 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 import inspect
+import logging
+import os
 
 from odoo import models, api
 from ..job import DelayableRecordset
+
+_logger = logging.getLogger(__name__)
 
 
 class Base(models.AbstractModel):
@@ -43,7 +47,6 @@ class Base(models.AbstractModel):
         In the line above, in so far ``write`` is allowed to be delayed with
         ``@job``, the write will be executed in an asynchronous job.
 
-
         :param priority: Priority of the job, 0 being the higher priority.
                          Default is 10.
         :param eta: Estimated Time of Arrival of the job. It will not be
@@ -61,7 +64,27 @@ class Base(models.AbstractModel):
                              the new job will not be added.
         :return: instance of a DelayableRecordset
         :rtype: :class:`odoo.addons.queue_job.job.DelayableRecordset`
+
+        Note for developers: if you want to run tests or simply disable
+        jobs queueing for debugging purposes, you can:
+
+            a. set the env var `TEST_QUEUE_JOB_NO_DELAY=1`
+            b. pass a ctx key `test_queue_job_no_delay=1`
+
+        In tests you'll have to mute the logger like:
+
+            @mute_logger('odoo.addons.queue_job.models.base')
         """
+        if os.getenv('TEST_QUEUE_JOB_NO_DELAY'):
+            _logger.warn(
+                '`TEST_QUEUE_JOB_NO_DELAY` env var found. NO JOB scheduled.'
+            )
+            return self
+        if self.env.context.get('test_queue_job_no_delay'):
+            _logger.warn(
+                '`test_queue_job_no_delay` ctx key found. NO JOB scheduled.'
+            )
+            return self
         return DelayableRecordset(self, priority=priority,
                                   eta=eta,
                                   max_retries=max_retries,
