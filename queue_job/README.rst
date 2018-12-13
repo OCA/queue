@@ -178,6 +178,8 @@ Changelog
 Next
 ~~~~
 
+* [REF] Extract a method handling the post of a message when a job is failed,
+  allowing to modify this behavior from addons
 * [ADD] Default "related action" for jobs, opening a form or list view (when
   the job is linked to respectively one record on several).
   (`#46 <https://github.com/OCA/queue/pull/46>`_)
