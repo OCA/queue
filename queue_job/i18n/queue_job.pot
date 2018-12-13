@@ -46,13 +46,13 @@ msgid "Cancel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:347
+#: code:addons/queue_job/models/queue_job.py:350
 #, python-format
 msgid "Cannot change the root channel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:354
+#: code:addons/queue_job/models/queue_job.py:357
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr ""
@@ -347,7 +347,7 @@ msgid "Parent Channel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:339
+#: code:addons/queue_job/models/queue_job.py:342
 #, python-format
 msgid "Parent channel required."
 msgstr ""
@@ -384,13 +384,13 @@ msgid "Related"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:259
+#: code:addons/queue_job/models/queue_job.py:262
 #, python-format
 msgid "Related Record"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:269
+#: code:addons/queue_job/models/queue_job.py:272
 #, python-format
 msgid "Related Records"
 msgstr ""
@@ -428,7 +428,7 @@ msgid "Set to 'Done'"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:217
+#: code:addons/queue_job/models/queue_job.py:220
 #, python-format
 msgid "Something bad happened during the execution of the job. More details in the 'Exception Information' section."
 msgstr ""
