@@ -5,7 +5,8 @@
 import logging
 from datetime import datetime, timedelta
 
-from odoo import models, fields, api, exceptions, _
+from odoo import models, fields, api, exceptions, registry, _
+from psycopg2 import OperationalError
 
 from ..job import STATES, DONE, PENDING, Job
 from ..fields import JobSerialized
@@ -220,16 +221,34 @@ class QueueJob(models.Model):
         return [('state', '=', 'failed')]
 
     @api.model
-    def autovacuum(self):
+    def autovacuum(self, jobs_set=1000, use_new_cursor=False):
         """ Delete all jobs done since more than ``_removal_interval`` days.
-
+        Uses sets of jobs to ensure that no timeout occurs
         Called from a cron.
         """
+        job_obj = self.env['queue.job']
         deadline = datetime.now() - timedelta(days=self._removal_interval)
-        jobs = self.search(
+        jobs_ids = self.search(
             [('date_done', '<=', fields.Datetime.to_string(deadline))],
-        )
-        jobs.unlink()
+        ).ids
+
+        while jobs_ids:
+            if use_new_cursor:
+                cr = registry(self._cr.dbname).cursor()
+                self = self.with_env(self.env(cr=cr))
+            try:
+                jobs = job_obj.browse(jobs_ids[:jobs_set])
+                jobs_ids = jobs_ids[jobs_set:]
+                jobs.unlink()
+                if use_new_cursor:
+                    cr.commit()
+            except OperationalError:
+                if use_new_cursor:
+                    cr.rollback()
+                    raise
+            finally:
+                if use_new_cursor:
+                    cr.close()
         return True
 
     @api.multi
