@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-# Copyright 2017 ACSONE SA/NV (<http://acsone.eu>)
+# Copyright 2019 ACSONE SA/NV (<http://acsone.eu>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 import logging
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.addons.queue_job.job import job
-from odoo.exceptions import ValidationError
-from odoo.addons.base.ir.ir_cron import str2tuple
 
 _logger = logging.getLogger(__name__)
 
@@ -27,32 +24,33 @@ class IrCron(models.Model):
 
     @job(default_channel='root.ir_cron')
     @api.model
-    def _run_job_as_queue_job(self, model_name, method_name, args):
-        args = str2tuple(args)
-        if model_name in self.env:
-            model = self.env[model_name]
-            if hasattr(model, method_name):
-                getattr(model, method_name)(*args)
-            else:
-                raise ValidationError(_("Method '%s.%s' does not exist." %
-                                        (model_name, method_name)))
+    def _run_job_as_queue_job(self, server_action):
+        return server_action.run()
+
+    @api.multi
+    def method_direct_trigger(self):
+        if self.run_as_queue_job:
+            return self.with_delay(
+                priority=self.priority,
+                description=self.name,
+                channel=self.channel_id.name)._run_job_as_queue_job(
+                server_action=self.ir_actions_server_id)
         else:
-            raise ValidationError(_("Model %r does not exist." % model_name))
+            return super(IrCron, self).method_direct_trigger()
 
     @api.model
-    def _callback(self, model_name, method_name, args, job_id):
+    def _callback(self, cron_name, server_action_id, job_id):
         cron = self.env['ir.cron'].sudo().browse(job_id)
         if cron.run_as_queue_job:
+            server_action = self.env['ir.actions.server'].browse(
+                server_action_id)
             return self.with_delay(
                 priority=cron.priority,
                 description=cron.name,
                 channel=cron.channel_id.name)._run_job_as_queue_job(
-                    model_name=model_name,
-                    method_name=method_name,
-                    args=args)
+                    server_action=server_action)
         else:
             return super(IrCron, self)._callback(
-                model_name=model_name,
-                method_name=method_name,
-                args=args,
+                cron_name=cron_name,
+                server_action_id=server_action_id,
                 job_id=job_id)
