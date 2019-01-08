@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-# Copyright 2017 ACSONE SA/NV (<http://acsone.eu>)
+# Copyright 2019 ACSONE SA/NV (<http://acsone.eu>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 from odoo.tests.common import TransactionCase
-from odoo.exceptions import ValidationError
 
 
 class TestQueueJobCron(TransactionCase):
@@ -43,24 +41,4 @@ class TestQueueJobCron(TransactionCase):
     def test_queue_job_cron_run(self):
         cron = self.env.ref('queue_job.ir_cron_autovacuum_queue_jobs')
         IrCron = self.env['ir.cron']
-
-        model_name = cron.model
-        method_name = cron.function
-        args = cron.args
-
-        model_name = 'fake.model'
-        method_name = cron.function
-        args = cron.args
-        with self.assertRaises(ValidationError):
-            IrCron._run_job_as_queue_job(model_name, method_name, args)
-
-        model_name = cron.model
-        method_name = 'fake.function'
-        args = cron.args
-        with self.assertRaises(ValidationError):
-            IrCron._run_job_as_queue_job(model_name, method_name, args)
-
-        model_name = cron.model
-        method_name = cron.function
-        args = cron.args
-        IrCron._run_job_as_queue_job(model_name, method_name, args)
+        IrCron._run_job_as_queue_job(server_action=cron.ir_actions_server_id)
