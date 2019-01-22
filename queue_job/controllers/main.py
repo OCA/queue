@@ -83,8 +83,8 @@ class RunJobController(http.Controller):
         env = http.request.env(user=odoo.SUPERUSER_ID)
 
         def retry_postpone(job, message, seconds=None):
-
-            job.env.cr.rollback()
+            if not job.env.cr._closed:
+                job.env.cr.rollback()
             job.env.clear()
             with odoo.api.Environment.manage():
                 with odoo.registry(job.env.cr.dbname).cursor() as new_cr:
@@ -105,12 +105,26 @@ class RunJobController(http.Controller):
             except OperationalError as err:
                 # Automatically retry the typical transaction serialization
                 # errors
-                if err.pgcode not in PG_CONCURRENCY_ERRORS_TO_RETRY:
+                if err.pgcode in PG_CONCURRENCY_ERRORS_TO_RETRY:
+                    retry_postpone(
+                        job,
+                        tools.ustr(err.pgerror, errors='replace'),
+                        seconds=PG_RETRY
+                    )
+                    _logger.debug('%s OperationalError, postponed', job)
+                elif unicode(err).startswith(
+                        u'Unable to use a closed cursor.'
+                ):
+                    # This error is raised by odoo in sql_db.py, it raises
+                    # an OperationalError but leave pgcode and pgerror empty,
+                    # we can only rely on the name which is hardcoded.
+                    # This error is likely to work in a fresh environment.
+                    retry_postpone(job, unicode(err), seconds=PG_RETRY)
+                    _logger.debug(
+                        '%s unable to use a closed cursor, postponed', job
+                    )
+                else:
                     raise
-
-                retry_postpone(job, tools.ustr(err.pgerror, errors='replace'),
-                               seconds=PG_RETRY)
-                _logger.debug('%s OperationalError, postponed', job)
 
         except NothingToDoJob as err:
             if unicode(err):
