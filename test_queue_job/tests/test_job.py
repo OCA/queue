@@ -5,7 +5,6 @@ import hashlib
 
 from datetime import datetime, timedelta
 import mock
-
 from odoo import SUPERUSER_ID
 import odoo.tests.common as common
 
@@ -529,6 +528,18 @@ class TestJobModel(common.TransactionCase):
         key_present = 'job_uuid' in result
         self.assertTrue(key_present)
         self.assertEqual(result['job_uuid'], test_job._uuid)
+
+    def test_context_from_context(self):
+        element = 'EXPECTED VALUE'
+        delayable = self.env['test.queue.job'].with_context(
+            return_context_from_context=True,
+            expected_element_from_context=element,
+        ).with_delay()
+        test_job = delayable.testing_method(return_context=True)
+        result = test_job.perform()
+        key_present = 'expected_element_from_context' in result
+        self.assertTrue(key_present)
+        self.assertEqual(result['expected_element_from_context'], element)
 
     def test_override_channel(self):
         delayable = self.env['test.queue.job'].with_delay(

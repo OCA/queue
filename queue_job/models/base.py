@@ -90,4 +90,5 @@ class Base(models.AbstractModel):
                                   max_retries=max_retries,
                                   description=description,
                                   channel=channel,
-                                  identity_key=identity_key)
+                                  identity_key=identity_key,
+                                  job_context=self.env.context.copy())

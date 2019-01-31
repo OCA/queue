@@ -88,6 +88,7 @@ class QueueJob(models.Model):
                           index=True)
 
     identity_key = fields.Char()
+    job_context = JobSerialized(readonly=True)
 
     @api.model_cr
     def init(self):

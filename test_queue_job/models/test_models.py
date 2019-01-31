@@ -36,7 +36,9 @@ class TestQueueJob(models.Model):
 
     name = fields.Char()
 
-    @job
+    @job(allow_context=[
+        'return_context_from_context', 'expected_element_from_context'
+    ])
     @related_action(action='testing_related_method')
     @api.multi
     def testing_method(self, *args, **kwargs):
@@ -47,6 +49,8 @@ class TestQueueJob(models.Model):
         if kwargs.get('raise_retry'):
             raise RetryableJobError('Must be retried later')
         if kwargs.get('return_context'):
+            return self.env.context
+        if self.env.context.get('return_context_from_context', False):
             return self.env.context
         return args, kwargs
 

@@ -55,7 +55,7 @@ class DelayableRecordset(object):
 
     def __init__(self, recordset, priority=None, eta=None,
                  max_retries=None, description=None, channel=None,
-                 identity_key=None):
+                 identity_key=None, job_context=None):
         self.recordset = recordset
         self.priority = priority
         self.eta = eta
@@ -63,6 +63,7 @@ class DelayableRecordset(object):
         self.description = description
         self.channel = channel
         self.identity_key = identity_key
+        self.job_context = job_context or {}
 
     def __getattr__(self, name):
         if name in self.recordset:
@@ -87,8 +88,17 @@ class DelayableRecordset(object):
                                eta=self.eta,
                                description=self.description,
                                channel=self.channel,
-                               identity_key=self.identity_key)
+                               identity_key=self.identity_key,
+                               job_context=self.get_context(recordset_method))
         return delay
+
+    def get_context(self, method):
+        original_ctx = self.job_context
+        ctx = {}
+        for key in getattr(method, 'allow_context', []):
+            if key in original_ctx:
+                ctx[key] = original_ctx[key]
+        return ctx
 
     def __str__(self):
         return "DelayableRecordset(%s%s)" % (
@@ -241,6 +251,10 @@ class Job(object):
         be added to a channel if the existing job with the same key is not yet
         started or executed.
 
+    .. attribute::job_context
+
+        Original context of the job
+
     """
     @classmethod
     def load(cls, env, job_uuid):
@@ -259,7 +273,6 @@ class Job(object):
         args = stored.args
         kwargs = stored.kwargs
         method_name = stored.method_name
-
         model = env[stored.model_name]
 
         recordset = model.browse(stored.record_ids)
@@ -297,6 +310,7 @@ class Job(object):
         if stored.company_id:
             job_.company_id = stored.company_id.id
         job_.identity_key = stored.identity_key
+        job_.job_context = stored.job_context or {}
         return job_
 
     def job_record_with_same_identity_key(self):
@@ -311,7 +325,7 @@ class Job(object):
     @classmethod
     def enqueue(cls, func, args=None, kwargs=None,
                 priority=None, eta=None, max_retries=None, description=None,
-                channel=None, identity_key=None):
+                channel=None, identity_key=None, job_context=None):
         """Create a Job and enqueue it in the queue. Return the job uuid.
 
         This expects the arguments specific to the job to be already extracted
@@ -324,7 +338,8 @@ class Job(object):
         new_job = cls(func=func, args=args,
                       kwargs=kwargs, priority=priority, eta=eta,
                       max_retries=max_retries, description=description,
-                      channel=channel, identity_key=identity_key)
+                      channel=channel, identity_key=identity_key,
+                      job_context=job_context)
         if new_job.identity_key:
             existing = new_job.job_record_with_same_identity_key()
             if existing:
@@ -355,7 +370,8 @@ class Job(object):
     def __init__(self, func,
                  args=None, kwargs=None, priority=None,
                  eta=None, job_uuid=None, max_retries=None,
-                 description=None, channel=None, identity_key=None):
+                 description=None, channel=None, identity_key=None,
+                 job_context=None):
         """ Create a Job
 
         :param func: function to execute
@@ -397,6 +413,7 @@ class Job(object):
 
         recordset = func.__self__
         env = recordset.env
+        self.job_context = job_context or {}
         self.model_name = recordset._name
         self.method_name = func.__name__
         self.recordset = recordset
@@ -497,6 +514,7 @@ class Job(object):
                 'date_done': False,
                 'eta': False,
                 'identity_key': False,
+                'job_context': self.job_context,
                 }
 
         dt_to_string = odoo.fields.Datetime.to_string
@@ -539,7 +557,10 @@ class Job(object):
 
     @property
     def func(self):
-        recordset = self.recordset.with_context(job_uuid=self.uuid)
+        recordset = self.recordset.with_context(
+            **(self.job_context or {})
+        ).with_context(job_uuid=self.uuid, )
+        # We want to be sure that the job_uuid is not rewritten
         recordset = recordset.sudo(self.user_id)
         return getattr(recordset, self.method_name)
 
@@ -675,7 +696,8 @@ def _is_model_method(func):
             isinstance(func.__self__.__class__, odoo.models.MetaModel))
 
 
-def job(func=None, default_channel='root', retry_pattern=None):
+def job(func=None, default_channel='root', retry_pattern=None,
+        allow_context=None):
     """Decorator for job methods.
 
     It enables the possibility to use a Model's method as a job function.
@@ -692,6 +714,8 @@ def job(func=None, default_channel='root', retry_pattern=None):
                           is provided, jobs will be retried after
                           :const:`RETRY_INTERVAL` seconds.
     :type retry_pattern: dict(retry_count,retry_eta_seconds)
+    :param allow_context: List of allowed context keys.
+    :type allow_context: array
 
     Indicates that a method of a Model can be delayed in the Job Queue.
 
@@ -759,7 +783,8 @@ def job(func=None, default_channel='root', retry_pattern=None):
     """
     if func is None:
         return functools.partial(job, default_channel=default_channel,
-                                 retry_pattern=retry_pattern)
+                                 retry_pattern=retry_pattern,
+                                 allow_context=allow_context)
 
     def delay_from_model(*args, **kwargs):
         raise AttributeError(
@@ -779,6 +804,7 @@ def job(func=None, default_channel='root', retry_pattern=None):
     func.delay = delay_func
     func.retry_pattern = retry_pattern
     func.default_channel = default_channel
+    func.allow_context = allow_context or []
     return func
 
 
