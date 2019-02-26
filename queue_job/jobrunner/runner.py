@@ -147,7 +147,7 @@ import requests
 
 import odoo
 from odoo.tools import config
-
+from . import queue_job_config
 from .channels import ChannelManager, PENDING, ENQUEUED, NOT_DONE
 
 SELECT_TIMEOUT = 60
@@ -170,8 +170,7 @@ session = requests.Session()
 def _channels():
     return (
         os.environ.get('ODOO_QUEUE_JOB_CHANNELS') or
-        config.misc.get("queue_job", {}).get("channels") or
-        "root:1"
+        queue_job_config.get("channels") or "root:1"
     )
 
 
@@ -191,8 +190,7 @@ def _connection_info_for(db_name):
 
     for p in ('host', 'port'):
         cfg = (os.environ.get('ODOO_QUEUE_JOB_JOBRUNNER_DB_%s' % p.upper()) or
-               config.misc
-               .get("queue_job", {}).get('jobrunner_db_' + p))
+               queue_job_config.get("jobrunner_db_" + p))
 
         if cfg:
             connection_info[p] = cfg
@@ -369,8 +367,8 @@ class QueueJobRunner(object):
         self._stop_pipe = os.pipe()
 
     def get_db_names(self):
-        if odoo.tools.config['db_name']:
-            db_names = odoo.tools.config['db_name'].split(',')
+        if config['db_name']:
+            db_names = config['db_name'].split(',')
         else:
             db_names = odoo.service.db.exp_list(True)
         return db_names

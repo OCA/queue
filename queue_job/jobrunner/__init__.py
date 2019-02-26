@@ -9,6 +9,15 @@ import time
 
 from odoo.service import server
 from odoo.tools import config
+try:
+    from odoo.addons.server_environment import serv_config
+    if serv_config.has_section('queue_job'):
+        queue_job_config = serv_config['queue_job']
+    else:
+        queue_job_config = {}
+except ImportError:
+    queue_job_config = config.misc.get('queue_job', {})
+
 
 from .runner import QueueJobRunner
 
@@ -28,17 +37,17 @@ class QueueJobRunnerThread(Thread):
         Thread.__init__(self)
         self.daemon = True
         scheme = (os.environ.get('ODOO_QUEUE_JOB_SCHEME') or
-                  config.misc.get("queue_job", {}).get('scheme'))
+                  queue_job_config.get("scheme"))
         host = (os.environ.get('ODOO_QUEUE_JOB_HOST') or
-                config.misc.get("queue_job", {}).get('host') or
+                queue_job_config.get("host") or
                 config['http_interface'])
         port = (os.environ.get('ODOO_QUEUE_JOB_PORT') or
-                config.misc.get("queue_job", {}).get('port') or
+                queue_job_config.get("port") or
                 config['http_port'])
         user = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_USER') or
-                config.misc.get("queue_job", {}).get('http_auth_user'))
+                queue_job_config.get("http_auth_user"))
         password = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD') or
-                    config.misc.get("queue_job", {}).get('http_auth_password'))
+                    queue_job_config.get("http_auth_password"))
         self.runner = QueueJobRunner(scheme or 'http',
                                      host or 'localhost',
                                      port or 8069,
