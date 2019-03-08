@@ -40,19 +40,6 @@ class RunJobController(http.Controller):
 
     def _try_perform_job(self, env, job):
         """Try to perform the job."""
-
-        # if the job has been manually set to DONE or PENDING,
-        # or if something tries to run a job that is not enqueued
-        # before its execution, stop
-        if job.state != ENQUEUED:
-            _logger.warning('job %s is in state %s '
-                            'instead of enqueued in /runjob',
-                            job.uuid, job.state)
-            return
-
-        # TODO: set_started should be done atomically with
-        #       update queue_job set=state=started
-        #       where state=enqueid and id=
         job.set_started()
         job.store()
         http.request.env.cr.commit()
@@ -91,10 +78,23 @@ class RunJobController(http.Controller):
                     job.store()
                     new_cr.commit()
 
-        job = self._load_job(env, job_uuid)
-        if job is None:
+        # ensure the job to run is in the correct state and lock the record
+        env.cr.execute(
+            "SELECT state FROM queue_job "
+            "WHERE uuid=%s AND state=%s "
+            "FOR UPDATE",
+            (job_uuid, ENQUEUED)
+        )
+        if not env.cr.fetchone():
+            _logger.warn(
+                "was requested to run job %s, but it does not exist, "
+                "or is not in state %s",
+                job_uuid, ENQUEUED
+            )
             return ""
-        env.cr.commit()
+
+        job = self._load_job(env, job_uuid)
+        assert job and job.state == ENQUEUED
 
         try:
             try:

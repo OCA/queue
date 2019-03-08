@@ -224,8 +224,14 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
             cr.execute(
                 "UPDATE queue_job SET state=%s, "
                 "date_enqueued=NULL, date_started=NULL "
-                "WHERE uuid=%s and state=%s", (PENDING, job_uuid, ENQUEUED)
+                "WHERE uuid=%s and state=%s "
+                "RETURNING uuid", (PENDING, job_uuid, ENQUEUED)
             )
+            if cr.fetchone():
+                _logger.warning(
+                    "state of job %s was reset from %s to %s",
+                    job_uuid, ENQUEUED, PENDING,
+                )
 
     # TODO: better way to HTTP GET asynchronously (grequest, ...)?
     #       if this was python3 I would be doing this with
