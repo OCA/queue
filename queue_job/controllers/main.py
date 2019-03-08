@@ -13,11 +13,7 @@ from odoo import _, http, tools
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
 from ..job import Job, ENQUEUED
-from ..exception import (NoSuchJobError,
-                         NotReadableJobError,
-                         RetryableJobError,
-                         FailedJobError,
-                         NothingToDoJob)
+from ..exception import (RetryableJobError, FailedJobError, NothingToDoJob)
 
 _logger = logging.getLogger(__name__)
 
@@ -25,18 +21,6 @@ PG_RETRY = 5  # seconds
 
 
 class RunJobController(http.Controller):
-
-    def _load_job(self, env, job_uuid):
-        """Reload a job from the backend"""
-        try:
-            job = Job.load(env, job_uuid)
-        except NoSuchJobError:
-            # just skip it
-            job = None
-        except NotReadableJobError:
-            _logger.exception('Could not read job: %s', job_uuid)
-            raise
-        return job
 
     def _try_perform_job(self, env, job):
         """Try to perform the job."""
@@ -93,7 +77,7 @@ class RunJobController(http.Controller):
             )
             return ""
 
-        job = self._load_job(env, job_uuid)
+        job = Job.load(env, job_uuid)
         assert job and job.state == ENQUEUED
 
         try:
