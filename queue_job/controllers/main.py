@@ -26,13 +26,13 @@ class RunJobController(http.Controller):
         """Try to perform the job."""
         job.set_started()
         job.store()
-        http.request.env.cr.commit()
-
+        env.cr.commit()
         _logger.debug('%s started', job)
+
         job.perform()
         job.set_done()
         job.store()
-        http.request.env.cr.commit()
+        env.cr.commit()
         _logger.debug('%s done', job)
 
     @http.route('/queue_job/session', type='http', auth="none")
