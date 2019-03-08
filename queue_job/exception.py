@@ -14,10 +14,6 @@ class NoSuchJobError(JobError):
     """The job does not exist."""
 
 
-class NotReadableJobError(JobError):
-    """The job cannot be read from the storage."""
-
-
 class FailedJobError(JobError):
     """A job had an error having to be resolved."""
 
