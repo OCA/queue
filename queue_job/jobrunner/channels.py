@@ -1045,7 +1045,7 @@ class ChannelManager(object):
             del self._jobs_by_uuid[job.uuid]
 
     def remove_db(self, db_name):
-        for job in self._jobs_by_uuid.values():
+        for job in list(self._jobs_by_uuid.values()):
             if job.db_name == db_name:
                 job.channel.remove(job)
                 del self._jobs_by_uuid[job.uuid]
