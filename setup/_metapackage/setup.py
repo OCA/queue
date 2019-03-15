@@ -9,6 +9,7 @@ setuptools.setup(
     version=version,
     install_requires=[
         'odoo12-addon-queue_job',
+        'odoo12-addon-queue_job_cron',
         'odoo12-addon-test_queue_job',
     ],
     classifiers=[
