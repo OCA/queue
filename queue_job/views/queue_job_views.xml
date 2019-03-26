@@ -158,7 +158,7 @@
     </record>
 
     <record id="view_set_jobs_done" model="ir.ui.view">
-        <field name="name">Requeue Jobs</field>
+        <field name="name">Set Jobs to Done</field>
         <field name="model">queue.jobs.to.done</field>
         <field name="arch" type="xml">
             <form string="Set jobs done">
