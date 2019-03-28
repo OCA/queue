@@ -261,9 +261,11 @@ class Job(object):
         method_name = stored.method_name
 
         model = env[stored.model_name]
-
-        recordset = model.browse(stored.record_ids)
-        method = getattr(recordset, method_name)
+        if stored.record_ids:
+            recordset = model.browse(stored.record_ids).exists()
+            method = getattr(recordset, method_name)
+        else:
+            method = getattr(model, method_name)
 
         eta = None
         if stored.eta:
