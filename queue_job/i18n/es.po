@@ -49,17 +49,18 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_requeue_job
+#: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Cancel"
 msgstr "Cancelar"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:350
+#: code:addons/queue_job/models/queue_job.py:362
 #, python-format
 msgid "Cannot change the root channel"
 msgstr "No puede modificar el canal root"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:357
+#: code:addons/queue_job/models/queue_job.py:369
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr "No puede eliminar el canal root"
@@ -128,12 +129,14 @@ msgstr "Fecha de Creación"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_create_uid
 msgid "Created by"
 msgstr "Creado por"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_create_date
 msgid "Created on"
 msgstr "Creado en"
@@ -162,6 +165,7 @@ msgstr "Descripción"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function_display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_display_name
 msgid "Display Name"
 msgstr "Nombre a mostrar"
@@ -219,6 +223,7 @@ msgstr "Agrupar por"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function_id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_id
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_id
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_id
 msgid "ID"
 msgstr "ID"
@@ -273,6 +278,7 @@ msgstr "Trabajo interrumpido y marcado como realizado: nada a realizar."
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_job_ids
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_job_ids
 #: model:ir.ui.menu,name:queue_job.menu_queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -289,18 +295,21 @@ msgstr "Kwargs"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job___last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel___last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function___last_update
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done___last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job___last_update
 msgid "Last Modified on"
 msgstr "Última modificación en"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_write_uid
 msgid "Last Updated by"
 msgstr "Última actualización por"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_write_date
 msgid "Last Updated on"
 msgstr "Última actualización en"
@@ -354,7 +363,7 @@ msgid "Parent Channel"
 msgstr "Canal padre"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:342
+#: code:addons/queue_job/models/queue_job.py:354
 #, python-format
 msgid "Parent channel required."
 msgstr "Canal padre obligatorio."
@@ -430,8 +439,34 @@ msgid "Sequence number of the next printed check."
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_jobs_to_done
+msgid "Set all selected jobs to done"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+#, fuzzy
+#| msgid "Set to 'Done'"
+msgid "Set jobs done"
+msgstr "Marcar como 'Realizado'"
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_set_jobs_done
+#, fuzzy
+#| msgid "Set to 'Done'"
+msgid "Set jobs to done"
+msgstr "Marcar como 'Realizado'"
+
+#. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Set to 'Done'"
+msgstr "Marcar como 'Realizado'"
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+#, fuzzy
+#| msgid "Set to 'Done'"
+msgid "Set to done"
 msgstr "Marcar como 'Realizado'"
 
 #. module: queue_job
@@ -488,6 +523,13 @@ msgid "The selected jobs will be requeued."
 msgstr "Los trabajo seleccionados serán puestos en cola de nuevo."
 
 #. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+#, fuzzy
+#| msgid "The selected jobs will be requeued."
+msgid "The selected jobs will be set to done."
+msgstr "Los trabajo seleccionados serán puestos en cola de nuevo."
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_uuid
 msgid "UUID"
 msgstr "UUID"
@@ -507,7 +549,5 @@ msgstr "Lanzador para volver a poner en cola una selección de trabajos"
 msgid "base"
 msgstr "base"
 
-#. module: queue_job
-#: model:ir.ui.view,arch_db:queue_job.view_requeue_job
-msgid "or"
-msgstr "o"
+#~ msgid "or"
+#~ msgstr "o"
