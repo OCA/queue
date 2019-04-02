@@ -209,6 +209,8 @@ Changelog
 Next
 ~~~~
 
+* [ADD] Ability to set several jobs to done using an multi-action
+  (port of `#59 <https://github.com/OCA/queue/pull/59>`_)
 * [REF] Extract a method handling the post of a message when a job is failed,
   allowing to modify this behavior from addons
 
