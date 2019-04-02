@@ -57,17 +57,18 @@ msgstr ""
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Cancel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:353
+#: code:addons/queue_job/models/queue_job.py:365
 #, python-format
 msgid "Cannot change the root channel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:360
+#: code:addons/queue_job/models/queue_job.py:372
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr ""
@@ -116,12 +117,14 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_uid
 msgid "Created by"
 msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_date
 msgid "Created on"
 msgstr ""
@@ -150,6 +153,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__display_name
 msgid "Display Name"
 msgstr ""
@@ -217,6 +221,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__id
 msgid "ID"
 msgstr ""
@@ -291,6 +296,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__job_ids
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__job_ids
 #: model:ir.ui.menu,name:queue_job.menu_queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -307,18 +313,21 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function____last_update
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job____last_update
 msgid "Last Modified on"
 msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_uid
 msgid "Last Updated by"
 msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
 msgid "Last Updated on"
 msgstr ""
@@ -427,7 +436,7 @@ msgid "Parent Channel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:345
+#: code:addons/queue_job/models/queue_job.py:357
 #, python-format
 msgid "Parent channel required."
 msgstr ""
@@ -508,8 +517,28 @@ msgid "Result"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_jobs_to_done
+msgid "Set all selected jobs to done"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+msgid "Set jobs done"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_set_jobs_done
+msgid "Set jobs to done"
+msgstr ""
+
+#. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Set to 'Done'"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+msgid "Set to done"
 msgstr ""
 
 #. module: queue_job
@@ -560,6 +589,11 @@ msgid "The selected jobs will be requeued."
 msgstr ""
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+msgid "The selected jobs will be set to done."
+msgstr ""
+
+#. module: queue_job
 #: selection:queue.job,activity_state:0
 msgid "Today"
 msgstr ""
@@ -587,10 +621,5 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_requeue_job
 msgid "Wizard to requeue a selection of jobs"
-msgstr ""
-
-#. module: queue_job
-#: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
-msgid "or"
 msgstr ""
 
