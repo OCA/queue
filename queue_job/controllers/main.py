@@ -53,10 +53,14 @@ class RunJobController(http.Controller):
         env = http.request.env(user=odoo.SUPERUSER_ID)
 
         def retry_postpone(job, message, seconds=None):
-            job.postpone(result=message, seconds=seconds)
-            job.set_pending(reset_retry=False)
-            job.store()
-            env.cr.commit()
+            job.env.clear()
+            with odoo.api.Environment.manage():
+                with odoo.registry(job.env.cr.dbname).cursor() as new_cr:
+                    job.env = job.env(cr=new_cr)
+                    job.postpone(result=message, seconds=seconds)
+                    job.set_pending(reset_retry=False)
+                    job.store()
+                    new_cr.commit()
 
         # ensure the job to run is in the correct state and lock the record
         env.cr.execute(
