@@ -264,7 +264,7 @@ msgid "Job failed"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/controllers/main.py:112
+#: code:addons/queue_job/controllers/main.py:116
 #, python-format
 msgid "Job interrupted and set to Done: nothing to do."
 msgstr ""
