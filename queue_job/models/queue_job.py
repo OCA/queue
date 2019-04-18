@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 from odoo import models, fields, api, exceptions, _
 
-from ..job import STATES, DONE, PENDING, Job
+from ..job import STATES, DONE, PENDING, STARTED, Job
 from ..fields import JobSerialized
 
 _logger = logging.getLogger(__name__)
@@ -27,6 +27,7 @@ class QueueJob(models.Model):
     _order = 'date_created DESC, date_done DESC'
 
     _removal_interval = 30  # days
+    _requeue_timeout = 30  # minutes
     _default_related_action = 'related_action_open_record'
 
     uuid = fields.Char(string='UUID',
@@ -230,6 +231,20 @@ class QueueJob(models.Model):
             [('date_done', '<=', fields.Datetime.to_string(deadline))],
         )
         jobs.unlink()
+        return True
+
+    @api.model
+    def autorequeue(self):
+        """ Do requeue all jobs in state Stared since more than ``_requeue_timeout`` minutes.
+
+        Called from a cron.
+        """
+        deadline = datetime.now() - timedelta(minutes=self._requeue_timeout)
+        jobs = self.search([
+            ('date_started', '<=', fields.Datetime.to_string(deadline)),
+            ('state', '=', STARTED),
+        ],)
+        jobs.requeue()
         return True
 
     @api.multi

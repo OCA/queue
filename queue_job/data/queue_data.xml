@@ -22,6 +22,18 @@
             <field eval="'()'" name="args"/>
         </record>
 
+        <record id="ir_cron_autorequeue_queue_jobs" model="ir.cron">
+            <field name="name">AutoRequeue Jobs in Queue</field>
+            <field eval="False" name="active"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">30</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'queue.job'" name="model"/>
+            <field eval="'autorequeue'" name="function"/>
+            <field eval="'()'" name="args"/>
+        </record>
     </data>
 
     <data noupdate="0">
