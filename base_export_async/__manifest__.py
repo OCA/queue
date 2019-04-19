@@ -16,6 +16,7 @@
     ],
     'data': [
         'views/assets.xml',
+        'security/ir.model.access.csv',
     ],
     'demo': [
     ],
