@@ -22,13 +22,7 @@ class DelayExport(models.Model):
     @api.model
     def delay_export(self, data):
         params = json.loads(data.get('data'))
-        context = params.get('context', {})
-        uid = context.get('uid', False)
-        if not uid:
-            raise Warning(_("A problem occurs during the job creation. \
-             Please contact your administrator"))
-        user = self.env['res.users'].browse([uid])
-        if not user.email:
+        if not self.env.user.email:
             raise Warning(_("You must set an email address to your user."))
         self.with_delay().export(params)
 
