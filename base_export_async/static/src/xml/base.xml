@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+<t t-extend="ExportDialog">
+    <t t-jquery="div.row" t-operation="append">
+        <div class="col-lg-12">
+            <label>
+                <input type="checkbox" name="async_export" id="async_export"/>
+                <strong> Asynchronous export </strong> (You will receive the export by email)
+            </label>
+        </div>
+    </t>
+</t>
+
+</templates>
