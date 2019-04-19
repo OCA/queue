@@ -25,7 +25,8 @@ class DelayExport(models.Model):
         context = params.get('context', {})
         uid = context.get('uid', False)
         if not uid:
-            raise Warning(_("A problem occurs during the job creation. Please contact your administrator"))
+            raise Warning(_("A problem occurs during the job creation. \
+             Please contact your administrator"))
         user = self.env['res.users'].browse([uid])
         if not user.email:
             raise Warning(_("You must set an email address to your user."))
@@ -38,19 +39,24 @@ class DelayExport(models.Model):
         raw_data = export_format != 'csv'
 
         model_name, fields_name, ids, domain, import_compat, context = \
-            operator.itemgetter('model', 'fields', 'ids', 'domain', 'import_compat', 'context')(params)
+            operator.itemgetter('model', 'fields', 'ids',
+                                'domain', 'import_compat', 'context')(params)
         user = self.env['res.users'].browse([context.get('uid')])
         if not user or not user.email:
             raise Warning(_("The user doesn't have an email address."))
 
-        model = self.env[model_name].with_context(import_compat=import_compat, **context)
-        records = model.browse(ids) or model.search(domain, offset=0, limit=False, order=False)
+        model = self.env[model_name].with_context(
+            import_compat=import_compat, **context)
+        records = model.browse(ids) or model.search(
+            domain, offset=0, limit=False, order=False)
 
         if not model._is_an_ordinary_table():
-            fields_name = [field for field in fields_name if field['name'] != 'id']
+            fields_name = [field for field in fields_name
+                           if field['name'] != 'id']
 
         field_names = [f['name'] for f in fields_name]
-        import_data = records.export_data(field_names, raw_data).get('datas', [])
+        import_data = records.export_data(
+            field_names, raw_data).get('datas', [])
 
         if import_compat:
             columns_headers = field_names
@@ -77,9 +83,10 @@ class DelayExport(models.Model):
             'email_from': email_from,
             'reply_to': email_from,
             'email_to': user.email,
-            'subject': _("Export {} {}").format(model_name,
-                fields.Date.to_string(fields.Date.today())),
-            'body_html': _("This is an automated message please do not reply."),
+            'subject': _("Export {} {}").format(
+                model_name, fields.Date.to_string(fields.Date.today())),
+            'body_html': _("This is an automated \
+                message please do not reply."),
             'attachment_ids': [(4, attachment.id)],
             'auto_delete': True,
         })
