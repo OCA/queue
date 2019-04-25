@@ -1,8 +1,11 @@
 # Copyright 2019 ACSONE SA/NV
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-import odoo.tests.common as common
 import json
+from dateutil.relativedelta import relativedelta
+
+from odoo import fields
+import odoo.tests.common as common
 
 data_csv = {'data': """{"format": "csv", "model": "res.partner",
             "fields": [{"name": "id", "label": "External ID"},
@@ -43,18 +46,43 @@ class TestBaseExportAsync(common.TransactionCase):
         """ Check that the export generate an attachment and email"""
         params = json.loads(data_csv.get('data'))
         mails = self.env['mail.mail'].search([])
+        attachments = self.env['ir.attachment'].search([])
         self.delay_export_obj.export(params)
         new_mail = self.env['mail.mail'].search([]) - mails
+        new_attachment = self.env['ir.attachment'].search([]) - attachments
         self.assertEqual(len(new_mail), 1)
-        self.assertEqual(new_mail.attachment_ids[0].datas_fname,
+        self.assertEqual(new_attachment.datas_fname,
                          "res.partner.csv")
+        self.assertTrue(new_attachment.to_delete)
 
     def test_export_xls(self):
         """ Check that the export generate an attachment and email"""
         params = json.loads(data_xls.get('data'))
         mails = self.env['mail.mail'].search([])
+        attachments = self.env['ir.attachment'].search([])
         self.delay_export_obj.export(params)
         new_mail = self.env['mail.mail'].search([]) - mails
+        new_attachment = self.env['ir.attachment'].search([]) - attachments
         self.assertEqual(len(new_mail), 1)
-        self.assertEqual(new_mail.attachment_ids[0].datas_fname,
+        self.assertEqual(new_attachment.datas_fname,
                          "res.partner.xls")
+        self.assertTrue(new_attachment.to_delete)
+
+    def test_cron_delete(self):
+        """ Check that cron delete attachment after TTL"""
+        params = json.loads(data_csv.get('data'))
+        attachments = self.env['ir.attachment'].search([])
+        self.delay_export_obj.export(params)
+        new_attachment = self.env['ir.attachment'].search([]) - attachments
+        time_to_live = self.env. \
+            ref('base_export_async.attachment_time_to_live').value
+        date_today = fields.Date.from_string(fields.Date.today())
+        date_to_delete = fields.Date.to_string(
+            date_today + relativedelta(days=-int(time_to_live)))
+        # Update create_date with today - TTL
+        new_attachment.write({
+            'create_date': date_to_delete
+        })
+        self.env['ir.attachment'].sudo().cron_delete()
+        # The attachment must be deleted
+        self.assertFalse(new_attachment.exists())
