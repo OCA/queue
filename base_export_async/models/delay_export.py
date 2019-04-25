@@ -5,6 +5,7 @@ import logging
 import json
 import operator
 import base64
+from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
 from odoo.addons.queue_job.job import job
@@ -64,23 +65,42 @@ class DelayExport(models.Model):
             xls = ExcelExport()
             result = xls.from_data(columns_headers, import_data)
 
+        name = "{}.{}".format(model_name, export_format)
         attachment = self.env['ir.attachment'].create({
-            'name': "{}.{}".format(model_name, export_format),
+            'name': name,
             'datas': base64.b64encode(result),
-            'datas_fname': "{}.{}".format(model_name, export_format),
-            'type': 'binary'
+            'datas_fname': name,
+            'type': 'binary',
+            'to_delete': True,
         })
 
-        odoobot = self.env.ref("base.partner_root")
-        email_from = odoobot.email
+        url = "{}/web/content/ir.attachment/{}/datas/{}?download=true".format(
+            self.env['ir.config_parameter'].sudo().get_param('web.base.url'),
+            attachment.id,
+            attachment.name,
+        )
+
+        time_to_live = self.env. \
+            ref('base_export_async.attachment_time_to_live').value
+        date_today = fields.Date.from_string(fields.Date.today())
+        expiration_date = fields.Date.to_string(
+            date_today + relativedelta(days=+int(time_to_live)))
+
+        odoo_bot = self.env.ref("base.partner_root")
+        email_from = odoo_bot.email
         self.env['mail.mail'].create({
             'email_from': email_from,
             'reply_to': email_from,
             'email_to': user.email,
             'subject': _("Export {} {}").format(
                 model_name, fields.Date.to_string(fields.Date.today())),
-            'body_html': _("This is an automated \
-                message please do not reply."),
-            'attachment_ids': [(4, attachment.id)],
+            'body_html': _("""
+                <p>Your export is available <a href="{}">here</a>.</p>
+                <p>It will be automatically deleted the {}.</p>
+                <p>&nbsp;</p>
+                <p><span style="color: #808080;">
+                This is an automated message please do not reply.
+                </span></p>
+                """).format(url, expiration_date),
             'auto_delete': True,
         })

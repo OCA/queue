@@ -9,7 +9,7 @@
     'version': '12.0.1.0.0',
     'license': 'AGPL-3',
     'author': 'ACSONE SA/NV, Odoo Community Association (OCA)',
-    'website': 'https://acsone.eu/',
+    'website': 'https://github.com/OCA/queue',
     'depends': [
         'web',
         'queue_job'
@@ -17,6 +17,8 @@
     'data': [
         'views/assets.xml',
         'security/ir.model.access.csv',
+        'data/config_parameter.xml',
+        'data/cron.xml',
     ],
     'demo': [
     ],
