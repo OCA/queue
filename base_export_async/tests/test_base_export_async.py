@@ -53,7 +53,6 @@ class TestBaseExportAsync(common.TransactionCase):
         self.assertEqual(len(new_mail), 1)
         self.assertEqual(new_attachment.datas_fname,
                          "res.partner.csv")
-        self.assertTrue(new_attachment.to_delete)
 
     def test_export_xls(self):
         """ Check that the export generate an attachment and email"""
@@ -66,7 +65,6 @@ class TestBaseExportAsync(common.TransactionCase):
         self.assertEqual(len(new_mail), 1)
         self.assertEqual(new_attachment.datas_fname,
                          "res.partner.xls")
-        self.assertTrue(new_attachment.to_delete)
 
     def test_cron_delete(self):
         """ Check that cron delete attachment after TTL"""
@@ -80,9 +78,9 @@ class TestBaseExportAsync(common.TransactionCase):
         date_to_delete = fields.Date.to_string(
             date_today + relativedelta(days=-int(time_to_live)))
         # Update create_date with today - TTL
-        new_attachment.write({
+        self.delay_export_obj.search([]).write({
             'create_date': date_to_delete
         })
-        self.env['ir.attachment'].sudo().cron_delete()
+        self.delay_export_obj.sudo().cron_delete()
         # The attachment must be deleted
         self.assertFalse(new_attachment.exists())
