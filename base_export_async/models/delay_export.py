@@ -85,9 +85,9 @@ class DelayExport(models.Model):
             attachment.name,
         )
 
-        time_to_live = self.sudo().env. \
-            ref('base_export_async.attachment_time_to_live').value
-        date_today = fields.Date.from_string(fields.Date.today())
+        time_to_live = self.env['ir.config_parameter'].sudo(). \
+            get_param('attachment.time.to.live', 7)
+        date_today = fields.Date.today()
         expiration_date = fields.Date.to_string(
             date_today + relativedelta(days=+int(time_to_live)))
 
@@ -114,7 +114,6 @@ class DelayExport(models.Model):
     def cron_delete(self):
         time_to_live = self.env. \
             ref('base_export_async.attachment_time_to_live').value
-        date_today = fields.Date.from_string(fields.Date.today())
-        date_to_delete = fields.Date.to_string(
-            date_today + relativedelta(days=-int(time_to_live)))
+        date_today = fields.Date.today()
+        date_to_delete = date_today + relativedelta(days=-int(time_to_live))
         self.search([('create_date', '<=', date_to_delete)]).unlink()
