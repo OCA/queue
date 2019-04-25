@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="attachment_time_to_live" model="ir.config_parameter">
+        <field name="key">attachment.time.to.live</field>
+        <field name="value">7</field>
+    </record>
+</odoo>
