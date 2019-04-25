@@ -20,6 +20,8 @@ class DelayExport(models.Model):
     _name = 'delay.export'
     _description = 'Allow to delay the export'
 
+    user_id = fields.Many2one('res.users', string='User', index=True)
+
     @api.model
     def delay_export(self, data):
         params = json.loads(data.get('data'))
@@ -65,13 +67,16 @@ class DelayExport(models.Model):
             xls = ExcelExport()
             result = xls.from_data(columns_headers, import_data)
 
+        export_record = self.sudo().create({'user_id': user.id})
+
         name = "{}.{}".format(model_name, export_format)
         attachment = self.env['ir.attachment'].create({
             'name': name,
             'datas': base64.b64encode(result),
             'datas_fname': name,
             'type': 'binary',
-            'to_delete': True,
+            'res_model': self._name,
+            'res_id': export_record.id,
         })
 
         url = "{}/web/content/ir.attachment/{}/datas/{}?download=true".format(
@@ -80,7 +85,7 @@ class DelayExport(models.Model):
             attachment.name,
         )
 
-        time_to_live = self.env. \
+        time_to_live = self.sudo().env. \
             ref('base_export_async.attachment_time_to_live').value
         date_today = fields.Date.from_string(fields.Date.today())
         expiration_date = fields.Date.to_string(
@@ -104,3 +109,12 @@ class DelayExport(models.Model):
                 """).format(url, expiration_date),
             'auto_delete': True,
         })
+
+    @api.model
+    def cron_delete(self):
+        time_to_live = self.env. \
+            ref('base_export_async.attachment_time_to_live').value
+        date_today = fields.Date.from_string(fields.Date.today())
+        date_to_delete = fields.Date.to_string(
+            date_today + relativedelta(days=-int(time_to_live)))
+        self.search([('create_date', '<=', date_to_delete)]).unlink()
