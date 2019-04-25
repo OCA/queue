@@ -17,6 +17,7 @@
     'data': [
         'views/assets.xml',
         'security/ir.model.access.csv',
+        'security/ir_rule.xml',
         'data/config_parameter.xml',
         'data/cron.xml',
     ],
