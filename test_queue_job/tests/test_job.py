@@ -480,6 +480,14 @@ class TestJobModel(common.TransactionCase):
         self.assertEqual(stored.result,
                          'Manually set to done by %s' % self.env.user.name)
 
+    def test_action_done(self):
+        stored = self._create_job()
+        stored.action_done(reason="reason")
+        self.assertEqual(stored.state, DONE)
+        self.assertEqual(stored.result,
+                         'Manually set to done by %s with reason: reason'
+                         % self.env.user.name)
+
     def test_requeue(self):
         stored = self._create_job()
         stored.write({'state': 'failed'})
