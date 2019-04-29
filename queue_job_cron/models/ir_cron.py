@@ -32,7 +32,7 @@ class IrCron(models.Model):
         if model_name in self.env:
             model = self.env[model_name]
             if hasattr(model, method_name):
-                getattr(model, method_name)(*args)
+                return getattr(model, method_name)(*args)
             else:
                 raise ValidationError(_("Method '%s.%s' does not exist." %
                                         (model_name, method_name)))
