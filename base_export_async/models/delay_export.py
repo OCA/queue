@@ -91,7 +91,7 @@ class DelayExport(models.Model):
         expiration_date = fields.Date.to_string(
             date_today + relativedelta(days=+int(time_to_live)))
 
-        odoo_bot = self.env.ref("base.partner_root")
+        odoo_bot = self.sudo().env.ref("base.partner_root")
         email_from = odoo_bot.email
         self.env['mail.mail'].create({
             'email_from': email_from,
