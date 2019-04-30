@@ -10,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models, _
 from odoo.addons.queue_job.job import job
 from odoo.addons.web.controllers.main import CSVExport, ExcelExport
-from odoo.exceptions import Warning
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class DelayExport(models.Model):
     def delay_export(self, data):
         params = json.loads(data.get('data'))
         if not self.env.user.email:
-            raise Warning(_("You must set an email address to your user."))
+            raise UserError(_("You must set an email address to your user."))
         self.with_delay().export(params)
 
     @api.model
@@ -40,7 +40,7 @@ class DelayExport(models.Model):
                                 'domain', 'import_compat', 'context')(params)
         user = self.env['res.users'].browse([context.get('uid')])
         if not user or not user.email:
-            raise Warning(_("The user doesn't have an email address."))
+            raise UserError(_("The user doesn't have an email address."))
 
         model = self.env[model_name].with_context(
             import_compat=import_compat, **context)
