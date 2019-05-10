@@ -19,7 +19,7 @@ except ImportError:
     queue_job_config = config.misc.get('queue_job', {})
 
 
-from .runner import QueueJobRunner
+from .runner import QueueJobRunner, _channels
 
 _logger = logging.getLogger(__name__)
 
@@ -75,9 +75,13 @@ def prefork_start(server, *args, **kwargs):
     global runner_thread
     res = orig_prefork_start(server, *args, **kwargs)
     if not config['stop_after_init']:
-        _logger.info("starting jobrunner thread (in prefork server)")
-        runner_thread = QueueJobRunnerThread()
-        runner_thread.start()
+        if (_channels().strip().startswith('root:0')):
+            _logger.info("jobrunner thread (in prefork server) NOT started, " \
+                         "because the root channel's capacity is set to 0")
+        else:
+            _logger.info("starting jobrunner thread (in prefork server)")
+            runner_thread = QueueJobRunnerThread()
+            runner_thread.start()
     return res
 
 
@@ -96,9 +100,13 @@ def threaded_start(server, *args, **kwargs):
     global runner_thread
     res = orig_threaded_start(server, *args, **kwargs)
     if not config['stop_after_init']:
-        _logger.info("starting jobrunner thread (in threaded server)")
-        runner_thread = QueueJobRunnerThread()
-        runner_thread.start()
+        if (_channels().strip().startswith('root:0')):
+            _logger.info("jobrunner thread (in threaded server) NOT started, " \
+                         "because the root channel's capacity is set to 0")
+        else:
+            _logger.info("starting jobrunner thread (in threaded server)")
+            runner_thread = QueueJobRunnerThread()
+            runner_thread.start()
     return res
 
 
