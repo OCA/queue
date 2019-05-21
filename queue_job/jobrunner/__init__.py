@@ -65,6 +65,25 @@ class QueueJobRunnerThread(Thread):
 
 runner_thread = None
 
+
+def _is_runner_enabled():
+    return not _channels().strip().startswith('root:0')
+
+
+def _start_runner_thread(server_type):
+    global runner_thread
+    if not config['stop_after_init']:
+        if _is_runner_enabled():
+            _logger.info("starting jobrunner thread (in %s)",
+                         server_type)
+            runner_thread = QueueJobRunnerThread()
+            runner_thread.start()
+        else:
+            _logger.info("jobrunner thread (in %s) NOT started, " \
+                         "because the root channel's capacity is set to 0",
+                         server_type)
+
+
 orig_prefork_start = server.PreforkServer.start
 orig_prefork_stop = server.PreforkServer.stop
 orig_threaded_start = server.ThreadedServer.start
@@ -72,16 +91,8 @@ orig_threaded_stop = server.ThreadedServer.stop
 
 
 def prefork_start(server, *args, **kwargs):
-    global runner_thread
     res = orig_prefork_start(server, *args, **kwargs)
-    if not config['stop_after_init']:
-        if (_channels().strip().startswith('root:0')):
-            _logger.info("jobrunner thread (in prefork server) NOT started, " \
-                         "because the root channel's capacity is set to 0")
-        else:
-            _logger.info("starting jobrunner thread (in prefork server)")
-            runner_thread = QueueJobRunnerThread()
-            runner_thread.start()
+    _start_runner_thread("prefork server")
     return res
 
 
@@ -97,16 +108,8 @@ def prefork_stop(server, graceful=True):
 
 
 def threaded_start(server, *args, **kwargs):
-    global runner_thread
     res = orig_threaded_start(server, *args, **kwargs)
-    if not config['stop_after_init']:
-        if (_channels().strip().startswith('root:0')):
-            _logger.info("jobrunner thread (in threaded server) NOT started, " \
-                         "because the root channel's capacity is set to 0")
-        else:
-            _logger.info("starting jobrunner thread (in threaded server)")
-            runner_thread = QueueJobRunnerThread()
-            runner_thread.start()
+    _start_runner_thread("threaded server")
     return res
 
 
