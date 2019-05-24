@@ -9,6 +9,11 @@ odoo.define('base_export_async.DataExport', function(require) {
     var _t = core._t;
 
     DataExport.include({
+        /*
+            Overwritten Object responsible for the standard export.
+            A flag (checkbox) Async is added and if checked, call the
+            delay export instead of the standard export.
+        */
         start: function() {
             this._super.apply(this, arguments);
             this.async = this.$('#async_export');
@@ -16,6 +21,9 @@ odoo.define('base_export_async.DataExport', function(require) {
         export_data: function() {
             var self = this;
             if (self.async.is(":checked")) {
+                /*
+                    Checks from the standard method
+                */
                 var exported_fields = this.$(
                     '.o_fields_list option').map(
                     function() {
@@ -43,6 +51,9 @@ odoo.define('base_export_async.DataExport', function(require) {
                 var export_format = this.$export_format_inputs
                     .filter(':checked').val();
 
+                /*
+                    Call the delay export if Async is checked
+                */
                 framework.blockUI();
                 this._rpc({
                     model: 'delay.export',
@@ -82,6 +93,9 @@ odoo.define('base_export_async.DataExport', function(require) {
                     ));
                 });
             } else {
+                /*
+                    Call the standard method if Async is not checked
+                */
                 this._super.apply(this, arguments);
             }
         },
