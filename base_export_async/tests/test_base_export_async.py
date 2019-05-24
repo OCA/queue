@@ -73,7 +73,7 @@ class TestBaseExportAsync(common.TransactionCase):
         self.delay_export_obj.export(params)
         new_attachment = self.env['ir.attachment'].search([]) - attachments
         time_to_live = self.env['ir.config_parameter'].sudo(). \
-            get_param('attachment.time.to.live', 7)
+            get_param('attachment.ttl', 7)
         date_today = fields.Date.today()
         date_to_delete = date_today + relativedelta(days=-int(time_to_live))
         # Update create_date with today - TTL
