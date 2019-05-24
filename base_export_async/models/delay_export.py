@@ -30,8 +30,7 @@ class DelayExport(models.Model):
         self.with_delay().export(params)
 
     @api.model
-    @job
-    def export(self, params):
+    def _get_file_content(self, params):
         export_format = params.get('format')
         raw_data = export_format != 'csv'
 
@@ -62,17 +61,26 @@ class DelayExport(models.Model):
 
         if export_format == 'csv':
             csv = CSVExport()
-            result = csv.from_data(columns_headers, import_data)
+            return csv.from_data(columns_headers, import_data)
         else:
             xls = ExcelExport()
-            result = xls.from_data(columns_headers, import_data)
+            return xls.from_data(columns_headers, import_data)
+
+    @api.model
+    @job
+    def export(self, params):
+        content = self._get_file_content(params)
+
+        model_name, context, export_format = \
+            operator.itemgetter('model', 'context', 'format')(params)
+        user = self.env['res.users'].browse([context.get('uid')])
 
         export_record = self.sudo().create({'user_id': user.id})
 
         name = "{}.{}".format(model_name, export_format)
         attachment = self.env['ir.attachment'].create({
             'name': name,
-            'datas': base64.b64encode(result),
+            'datas': base64.b64encode(content),
             'datas_fname': name,
             'type': 'binary',
             'res_model': self._name,
