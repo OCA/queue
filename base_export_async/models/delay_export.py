@@ -102,12 +102,13 @@ class DelayExport(models.Model):
         # TODO : move to email template
         odoo_bot = self.sudo().env.ref("base.partner_root")
         email_from = odoo_bot.email
+        model_description = self.env[model_name]._description
         self.env['mail.mail'].create({
             'email_from': email_from,
             'reply_to': email_from,
             'email_to': user.email,
             'subject': _("Export {} {}").format(
-                model_name, fields.Date.to_string(fields.Date.today())),
+                model_description, fields.Date.to_string(fields.Date.today())),
             'body_html': _("""
                 <p>Your export is available <a href="{}">here</a>.</p>
                 <p>It will be automatically deleted the {}.</p>
