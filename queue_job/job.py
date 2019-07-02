@@ -7,8 +7,11 @@ import logging
 import os
 import sys
 import uuid
+import weakref
+
 from datetime import datetime, timedelta
 from random import randint
+from functools import total_ordering
 
 import odoo
 
@@ -147,6 +150,7 @@ def identity_exact(job_):
     return hasher.hexdigest()
 
 
+@total_ordering
 class Job(object):
     """A Job is a task to execute. It is the in-memory representation of a job.
 
@@ -315,6 +319,13 @@ class Job(object):
             job_.company_id = stored.company_id.id
         job_.identity_key = stored.identity_key
         job_.worker_pid = stored.worker_pid
+
+        job_.__depends_on_uuids.update(
+            stored.dependencies.get('depends_on', [])
+        )
+        job_.__reverse_depends_on_uuids.update(
+            stored.dependencies.get('reverse_depends_on', [])
+        )
         return job_
 
     def job_record_with_same_identity_key(self):
@@ -468,6 +479,11 @@ class Job(object):
         self.args = args
         self.kwargs = kwargs
 
+        self.__depends_on_uuids = set()
+        self.__reverse_depends_on_uuids = set()
+        self._depends_on = set()
+        self._reverse_depends_on = weakref.WeakSet()
+
         self.priority = priority
         if self.priority is None:
             self.priority = DEFAULT_PRIORITY
@@ -503,6 +519,20 @@ class Job(object):
         self.eta = eta
         self.channel = channel
         self.worker_pid = None
+
+    def add_depends(self, jobs):
+        self.__depends_on_uuids |= {j.uuid for j in jobs}
+        self._depends_on.update(jobs)
+        for parent in jobs:
+            parent.__reverse_depends_on_uuids.add(self.uuid)
+            parent._reverse_depends_on.add(self)
+
+    def add_reverse_depends(self, jobs):
+        self.__reverse_depends_on_uuids |= {j.uuid for j in jobs}
+        self._reverse_depends_on.update(jobs)
+        for child in jobs:
+            child.__depends_on_uuids.add(self.uuid)
+            child._depends_on.add(self)
 
     def perform(self):
         """Execute the job.
@@ -583,6 +613,16 @@ class Job(object):
         if self.identity_key:
             vals["identity_key"] = self.identity_key
 
+        dependencies = {
+            'depends_on': [
+                parent.uuid for parent in self.depends_on
+            ],
+            'reverse_depends_on': [
+                children.uuid for children in self.reverse_depends_on
+            ],
+        }
+        vals['dependencies'] = dependencies
+
         if create:
             vals.update(
                 {
@@ -630,6 +670,22 @@ class Job(object):
         all_args = ", ".join(args + kwargs)
         return "{}.{}({})".format(model, self.method_name, all_args)
 
+    def __eq__(self, other):
+        return self.uuid == other.uuid
+
+    def __hash__(self):
+        return self.uuid.__hash__()
+
+    def sorting_key(self):
+        return self.eta, self.priority, self.date_created, self.seq
+
+    def __lt__(self, other):
+        if self.eta and not other.eta:
+            return True
+        elif not self.eta and other.eta:
+            return False
+        return self.sorting_key() < other.sorting_key()
+
     def db_record(self):
         return self.db_record_from_uuid(self.env, self.uuid)
 
@@ -660,6 +716,26 @@ class Job(object):
             # from the function
             self._identity_key = None
             self._identity_key_func = value
+
+    @property
+    def depends_on(self):
+        if not self._depends_on:
+            # TODO batch load instead of loop
+            self._depends_on = {
+                Job.load(self.env, parent_uuid) for parent_uuid
+                in self.__depends_on_uuids
+            }
+        return self._depends_on
+
+    @property
+    def reverse_depends_on(self):
+        if not self._reverse_depends_on:
+            # TODO batch load instead of loop
+            self._reverse_depends_on = {
+                Job.load(self.env, child_uuid) for child_uuid
+                in self.__reverse_depends_on_uuids
+            }
+        return set(self._reverse_depends_on)
 
     @property
     def description(self):
