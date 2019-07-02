@@ -8,6 +8,7 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 
 from odoo import _, api, exceptions, fields, models, tools
+from odoo.addons.base_sparse_field.models.fields import Serialized
 from odoo.osv import expression
 
 from ..fields import JobSerialized
@@ -68,6 +69,7 @@ class QueueJob(models.Model):
     records = JobSerialized(
         string="Record(s)", readonly=True, base_type=models.BaseModel,
     )
+    dependencies = Serialized(readonly=True)
     args = JobSerialized(readonly=True, base_type=tuple)
     kwargs = JobSerialized(readonly=True, base_type=dict)
     func_string = fields.Char(string="Task", readonly=True)
