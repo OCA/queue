@@ -4,7 +4,8 @@
 import logging
 from datetime import datetime, timedelta
 
-from odoo import _, api, exceptions, fields, models
+from odoo import _, api, exceptions, fields, models, tools
+from odoo.addons.base_sparse_field.models.fields import Serialized
 from odoo.osv import expression
 
 from ..fields import JobSerialized
@@ -62,6 +63,7 @@ class QueueJob(models.Model):
         readonly=True,
         base_type=models.BaseModel,
     )
+    dependencies = Serialized(readonly=True)
     args = JobSerialized(readonly=True, base_type=tuple)
     kwargs = JobSerialized(readonly=True, base_type=dict)
     func_string = fields.Char(string="Task", readonly=True)
