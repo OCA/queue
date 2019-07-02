@@ -5,6 +5,8 @@ import odoo.tests.common as common
 
 from odoo.addons.queue_job.job import (
     Job,
+    WAIT_DEPENDENCIES,
+    PENDING,
 )
 
 
@@ -109,3 +111,23 @@ class TestJobDependencies(common.TransactionCase):
 
         read_job_a = Job.load(self.env, job_a.uuid)
         self.assertEqual(read_job_a.depends_on, {job_root})
+
+    def test_depends_enqueue_waiting_single(self):
+        job_root = Job(self.method)
+        job_a = Job(self.method)
+        job_a.add_depends({job_root})
+
+        job_root.store()
+        job_a.store()
+
+        self.assertEqual(job_a.state, WAIT_DEPENDENCIES)
+
+        # these are the steps run by RunJobController
+        job_root.perform()
+        job_root.set_done()
+        job_root.store()
+
+        job_root.enqueue_waiting()
+
+        # will be picked up by the jobrunner
+        self.assertEqual(job_a.state, PENDING)
