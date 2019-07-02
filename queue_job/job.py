@@ -17,6 +17,7 @@ import odoo
 
 from .exception import FailedJobError, NoSuchJobError, RetryableJobError
 
+WAIT_DEPENDENCIES = 'wait_dependencies'
 PENDING = "pending"
 ENQUEUED = "enqueued"
 CANCELLED = "cancelled"
@@ -25,6 +26,7 @@ STARTED = "started"
 FAILED = "failed"
 
 STATES = [
+    (WAIT_DEPENDENCIES, 'Wait Dependencies'),
     (PENDING, "Pending"),
     (ENQUEUED, "Enqueued"),
     (STARTED, "Started"),
@@ -526,6 +528,8 @@ class Job(object):
         for parent in jobs:
             parent.__reverse_depends_on_uuids.add(self.uuid)
             parent._reverse_depends_on.add(self)
+        if any(j.state != DONE for j in jobs):
+            self.state = WAIT_DEPENDENCIES
 
     def add_reverse_depends(self, jobs):
         self.__reverse_depends_on_uuids |= {j.uuid for j in jobs}
@@ -558,7 +562,19 @@ class Job(object):
                 )
                 raise new_exc from err
             raise
+
         return self.result
+
+    # TODO call in an isolated transaction with retries (in RunJobController)
+    def enqueue_waiting(self):
+        children = self.reverse_depends_on
+        for child in children:
+            if child.state != WAIT_DEPENDENCIES:
+                continue
+            parents = child.depends_on
+            if all(parent.state == 'done' for parent in parents):
+                child.state = PENDING
+                child.store()
 
     def store(self):
         """Store the Job"""
