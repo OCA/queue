@@ -36,6 +36,9 @@ class RunJobController(http.Controller):
         env.cr.commit()
         _logger.debug("%s done", job)
 
+    def _enqueue_dependent_jobs(self, env, job):
+        job.enqueue_waiting()
+
     @http.route("/queue_job/runjob", type="http", auth="none", save_session=False)
     def runjob(self, db, job_uuid, **kw):
         http.request.session.db = db
@@ -115,6 +118,8 @@ class RunJobController(http.Controller):
                     new_cr.commit()
                     buff.close()
             raise
+
+        self._enqueue_dependent_jobs(env, job)
 
         return ""
 
