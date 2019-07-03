@@ -161,10 +161,28 @@ class QueueJob(models.Model):
             job_.store()
 
     @api.multi
-    def button_done(self):
-        result = _('Manually set to done by %s') % self.env.user.name
+    def action_done(self, reason=None):
+        result = _(
+            u"Manually set to done by {}"
+        ).format(self.env.user.name)
+        if reason:
+            result = _(
+                u"{} with reason: {}"
+            ).format(result, reason)
         self._change_job_state(DONE, result=result)
         return True
+
+    @api.multi
+    def button_done(self):
+        _logger.warning('deprecated, replaced by action_done()')
+        return self.action_done()
+
+    @api.multi
+    def button_done_ask_reason(self):
+        action = self.env.ref(
+            'queue_job.action_set_jobs_done'
+        ).read()[0]
+        return action
 
     @api.multi
     def requeue(self):
@@ -296,10 +314,12 @@ class SetJobsToDone(models.TransientModel):
     _name = 'queue.jobs.to.done'
     _description = 'Set all selected jobs to done'
 
+    reason = fields.Text(string='Reason to set to done')
+
     @api.multi
     def set_done(self):
         jobs = self.job_ids
-        jobs.button_done()
+        jobs.action_done(reason=self.reason)
         return {'type': 'ir.actions.act_window_close'}
 
 
