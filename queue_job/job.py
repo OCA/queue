@@ -565,7 +565,6 @@ class Job(object):
 
         return self.result
 
-    # TODO call in an isolated transaction with retries (in RunJobController)
     def enqueue_waiting(self):
         children = self.reverse_depends_on
         for child in children:
@@ -807,7 +806,10 @@ class Job(object):
         return None
 
     def set_pending(self, result=None, reset_retry=True):
-        self.state = PENDING
+        if any(j.state != DONE for j in self.depends_on):
+            self.state = WAIT_DEPENDENCIES
+        else:
+            self.state = PENDING
         self.date_enqueued = None
         self.date_started = None
         self.date_done = None

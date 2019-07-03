@@ -188,13 +188,16 @@ class QueueJob(models.Model):
             job_ = Job.load(record.env, record.uuid)
             if state == DONE:
                 job_.set_done(result=result)
+                job_.store()
+                job_.enqueue_waiting()
             elif state == PENDING:
                 job_.set_pending(result=result)
+                job_.store()
             elif state == CANCELLED:
                 job_.set_cancelled(result=result)
+                job_.store()
             else:
                 raise ValueError("State not supported: %s" % state)
-            job_.store()
 
     def button_done(self):
         result = _("Manually set to done by %s") % self.env.user.name
