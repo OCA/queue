@@ -224,6 +224,11 @@ class QueueJob(models.Model):
 
     @api.multi
     def requeue(self):
+        # FIXME if leaves are requeued before their done parents
+        # they will be pending instead of wait_dependencies
+        # (in a scenario where we select all the jobs and requeue them)
+        # Requeue them in reverse order of the graph? Or recheck the state
+        # after they are all updated.
         self._change_job_state(PENDING)
         return True
 

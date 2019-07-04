@@ -7,8 +7,10 @@ import logging
 from weakref import WeakValueDictionary
 
 from ..exception import ChannelNotFound
-from ..job import PENDING, ENQUEUED, STARTED, FAILED, DONE
-NOT_DONE = (PENDING, ENQUEUED, STARTED, FAILED)
+from ..job import (
+    PENDING, ENQUEUED, STARTED, FAILED, DONE, WAIT_DEPENDENCIES
+)
+NOT_DONE = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, STARTED, FAILED)
 
 _logger = logging.getLogger(__name__)
 
@@ -1035,6 +1037,9 @@ class ChannelManager(object):
             job.channel.set_running(job)
         elif state == FAILED:
             job.channel.set_failed(job)
+        elif state == WAIT_DEPENDENCIES:
+            # wait until all parent jobs are done
+            pass
         else:
             _logger.error("unexpected state %s for job %s", state, job)
 
