@@ -10,19 +10,20 @@ msgstr ""
 "Project-Id-Version: Odoo Server 9.0c\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-06-24 00:51+0000\n"
-"PO-Revision-Date: 2017-06-24 00:51+0000\n"
-"Last-Translator: Rudolf Schnapka <rs@techno-flex.de>, 2017\n"
+"PO-Revision-Date: 2019-07-04 14:42+0000\n"
+"Last-Translator: Maria Sparenberg <maria.sparenberg@gmx.net>\n"
 "Language-Team: German (https://www.transifex.com/oca/teams/23907/de/)\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.7.1\n"
 
 #. module: queue_job_subscribe
 #: model:ir.ui.view,arch_db:queue_job_subscribe.view_user_connector_form
 msgid "Connectors"
-msgstr "Connector"
+msgstr "Konnektoren"
 
 #. module: queue_job_subscribe
 #: model:ir.model.fields,help:queue_job_subscribe.field_res_users_subscribe_job
@@ -30,13 +31,13 @@ msgid ""
 "If this flag is checked and the user is Connector Manager, he will receive "
 "job notifications."
 msgstr ""
-"Wenn dieses Kennzeichen gesetzt ist und der Benutzer ist Verbindungsmanager, "
-"dann wird er Job-Hinweise erhalten."
+"Wenn der Haken gesetzt ist und der Benutzer Konnektor-Manager ist, dann wird "
+"er Job-Benachrichtigungen erhalten."
 
 #. module: queue_job_subscribe
 #: model:ir.model.fields,field_description:queue_job_subscribe.field_res_users_subscribe_job
 msgid "Job Notifications"
-msgstr ""
+msgstr "Job-Benachrichtigungen"
 
 #. module: queue_job_subscribe
 #: model:ir.model,name:queue_job_subscribe.model_queue_job
