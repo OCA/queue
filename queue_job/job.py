@@ -523,6 +523,8 @@ class Job(object):
         self.worker_pid = None
 
     def add_depends(self, jobs):
+        if self in jobs:
+            raise ValueError('job cannot depend on itself')
         self.__depends_on_uuids |= {j.uuid for j in jobs}
         self._depends_on.update(jobs)
         for parent in jobs:
@@ -532,6 +534,8 @@ class Job(object):
             self.state = WAIT_DEPENDENCIES
 
     def add_reverse_depends(self, jobs):
+        if self in jobs:
+            raise ValueError('job cannot depend on itself')
         self.__reverse_depends_on_uuids |= {j.uuid for j in jobs}
         self._reverse_depends_on.update(jobs)
         for child in jobs:
@@ -566,14 +570,34 @@ class Job(object):
         return self.result
 
     def enqueue_waiting(self):
-        children = self.reverse_depends_on
-        for child in children:
-            if child.state != WAIT_DEPENDENCIES:
-                continue
-            parents = child.depends_on
-            if all(parent.state == 'done' for parent in parents):
-                child.state = PENDING
-                child.store()
+        # TODO replace states by constants
+        sql = """
+            UPDATE queue_job
+            SET state = 'pending'
+            FROM (
+            SELECT child.id, array_agg(parent.state) as parent_states
+            FROM queue_job job
+            JOIN LATERAL
+              json_array_elements_text(
+                  job.dependencies::json->'reverse_depends_on'
+              ) child_deps ON true
+            JOIN queue_job child
+            ON child.uuid = child_deps
+            JOIN LATERAL
+                json_array_elements_text(
+                  child.dependencies::json->'depends_on'
+                ) parent_deps ON true
+            JOIN queue_job parent
+            ON parent.uuid = parent_deps
+            WHERE job.uuid = %s
+            GROUP BY child.id
+            ) jobs
+            WHERE
+            queue_job.id = jobs.id
+            AND 'done' = ALL(jobs.parent_states)
+            AND state = 'wait_dependencies';
+        """
+        self.env.cr.execute(sql, (self.uuid,))
 
     def store(self):
         """Store the Job"""
