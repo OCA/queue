@@ -17,7 +17,7 @@
                     />
                     <button
                         name="button_done"
-                        states="pending,enqueued,failed"
+                        states="wait_dependencies,pending,enqueued,failed"
                         class="oe_highlight"
                         string="Set to 'Done'"
                         type="object"
@@ -35,7 +35,7 @@
                     <field
                         name="state"
                         widget="statusbar"
-                        statusbar_visible="pending,enqueued,started,done"
+                        statusbar_visible="wait_dependencies,pending,enqueued,started,done"
                         statusbar_colors='{"failed":"red","done":"green","cancelled":"yellow"}'
                     />
                 </header>
@@ -183,6 +183,11 @@
                     widget="selection"
                 />
                 <filter
+                    name="wait_dependencies"
+                    string="Wait Dependencies"
+                    domain="[('state', '=', 'wait_dependencies')]"
+                />
+                <filter
                     name="pending"
                     string="Pending"
                     domain="[('state', '=', 'pending')]"
@@ -243,7 +248,8 @@
         <field name="name">Jobs</field>
         <field name="res_model">queue.job</field>
         <field name="view_mode">tree,form,pivot,graph</field>
-        <field name="context">{'search_default_pending': 1,
+        <field name="context">{'search_default_wait_dependencies': 1,
+                               'search_default_pending': 1,
                                'search_default_enqueued': 1,
                                'search_default_started': 1,
                                'search_default_failed': 1}</field>
