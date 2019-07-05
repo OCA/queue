@@ -129,5 +129,8 @@ class TestJobDependencies(common.TransactionCase):
 
         job_root.enqueue_waiting()
 
-        # will be picked up by the jobrunner
-        self.assertEqual(job_a.state, PENDING)
+        # Will be picked up by the jobrunner.
+        # Warning: as the state has been changed in memory but
+        # not in the job_a instance, here, we re-read it.
+        # In practice, it won't be an issue for the jobrunner.
+        self.assertEqual(Job.load(self.env, job_a.uuid).state, PENDING)
