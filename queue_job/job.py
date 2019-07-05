@@ -69,6 +69,7 @@ class DelayableRecordset(object):
         self.channel = channel
         self.identity_key = identity_key
 
+    # TODO it should use the new DelayableBuilder
     def __getattr__(self, name):
         if name in self.recordset:
             raise AttributeError(
@@ -338,26 +339,29 @@ class Job(object):
                       kwargs=kwargs, priority=priority, eta=eta,
                       max_retries=max_retries, description=description,
                       channel=channel, identity_key=identity_key)
-        if new_job.identity_key:
-            existing = new_job.job_record_with_same_identity_key()
+        return new_job._enqueue_job()
+
+    def _enqueue_job(self):
+        if self.identity_key:
+            existing = self.job_record_with_same_identity_key()
             if existing:
                 _logger.debug(
                     'a job has not been enqueued due to having '
                     'the same identity key (%s) than job %s',
-                    new_job.identity_key,
+                    self.identity_key,
                     existing.uuid
                 )
                 return Job._load_from_db_record(existing)
-        new_job.store()
+        self.store()
         _logger.debug(
             "enqueued %s:%s(*%r, **%r) with uuid: %s",
-            new_job.recordset,
-            new_job.method_name,
-            new_job.args,
-            new_job.kwargs,
-            new_job.uuid
+            self.recordset,
+            self.method_name,
+            self.args,
+            self.kwargs,
+            self.uuid
         )
-        return new_job
+        return self
 
     @staticmethod
     def db_record_from_uuid(env, job_uuid):
