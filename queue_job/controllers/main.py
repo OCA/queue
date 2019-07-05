@@ -41,8 +41,6 @@ class RunJobController(http.Controller):
 
     def _enqueue_dependent_jobs(self, env, job):
         tries = 0
-        # FIXME: timing condition, when 2 "parent" jobs are done
-        # at the same time neither will see the other as done (I think)
         while True:
             try:
                 job.enqueue_waiting()
