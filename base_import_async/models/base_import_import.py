@@ -6,6 +6,7 @@
 
 import csv
 import base64
+from datetime import datetime
 from os.path import splitext
 from io import StringIO, TextIOWrapper, BytesIO
 
@@ -147,6 +148,8 @@ class BaseImportImport(models.TransientModel):
         else:
             header_offset = 0
         chunk_size = options.get(OPT_CHUNK_SIZE) or DEFAULT_CHUNK_SIZE
+        batch_name = '%s (%s)' % (file_name, datetime.today())
+        batch = self.env['queue.job.batch'].get_new_batch(batch_name)
         for row_from, row_to in self._extract_chunks(
                 model_obj, fields, data, chunk_size):
             chunk = str(priority - INIT_PRIORITY).zfill(padding)
@@ -161,13 +164,15 @@ class BaseImportImport(models.TransientModel):
             attachment = self._create_csv_attachment(
                 fields, data[row_from:row_to + 1], options,
                 file_name=root + '-' + chunk + ext)
-            delayed_job = self.with_delay(
+            delayed_job = self.with_context(
+                job_batch=batch).with_delay(
                 description=description, priority=priority)._import_one_chunk(
                     model_name=model_name,
                     attachment=attachment,
                     options=options)
             self._link_attachment_to_job(delayed_job, attachment)
             priority += 1
+        batch.enqueue()
 
     @api.model
     @job
