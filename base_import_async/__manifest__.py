@@ -7,7 +7,7 @@
 {
     'name': 'Asynchronous Import',
     'summary': 'Import CSV files in the background',
-    'version': '11.0.1.0.0',
+    'version': '11.0.2.0.0',
     'author': 'Akretion, ACSONE SA/NV, Odoo Community Association (OCA)',
     'license': 'AGPL-3',
     'website': 'https://github.com/OCA/queue',
@@ -15,6 +15,7 @@
     'depends': [
         'base_import',
         'queue_job',
+        'queue_job_batch',
     ],
     'data': [
         'views/base_import_async.xml',

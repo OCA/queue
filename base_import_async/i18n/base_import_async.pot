@@ -20,13 +20,13 @@ msgid "Attachment"
 msgstr ""
 
 #. module: base_import_async
-#: code:addons/base_import_async/models/base_import_import.py:63
+#: code:addons/base_import_async/models/base_import_import.py:64
 #, python-format
 msgid "Import %s from file %s"
 msgstr ""
 
 #. module: base_import_async
-#: code:addons/base_import_async/models/base_import_import.py:153
+#: code:addons/base_import_async/models/base_import_import.py:156
 #, python-format
 msgid "Import %s from file %s - #%s - lines %s to %s"
 msgstr ""
