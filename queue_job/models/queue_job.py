@@ -8,6 +8,7 @@ from odoo import _, api, exceptions, fields, models, tools
 from odoo.addons.base_sparse_field.models.fields import Serialized
 from odoo.osv import expression
 
+from ..delay import Graph
 from ..fields import JobSerialized
 from ..job import CANCELLED, DONE, PENDING, STATES, Job
 
@@ -64,6 +65,8 @@ class QueueJob(models.Model):
         base_type=models.BaseModel,
     )
     dependencies = Serialized(readonly=True)
+    # dependency graph as expected by the field widget
+    dependency_graph = Serialized(compute='_compute_dependency_graph')
     args = JobSerialized(readonly=True, base_type=tuple)
     kwargs = JobSerialized(readonly=True, base_type=dict)
     func_string = fields.Char(string="Task", readonly=True)
@@ -123,6 +126,53 @@ class QueueJob(models.Model):
     def _compute_record_ids(self):
         for record in self:
             record.record_ids = record.records.ids
+
+    @api.multi
+    @api.depends('dependencies')
+    def _compute_dependency_graph(self):
+        for record in self:
+            # Can we write a clever SQL query
+            # to get that graph?
+            graph = Graph()
+            jobs = [record]
+            seen = set()
+            while jobs:
+                current = jobs.pop()
+                seen.add(current.id)
+                graph.add_vertex(current.id)
+
+                dependencies = current.dependencies
+                depends_on = dependencies.get('depends_on', [])
+                reverse_depends_on = dependencies.get(
+                    'reverse_depends_on', []
+                )
+                parents = self.search([
+                    ('uuid', 'in', depends_on)
+                ])
+                children = self.search([
+                    ('uuid', 'in', reverse_depends_on)
+                ])
+                jobs += [
+                    parent for parent in parents
+                    if parent.id not in seen
+                ]
+                jobs += [
+                    child for child in children
+                    if child.id not in seen
+                ]
+                for parent in parents:
+                    graph.add_edge(parent.id, current.id)
+                for child in children:
+                    graph.add_edge(current.id, child.id)
+
+            # this is the most portable format for json for the graph,
+            # as we cannot have integer as dictionary keys
+            record.dependency_graph = {
+                # list of ids
+                'nodes': list(graph.vertices()),
+                # list of tuples (from, to)
+                'edges': graph.edges(),
+            }
 
     @api.model_create_multi
     def create(self, vals_list):
