@@ -20,8 +20,7 @@ def chain(*delayables):
     return DelayableChain(*delayables)
 
 
-class DelayableGraph:
-    """Directed Graph for Delayable dependencies"""
+class Graph:
     __slots__ = ('_graph')
 
     def __init__(self, graph=None):
@@ -30,8 +29,8 @@ class DelayableGraph:
         else:
             self._graph = {}
 
-    def add_vertex(self, delayable):
-        self._graph.setdefault(delayable, set())
+    def add_vertex(self, vertex):
+        self._graph.setdefault(vertex, set())
 
     def add_edge(self, parent, child):
         self.add_vertex(child)
@@ -46,46 +45,6 @@ class DelayableGraph:
             for neighbour in neighbours:
                 links.append((vertex, neighbour))
         return links
-
-    def _merge_graph(self, graph):
-        for vertex, neighbours in graph._graph.items():
-            tails = vertex._tail()
-            for tail in tails:
-                # connect the tails with the heads of each node
-                heads = {head for n in neighbours for head in n._head()}
-                self._graph.setdefault(tail, set()).update(heads)
-
-    def _connect_graphs(self):
-        graph = DelayableGraph()
-        graph._merge_graph(self)
-
-        seen = set()
-        visit_stack = deque([self])
-        while visit_stack:
-            current = visit_stack.popleft()
-            if current in seen:
-                continue
-
-            vertices = current.vertices()
-            for vertex in vertices:
-                vertex_graph = vertex._graph
-                graph._merge_graph(vertex_graph)
-                visit_stack.append(vertex_graph)
-
-            seen.add(current)
-
-        return graph
-
-    def delay(self):
-        graph = self._connect_graphs()
-        for vertex in graph.vertices():
-            vertex._build_job()
-        for vertex, neighbour in graph.edges():
-            neighbour._generated_job.add_depends({vertex._generated_job})
-        for vertex in graph.vertices():
-            # TODO it ignores identity key now, what should we do if
-            # we have dependencies...?
-            vertex._generated_job.store()
 
     # from
     # https://codereview.stackexchange.com/questions/55767/finding-all-paths-from-a-given-graph
@@ -131,6 +90,50 @@ class DelayableGraph:
         for path in paths:
             lines.append(' → '.join(repr(vertex) for vertex in path))
         return '\n'.join(lines)
+
+
+class DelayableGraph(Graph):
+    """Directed Graph for Delayable dependencies"""
+
+    def _merge_graph(self, graph):
+        for vertex, neighbours in graph._graph.items():
+            tails = vertex._tail()
+            for tail in tails:
+                # connect the tails with the heads of each node
+                heads = {head for n in neighbours for head in n._head()}
+                self._graph.setdefault(tail, set()).update(heads)
+
+    def _connect_graphs(self):
+        graph = DelayableGraph()
+        graph._merge_graph(self)
+
+        seen = set()
+        visit_stack = deque([self])
+        while visit_stack:
+            current = visit_stack.popleft()
+            if current in seen:
+                continue
+
+            vertices = current.vertices()
+            for vertex in vertices:
+                vertex_graph = vertex._graph
+                graph._merge_graph(vertex_graph)
+                visit_stack.append(vertex_graph)
+
+            seen.add(current)
+
+        return graph
+
+    def delay(self):
+        graph = self._connect_graphs()
+        for vertex in graph.vertices():
+            vertex._build_job()
+        for vertex, neighbour in graph.edges():
+            neighbour._generated_job.add_depends({vertex._generated_job})
+        for vertex in graph.vertices():
+            # TODO it ignores identity key now, what should we do if
+            # we have dependencies...?
+            vertex._generated_job.store()
 
 
 class DelayableChain:
