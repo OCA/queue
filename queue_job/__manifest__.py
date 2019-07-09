@@ -1,6 +1,5 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
-
 {
     "name": "Job Queue",
     "version": "16.0.1.1.0",
@@ -13,6 +12,7 @@
     "data": [
         "security/security.xml",
         "security/ir.model.access.csv",
+        "views/queue_job_assets.xml",
         "views/queue_job_views.xml",
         "views/queue_job_channel_views.xml",
         "views/queue_job_function_views.xml",
