@@ -92,6 +92,17 @@
                         <field colspan="4" nolabel="1" name="exc_info" />
                     </group>
                     <group
+                        name="dependencies"
+                        string="Dependencies"
+                        attrs="{'invisible': [('dependency_graph', '=', False)]}"
+                    >
+                        <field
+                            nolabel="1"
+                            name="dependency_graph"
+                            widget="job_directed_graph"
+                        />
+                    </group>
+                    <group
                         name="result"
                         string="Result"
                         attrs="{'invisible': [('result', '=', False)]}"
