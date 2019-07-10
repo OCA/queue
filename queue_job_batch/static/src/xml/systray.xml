@@ -13,7 +13,7 @@
                     <div>
                         <button type="button" class="btn btn-sm o_filter_button active">Job batches</button>
                     </div>
-                    <button type="button" class="btn btn-sm o_view_all_job_batches"> View All </button>
+                    <button type="button" class="btn btn-sm o_view_all_batch_jobs"> View All </button>
                 </li>
                 <li class="o_mail_navbar_dropdown_channels"/>
             </ul>
