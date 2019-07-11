@@ -21,6 +21,44 @@ var JobDirectedGraph = AbstractField.extend({
     jsLibs: [
         '/queue_job/static/lib/vis/vis-network.min.js'
     ],
+    init: function () {
+        this._super.apply(this, arguments);
+        this.network = null;
+        this.tabListenerInstalled = false;
+    },
+    start: function () {
+        var def = this._super();
+
+        core.bus.on('DOM_updated', this, function () {
+            this._installTabListener();
+        }.bind(this));
+
+        return def;
+    },
+    _fitNetwork: function () {
+        if (this.network) {
+            this.network.fit(this.network.body.nodeIndices);
+        }
+    },
+    /*
+     * Add a listener on tabs if any: when the widget is render inside a tab,
+     * it does not view the view. Install a listener that will fit the network
+     * graph to show all the nodes when we switch tab.
+     */
+    _installTabListener: function () {
+        if (this.tabListenerInstalled) {
+            return;
+        }
+        this.tabListenerInstalled = true;
+
+        var tab = this.$el.closest('div.tab-pane');
+        if (!tab.length) {
+            return;
+        }
+        $('a[href="#' + tab[0].id + '"]').on('shown.bs.tab', function (e) {
+            this._fitNetwork();
+        }.bind(this));
+    },
     _render: function () {
         var self = this;
         this.$el.empty();
@@ -69,6 +107,7 @@ var JobDirectedGraph = AbstractField.extend({
                 network.selectNodes([self.res_id]);
             }
         });
+        this.network = network;
     },
     openDependencyJob: function (res_id) {
         var self = this;
