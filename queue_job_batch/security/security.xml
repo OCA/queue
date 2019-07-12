@@ -27,11 +27,11 @@
             <field name="model_id" ref="model_queue_job_batch"/>
             <field name="groups"
                    eval="[(4, ref('queue_job_batch.group_queue_job_batch_user'))]"/>
-            <field name="domain_force">[('user_id', '=', uid)]</field>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
         </record>
 
         <record id="queue_job_batch_manager_rule" model="ir.rule">
-            <field name="name">Job Queue batch multi-company</field>
+            <field name="name">Job Queue batch manager</field>
             <field name="model_id" ref="model_queue_job_batch"/>
             <field name="groups"
                    eval="[(4, ref('queue_job.group_queue_job_manager'))]"/>
