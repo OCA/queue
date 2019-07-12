@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2019-07-04 14:42+0000\n"
+"PO-Revision-Date: 2019-07-12 14:43+0000\n"
 "Last-Translator: Maria Sparenberg <maria.sparenberg@gmx.net>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -287,7 +287,7 @@ msgstr "Jobs"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_kwargs
 msgid "Kwargs"
-msgstr ""
+msgstr "Kwargs"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job___last_update
@@ -395,7 +395,7 @@ msgstr "Datensatz"
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Related"
-msgstr ""
+msgstr "Zugehörige Aktion anzeigen"
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:262
