@@ -29,12 +29,13 @@ class IrCron(models.Model):
 
     @api.multi
     def method_direct_trigger(self):
+        self.check_access_rights('write')
         if self.run_as_queue_job:
-            return self.with_delay(
+            return self.sudo(user=self.user_id.id).with_delay(
                 priority=self.priority,
                 description=self.name,
                 channel=self.channel_id.name)._run_job_as_queue_job(
-                server_action=self.ir_actions_server_id)
+                server_action=self.ir_actions_server_id.sudo(self.user_id.id))
         else:
             return super(IrCron, self).method_direct_trigger()
 
