@@ -18,6 +18,7 @@
             <field name="interval_type">days</field>
             <field name="numbercall">-1</field>
             <field eval="False" name="doall"/>
+            <field name="state">code</field>
             <field name="code">model.autovacuum()</field>
         </record>
 
