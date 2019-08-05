@@ -22,6 +22,16 @@
             <field eval="'()'" name="args"/>
         </record>
 
+        <record id="ir_cron_connector_queue_garbage_collector" model="ir.cron">
+            <field name="name">Jobs Garbage Collector</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="model">queue.job</field>
+            <field name="function">requeue_stuck_jobs</field>
+            <field name="args">()</field>
+        </record>
+
     </data>
 
     <data noupdate="0">
