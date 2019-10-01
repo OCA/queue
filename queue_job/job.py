@@ -445,7 +445,7 @@ class Job(object):
             company_id = env.context['company_id']
         else:
             company_model = env['res.company']
-            company_model = company_model.sudo(self.user_id)
+            company_model = company_model.with_user(self.user_id)
             company_id = company_model._company_default_get(
                 object='queue.job',
                 field='company_id'
@@ -538,7 +538,7 @@ class Job(object):
     @property
     def func(self):
         recordset = self.recordset.with_context(job_uuid=self.uuid)
-        recordset = recordset.sudo(self.user_id)
+        recordset = recordset.with_user(self.user_id)
         return getattr(recordset, self.method_name)
 
     @property
