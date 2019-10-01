@@ -90,7 +90,6 @@ class QueueJob(models.Model):
 
     identity_key = fields.Char()
 
-    @api.model_cr
     def init(self):
         self._cr.execute(
             'SELECT indexname FROM pg_indexes WHERE indexname = %s ',
@@ -103,19 +102,16 @@ class QueueJob(models.Model):
                 "'enqueued') AND identity_key IS NOT NULL;"
             )
 
-    @api.multi
     def _inverse_channel(self):
         for record in self:
             record.override_channel = record.channel
 
-    @api.multi
     @api.depends('job_function_id.channel_id')
     def _compute_channel(self):
         for record in self:
             record.channel = (record.override_channel or
                               record.job_function_id.channel)
 
-    @api.multi
     @api.depends('model_name', 'method_name', 'job_function_id.channel_id')
     def _compute_job_function(self):
         for record in self:
@@ -127,7 +123,6 @@ class QueueJob(models.Model):
             record.channel_method_name = channel_method_name
             record.job_function_id = function
 
-    @api.multi
     @api.depends('model_name', 'method_name', 'record_ids', 'args', 'kwargs')
     def _compute_func_string(self):
         for record in self:
@@ -141,7 +136,6 @@ class QueueJob(models.Model):
                 "%s.%s(%s)" % (model, record.method_name, all_args)
             )
 
-    @api.multi
     def open_related_action(self):
         """Open the related action associated to the job"""
         self.ensure_one()
@@ -151,7 +145,6 @@ class QueueJob(models.Model):
             raise exceptions.UserError(_('No action available for this job'))
         return action
 
-    @api.multi
     def _change_job_state(self, state, result=None):
         """Change the state of the `Job` object
 
@@ -168,13 +161,11 @@ class QueueJob(models.Model):
                 raise ValueError('State not supported: %s' % state)
             job_.store()
 
-    @api.multi
     def button_done(self):
         result = _('Manually set to done by %s') % self.env.user.name
         self._change_job_state(DONE, result=result)
         return True
 
-    @api.multi
     def requeue(self):
         self._change_job_state(PENDING)
         return True
@@ -191,14 +182,12 @@ class QueueJob(models.Model):
                 record.message_post(body=msg,
                                     subtype='queue_job.mt_job_failed')
 
-    @api.multi
     def write(self, vals):
         res = super(QueueJob, self).write(vals)
         if vals.get('state') == 'failed':
             self._message_post_on_failure()
         return res
 
-    @api.multi
     def _subscribe_users_domain(self):
         """Subscribe all users having the 'Queue Job Manager' group"""
         group = self.env.ref('queue_job.group_queue_job_manager')
@@ -210,7 +199,6 @@ class QueueJob(models.Model):
             domain.append(('company_id', 'child_of', companies.ids))
         return domain
 
-    @api.multi
     def _message_failed_job(self):
         """Return a message which will be posted on the job when it is failed.
 
@@ -223,7 +211,6 @@ class QueueJob(models.Model):
         return _("Something bad happened during the execution of the job. "
                  "More details in the 'Exception Information' section.")
 
-    @api.model
     def _needaction_domain_get(self):
         """Returns the domain to filter records that require an action
 
@@ -231,7 +218,6 @@ class QueueJob(models.Model):
         """
         return [('state', '=', 'failed')]
 
-    @api.model
     def autovacuum(self):
         """Delete all jobs done since more than ``_removal_interval`` days.
 
@@ -244,7 +230,6 @@ class QueueJob(models.Model):
         jobs.unlink()
         return True
 
-    @api.multi
     def related_action_open_record(self):
         """Open a form view with the record(s) of the job.
 
@@ -264,7 +249,6 @@ class QueueJob(models.Model):
         action = {
             'name': _('Related Record'),
             'type': 'ir.actions.act_window',
-            'view_type': 'form',
             'view_mode': 'form',
             'res_model': records._name,
         }
@@ -283,7 +267,6 @@ class RequeueJob(models.TransientModel):
     _name = 'queue.requeue.job'
     _description = 'Wizard to requeue a selection of jobs'
 
-    @api.model
     def _default_job_ids(self):
         res = False
         context = self.env.context
@@ -294,9 +277,8 @@ class RequeueJob(models.TransientModel):
 
     job_ids = fields.Many2many(comodel_name='queue.job',
                                string='Jobs',
-                               default=_default_job_ids)
+                               default=lambda r: r._default_job_ids())
 
-    @api.multi
     def requeue(self):
         jobs = self.job_ids
         jobs.requeue()
@@ -308,7 +290,6 @@ class SetJobsToDone(models.TransientModel):
     _name = 'queue.jobs.to.done'
     _description = 'Set all selected jobs to done'
 
-    @api.multi
     def set_done(self):
         jobs = self.job_ids
         jobs.button_done()
@@ -336,43 +317,39 @@ class JobChannel(models.Model):
          'Channel complete name must be unique'),
     ]
 
-    @api.multi
     @api.depends('name', 'parent_id.complete_name')
     def _compute_complete_name(self):
         for record in self:
             if not record.name:
-                continue  # new record
-            channel = record
-            parts = [channel.name]
-            while channel.parent_id:
-                channel = channel.parent_id
-                parts.append(channel.name)
-            record.complete_name = '.'.join(reversed(parts))
+                complete_name = ''  # new record
+            elif record.parent_id:
+                complete_name = '.'.join(
+                    [record.parent_id.complete_name, record.name]
+                )
+            else:
+                complete_name = record.name
+            record.complete_name = complete_name
 
-    @api.multi
     @api.constrains('parent_id', 'name')
     def parent_required(self):
         for record in self:
             if record.name != 'root' and not record.parent_id:
                 raise exceptions.ValidationError(_('Parent channel required.'))
 
-    @api.multi
     def write(self, values):
         for channel in self:
             if (not self.env.context.get('install_mode') and
                     channel.name == 'root' and
                     ('name' in values or 'parent_id' in values)):
-                raise exceptions.Warning(_('Cannot change the root channel'))
+                raise exceptions.UserError(_('Cannot change the root channel'))
         return super(JobChannel, self).write(values)
 
-    @api.multi
     def unlink(self):
         for channel in self:
             if channel.name == 'root':
-                raise exceptions.Warning(_('Cannot remove the root channel'))
+                raise exceptions.UserError(_('Cannot remove the root channel'))
         return super(JobChannel, self).unlink()
 
-    @api.multi
     def name_get(self):
         result = []
         for record in self:
@@ -385,7 +362,6 @@ class JobFunction(models.Model):
     _description = 'Job Functions'
     _log_access = False
 
-    @api.model
     def _default_channel(self):
         return self.env.ref('queue_job.channel_root')
 
@@ -393,12 +369,11 @@ class JobFunction(models.Model):
     channel_id = fields.Many2one(comodel_name='queue.job.channel',
                                  string='Channel',
                                  required=True,
-                                 default=_default_channel)
+                                 default=lambda r: r._default_channel())
     channel = fields.Char(related='channel_id.complete_name',
                           store=True,
                           readonly=True)
 
-    @api.model
     def _find_or_create_channel(self, channel_path):
         channel_model = self.env['queue.job.channel']
         parts = channel_path.split('.')
@@ -421,7 +396,6 @@ class JobFunction(models.Model):
                 })
         return channel
 
-    @api.model
     def _register_job(self, model, job_method):
         func_name = channel_func_name(model, job_method)
         if not self.search_count([('name', '=', func_name)]):
