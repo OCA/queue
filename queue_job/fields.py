@@ -102,7 +102,7 @@ class JobDecoder(json.JSONDecoder):
         if type_ == 'odoo_recordset':
             model = self.env[obj['model']]
             if obj.get('uid'):
-                model = model.sudo(obj['uid'])
+                model = model.with_user(obj['uid'])
             return model.browse(obj['ids'])
         elif type_ == 'datetime_isoformat':
             return dateutil.parser.parse(obj['value'])
