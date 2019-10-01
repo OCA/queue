@@ -1,5 +1,3 @@
-# Copyright (C) 2014 ACSONE SA/NV (http://acsone.eu).
-# Copyright (C) 2013 Akretion (http://www.akretion.com).
 # @author Stéphane Bidoul <stephane.bidoul@acsone.eu>
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
