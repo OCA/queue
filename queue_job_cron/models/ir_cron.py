@@ -13,21 +13,23 @@ class IrCron(models.Model):
     run_as_queue_job = fields.Boolean(help="Specify if this cron should be "
                                            "ran as a queue job")
     channel_id = fields.Many2one(comodel_name='queue.job.channel',
+                                 compute="_compute_run_as_queue_job",
+                                 readonly=False,
                                  string='Channel')
 
-    @api.onchange('run_as_queue_job')
-    def onchange_run_as_queue_job(self):
+    @api.depends('run_as_queue_job')
+    def _compute_run_as_queue_job(self):
         for cron in self:
             if cron.run_as_queue_job and not cron.channel_id:
                 cron.channel_id = self.env.ref(
                     'queue_job_cron.channel_root_ir_cron').id
+            else:
+                cron.channel_id = False
 
     @job(default_channel='root.ir_cron')
-    @api.model
     def _run_job_as_queue_job(self, server_action):
         return server_action.run()
 
-    @api.multi
     def method_direct_trigger(self):
         if self.run_as_queue_job:
             return self.with_delay(
@@ -36,9 +38,8 @@ class IrCron(models.Model):
                 channel=self.channel_id.name)._run_job_as_queue_job(
                 server_action=self.ir_actions_server_id)
         else:
-            return super(IrCron, self).method_direct_trigger()
+            return super().method_direct_trigger()
 
-    @api.model
     def _callback(self, cron_name, server_action_id, job_id):
         cron = self.env['ir.cron'].sudo().browse(job_id)
         if cron.run_as_queue_job:
@@ -50,7 +51,7 @@ class IrCron(models.Model):
                 channel=cron.channel_id.name)._run_job_as_queue_job(
                     server_action=server_action)
         else:
-            return super(IrCron, self)._callback(
+            return super()._callback(
                 cron_name=cron_name,
                 server_action_id=server_action_id,
                 job_id=job_id)
