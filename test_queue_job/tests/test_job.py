@@ -651,7 +651,7 @@ class TestJobStorageMultiCompany(common.TransactionCase):
                                  company_id=self.other_company_a.id)
         company_a_env = self.env(context=company_a_context)
         stored = self._create_job(company_a_env)
-        stored.sudo(self.other_user_a.id)
+        stored.with_user(self.other_user_a.id)
         self._subscribe_users(stored)
         # 2 because admin + self.other_partner_a
         self.assertEqual(len(stored.message_follower_ids), 2)
