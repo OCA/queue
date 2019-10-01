@@ -13,5 +13,5 @@
     'data': [
         'data/data.xml',
         'views/ir_cron_view.xml'],
-    'installable': True,
+    'installable': False,
 }
