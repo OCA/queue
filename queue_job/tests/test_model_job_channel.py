@@ -45,11 +45,15 @@ class TestJobChannel(common.TransactionCase):
         self.assertEqual(channel.name, 'sub')
         self.assertEqual(channel.complete_name, 'root.sub')
 
+        self.Channel.create({
+            'name': 'sub',
+            'parent_id': self.root_channel.id,
+        })
         with self.assertRaises(IntegrityError):
-            self.Channel.create({
-                'name': 'sub',
-                'parent_id': self.root_channel.id,
-            })
+            # Flush process all the pending recomputations (or at least the
+            # given field and flush the pending updates to the database.
+            # It is normally called on commit.
+            self.env['base'].flush()
 
     def test_channel_name_get(self):
         channel = self.Channel.create({

@@ -714,7 +714,6 @@ def job(func=None, default_channel='root', retry_pattern=None):
         class ProductProduct(models.Model):
             _inherit = 'product.product'
 
-            @api.multi
             @job
             def export_one_thing(self, one_thing):
                 # work
@@ -796,7 +795,6 @@ def related_action(action=None, **kwargs):
         class QueueJob(models.Model):
             _inherit = 'queue.job'
 
-            @api.multi
             def related_action_partner(self):
                 self.ensure_one()
                 model = self.model_name
@@ -815,7 +813,6 @@ def related_action(action=None, **kwargs):
         class ResPartner(models.Model):
             _inherit = 'res.partner'
 
-            @api.multi
             @job
             @related_action(action='related_action_partner')
             def export_partner(self):
@@ -828,7 +825,6 @@ def related_action(action=None, **kwargs):
         class QueueJob(models.Model):
             _inherit = 'queue.job'
 
-            @api.multi
             def related_action_product(self, extra_arg=1):
                 assert extra_arg == 2
                 model = self.model_name
@@ -837,7 +833,6 @@ def related_action(action=None, **kwargs):
         class ProductProduct(models.Model):
             _inherit = 'product.product'
 
-            @api.multi
             @job
             @related_action(action='related_action_product', extra_arg=2)
             def export_product(self):
