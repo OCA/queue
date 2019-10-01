@@ -6,7 +6,7 @@ from odoo.tests.common import TransactionCase
 class TestQueueJobCron(TransactionCase):
 
     def setUp(self):
-        super(TestQueueJobCron, self).setUp()
+        super().setUp()
 
     def test_queue_job_cron(self):
         QueueJob = self.env['queue.job']
@@ -30,12 +30,11 @@ class TestQueueJobCron(TransactionCase):
         self.assertEqual(qjob.user_id, cron.user_id)
         self.assertEqual(qjob.channel, cron.channel_id.name)
 
-    def test_queue_job_cron_onchange(self):
+    def test_queue_job_cron_depends(self):
         cron = self.env.ref('queue_job.ir_cron_autovacuum_queue_jobs')
         default_channel = self.env.ref('queue_job_cron.channel_root_ir_cron')
         self.assertFalse(cron.run_as_queue_job)
         cron.write({'run_as_queue_job': True})
-        cron.onchange_run_as_queue_job()
         self.assertEqual(cron.channel_id.id, default_channel.id)
 
     def test_queue_job_cron_run(self):
