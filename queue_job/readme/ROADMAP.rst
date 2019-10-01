@@ -16,3 +16,16 @@
 .. code-block:: sql
 
   update queue_job set state='pending' where state in ('started', 'enqueued')
+
+Tips and tricks
+---------------
+
+* **Idempotency** (https://www.restapitutorial.com/lessons/idempotency.html): The queue_job should be idempotent so they can be retried several times without impact on the data.
+* **The job should test at the very beginning its revelency**: the moment the job will be executed is unknown by design. So the first task of a job should be to check if the related work is still relevent at the moment of the execution.
+
+Patterns
+~~~~~~~~
+Through the time, two main patterns emerged:
+
+1. For data exposed to client, a model should store the data and the model should be the creator of the job. The job is kept hidden from the client
+2. For technical data, that are not exposed to the client, it is priviledged to create directly jobs, without intermediary models. The jobs are then used to check the data
