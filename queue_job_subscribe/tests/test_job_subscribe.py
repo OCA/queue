@@ -35,7 +35,7 @@ class TestJobSubscribe(common.TransactionCase):
         })
 
     def _create_failed_job(self):
-        method = self.env['res.users'].mapped
+        method = self.env['res.users'].with_user(self.other_user_a).mapped
         test_job = Job(method)
         test_job.store()
         test_job_record = self.env['queue.job'].search([
