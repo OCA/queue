@@ -90,7 +90,6 @@ class TestRelatedAction(common.SavepointCase):
             'res_model': self.record._name,
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
-            'view_type': 'form',
         }
         self.assertEquals(job_.related_action(), expected)
 
@@ -113,7 +112,6 @@ class TestRelatedAction(common.SavepointCase):
             'res_model': self.record._name,
             'type': 'ir.actions.act_window',
             'view_mode': 'tree,form',
-            'view_type': 'form',
         }
         self.assertEquals(job_.related_action(), expected)
 
