@@ -10,19 +10,59 @@ from odoo import fields, models
 
 
 class JobSerialized(fields.Field):
-    """Serialized fields provide the storage for sparse fields."""
+    """Provide the storage for job fields stored as json
+
+    A base_type must be set, it must be dict, list or tuple.
+    When the field is not set, the json will be the corresponding
+    json string ("{}" or "[]").
+
+    Support for some custom types has been added to the json decoder/encoder
+    (see JobEncoder and JobDecoder).
+    """
     type = 'job_serialized'
     column_type = ('text', 'text')
 
-    def convert_to_column(self, value, record, values=None):
-        return json.dumps(value, cls=JobEncoder)
+    _slots = {
+        '_base_type': type,
+    }
+
+    _default_json_mapping = {
+        dict: "{}",
+        list: "[]",
+        tuple: "[]",
+    }
+
+    def __init__(self, string=fields.Default,
+                 base_type=fields.Default, **kwargs):
+        super().__init__(
+            string=string, _base_type=base_type, **kwargs
+        )
+
+    def _setup_attrs(self, model, name):
+        super()._setup_attrs(model, name)
+        if not self._base_type_default_json():
+            raise ValueError(
+                "%s is not a supported base type" % (self._base_type)
+            )
+
+    def _base_type_default_json(self):
+        return self._default_json_mapping.get(self._base_type)
+
+    def convert_to_column(self, value, record, values=None, validate=True):
+        return self.convert_to_cache(value, record, validate=validate)
 
     def convert_to_cache(self, value, record, validate=True):
-        # cache format: dict
-        value = value or {}
-        if isinstance(value, dict):
-            return value
-        return json.loads(value, cls=JobDecoder, env=record.env)
+        # cache format: json.dumps(value) or None
+        if isinstance(value, self._base_type):
+            return json.dumps(value, cls=JobEncoder)
+        else:
+            return value or None
+
+    def convert_to_record(self, value, record):
+        default = self._base_type_default_json()
+        return json.loads(
+            value or default, cls=JobDecoder, env=record.env
+        )
 
 
 class JobEncoder(json.JSONEncoder):
