@@ -9,14 +9,16 @@ import time
 
 from odoo.service import server
 from odoo.tools import config
+
 try:
     from odoo.addons.server_environment import serv_config
-    if serv_config.has_section('queue_job'):
-        queue_job_config = serv_config['queue_job']
+
+    if serv_config.has_section("queue_job"):
+        queue_job_config = serv_config["queue_job"]
     else:
         queue_job_config = {}
 except ImportError:
-    queue_job_config = config.misc.get('queue_job', {})
+    queue_job_config = config.misc.get("queue_job", {})
 
 
 from .runner import QueueJobRunner, _channels
@@ -32,27 +34,31 @@ START_DELAY = 5
 
 
 class QueueJobRunnerThread(Thread):
-
     def __init__(self):
         Thread.__init__(self)
         self.daemon = True
-        scheme = (os.environ.get('ODOO_QUEUE_JOB_SCHEME') or
-                  queue_job_config.get("scheme"))
-        host = (os.environ.get('ODOO_QUEUE_JOB_HOST') or
-                queue_job_config.get("host") or
-                config['http_interface'])
-        port = (os.environ.get('ODOO_QUEUE_JOB_PORT') or
-                queue_job_config.get("port") or
-                config['http_port'])
-        user = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_USER') or
-                queue_job_config.get("http_auth_user"))
-        password = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD') or
-                    queue_job_config.get("http_auth_password"))
-        self.runner = QueueJobRunner(scheme or 'http',
-                                     host or 'localhost',
-                                     port or 8069,
-                                     user,
-                                     password)
+        scheme = os.environ.get("ODOO_QUEUE_JOB_SCHEME") or queue_job_config.get(
+            "scheme"
+        )
+        host = (
+            os.environ.get("ODOO_QUEUE_JOB_HOST")
+            or queue_job_config.get("host")
+            or config["http_interface"]
+        )
+        port = (
+            os.environ.get("ODOO_QUEUE_JOB_PORT")
+            or queue_job_config.get("port")
+            or config["http_port"]
+        )
+        user = os.environ.get("ODOO_QUEUE_JOB_HTTP_AUTH_USER") or queue_job_config.get(
+            "http_auth_user"
+        )
+        password = os.environ.get(
+            "ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD"
+        ) or queue_job_config.get("http_auth_password")
+        self.runner = QueueJobRunner(
+            scheme or "http", host or "localhost", port or 8069, user, password
+        )
 
     def run(self):
         # sleep a bit to let the workers start at ease
@@ -67,21 +73,22 @@ runner_thread = None
 
 
 def _is_runner_enabled():
-    return not _channels().strip().startswith('root:0')
+    return not _channels().strip().startswith("root:0")
 
 
 def _start_runner_thread(server_type):
     global runner_thread
-    if not config['stop_after_init']:
+    if not config["stop_after_init"]:
         if _is_runner_enabled():
-            _logger.info("starting jobrunner thread (in %s)",
-                         server_type)
+            _logger.info("starting jobrunner thread (in %s)", server_type)
             runner_thread = QueueJobRunnerThread()
             runner_thread.start()
         else:
-            _logger.info("jobrunner thread (in %s) NOT started, " \
-                         "because the root channel's capacity is set to 0",
-                         server_type)
+            _logger.info(
+                "jobrunner thread (in %s) NOT started, "
+                "because the root channel's capacity is set to 0",
+                server_type,
+            )
 
 
 orig_prefork_start = server.PreforkServer.start
