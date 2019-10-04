@@ -1,32 +1,31 @@
 # Copyright 2013-2016 Camptocamp
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
-import inspect
 import functools
 import hashlib
+import inspect
 import logging
-import uuid
 import sys
+import uuid
 from datetime import datetime, timedelta
 
 import odoo
 
-from .exception import (NoSuchJobError,
-                        FailedJobError,
-                        RetryableJobError)
+from .exception import FailedJobError, NoSuchJobError, RetryableJobError
 
+PENDING = "pending"
+ENQUEUED = "enqueued"
+DONE = "done"
+STARTED = "started"
+FAILED = "failed"
 
-PENDING = 'pending'
-ENQUEUED = 'enqueued'
-DONE = 'done'
-STARTED = 'started'
-FAILED = 'failed'
-
-STATES = [(PENDING, 'Pending'),
-          (ENQUEUED, 'Enqueued'),
-          (STARTED, 'Started'),
-          (DONE, 'Done'),
-          (FAILED, 'Failed')]
+STATES = [
+    (PENDING, "Pending"),
+    (ENQUEUED, "Enqueued"),
+    (STARTED, "Started"),
+    (DONE, "Done"),
+    (FAILED, "Failed"),
+]
 
 DEFAULT_PRIORITY = 10  # used by the PriorityQueue to sort the jobs
 DEFAULT_MAX_RETRIES = 5
@@ -53,9 +52,16 @@ class DelayableRecordset(object):
     by :meth:`~odoo.addons.queue_job.models.base.Base.with_delay`
     """
 
-    def __init__(self, recordset, priority=None, eta=None,
-                 max_retries=None, description=None, channel=None,
-                 identity_key=None):
+    def __init__(
+        self,
+        recordset,
+        priority=None,
+        eta=None,
+        max_retries=None,
+        description=None,
+        channel=None,
+        identity_key=None,
+    ):
         self.recordset = recordset
         self.priority = priority
         self.eta = eta
@@ -67,33 +73,36 @@ class DelayableRecordset(object):
     def __getattr__(self, name):
         if name in self.recordset:
             raise AttributeError(
-                'only methods can be delayed (%s called on %s)' %
-                (name, self.recordset)
+                "only methods can be delayed ({} called on {})".format(
+                    name, self.recordset
+                )
             )
         recordset_method = getattr(self.recordset, name)
-        if not getattr(recordset_method, 'delayable', None):
+        if not getattr(recordset_method, "delayable", None):
             raise AttributeError(
-                'method %s on %s is not allowed to be delayed, '
-                'it should be decorated with odoo.addons.queue_job.job.job' %
-                (name, self.recordset)
+                "method %s on %s is not allowed to be delayed, "
+                "it should be decorated with odoo.addons.queue_job.job.job"
+                % (name, self.recordset)
             )
 
         def delay(*args, **kwargs):
-            return Job.enqueue(recordset_method,
-                               args=args,
-                               kwargs=kwargs,
-                               priority=self.priority,
-                               max_retries=self.max_retries,
-                               eta=self.eta,
-                               description=self.description,
-                               channel=self.channel,
-                               identity_key=self.identity_key)
+            return Job.enqueue(
+                recordset_method,
+                args=args,
+                kwargs=kwargs,
+                priority=self.priority,
+                max_retries=self.max_retries,
+                eta=self.eta,
+                description=self.description,
+                channel=self.channel,
+                identity_key=self.identity_key,
+            )
+
         return delay
 
     def __str__(self):
-        return "DelayableRecordset(%s%s)" % (
-            self.recordset._name,
-            getattr(self.recordset, '_ids', "")
+        return "DelayableRecordset({}{})".format(
+            self.recordset._name, getattr(self.recordset, "_ids", "")
         )
 
     __repr__ = __str__
@@ -135,11 +144,11 @@ def identity_exact(job_):
     model and method.
     """
     hasher = hashlib.sha1()
-    hasher.update(job_.model_name.encode('utf-8'))
-    hasher.update(job_.method_name.encode('utf-8'))
-    hasher.update(str(sorted(job_.recordset.ids)).encode('utf-8'))
-    hasher.update(str(job_.args).encode('utf-8'))
-    hasher.update(str(sorted(job_.kwargs.items())).encode('utf-8'))
+    hasher.update(job_.model_name.encode("utf-8"))
+    hasher.update(job_.method_name.encode("utf-8"))
+    hasher.update(str(sorted(job_.recordset.ids)).encode("utf-8"))
+    hasher.update(str(job_.args).encode("utf-8"))
+    hasher.update(str(sorted(job_.kwargs.items())).encode("utf-8"))
 
     return hasher.hexdigest()
 
@@ -242,13 +251,15 @@ class Job(object):
         started or executed.
 
     """
+
     @classmethod
     def load(cls, env, job_uuid):
         """Read a job from the Database"""
         stored = cls.db_record_from_uuid(env, job_uuid)
         if not stored:
             raise NoSuchJobError(
-                'Job %s does no longer exist in the storage.' % job_uuid)
+                "Job %s does no longer exist in the storage." % job_uuid
+            )
         return cls._load_from_db_record(stored)
 
     @classmethod
@@ -269,10 +280,17 @@ class Job(object):
         if stored.eta:
             eta = stored.eta
 
-        job_ = cls(method, args=args, kwargs=kwargs,
-                   priority=stored.priority, eta=eta, job_uuid=stored.uuid,
-                   description=stored.name, channel=stored.channel,
-                   identity_key=stored.identity_key)
+        job_ = cls(
+            method,
+            args=args,
+            kwargs=kwargs,
+            priority=stored.priority,
+            eta=eta,
+            job_uuid=stored.uuid,
+            description=stored.name,
+            channel=stored.channel,
+            identity_key=stored.identity_key,
+        )
 
         if stored.date_created:
             job_.date_created = stored.date_created
@@ -300,17 +318,32 @@ class Job(object):
 
     def job_record_with_same_identity_key(self):
         """Check if a job to be executed with the same key exists."""
-        existing = self.env['queue.job'].sudo().search(
-            [('identity_key', '=', self.identity_key),
-             ('state', 'in', [PENDING, ENQUEUED])],
-            limit=1
+        existing = (
+            self.env["queue.job"]
+            .sudo()
+            .search(
+                [
+                    ("identity_key", "=", self.identity_key),
+                    ("state", "in", [PENDING, ENQUEUED]),
+                ],
+                limit=1,
+            )
         )
         return existing
 
     @classmethod
-    def enqueue(cls, func, args=None, kwargs=None,
-                priority=None, eta=None, max_retries=None, description=None,
-                channel=None, identity_key=None):
+    def enqueue(
+        cls,
+        func,
+        args=None,
+        kwargs=None,
+        priority=None,
+        eta=None,
+        max_retries=None,
+        description=None,
+        channel=None,
+        identity_key=None,
+    ):
         """Create a Job and enqueue it in the queue. Return the job uuid.
 
         This expects the arguments specific to the job to be already extracted
@@ -320,18 +353,25 @@ class Job(object):
         no job is created and the existing job is returned
 
         """
-        new_job = cls(func=func, args=args,
-                      kwargs=kwargs, priority=priority, eta=eta,
-                      max_retries=max_retries, description=description,
-                      channel=channel, identity_key=identity_key)
+        new_job = cls(
+            func=func,
+            args=args,
+            kwargs=kwargs,
+            priority=priority,
+            eta=eta,
+            max_retries=max_retries,
+            description=description,
+            channel=channel,
+            identity_key=identity_key,
+        )
         if new_job.identity_key:
             existing = new_job.job_record_with_same_identity_key()
             if existing:
                 _logger.debug(
-                    'a job has not been enqueued due to having '
-                    'the same identity key (%s) than job %s',
+                    "a job has not been enqueued due to having "
+                    "the same identity key (%s) than job %s",
                     new_job.identity_key,
-                    existing.uuid
+                    existing.uuid,
                 )
                 return Job._load_from_db_record(existing)
         new_job.store()
@@ -341,20 +381,29 @@ class Job(object):
             new_job.method_name,
             new_job.args,
             new_job.kwargs,
-            new_job.uuid
+            new_job.uuid,
         )
         return new_job
 
     @staticmethod
     def db_record_from_uuid(env, job_uuid):
-        model = env['queue.job'].sudo()
-        record = model.search([('uuid', '=', job_uuid)], limit=1)
+        model = env["queue.job"].sudo()
+        record = model.search([("uuid", "=", job_uuid)], limit=1)
         return record.with_env(env)
 
-    def __init__(self, func,
-                 args=None, kwargs=None, priority=None,
-                 eta=None, job_uuid=None, max_retries=None,
-                 description=None, channel=None, identity_key=None):
+    def __init__(
+        self,
+        func,
+        args=None,
+        kwargs=None,
+        priority=None,
+        eta=None,
+        job_uuid=None,
+        max_retries=None,
+        description=None,
+        channel=None,
+        identity_key=None,
+    ):
         """ Create a Job
 
         :param func: function to execute
@@ -401,8 +450,8 @@ class Job(object):
         self.recordset = recordset
 
         self.env = env
-        self.job_model = self.env['queue.job']
-        self.job_model_name = 'queue.job'
+        self.job_model = self.env["queue.job"]
+        self.job_model_name = "queue.job"
 
         self.state = PENDING
 
@@ -441,14 +490,13 @@ class Job(object):
         self.exc_info = None
 
         self.user_id = env.uid
-        if 'company_id' in env.context:
-            company_id = env.context['company_id']
+        if "company_id" in env.context:
+            company_id = env.context["company_id"]
         else:
-            company_model = env['res.company']
+            company_model = env["res.company"]
             company_model = company_model.with_user(self.user_id)
             company_id = company_model._company_default_get(
-                object='queue.job',
-                field='company_id'
+                object="queue.job", field="company_id"
             ).id
         self.company_id = company_id
         self._eta = None
@@ -474,40 +522,41 @@ class Job(object):
                 # change the exception type but keep the original
                 # traceback and message:
                 # http://blog.ianbicking.org/2007/09/12/re-raising-exceptions/
-                new_exc = FailedJobError("Max. retries (%d) reached: %s" %
-                                         (self.max_retries, value or type_)
-                                         )
+                new_exc = FailedJobError(
+                    "Max. retries (%d) reached: %s" % (self.max_retries, value or type_)
+                )
                 raise new_exc from err
             raise
         return self.result
 
     def store(self):
         """Store the Job"""
-        vals = {'state': self.state,
-                'priority': self.priority,
-                'retry': self.retry,
-                'max_retries': self.max_retries,
-                'exc_info': self.exc_info,
-                'user_id': self.user_id or self.env.uid,
-                'company_id': self.company_id,
-                'result': str(self.result) if self.result else False,
-                'date_enqueued': False,
-                'date_started': False,
-                'date_done': False,
-                'eta': False,
-                'identity_key': False,
-                }
+        vals = {
+            "state": self.state,
+            "priority": self.priority,
+            "retry": self.retry,
+            "max_retries": self.max_retries,
+            "exc_info": self.exc_info,
+            "user_id": self.user_id or self.env.uid,
+            "company_id": self.company_id,
+            "result": str(self.result) if self.result else False,
+            "date_enqueued": False,
+            "date_started": False,
+            "date_done": False,
+            "eta": False,
+            "identity_key": False,
+        }
 
         if self.date_enqueued:
-            vals['date_enqueued'] = self.date_enqueued
+            vals["date_enqueued"] = self.date_enqueued
         if self.date_started:
-            vals['date_started'] = self.date_started
+            vals["date_started"] = self.date_started
         if self.date_done:
-            vals['date_done'] = self.date_done
+            vals["date_done"] = self.date_done
         if self.eta:
-            vals['eta'] = self.eta
+            vals["eta"] = self.eta
         if self.identity_key:
-            vals['identity_key'] = self.identity_key
+            vals["identity_key"] = self.identity_key
 
         db_record = self.db_record()
         if db_record:
@@ -516,19 +565,22 @@ class Job(object):
             date_created = self.date_created
             # The following values must never be modified after the
             # creation of the job
-            vals.update({'uuid': self.uuid,
-                         'name': self.description,
-                         'date_created': date_created,
-                         'model_name': self.model_name,
-                         'method_name': self.method_name,
-                         'record_ids': self.recordset.ids,
-                         'args': self.args,
-                         'kwargs': self.kwargs,
-                         })
+            vals.update(
+                {
+                    "uuid": self.uuid,
+                    "name": self.description,
+                    "date_created": date_created,
+                    "model_name": self.model_name,
+                    "method_name": self.method_name,
+                    "record_ids": self.recordset.ids,
+                    "args": self.args,
+                    "kwargs": self.kwargs,
+                }
+            )
             # it the channel is not specified, lets the job_model compute
             # the right one to use
             if self.channel:
-                vals.update({'channel': self.channel})
+                vals.update({"channel": self.channel})
 
             self.env[self.job_model_name].sudo().create(vals)
 
@@ -566,7 +618,7 @@ class Job(object):
         elif self.func.__doc__:
             return self.func.__doc__.splitlines()[0].strip()
         else:
-            return '%s.%s' % (self.model_name, self.func.__name__)
+            return "{}.{}".format(self.model_name, self.func.__name__)
 
     @property
     def uuid(self):
@@ -621,7 +673,7 @@ class Job(object):
             self.exc_info = exc_info
 
     def __repr__(self):
-        return '<Job %s, priority:%d>' % (self.uuid, self.priority)
+        return "<Job %s, priority:%d>" % (self.uuid, self.priority)
 
     def _get_retry_seconds(self, seconds=None):
         retry_pattern = self.func.retry_pattern
@@ -653,7 +705,7 @@ class Job(object):
 
     def related_action(self):
         record = self.db_record()
-        if hasattr(self.func, 'related_action'):
+        if hasattr(self.func, "related_action"):
             funcname = self.func.related_action
             # decorator is set but empty: disable the default one
             if not funcname:
@@ -661,19 +713,22 @@ class Job(object):
         else:
             funcname = record._default_related_action
         if not isinstance(funcname, str):
-            raise ValueError('related_action must be the name of the '
-                             'method on queue.job as string')
+            raise ValueError(
+                "related_action must be the name of the "
+                "method on queue.job as string"
+            )
         action = getattr(record, funcname)
-        action_kwargs = getattr(self.func, 'kwargs', {})
+        action_kwargs = getattr(self.func, "kwargs", {})
         return action(**action_kwargs)
 
 
 def _is_model_method(func):
-    return (inspect.ismethod(func) and
-            isinstance(func.__self__.__class__, odoo.models.MetaModel))
+    return inspect.ismethod(func) and isinstance(
+        func.__self__.__class__, odoo.models.MetaModel
+    )
 
 
-def job(func=None, default_channel='root', retry_pattern=None):
+def job(func=None, default_channel="root", retry_pattern=None):
     """Decorator for job methods.
 
     It enables the possibility to use a Model's method as a job function.
@@ -755,20 +810,22 @@ def job(func=None, default_channel='root', retry_pattern=None):
     to a job
     """
     if func is None:
-        return functools.partial(job, default_channel=default_channel,
-                                 retry_pattern=retry_pattern)
+        return functools.partial(
+            job, default_channel=default_channel, retry_pattern=retry_pattern
+        )
 
     def delay_from_model(*args, **kwargs):
         raise AttributeError(
             "method.delay() can no longer be used, the general form is "
             "env['res.users'].with_delay().method()"
-            )
+        )
 
-    assert default_channel == 'root' or default_channel.startswith('root.'), (
-        "The channel path must start by 'root'")
-    assert retry_pattern is None or isinstance(retry_pattern, dict), (
-        "retry_pattern must be a dict"
-    )
+    assert default_channel == "root" or default_channel.startswith(
+        "root."
+    ), "The channel path must start by 'root'"
+    assert retry_pattern is None or isinstance(
+        retry_pattern, dict
+    ), "retry_pattern must be a dict"
 
     delay_func = delay_from_model
 
@@ -839,8 +896,10 @@ def related_action(action=None, **kwargs):
                 # ...
 
     """
+
     def decorate(func):
         func.related_action = action
         func.kwargs = kwargs
         return func
+
     return decorate
