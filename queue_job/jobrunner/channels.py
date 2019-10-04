@@ -1,13 +1,14 @@
 # Copyright (c) 2015-2016 ACSONE SA/NV (<http://acsone.eu>)
 # Copyright 2015-2016 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
-from functools import total_ordering
-from heapq import heappush, heappop
 import logging
+from functools import total_ordering
+from heapq import heappop, heappush
 from weakref import WeakValueDictionary
 
 from ..exception import ChannelNotFound
-from ..job import PENDING, ENQUEUED, STARTED, FAILED, DONE
+from ..job import DONE, ENQUEUED, FAILED, PENDING, STARTED
+
 NOT_DONE = (PENDING, ENQUEUED, STARTED, FAILED)
 
 _logger = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ class PriorityQueue(object):
 
     def __init__(self):
         self._heap = []
-        self._known = set()    # all objects in the heap (including removed)
+        self._known = set()  # all objects in the heap (including removed)
         self._removed = set()  # all objects that have been removed
 
     def __len__(self):
@@ -112,6 +113,7 @@ class SafeSet(set):
     0
     >>> s.remove(1)
     """
+
     def remove(self, o):
         # pylint: disable=missing-return,except-pass
         try:
@@ -191,8 +193,7 @@ class ChannelJob(object):
 
     """
 
-    def __init__(self, db_name, channel, uuid,
-                 seq, date_created, priority, eta):
+    def __init__(self, db_name, channel, uuid, seq, date_created, priority, eta):
         self.db_name = db_name
         self.channel = channel
         self.uuid = uuid
@@ -337,8 +338,7 @@ class ChannelQueue(object):
             eta_job = self._eta_queue[0]
             job = self._queue[0]
 
-            if (eta_job.sorting_key_ignoring_eta() <
-                    job.sorting_key_ignoring_eta()):
+            if eta_job.sorting_key_ignoring_eta() < job.sorting_key_ignoring_eta():
                 # eta ignored, the job with eta has higher priority
                 # than the job without eta; since it's a sequential
                 # queue we wait until eta
@@ -401,8 +401,7 @@ class Channel(object):
     without risking to overflow the system.
     """
 
-    def __init__(self, name, parent, capacity=None, sequential=False,
-                 throttle=0):
+    def __init__(self, name, parent, capacity=None, sequential=False, throttle=0):
         self.name = name
         self.parent = parent
         if self.parent:
@@ -433,10 +432,10 @@ class Channel(object):
         * sequential
         * throttle
         """
-        assert self.fullname.endswith(config['name'])
-        self.capacity = config.get('capacity', None)
-        self.sequential = bool(config.get('sequential', False))
-        self.throttle = int(config.get('throttle', 0))
+        assert self.fullname.endswith(config["name"])
+        self.capacity = config.get("capacity", None)
+        self.sequential = bool(config.get("sequential", False))
+        self.throttle = int(config.get("throttle", 0))
         if self.sequential and self.capacity != 1:
             raise ValueError("A sequential channel must have a capacity of 1")
 
@@ -444,7 +443,7 @@ class Channel(object):
     def fullname(self):
         """The full name of the channel, in dot separated notation."""
         if self.parent:
-            return self.parent.fullname + '.' + self.name
+            return self.parent.fullname + "." + self.name
         else:
             return self.name
 
@@ -452,12 +451,14 @@ class Channel(object):
         return self.children.get(subchannel_name)
 
     def __str__(self):
-        capacity = '∞' if self.capacity is None else str(self.capacity)
-        return "%s(C:%s,Q:%d,R:%d,F:%d)" % (self.fullname,
-                                            capacity,
-                                            len(self._queue),
-                                            len(self._running),
-                                            len(self._failed))
+        capacity = "∞" if self.capacity is None else str(self.capacity)
+        return "%s(C:%s,Q:%d,R:%d,F:%d)" % (
+            self.fullname,
+            capacity,
+            len(self._queue),
+            len(self._running),
+            len(self._failed),
+        )
 
     def remove(self, job):
         """Remove a job from the channel."""
@@ -473,8 +474,7 @@ class Channel(object):
         This removes it from the channel queue.
         """
         self.remove(job)
-        _logger.debug("job %s marked done in channel %s",
-                      job.uuid, self)
+        _logger.debug("job %s marked done in channel %s", job.uuid, self)
 
     def set_pending(self, job):
         """Mark a job as pending.
@@ -488,8 +488,7 @@ class Channel(object):
             self._failed.remove(job)
             if self.parent:
                 self.parent.remove(job)
-            _logger.debug("job %s marked pending in channel %s",
-                          job.uuid, self)
+            _logger.debug("job %s marked pending in channel %s", job.uuid, self)
 
     def set_running(self, job):
         """Mark a job as running.
@@ -502,8 +501,7 @@ class Channel(object):
             self._failed.remove(job)
             if self.parent:
                 self.parent.set_running(job)
-            _logger.debug("job %s marked running in channel %s",
-                          job.uuid, self)
+            _logger.debug("job %s marked running in channel %s", job.uuid, self)
 
     def set_failed(self, job):
         """Mark the job as failed. """
@@ -513,8 +511,7 @@ class Channel(object):
             self._failed.add(job)
             if self.parent:
                 self.parent.remove(job)
-            _logger.debug("job %s marked failed in channel %s",
-                          job.uuid, self)
+            _logger.debug("job %s marked failed in channel %s", job.uuid, self)
 
     def has_capacity(self):
         if self.sequential and self._failed:
@@ -549,9 +546,12 @@ class Channel(object):
         if self.throttle and self._pause_until:
             if now < self._pause_until:
                 if self.has_capacity():
-                    _logger.debug("channel %s paused until %s because "
-                                  "of throttle delay between jobs",
-                                  self, self._pause_until)
+                    _logger.debug(
+                        "channel %s paused until %s because "
+                        "of throttle delay between jobs",
+                        self,
+                        self._pause_until,
+                    )
                 return
             else:
                 # unpause, this is important to avoid perpetual wakeup
@@ -564,13 +564,11 @@ class Channel(object):
             if not job:
                 return
             self._running.add(job)
-            _logger.debug("job %s marked running in channel %s",
-                          job.uuid, self)
+            _logger.debug("job %s marked running in channel %s", job.uuid, self)
             yield job
             if self.throttle:
                 self._pause_until = now + self.throttle
-                _logger.debug("pausing channel %s until %s",
-                              self, self._pause_until)
+                _logger.debug("pausing channel %s until %s", self, self._pause_until)
                 return
 
     def get_wakeup_time(self, wakeup_time=0):
@@ -802,7 +800,7 @@ class ChannelManager(object):
 
     def __init__(self):
         self._jobs_by_uuid = WeakValueDictionary()
-        self._root_channel = Channel(name='root', parent=None, capacity=1)
+        self._root_channel = Channel(name="root", parent=None, capacity=1)
         self._channels_by_name = WeakValueDictionary(root=self._root_channel)
 
     @classmethod
@@ -859,42 +857,46 @@ class ChannelManager(object):
         """
         res = []
         config_string = config_string.replace("\n", ",")
-        for channel_config_string in split_strip(config_string, ','):
+        for channel_config_string in split_strip(config_string, ","):
             if not channel_config_string:
                 # ignore empty entries (commented lines, trailing commas)
                 continue
             config = {}
-            config_items = split_strip(channel_config_string, ':')
+            config_items = split_strip(channel_config_string, ":")
             name = config_items[0]
             if not name:
-                raise ValueError('Invalid channel config %s: '
-                                 'missing channel name' % config_string)
-            config['name'] = name
+                raise ValueError(
+                    "Invalid channel config %s: missing channel name" % config_string
+                )
+            config["name"] = name
             if len(config_items) > 1:
                 capacity = config_items[1]
                 try:
-                    config['capacity'] = int(capacity)
+                    config["capacity"] = int(capacity)
                 except Exception:
-                    raise ValueError('Invalid channel config %s: '
-                                     'invalid capacity %s' %
-                                     (config_string, capacity))
+                    raise ValueError(
+                        "Invalid channel config %s: "
+                        "invalid capacity %s" % (config_string, capacity)
+                    )
                 for config_item in config_items[2:]:
-                    kv = split_strip(config_item, '=')
+                    kv = split_strip(config_item, "=")
                     if len(kv) == 1:
                         k, v = kv[0], True
                     elif len(kv) == 2:
                         k, v = kv
                     else:
-                        raise ValueError('Invalid channel config %s: '
-                                         'incorrect config item %s' %
-                                         (config_string, config_item))
+                        raise ValueError(
+                            "Invalid channel config %s: "
+                            "incorrect config item %s" % (config_string, config_item)
+                        )
                     if k in config:
-                        raise ValueError('Invalid channel config %s: '
-                                         'duplicate key %s' %
-                                         (config_string, k))
+                        raise ValueError(
+                            "Invalid channel config %s: "
+                            "duplicate key %s" % (config_string, k)
+                        )
                     config[k] = v
             else:
-                config['capacity'] = 1
+                config["capacity"] = 1
             res.append(config)
         return res
 
@@ -935,7 +937,7 @@ class ChannelManager(object):
         (except for the root channel, which defaults to a capacity of 1
         when not configured explicity).
         """
-        channel = self.get_channel_by_name(config['name'], autocreate=True)
+        channel = self.get_channel_by_name(config["name"], autocreate=True)
         channel.configure(config)
         _logger.info("Configured channel: %s", channel)
         return channel
@@ -981,14 +983,14 @@ class ChannelManager(object):
         """
         if not channel_name or channel_name == self._root_channel.name:
             return self._root_channel
-        if not channel_name.startswith(self._root_channel.name + '.'):
-            channel_name = self._root_channel.name + '.' + channel_name
+        if not channel_name.startswith(self._root_channel.name + "."):
+            channel_name = self._root_channel.name + "." + channel_name
         if channel_name in self._channels_by_name:
             return self._channels_by_name[channel_name]
         if not autocreate:
-            raise ChannelNotFound('Channel %s not found' % channel_name)
+            raise ChannelNotFound("Channel %s not found" % channel_name)
         parent = self._root_channel
-        for subchannel_name in channel_name.split('.')[1:]:
+        for subchannel_name in channel_name.split(".")[1:]:
             subchannel = parent.get_subchannel_by_name(subchannel_name)
             if not subchannel:
                 subchannel = Channel(subchannel_name, parent, capacity=None)
@@ -996,14 +998,15 @@ class ChannelManager(object):
             parent = subchannel
         return parent
 
-    def notify(self, db_name, channel_name, uuid,
-               seq, date_created, priority, eta, state):
+    def notify(
+        self, db_name, channel_name, uuid, seq, date_created, priority, eta, state
+    ):
         try:
             channel = self.get_channel_by_name(channel_name)
         except ChannelNotFound:
-            _logger.warning('unknown channel %s, '
-                            'using root channel for job %s',
-                            channel_name, uuid)
+            _logger.warning(
+                "unknown channel %s, using root channel for job %s", channel_name, uuid
+            )
             channel = self._root_channel
         job = self._jobs_by_uuid.get(uuid)
         if job:
@@ -1014,17 +1017,17 @@ class ChannelManager(object):
             # if one of the job properties that influence
             # scheduling order has changed, we remove the job
             # from the queues and create a new job object
-            if (seq != job.seq or
-                    priority != job.priority or
-                    eta != job.eta or
-                    channel != job.channel):
-                _logger.debug("job %s properties changed, rescheduling it",
-                              uuid)
+            if (
+                seq != job.seq
+                or priority != job.priority
+                or eta != job.eta
+                or channel != job.channel
+            ):
+                _logger.debug("job %s properties changed, rescheduling it", uuid)
                 self.remove_job(uuid)
                 job = None
         if not job:
-            job = ChannelJob(db_name, channel, uuid,
-                             seq, date_created, priority, eta)
+            job = ChannelJob(db_name, channel, uuid, seq, date_created, priority, eta)
             self._jobs_by_uuid[uuid] = job
         # state transitions
         if not state or state == DONE:

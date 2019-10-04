@@ -12,8 +12,8 @@ import odoo
 from odoo import _, http, tools
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
-from ..job import Job, ENQUEUED
-from ..exception import (RetryableJobError, FailedJobError, NothingToDoJob)
+from ..exception import FailedJobError, NothingToDoJob, RetryableJobError
+from ..job import ENQUEUED, Job
 
 _logger = logging.getLogger(__name__)
 
@@ -21,21 +21,20 @@ PG_RETRY = 5  # seconds
 
 
 class RunJobController(http.Controller):
-
     def _try_perform_job(self, env, job):
         """Try to perform the job."""
         job.set_started()
         job.store()
         env.cr.commit()
-        _logger.debug('%s started', job)
+        _logger.debug("%s started", job)
 
         job.perform()
         job.set_done()
         job.store()
         env.cr.commit()
-        _logger.debug('%s done', job)
+        _logger.debug("%s done", job)
 
-    @http.route('/queue_job/session', type='http', auth="none")
+    @http.route("/queue_job/session", type="http", auth="none")
     def session(self):
         """Used by the jobrunner to spawn a session
 
@@ -45,9 +44,9 @@ class RunJobController(http.Controller):
         and does a GET on ``/queue_job/session``, providing it a cookie
         which will be used for subsequent calls to runjob.
         """
-        return ''
+        return ""
 
-    @http.route('/queue_job/runjob', type='http', auth='none')
+    @http.route("/queue_job/runjob", type="http", auth="none")
     def runjob(self, db, job_uuid, **kw):
         http.request.session.db = db
         env = http.request.env(user=odoo.SUPERUSER_ID)
@@ -64,16 +63,15 @@ class RunJobController(http.Controller):
 
         # ensure the job to run is in the correct state and lock the record
         env.cr.execute(
-            "SELECT state FROM queue_job "
-            "WHERE uuid=%s AND state=%s "
-            "FOR UPDATE",
-            (job_uuid, ENQUEUED)
+            "SELECT state FROM queue_job WHERE uuid=%s AND state=%s FOR UPDATE",
+            (job_uuid, ENQUEUED),
         )
         if not env.cr.fetchone():
             _logger.warn(
                 "was requested to run job %s, but it does not exist, "
                 "or is not in state %s",
-                job_uuid, ENQUEUED
+                job_uuid,
+                ENQUEUED,
             )
             return ""
 
@@ -89,15 +87,16 @@ class RunJobController(http.Controller):
                 if err.pgcode not in PG_CONCURRENCY_ERRORS_TO_RETRY:
                     raise
 
-                retry_postpone(job, tools.ustr(err.pgerror, errors='replace'),
-                               seconds=PG_RETRY)
-                _logger.debug('%s OperationalError, postponed', job)
+                retry_postpone(
+                    job, tools.ustr(err.pgerror, errors="replace"), seconds=PG_RETRY
+                )
+                _logger.debug("%s OperationalError, postponed", job)
 
         except NothingToDoJob as err:
             if str(err):
                 msg = str(err)
             else:
-                msg = _('Job interrupted and set to Done: nothing to do.')
+                msg = _("Job interrupted and set to Done: nothing to do.")
             job.set_done(msg)
             job.store()
             env.cr.commit()
@@ -105,7 +104,7 @@ class RunJobController(http.Controller):
         except RetryableJobError as err:
             # delay the job later, requeue
             retry_postpone(job, str(err), seconds=err.seconds)
-            _logger.debug('%s postponed', job)
+            _logger.debug("%s postponed", job)
 
         except (FailedJobError, Exception):
             buff = StringIO()
