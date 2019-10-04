@@ -133,22 +133,23 @@ Caveat
        of running Odoo is obviously not for production purposes.
 """
 
-from contextlib import closing, contextmanager
 import datetime
 import logging
 import os
 import select
 import threading
 import time
+from contextlib import closing, contextmanager
 
 import psycopg2
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import requests
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 import odoo
 from odoo.tools import config
+
 from . import queue_job_config
-from .channels import ChannelManager, PENDING, ENQUEUED, NOT_DONE
+from .channels import ENQUEUED, NOT_DONE, PENDING, ChannelManager
 
 SELECT_TIMEOUT = 60
 ERROR_RECOVERY_DELAY = 5
@@ -169,8 +170,9 @@ session = requests.Session()
 
 def _channels():
     return (
-        os.environ.get('ODOO_QUEUE_JOB_CHANNELS') or
-        queue_job_config.get("channels") or "root:1"
+        os.environ.get("ODOO_QUEUE_JOB_CHANNELS")
+        or queue_job_config.get("channels")
+        or "root:1"
     )
 
 
@@ -188,9 +190,10 @@ def _odoo_now():
 def _connection_info_for(db_name):
     db_or_uri, connection_info = odoo.sql_db.connection_info_for(db_name)
 
-    for p in ('host', 'port'):
-        cfg = (os.environ.get('ODOO_QUEUE_JOB_JOBRUNNER_DB_%s' % p.upper()) or
-               queue_job_config.get("jobrunner_db_" + p))
+    for p in ("host", "port"):
+        cfg = os.environ.get(
+            "ODOO_QUEUE_JOB_JOBRUNNER_DB_%s" % p.upper()
+        ) or queue_job_config.get("jobrunner_db_" + p)
 
         if cfg:
             connection_info[p] = cfg
@@ -205,7 +208,7 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
     if not session.cookies:
         # obtain an anonymous session
         _logger.info("obtaining an anonymous session for the job runner")
-        url = ('%s://%s:%s/queue_job/session' % (scheme, host, port))
+        url = "{}://{}:{}/queue_job/session".format(scheme, host, port)
         auth = None
         if user:
             auth = (user, password)
@@ -223,20 +226,24 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
                 "UPDATE queue_job SET state=%s, "
                 "date_enqueued=NULL, date_started=NULL "
                 "WHERE uuid=%s and state=%s "
-                "RETURNING uuid", (PENDING, job_uuid, ENQUEUED)
+                "RETURNING uuid",
+                (PENDING, job_uuid, ENQUEUED),
             )
             if cr.fetchone():
                 _logger.warning(
                     "state of job %s was reset from %s to %s",
-                    job_uuid, ENQUEUED, PENDING,
+                    job_uuid,
+                    ENQUEUED,
+                    PENDING,
                 )
 
     # TODO: better way to HTTP GET asynchronously (grequest, ...)?
     #       if this was python3 I would be doing this with
     #       asyncio, aiohttp and aiopg
     def urlopen():
-        url = ('%s://%s:%s/queue_job/runjob?db=%s&job_uuid=%s' %
-               (scheme, host, port, db_name, job_uuid))
+        url = "{}://{}:{}/queue_job/runjob?db={}&job_uuid={}".format(
+            scheme, host, port, db_name, job_uuid
+        )
         try:
             auth = None
             if user:
@@ -255,13 +262,13 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
             _logger.exception("exception in GET %s", url)
             session.cookies.clear()
             set_job_pending()
+
     thread = threading.Thread(target=urlopen)
     thread.daemon = True
     thread.start()
 
 
 class Database(object):
-
     def __init__(self, db_name):
         self.db_name = db_name
         connection_info = _connection_info_for(db_name)
@@ -284,20 +291,22 @@ class Database(object):
 
     def _has_queue_job(self):
         with closing(self.conn.cursor()) as cr:
-            cr.execute("SELECT 1 FROM pg_tables WHERE tablename=%s",
-                       ('ir_module_module',))
+            cr.execute(
+                "SELECT 1 FROM pg_tables WHERE tablename=%s", ("ir_module_module",)
+            )
             if not cr.fetchone():
                 return False
             cr.execute(
                 "SELECT 1 FROM ir_module_module WHERE name=%s AND state=%s",
-                ('queue_job', 'installed')
+                ("queue_job", "installed"),
             )
             return cr.fetchone()
 
     def _initialize(self):
         with closing(self.conn.cursor()) as cr:
             # this is the trigger that sends notifications when jobs change
-            cr.execute("""
+            cr.execute(
+                """
                 DROP TRIGGER IF EXISTS queue_job_notify ON queue_job;
 
                 CREATE OR REPLACE
@@ -318,7 +327,8 @@ class Database(object):
                     AFTER INSERT OR UPDATE OR DELETE
                     ON queue_job
                     FOR EACH ROW EXECUTE PROCEDURE queue_job_notify();
-            """)
+            """
+            )
             cr.execute("LISTEN queue_job")
 
     @contextmanager
@@ -327,32 +337,36 @@ class Database(object):
         # the checker thinks we are injecting values but we are not, we are
         # adding the where conditions, values are added later properly with
         # parameters
-        query = ("SELECT channel, uuid, id as seq, date_created, "
-                 "priority, EXTRACT(EPOCH FROM eta), state "
-                 "FROM queue_job WHERE %s" %
-                 (where, ))
+        query = (
+            "SELECT channel, uuid, id as seq, date_created, "
+            "priority, EXTRACT(EPOCH FROM eta), state "
+            "FROM queue_job WHERE %s" % (where,)
+        )
         with closing(self.conn.cursor("select_jobs", withhold=True)) as cr:
             cr.execute(query, args)
             yield cr
 
     def set_job_enqueued(self, uuid):
         with closing(self.conn.cursor()) as cr:
-            cr.execute("UPDATE queue_job SET state=%s, "
-                       "date_enqueued=date_trunc('seconds', "
-                       "                         now() at time zone 'utc') "
-                       "WHERE uuid=%s",
-                       (ENQUEUED, uuid))
+            cr.execute(
+                "UPDATE queue_job SET state=%s, "
+                "date_enqueued=date_trunc('seconds', "
+                "                         now() at time zone 'utc') "
+                "WHERE uuid=%s",
+                (ENQUEUED, uuid),
+            )
 
 
 class QueueJobRunner(object):
-
-    def __init__(self,
-                 scheme='http',
-                 host='localhost',
-                 port=8069,
-                 user=None,
-                 password=None,
-                 channel_config_string=None):
+    def __init__(
+        self,
+        scheme="http",
+        host="localhost",
+        port=8069,
+        user=None,
+        password=None,
+        channel_config_string=None,
+    ):
         self.scheme = scheme
         self.host = host
         self.port = port
@@ -367,8 +381,8 @@ class QueueJobRunner(object):
         self._stop_pipe = os.pipe()
 
     def get_db_names(self):
-        if config['db_name']:
-            db_names = config['db_name'].split(',')
+        if config["db_name"]:
+            db_names = config["db_name"].split(",")
         else:
             db_names = odoo.service.db.exp_list(True)
         return db_names
@@ -380,37 +394,37 @@ class QueueJobRunner(object):
                     self.channel_manager.remove_db(db_name)
                 db.close()
             except Exception:
-                _logger.warning('error closing database %s',
-                                db_name, exc_info=True)
+                _logger.warning("error closing database %s", db_name, exc_info=True)
         self.db_by_name = {}
 
     def initialize_databases(self):
         for db_name in self.get_db_names():
             db = Database(db_name)
             if not db.has_queue_job:
-                _logger.debug('queue_job is not installed for db %s', db_name)
+                _logger.debug("queue_job is not installed for db %s", db_name)
             else:
                 self.db_by_name[db_name] = db
-                with db.select_jobs('state in %s', (NOT_DONE,)) as cr:
+                with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
                     for job_data in cr:
                         self.channel_manager.notify(db_name, *job_data)
-                _logger.info('queue job runner ready for db %s', db_name)
+                _logger.info("queue job runner ready for db %s", db_name)
 
     def run_jobs(self):
         now = _odoo_now()
         for job in self.channel_manager.get_jobs_to_run(now):
             if self._stop:
                 break
-            _logger.info("asking Odoo to run job %s on db %s",
-                         job.uuid, job.db_name)
+            _logger.info("asking Odoo to run job %s on db %s", job.uuid, job.db_name)
             self.db_by_name[job.db_name].set_job_enqueued(job.uuid)
-            _async_http_get(self.scheme,
-                            self.host,
-                            self.port,
-                            self.user,
-                            self.password,
-                            job.db_name,
-                            job.uuid)
+            _async_http_get(
+                self.scheme,
+                self.host,
+                self.port,
+                self.user,
+                self.password,
+                job.db_name,
+                job.uuid,
+            )
 
     def process_notifications(self):
         for db in self.db_by_name.values():
@@ -419,7 +433,7 @@ class QueueJobRunner(object):
                     break
                 notification = db.conn.notifies.pop()
                 uuid = notification.payload
-                with db.select_jobs('uuid = %s', (uuid,)) as cr:
+                with db.select_jobs("uuid = %s", (uuid,)) as cr:
                     job_datas = cr.fetchone()
                     if job_datas:
                         self.channel_manager.notify(db.db_name, *job_datas)
@@ -461,7 +475,7 @@ class QueueJobRunner(object):
         _logger.info("graceful stop requested")
         self._stop = True
         # wakeup the select() in wait_notification
-        os.write(self._stop_pipe[1], b'.')
+        os.write(self._stop_pipe[1], b".")
 
     def run(self):
         _logger.info("starting")
@@ -481,8 +495,9 @@ class QueueJobRunner(object):
             except KeyboardInterrupt:
                 self.stop()
             except Exception:
-                _logger.exception("exception: sleeping %ds and retrying",
-                                  ERROR_RECOVERY_DELAY)
+                _logger.exception(
+                    "exception: sleeping %ds and retrying", ERROR_RECOVERY_DELAY
+                )
                 self.close_databases()
                 time.sleep(ERROR_RECOVERY_DELAY)
         self.close_databases(remove_jobs=False)
