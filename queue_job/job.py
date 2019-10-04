@@ -75,7 +75,7 @@ class DelayableRecordset(object):
         self.channel = channel
         self.identity_key = identity_key
 
-    # TODO it should use the new DelayableBuilder
+    # TODO it should use the new Delayable
     def __getattr__(self, name):
         if name in self.recordset:
             raise AttributeError(
