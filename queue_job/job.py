@@ -263,13 +263,25 @@ class Job(object):
 
     @classmethod
     def load(cls, env, job_uuid):
-        """Read a job from the Database"""
-        stored = cls.db_record_from_uuid(env, job_uuid)
+        """Read a single job from the Database
+
+        Raise an error if the job is not found.
+        """
+        stored = cls.db_records_from_uuids(env, [job_uuid])
         if not stored:
             raise NoSuchJobError(
                 "Job %s does no longer exist in the storage." % job_uuid
             )
         return cls._load_from_db_record(stored)
+
+    @classmethod
+    def load_many(cls, env, job_uuids):
+        """Read jobs in batch from the Database
+
+        Jobs not found are ignored.
+        """
+        recordset = cls.db_records_from_uuids(env, job_uuids)
+        return {cls._load_from_db_record(record) for record in recordset}
 
     @classmethod
     def _load_from_db_record(cls, job_db_record):
@@ -405,8 +417,14 @@ class Job(object):
 
     @staticmethod
     def db_record_from_uuid(env, job_uuid):
+        # TODO remove in 15.0 or 16.0
+        _logger.debug("deprecated, use 'db_records_from_uuids")
+        return Job.db_records_from_uuids(env, [job_uuid])
+
+    @staticmethod
+    def db_records_from_uuids(env, job_uuids):
         model = env["queue.job"].sudo()
-        record = model.search([("uuid", "=", job_uuid)], limit=1)
+        record = model.search([("uuid", "in", tuple(job_uuids))])
         return record.with_env(env).sudo()
 
     def __init__(
@@ -574,10 +592,9 @@ class Job(object):
         return self.result
 
     def enqueue_waiting(self):
-        # TODO replace states by constants
         sql = """
             UPDATE queue_job
-            SET state = 'pending'
+            SET state = %s
             FROM (
             SELECT child.id, array_agg(parent.state) as parent_states
             FROM queue_job job
@@ -598,10 +615,10 @@ class Job(object):
             ) jobs
             WHERE
             queue_job.id = jobs.id
-            AND 'done' = ALL(jobs.parent_states)
-            AND state = 'wait_dependencies';
+            AND %s = ALL(jobs.parent_states)
+            AND state = %s;
         """
-        self.env.cr.execute(sql, (self.uuid,))
+        self.env.cr.execute(sql, (PENDING, self.uuid, DONE, WAIT_DEPENDENCIES))
 
     def store(self):
         """Store the Job"""
@@ -730,7 +747,7 @@ class Job(object):
         return self.sorting_key() < other.sorting_key()
 
     def db_record(self):
-        return self.db_record_from_uuid(self.env, self.uuid)
+        return self.db_records_from_uuids(self.env, [self.uuid])
 
     @property
     def func(self):
@@ -763,21 +780,17 @@ class Job(object):
     @property
     def depends_on(self):
         if not self._depends_on:
-            # TODO batch load instead of loop
-            self._depends_on = {
-                Job.load(self.env, parent_uuid) for parent_uuid
-                in self.__depends_on_uuids
-            }
+            self._depends_on = Job.load_many(
+                self.env, self.__depends_on_uuids
+            )
         return self._depends_on
 
     @property
     def reverse_depends_on(self):
         if not self._reverse_depends_on:
-            # TODO batch load instead of loop
-            self._reverse_depends_on = {
-                Job.load(self.env, child_uuid) for child_uuid
-                in self.__reverse_depends_on_uuids
-            }
+            self._reverse_depends_on = Job.load_many(
+                self.env, self.__reverse_depends_on_uuids
+            )
         return set(self._reverse_depends_on)
 
     @property
