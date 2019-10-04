@@ -4,6 +4,7 @@
 
 import itertools
 import logging
+import os
 
 from collections import deque
 
@@ -130,9 +131,31 @@ class DelayableGraph(Graph):
             vertex._build_job()
         for vertex, neighbour in graph.edges():
             neighbour._generated_job.add_depends({vertex._generated_job})
+
+        # If all the jobs of the graph have another job with the same identity,
+        # we do not create them. Maybe we should check that the found jobs are
+        # part of the same graph, but not sure it's really required...
+        # Also, maybe we want to check only the root jobs.
+        existing_mapping = {}
         for vertex in graph.vertices():
-            # TODO it ignores identity key now, what should we do if
-            # we have dependencies...?
+            if not vertex.identity_key:
+                continue
+            existing = vertex._generated_job.job_record_with_same_identity_key()
+            if not existing:
+                # at least one does not exist yet, we'll delay the whole graph
+                existing_mapping.clear()
+                break
+            existing_mapping[vertex] = existing
+
+        # We'll replace the generated jobs by the existing ones, so callers
+        # can retrieve the existing job in "_generated_job".
+        # existing_mapping contains something only if *all* the job with an
+        # identity have an existing one.
+        for vertex, existing in existing_mapping.items():
+            vertex._generated_job = existing
+            return
+
+        for vertex in graph.vertices():
             vertex._generated_job.store()
 
 
@@ -300,11 +323,57 @@ class Delayable:
                 (name, self.recordset)
             )
         recordset_method = getattr(self.recordset, name)
-        if not getattr(recordset_method, 'delayable', None):
-            raise AttributeError(
-                'method %s on %s is not allowed to be delayed, '
-                'it should be decorated with odoo.addons.queue_job.job.job' %
-                (name, self.recordset)
-            )
         self._job_method = recordset_method
         return self._store_args
+
+
+class DelayableRecordset(object):
+    """Allow to delay a method for a recordset (shortcut way)
+
+    Usage::
+
+        delayable = DelayableRecordset(recordset, priority=20)
+        delayable.method(args, kwargs)
+
+    ``method`` must be a method of the recordset's Model, decorated with
+    :func:`~odoo.addons.queue_job.job.job`.
+
+    The method call will be processed asynchronously in the job queue, with
+    the passed arguments.
+
+    This class will generally not be used directly, it is used internally
+    by :meth:`~odoo.addons.queue_job.models.base.Base.with_delay`
+    """
+
+    __slots__ = ('delayable',)
+
+    def __init__(self, recordset, priority=None, eta=None,
+                 max_retries=None, description=None, channel=None,
+                 identity_key=None):
+        self.delayable = Delayable(
+            recordset,
+            priority=priority,
+            eta=eta,
+            max_retries=max_retries,
+            description=description,
+            channel=channel,
+            identity_key=identity_key,
+        )
+
+    @property
+    def recordset(self):
+        return self.delayable.recordset
+
+    def __getattr__(self, name):
+        def _delay_delayable(*args, **kwargs):
+            getattr(self.delayable, name)(*args, **kwargs).delay()
+            return self.delayable._generated_job
+        return _delay_delayable
+
+    def __str__(self):
+        return "DelayableRecordset(%s%s)" % (
+            self.delayable.recordset._name,
+            getattr(self.delayable.recordset, '_ids', "")
+        )
+
+    __repr__ = __str__
