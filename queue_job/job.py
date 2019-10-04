@@ -42,70 +42,14 @@ RETRY_INTERVAL = 10 * 60  # seconds
 _logger = logging.getLogger(__name__)
 
 
-class DelayableRecordset(object):
-    """Allow to delay a method for a recordset
-
-    Usage::
-
-        delayable = DelayableRecordset(recordset, priority=20)
-        delayable.method(args, kwargs)
-
-    The method call will be processed asynchronously in the job queue, with
-    the passed arguments.
-
-    This class will generally not be used directly, it is used internally
-    by :meth:`~odoo.addons.queue_job.models.base.Base.with_delay`
-    """
-
-    def __init__(
-        self,
-        recordset,
-        priority=None,
-        eta=None,
-        max_retries=None,
-        description=None,
-        channel=None,
-        identity_key=None,
-    ):
-        self.recordset = recordset
-        self.priority = priority
-        self.eta = eta
-        self.max_retries = max_retries
-        self.description = description
-        self.channel = channel
-        self.identity_key = identity_key
-
-    # TODO it should use the new Delayable
-    def __getattr__(self, name):
-        if name in self.recordset:
-            raise AttributeError(
-                "only methods can be delayed ({} called on {})".format(
-                    name, self.recordset
-                )
-            )
-        recordset_method = getattr(self.recordset, name)
-
-        def delay(*args, **kwargs):
-            return Job.enqueue(
-                recordset_method,
-                args=args,
-                kwargs=kwargs,
-                priority=self.priority,
-                max_retries=self.max_retries,
-                eta=self.eta,
-                description=self.description,
-                channel=self.channel,
-                identity_key=self.identity_key,
-            )
-
-        return delay
-
-    def __str__(self):
-        return "DelayableRecordset({}{})".format(
-            self.recordset._name, getattr(self.recordset, "_ids", "")
-        )
-
-    __repr__ = __str__
+# TODO remove in 15.0 or 16.0, used to keep compatibility as the
+# class has been moved in 'delay'.
+def DelayableRecordset(*args, **kwargs):
+    # prevent circular import
+    from .delay import DelayableRecordset as dr
+    _logger.debug("DelayableRecordset moved from the queue_job.job"
+                  " to the queue_job.delay python module")
+    return dr(*args, **kwargs)
 
 
 def identity_exact(job_):
@@ -358,6 +302,7 @@ class Job(object):
         )
         return existing
 
+    # TODO to deprecate (not called anymore)
     @classmethod
     def enqueue(
         cls,
@@ -393,6 +338,7 @@ class Job(object):
         )
         return new_job._enqueue_job()
 
+    # TODO to deprecate (not called anymore)
     def _enqueue_job(self):
         if self.identity_key:
             existing = self.job_record_with_same_identity_key()
