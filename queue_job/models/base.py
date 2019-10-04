@@ -33,22 +33,91 @@ class Base(models.AbstractModel):
     ):
         """Return a ``DelayableRecordset``
 
-        The returned instance allows to enqueue any method of the recordset's
-        Model.
+        It is a shortcut for the longer form as shown below::
 
-        Usage::
-
-            self.env['res.users'].with_delay().write({'name': 'test'})
+            self.with_delay(priority=20).action_done()
+            # is equivalent to:
+            self.delayable().set(priority=20).action_done().delay()
 
         ``with_delay()`` accepts job properties which specify how the job will
         be executed.
 
         Usage with job properties::
 
-            delayable = env['a.model'].with_delay(priority=30, eta=60*60*5)
+            env['a.model'].with_delay(priority=30, eta=60*60*5).action_done()
             delayable.export_one_thing(the_thing_to_export)
             # => the job will be executed with a low priority and not before a
             # delay of 5 hours from now
+
+        When using :meth:``with_delay``, the final ``delay()`` is implicit.
+        See the documentation of :meth:``delayable`` for more details.
+
+        :return: instance of a DelayableRecordset
+        :rtype: :class:`odoo.addons.queue_job.job.DelayableRecordset`
+        """
+        if os.getenv('TEST_QUEUE_JOB_NO_DELAY'):
+            _logger.warn(
+                '`TEST_QUEUE_JOB_NO_DELAY` env var found. NO JOB scheduled.'
+            )
+            return self
+        if self.env.context.get('test_queue_job_no_delay'):
+            _logger.warn(
+                '`test_queue_job_no_delay` ctx key found. NO JOB scheduled.'
+            )
+            return self
+        return DelayableRecordset(self, priority=priority,
+                                  eta=eta,
+                                  max_retries=max_retries,
+                                  description=description,
+                                  channel=channel,
+                                  identity_key=identity_key)
+
+    @api.multi
+    def delayable(self, priority=None, eta=None,
+                  max_retries=None, description=None,
+                  channel=None, identity_key=None):
+        """Return a ``Delayable``
+
+        The returned instance allows to enqueue any method of the recordset's
+        Model.
+
+        Usage::
+
+            delayable = self.env['res.users'].browse(10).delayable(priority=20)
+            delayable.do_work({'name': 'test'}).delay()
+
+        In the line above, ``do_work`` is allowed to be delayed because the
+        method definition of the fictive method ``do_work`` is decorated by
+        ``@job``. The ``do_work`` method will to be executed directly. It will
+        be executed in an asynchronous job.
+
+        Method calls on a Delayable generally return themselves, so calls can
+        be chained together::
+
+            delayable.set(priority=15).do_work({'name': 'test'}).delay()
+
+        The order of the calls that build the job is not relevant, beside
+        the call to ``delay()`` that must happen at the very end. This is
+        equivalent to the one before::
+
+            delayable.do_work({'name': 'test'}).set(priority=15).delay()
+
+        Very importantly, ``delay()`` must be called on the top-most parent
+        of a chain of jobs, so if you have this::
+
+            job1 = record1.delayable().do_work()
+            job2 = record2.delayable().do_work()
+            job1.done(job2)
+
+        The ``delay()`` call must be made on ``job1``, otherwise ``job2`` will
+        be delayed, but ``job1`` will never be. When done on ``job1``, the
+        ``delay()`` call will traverse the graph of jobs and delay all of
+        them::
+
+            job1.delay()
+
+        For more details on the graph dependencies, read the documentation of
+        :module:`~odoo.addons.queue_job.delay`.
 
         :param priority: Priority of the job, 0 being the higher priority.
                          Default is 10.
@@ -67,8 +136,9 @@ class Base(models.AbstractModel):
                              the new job will not be added. It is either a
                              string, either a function that takes the job as
                              argument (see :py:func:`..job.identity_exact`).
-        :return: instance of a DelayableRecordset
-        :rtype: :class:`odoo.addons.queue_job.job.DelayableRecordset`
+                             the new job will not be added.
+        :return: instance of a Delayable
+        :rtype: :class:`odoo.addons.queue_job.job.Delayable`
 
         Note for developers: if you want to run tests or simply disable
         jobs queueing for debugging purposes, you can:
@@ -80,30 +150,6 @@ class Base(models.AbstractModel):
 
             @mute_logger('odoo.addons.queue_job.models.base')
         """
-        if os.getenv("TEST_QUEUE_JOB_NO_DELAY"):
-            _logger.warning(
-                "`TEST_QUEUE_JOB_NO_DELAY` env var found. NO JOB scheduled."
-            )
-            return self
-        if self.env.context.get("test_queue_job_no_delay"):
-            _logger.warning(
-                "`test_queue_job_no_delay` ctx key found. NO JOB scheduled."
-            )
-            return self
-        return DelayableRecordset(
-            self,
-            priority=priority,
-            eta=eta,
-            max_retries=max_retries,
-            description=description,
-            channel=channel,
-            identity_key=identity_key,
-        )
-
-    @api.multi
-    def delayable(self, priority=None, eta=None,
-                  max_retries=None, description=None,
-                  channel=None, identity_key=None):
         return Delayable(self, priority=priority,
                          eta=eta,
                          max_retries=max_retries,
