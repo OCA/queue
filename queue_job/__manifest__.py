@@ -4,7 +4,7 @@
 {'name': 'Job Queue',
  'version': '12.0.1.0.1',
  'author': 'Camptocamp,ACSONE SA/NV,Odoo Community Association (OCA)',
- 'website': 'https://github.com/OCA/queue/queue_job',
+ 'website': 'https://github.com/OCA/queue/tree/12.0/queue_job',
  'license': 'AGPL-3',
  'category': 'Generic Modules',
  'depends': ['mail',
