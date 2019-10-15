@@ -1,12 +1,12 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* queue_job
+# 	* queue_job
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server 13.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: <>\n"
+"Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -15,7 +15,9 @@ msgstr ""
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
-msgid "<span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number of retries is infinite.</span>"
+msgid ""
+"<span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number of "
+"retries is infinite.</span>"
 msgstr ""
 
 #. module: queue_job
@@ -26,6 +28,11 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_ids
 msgid "Activities"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_exception_decoration
+msgid "Activity Exception Decoration"
 msgstr ""
 
 #. module: queue_job
@@ -62,13 +69,13 @@ msgid "Cancel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:365
+#: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Cannot change the root channel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:372
+#: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr ""
@@ -87,7 +94,7 @@ msgid "Channel Method Name"
 msgstr ""
 
 #. module: queue_job
-#: sql_constraint:queue.job.channel:0
+#: model:ir.model.constraint,message:queue_job.constraint_queue_job_channel_name_uniq
 msgid "Channel complete name must be unique"
 msgstr ""
 
@@ -159,8 +166,8 @@ msgid "Display Name"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__done
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
-#: selection:queue.job,state:0
 msgid "Done"
 msgstr ""
 
@@ -170,8 +177,8 @@ msgid "Enqueue Time"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__enqueued
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
-#: selection:queue.job,state:0
 msgid "Enqueued"
 msgstr ""
 
@@ -191,8 +198,8 @@ msgid "Execute only after"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__failed
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
-#: selection:queue.job,state:0
 msgid "Failed"
 msgstr ""
 
@@ -227,22 +234,29 @@ msgid "ID"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_exception_icon
+msgid "Icon"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__identity_key
 msgid "Identity Key"
 msgstr ""
 
 #. module: queue_job
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_unread
-msgid "If checked new messages require your attention."
-msgstr ""
-
-#. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction
+#: model:ir.model.fields,help:queue_job.field_queue_job__message_unread
 msgid "If checked, new messages require your attention."
 msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error
+#: model:ir.model.fields,help:queue_job.field_queue_job__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
 
@@ -289,7 +303,7 @@ msgid "Job failed"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/controllers/main.py:100
+#: code:addons/queue_job/controllers/main.py:0
 #, python-format
 msgid "Job interrupted and set to Done: nothing to do."
 msgstr ""
@@ -338,7 +352,7 @@ msgid "Main Attachment"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:173
+#: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Manually set to done by %s"
 msgstr ""
@@ -390,7 +404,7 @@ msgid "Next Activity Type"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:151
+#: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "No action available for this job"
 msgstr ""
@@ -402,7 +416,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_error_counter
-msgid "Number of error"
+msgid "Number of errors"
 msgstr ""
 
 #. module: queue_job
@@ -421,11 +435,6 @@ msgid "Number of unread messages"
 msgstr ""
 
 #. module: queue_job
-#: selection:queue.job,activity_state:0
-msgid "Overdue"
-msgstr ""
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__override_channel
 msgid "Override Channel"
 msgstr ""
@@ -436,20 +445,15 @@ msgid "Parent Channel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:357
+#: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Parent channel required."
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__pending
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
-#: selection:queue.job,state:0
 msgid "Pending"
-msgstr ""
-
-#. module: queue_job
-#: selection:queue.job,activity_state:0
-msgid "Planned"
 msgstr ""
 
 #. module: queue_job
@@ -478,13 +482,13 @@ msgid "Related"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:265
+#: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Related Record"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:275
+#: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Related Records"
 msgstr ""
@@ -517,6 +521,11 @@ msgid "Result"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
 msgid "Set all selected jobs to done"
 msgstr ""
@@ -542,9 +551,11 @@ msgid "Set to done"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:223
+#: code:addons/queue_job/models/queue_job.py:0
 #, python-format
-msgid "Something bad happened during the execution of the job. More details in the 'Exception Information' section."
+msgid ""
+"Something bad happened during the execution of the job. More details in the "
+"'Exception Information' section."
 msgstr ""
 
 #. module: queue_job
@@ -553,8 +564,8 @@ msgid "Start Date"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__started
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
-#: selection:queue.job,state:0
 msgid "Started"
 msgstr ""
 
@@ -566,7 +577,8 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_state
-msgid "Status based on activities\n"
+msgid ""
+"Status based on activities\n"
 "Overdue: Due date is already passed\n"
 "Today: Activity date is today\n"
 "Planned: Future activities."
@@ -579,7 +591,8 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__max_retries
-msgid "The job will fail if the number of tries reach the max. retries.\n"
+msgid ""
+"The job will fail if the number of tries reach the max. retries.\n"
 "Retries are infinite when empty."
 msgstr ""
 
@@ -594,8 +607,8 @@ msgid "The selected jobs will be set to done."
 msgstr ""
 
 #. module: queue_job
-#: selection:queue.job,activity_state:0
-msgid "Today"
+#: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_decoration
+msgid "Type of the exception activity on record."
 msgstr ""
 
 #. module: queue_job
@@ -622,4 +635,3 @@ msgstr ""
 #: model:ir.model,name:queue_job.model_queue_requeue_job
 msgid "Wizard to requeue a selection of jobs"
 msgstr ""
-
