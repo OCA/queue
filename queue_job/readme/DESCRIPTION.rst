@@ -14,7 +14,6 @@ Example:
   class MyModel(models.Model):
      _name = 'my.model'
 
-     @api.multi
      @job
      def my_method(self, a, k=None):
          _logger.info('executed with a: %s and k: %s', a, k)
@@ -23,7 +22,6 @@ Example:
   class MyOtherModel(models.Model):
       _name = 'my.other.model'
 
-      @api.multi
       def button_do_stuff(self):
           self.env['my.model'].with_delay().my_method('a', k=2)
 

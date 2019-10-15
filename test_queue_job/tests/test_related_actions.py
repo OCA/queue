@@ -2,7 +2,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 import odoo.tests.common as common
-
 from odoo import exceptions
 
 
@@ -12,7 +11,7 @@ class TestRelatedAction(common.SavepointCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.model = cls.env['test.related.action']
+        cls.model = cls.env["test.related.action"]
         cls.record = cls.model.create({})
         cls.records = cls.record + cls.model.create({})
 
@@ -21,7 +20,7 @@ class TestRelatedAction(common.SavepointCase):
         job_ = self.record.with_delay().testing_related_action__kwargs()
         act_job, act_kwargs = job_.related_action()
         self.assertEqual(act_job, job_.db_record())
-        self.assertEqual(act_kwargs, {'b': 4})
+        self.assertEqual(act_kwargs, {"b": 4})
 
     def test_decorator_empty(self):
         """ Job with decorator without value disable the default action
@@ -85,12 +84,11 @@ class TestRelatedAction(common.SavepointCase):
         """
         job_ = self.record.with_delay().testing_related_action__no()
         expected = {
-            'name': 'Related Record',
-            'res_id': self.record.id,
-            'res_model': self.record._name,
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'view_type': 'form',
+            "name": "Related Record",
+            "res_id": self.record.id,
+            "res_model": self.record._name,
+            "type": "ir.actions.act_window",
+            "view_mode": "form",
         }
         self.assertEquals(job_.related_action(), expected)
 
@@ -108,12 +106,11 @@ class TestRelatedAction(common.SavepointCase):
         """
         job_ = self.records.with_delay().testing_related_action__no()
         expected = {
-            'name': 'Related Records',
-            'domain': [('id', 'in', self.records.ids)],
-            'res_model': self.record._name,
-            'type': 'ir.actions.act_window',
-            'view_mode': 'tree,form',
-            'view_type': 'form',
+            "name": "Related Records",
+            "domain": [("id", "in", self.records.ids)],
+            "res_model": self.record._name,
+            "type": "ir.actions.act_window",
+            "view_mode": "tree,form",
         }
         self.assertEquals(job_.related_action(), expected)
 
@@ -129,11 +126,10 @@ class TestRelatedAction(common.SavepointCase):
                 return
 
         """
-        job_ = self.record.with_delay().testing_related_action__store(
-            'Discworld'
-        )
-        expected = {'type': 'ir.actions.act_url',
-                    'target': 'new',
-                    'url': 'https://en.wikipedia.org/wiki/Discworld',
-                    }
+        job_ = self.record.with_delay().testing_related_action__store("Discworld")
+        expected = {
+            "type": "ir.actions.act_url",
+            "target": "new",
+            "url": "https://en.wikipedia.org/wiki/Discworld",
+        }
         self.assertEquals(job_.related_action(), expected)
