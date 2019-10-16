@@ -28,4 +28,4 @@ Patterns
 Through the time, two main patterns emerged:
 
 1. For data exposed to client, a model should store the data and the model should be the creator of the job. The job is kept hidden from the client
-2. For technical data, that are not exposed to the client, it is priviledged to create directly jobs, without intermediary models. The jobs are then used to check the data
+2. For technical data, that are not exposed to the users, it is generally alright to create directly jobs with data passed as arguments to the job, without intermediary models.
