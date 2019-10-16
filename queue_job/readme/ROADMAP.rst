@@ -27,5 +27,5 @@ Patterns
 ~~~~~~~~
 Through the time, two main patterns emerged:
 
-1. For data exposed to client, a model should store the data and the model should be the creator of the job. The job is kept hidden from the client
+1. For data exposed to users, a model should store the data and the model should be the creator of the job. The job is kept hidden from the users
 2. For technical data, that are not exposed to the users, it is generally alright to create directly jobs with data passed as arguments to the job, without intermediary models.
