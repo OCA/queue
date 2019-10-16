@@ -493,11 +493,7 @@ class Job(object):
         if "company_id" in env.context:
             company_id = env.context["company_id"]
         else:
-            company_model = env["res.company"]
-            company_model = company_model.with_user(self.user_id)
-            company_id = company_model._company_default_get(
-                object="queue.job", field="company_id"
-            ).id
+            company_id = env.company.id
         self.company_id = company_id
         self._eta = None
         self.eta = eta
