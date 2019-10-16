@@ -21,7 +21,7 @@ Tips and tricks
 ---------------
 
 * **Idempotency** (https://www.restapitutorial.com/lessons/idempotency.html): The queue_job should be idempotent so they can be retried several times without impact on the data.
-* **The job should test at the very beginning its revelency**: the moment the job will be executed is unknown by design. So the first task of a job should be to check if the related work is still relevent at the moment of the execution.
+* **The job should test at the very beginning its relevance**: the moment the job will be executed is unknown by design. So the first task of a job should be to check if the related work is still relevant at the moment of the execution.
 
 Patterns
 ~~~~~~~~
