@@ -13,6 +13,11 @@ valid_odoo_versions=13.0
 [MESSAGES CONTROL]
 disable=all
 
+# missing-manifest-dependency
+# has been removed from the checks
+# until https://github.com/OCA/pylint-odoo/pull/263
+# is released
+
 enable=anomalous-backslash-in-string,
     api-one-deprecated,
     api-one-multi-together,
@@ -39,7 +44,6 @@ enable=anomalous-backslash-in-string,
     method-required-super,
     method-search,
     missing-import-error,
-    missing-manifest-dependency,
     openerp-exception-warning,
     pointless-statement,
     pointless-string-statement,
