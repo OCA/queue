@@ -1,4 +1,4 @@
-exclude: "^setup/|/static/lib/|/static/src/lib/|^base_export_async/|^base_import_async/|^queue_job/|^queue_job_cron/|^queue_job_subscribe/|^test_base_import_async/|^test_queue_job/"
+exclude: "^setup/|/static/lib/|/static/src/lib/|^base_export_async/|^base_import_async/|^test_base_import_async/"
 default_language_version:
   python: python3
 repos:
