@@ -1,5 +1,5 @@
 # copyright 2018 Camptocamp
-# license agpl-3.0 or later (http://www.gnu.org/licenses/agpl.html)
+# license lgpl-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 from psycopg2 import IntegrityError
 
