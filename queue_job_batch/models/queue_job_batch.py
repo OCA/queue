@@ -1,4 +1,6 @@
 # Copyright 2019 Creu Blanca
+# Copyright 2019 Eficent Business and IT Consulting Services S.L.
+#     (http://www.eficent.com)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 from odoo import models, fields, api
@@ -87,7 +89,12 @@ class QueueJobBatch(models.Model):
 
     @api.multi
     def set_read(self):
-        return self.write({'is_read': True})
+        res = self.write({'is_read': True})
+        notifications = []
+        channel = 'queue.job.batch'
+        notifications.append([channel, {}])
+        self.env['bus.bus'].sendmany(notifications)
+        return res
 
     @api.model
     def get_new_batch(self, name, **kwargs):
