@@ -1,5 +1,5 @@
 # Copyright 2019 Versada UAB
-# License AGPL-3 or later (https://www.gnu.org/licenses/agpl).
+# License LGPL-3 or later (https://www.gnu.org/licenses/lgpl).
 
 import datetime
 
