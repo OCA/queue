@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 11.0\n"
+"Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
@@ -14,29 +14,49 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_needaction
+msgid "Action Needed"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__activity_ids
+msgid "Activities"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__activity_state
+msgid "Activity State"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_attachment_count
+msgid "Attachment Count"
+msgstr ""
+
+#. module: queue_job_batch
 #: model:ir.model,name:queue_job_batch.model_queue_job_batch
 msgid "Batch of jobs"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_company_id
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__company_id
 msgid "Company"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_completeness
-#: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_form
-#: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_tree
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__completeness
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_form
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_tree
 msgid "Completeness"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_display_name
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__display_name
 msgid "Display Name"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 #: selection:queue.job.batch,state:0
 msgid "Draft"
 msgstr ""
@@ -47,41 +67,64 @@ msgid "Enqueued"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_failed_job_count
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__failed_job_count
 msgid "Failed Job Count"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_failed_percentage
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__failed_percentage
 msgid "Failed Percentage"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 #: selection:queue.job.batch,state:0
 msgid "Finished"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_finished_job_count
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__finished_job_count
 msgid "Finished Job Count"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_follower_ids
+msgid "Followers"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_channel_ids
+msgid "Followers (Channels)"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_partner_ids
+msgid "Followers (Partners)"
+msgstr ""
+
+#. module: queue_job_batch
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "Group By"
 msgstr ""
 
 #. module: queue_job_batch
-#. openerp-web
-#: code:addons/queue_job_batch/static/src/xml/systray.xml:52
-#, python-format
-msgid "Hide"
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__id
+msgid "ID"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_id
-msgid "ID"
+#: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__message_unread
+msgid "If checked new messages require your attention."
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__message_has_error
+msgid "If checked, some messages have a delivery error."
 msgstr ""
 
 #. module: queue_job_batch
@@ -90,33 +133,38 @@ msgid "In Progress"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "In progress"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_is_read
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_is_follower
+msgid "Is Follower"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__is_read
 msgid "Is Read"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_job_ids
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__job_ids
 msgid "Job"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_job_batch_id
-#: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_form
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job__job_batch_id
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_form
 msgid "Job Batch"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_tree
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_tree
 msgid "Job Batches"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_job_count
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__job_count
 msgid "Job Count"
 msgstr ""
 
@@ -138,18 +186,55 @@ msgstr ""
 
 #. module: queue_job_batch
 #: model:ir.actions.act_window,name:queue_job_batch.action_queue_job_related
-#: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_form
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_form
 msgid "Jobs"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch___last_update
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch____last_update
 msgid "Last Modified on"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_name
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_main_attachment_id
+msgid "Main Attachment"
+msgstr ""
+
+#. module: queue_job_batch
+#. openerp-web
+#: code:addons/queue_job_batch/static/src/xml/systray.xml:53
+#, python-format
+msgid "Mark as Read"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_has_error
+msgid "Message Delivery error"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_ids
+msgid "Messages"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__name
 msgid "Name"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__activity_summary
+msgid "Next Activity Summary"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__activity_type_id
+msgid "Next Activity Type"
 msgstr ""
 
 #. module: queue_job_batch
@@ -160,19 +245,82 @@ msgid "No jobs to view."
 msgstr ""
 
 #. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_needaction_counter
+msgid "Number of Actions"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_has_error_counter
+msgid "Number of error"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__message_needaction_counter
+msgid "Number of messages which requires an action"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__message_unread_counter
+msgid "Number of unread messages"
+msgstr ""
+
+#. module: queue_job_batch
+#: selection:queue.job.batch,activity_state:0
+msgid "Overdue"
+msgstr ""
+
+#. module: queue_job_batch
+#: selection:queue.job.batch,activity_state:0
+msgid "Planned"
+msgstr ""
+
+#. module: queue_job_batch
 #: model:ir.model,name:queue_job_batch.model_queue_job
 msgid "Queue Job"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_state
-#: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__activity_user_id
+msgid "Responsible User"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__state
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "State"
 msgstr ""
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_user_id
-#: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
+#: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__activity_state
+msgid "Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+
+#. module: queue_job_batch
+#: selection:queue.job.batch,activity_state:0
+msgid "Today"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_unread
+msgid "Unread Messages"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_unread_counter
+msgid "Unread Messages Counter"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__user_id
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "User"
 msgstr ""
 
@@ -181,5 +329,15 @@ msgstr ""
 #: code:addons/queue_job_batch/static/src/xml/systray.xml:16
 #, python-format
 msgid "View All"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__website_message_ids
+msgid "Website Messages"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__website_message_ids
+msgid "Website communication history"
 msgstr ""
 
