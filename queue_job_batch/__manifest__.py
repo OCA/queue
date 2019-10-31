@@ -1,9 +1,11 @@
+# Copyright 2019 Creu Blanca
+# Copyright 2019 Eficent Business and IT Consulting Services S.L.
+#     (http://www.eficent.com)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
-
 
 {
     'name': 'Job Queue Batch',
-    'version': '11.0.1.1.1',
+    'version': '12.0.1.0.0',
     'author': 'Creu Blanca,Odoo Community Association (OCA)',
     'website': 'https://github.com/OCA/queue',
     'license': 'AGPL-3',
