@@ -67,8 +67,8 @@
                 <filter name="finished" string="Finished"
                     domain="[('state', '=', 'finished')]"/>
                 <group expand="0" string="Group By">
-                    <filter string="State" context="{'group_by': 'state'}" />
-                    <filter string="User" context="{'group_by': 'user_id'}" />
+                    <filter name="group_by_state" string="State" context="{'group_by': 'state'}" />
+                    <filter name="group_by_user" string="User" context="{'group_by': 'user_id'}" />
                 </group>
             </search>
         </field>
