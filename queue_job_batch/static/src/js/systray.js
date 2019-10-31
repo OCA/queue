@@ -5,7 +5,7 @@ odoo.define('queue_job_batch.systray', function (require) {
     var session = require('web.session');
     var SystrayMenu = require('web.SystrayMenu');
     var Widget = require('web.Widget');
-    var bus = require('bus.bus').bus;
+    var BusService = require('bus.BusService');
 
     var QWeb = core.qweb;
 
@@ -13,7 +13,7 @@ odoo.define('queue_job_batch.systray', function (require) {
         template:'queue_job_batch.view.Menu',
         events: {
             "click": "_onMenuClick",
-            "click .o_mail_channel_preview": "_onQueueJobBatchClick",
+            "click .o_mail_preview": "_onQueueJobBatchClick",
             "click .o_view_all_batch_jobs": "_viewAllQueueJobBatches",
             "click .o_queue_job_batch_hide": "_hideJobBatchClick",
         },
@@ -37,14 +37,15 @@ odoo.define('queue_job_batch.systray', function (require) {
                 self.manager = data;
                 if (data) {
                     self.$queue_job_batch_preview = self.$(
-                        '.o_mail_navbar_dropdown_channels'
+                        '.o_mail_systray_dropdown_items'
                     );
                     self._updateQueueJobBatchesPreview();
                     var channel = 'queue.job.batch';
-                    bus.add_channel(channel);
-                    bus.on(
-                        'notification',
-                        self, self._updateQueueJobBatchesPreview
+                    self.call('bus_service', 'addChannel', channel);
+                    self.call('bus_service', 'startPolling');
+                    self.call(
+                        'bus_service', 'onNotification',
+                        self, self._updateQueueJobBatchesPreview,
                     );
                 }
             });
@@ -93,6 +94,9 @@ odoo.define('queue_job_batch.systray', function (require) {
             });
         },
         _hideJobBatchClick: function (event) {
+            // hide the batch without navigating to it.
+            event.preventDefault();
+            event.stopPropagation();
             var queue_job_batch_id = parseInt(
                 $(event.currentTarget, 10).data('job-batch-id'), 10);
             this._hideJobBatch(event, queue_job_batch_id);
@@ -101,7 +105,7 @@ odoo.define('queue_job_batch.systray', function (require) {
             this._rpc({
                 model: 'queue.job.batch',
                 method: 'set_read',
-                args: [[queue_job_batch_id]],
+                args: [queue_job_batch_id,],
                 kwargs: {
                     context: session.user_context,
                 },
@@ -133,7 +137,5 @@ odoo.define('queue_job_batch.systray', function (require) {
 
     SystrayMenu.Items.push(QueueJobBatchMenu);
 
-    return {
-        QueueJobBatchMenu: QueueJobBatchMenu,
-    };
+    return QueueJobBatchMenu;
 });
