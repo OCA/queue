@@ -12,6 +12,15 @@ Next
 ~~~~
 
 
+13.0.1.1.0 (2019-11-01)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Important: the license has been changed from AGPL3 to LGPL3.
+
+* Remove deprecated default company method
+  (details on `#180 <https://github.com/OCA/queue/pull/180>`_)
+
+
 13.0.1.0.0 (2019-10-14)
 ~~~~~~~~~~~~~~~~~~~~~~~
 
