@@ -171,6 +171,19 @@ Tip: you can do this at test case level like this
 Then all your tests execute the job methods synchronously
 without delaying any jobs.
 
+Tips and tricks
+~~~~~~~~~~~~~~~
+
+* **Idempotency** (https://www.restapitutorial.com/lessons/idempotency.html): The queue_job should be idempotent so they can be retried several times without impact on the data.
+* **The job should test at the very beginning its relevance**: the moment the job will be executed is unknown by design. So the first task of a job should be to check if the related work is still relevant at the moment of the execution.
+
+Patterns
+~~~~~~~~
+Through the time, two main patterns emerged:
+
+1. For data exposed to users, a model should store the data and the model should be the creator of the job. The job is kept hidden from the users
+2. For technical data, that are not exposed to the users, it is generally alright to create directly jobs with data passed as arguments to the job, without intermediary models.
+
 Known issues / Roadmap
 ======================
 
@@ -192,6 +205,7 @@ Known issues / Roadmap
 .. code-block:: sql
 
   update queue_job set state='pending' where state in ('started', 'enqueued')
+
 
 Changelog
 =========
