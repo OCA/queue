@@ -18,7 +18,7 @@ Available addons
 addon | version | summary
 --- | --- | ---
 [base_export_async](base_export_async/) | 12.0.1.0.0 | Asynchronous export with job queue
-[queue_job](queue_job/) | 12.0.1.0.1 | Job Queue
+[queue_job](queue_job/) | 12.0.1.1.0 | Job Queue
 [queue_job_cron](queue_job_cron/) | 12.0.1.1.0 | Scheduled Actions as Queue Jobs
 [test_queue_job](test_queue_job/) | 12.0.1.0.0 | Queue Job Tests
 
