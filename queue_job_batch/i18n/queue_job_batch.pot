@@ -331,3 +331,13 @@ msgstr ""
 msgid "View All"
 msgstr ""
 
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__website_message_ids
+msgid "Website Messages"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__website_message_ids
+msgid "Website communication history"
+msgstr ""
+
