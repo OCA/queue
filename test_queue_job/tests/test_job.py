@@ -448,6 +448,10 @@ class TestJobModel(common.TransactionCase):
         self.queue_job = self.env['queue.job']
         self.user = self.env['res.users']
         self.method = self.env['test.queue.job'].testing_method
+        self.env['queue.job.function']._register_job(
+            self.env['test.queue.job'],
+            self.method
+        )
 
     def _create_job(self):
         test_job = Job(self.method)
@@ -508,8 +512,38 @@ class TestJobModel(common.TransactionCase):
             set([u.partner_id for u in group.users]) - set(followers))
 
     def test_autovacuum(self):
+        # test default removal interval
         stored = self._create_job()
-        stored.write({'date_done': '2000-01-01 00:00:00'})
+        date_done = datetime.now() - timedelta(days=29)
+        stored.write({'date_done': date_done})
+        self.env['queue.job'].autovacuum()
+        self.assertEqual(len(self.env['queue.job'].search([])), 1)
+
+        date_done = datetime.now() - timedelta(days=31)
+        stored.write({'date_done': date_done})
+        self.env['queue.job'].autovacuum()
+        self.assertEqual(len(self.env['queue.job'].search([])), 0)
+
+    def test_autovacuum_multi_channel(self):
+        root_channel = self.env.ref('queue_job.channel_root')
+        channel_60days = self.env['queue.job.channel'].create(
+            {'name': '60days',
+             'removal_interval': 60,
+             'parent_id': root_channel.id}
+        )
+        date_done = datetime.now() - timedelta(days=31)
+        job_root = self._create_job()
+        job_root.write({'date_done': date_done})
+        job_60days = self._create_job()
+        job_60days.write({'channel': channel_60days.name,
+                          'date_done': date_done})
+
+        self.assertEqual(len(self.env['queue.job'].search([])), 2)
+        self.env['queue.job'].autovacuum()
+        self.assertEqual(len(self.env['queue.job'].search([])), 1)
+
+        date_done = datetime.now() - timedelta(days=61)
+        job_60days.write({'date_done': date_done})
         self.env['queue.job'].autovacuum()
         self.assertEqual(len(self.env['queue.job'].search([])), 0)
 
