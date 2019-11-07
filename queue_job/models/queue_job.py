@@ -207,13 +207,18 @@ class QueueJob(models.Model):
         return [("state", "=", "failed")]
 
     def autovacuum(self):
-        """Delete all jobs done since more than ``_removal_interval`` days.
+        """Delete all jobs done based on the removal interval defined on the
+           channel
 
         Called from a cron.
         """
-        deadline = datetime.now() - timedelta(days=self._removal_interval)
-        jobs = self.search([("date_done", "<=", deadline)])
-        jobs.unlink()
+        for channel in self.env["queue.job.channel"].search([]):
+            deadline = datetime.now() - timedelta(days=int(channel.removal_interval))
+            jobs = self.search(
+                [("date_done", "<=", deadline), ("channel", "=", channel.name)]
+            )
+            if jobs:
+                jobs.unlink()
         return True
 
     def related_action_open_record(self):
@@ -298,6 +303,9 @@ class JobChannel(models.Model):
         comodel_name="queue.job.function",
         inverse_name="channel_id",
         string="Job Functions",
+    )
+    removal_interval = fields.Integer(
+        default=lambda self: self.env["queue.job"]._removal_interval, required=True
     )
 
     _sql_constraints = [
