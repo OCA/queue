@@ -199,6 +199,7 @@
                     <field name="name" attrs="{'required': [('name', '!=', 'root')], 'readonly': [('name', '=', 'root')]}"/>
                     <field name="parent_id" attrs="{'required': [('name', '!=', 'root')], 'readonly': [('name', '=', 'root')]}"/>
                     <field name="complete_name"/>
+                    <field name="removal_interval"/>
                 </group>
                 <group>
                   <field name="job_function_ids" widget="many2many_tags"/>
