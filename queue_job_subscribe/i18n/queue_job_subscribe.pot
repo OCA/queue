@@ -1,23 +1,17 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# * connector_job_subscribe
+#	* queue_job_subscribe
 #
-# Translators:
-# OCA Transbot <transbot@odoo-community.org>, 2017
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 9.0c\n"
+"Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-04-05 00:42+0000\n"
-"PO-Revision-Date: 2017-04-05 00:42+0000\n"
-"Last-Translator: OCA Transbot <transbot@odoo-community.org>, 2017\n"
-"Language-Team: Turkish (Turkey) (https://www.transifex.com/oca/teams/23907/"
-"tr_TR/)\n"
-"Language: tr_TR\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: \n"
 
 #. module: queue_job_subscribe
 #: model:ir.ui.view,arch_db:queue_job_subscribe.view_user_connector_form
@@ -26,9 +20,7 @@ msgstr ""
 
 #. module: queue_job_subscribe
 #: model:ir.model.fields,help:queue_job_subscribe.field_res_users_subscribe_job
-msgid ""
-"If this flag is checked and the user is Connector Manager, he will receive "
-"job notifications."
+msgid "If this flag is checked and the user is Connector Manager, he will receive job notifications."
 msgstr ""
 
 #. module: queue_job_subscribe
@@ -44,4 +36,5 @@ msgstr ""
 #. module: queue_job_subscribe
 #: model:ir.model,name:queue_job_subscribe.model_res_users
 msgid "Users"
-msgstr "Kullanıcılar"
+msgstr ""
+
