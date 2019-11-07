@@ -5,3 +5,4 @@
 * David Lefever <dl@taktik.be>
 * Laurent Mignon <laurent.mignon@acsone.eu>
 * Laetitia Gangloff <laetitia.gangloff@acsone.eu>
+* Cédric Pigeon <cedric.pigeon@acsone.eu>
