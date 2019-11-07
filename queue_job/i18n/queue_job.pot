@@ -1,0 +1,479 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* queue_job
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "<span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number of retries is infinite.</span>"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_args
+msgid "Args"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_requeue_job
+#: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+msgid "Cancel"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:374
+#, python-format
+msgid "Cannot change the root channel"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:381
+#, python-format
+msgid "Cannot remove the root channel"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function_channel_id
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Channel"
+msgstr ""
+
+#. module: queue_job
+#: sql_constraint:queue.job.channel:0
+msgid "Channel complete name must be unique"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_method_name
+msgid "Channel method name"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_queue_job_channel
+#: model:ir.ui.menu,name:queue_job.menu_queue_job_channel
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_channel_form
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_channel_search
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_channel_tree
+msgid "Channels"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_company_id
+msgid "Company"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_complete_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function_channel
+msgid "Complete Name"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_date_created
+msgid "Created Date"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_create_date
+msgid "Created on"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_retry
+msgid "Current try"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Current try / max. retries"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_date_done
+msgid "Date Done"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_name
+msgid "Description"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function_display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_search
+#: selection:queue.job,state:0
+msgid "Done"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_date_enqueued
+msgid "Enqueue Time"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_search
+#: selection:queue.job,state:0
+msgid "Enqueued"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_exc_info
+msgid "Exception Info"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Exception Information"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_eta
+msgid "Execute only after"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_search
+#: selection:queue.job,state:0
+msgid "Failed"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Group By"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_id
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function_id
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_id
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_id
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_id
+msgid "ID"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_identity_key
+msgid "Identity key"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_job_channel
+msgid "Job Channels"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_job_function_id
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Job Function"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_queue_job_function
+#: model:ir.model,name:queue_job.model_queue_job_function
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_job_function_ids
+#: model:ir.ui.menu,name:queue_job.menu_queue_job_function
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_function_form
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_function_tree
+msgid "Job Functions"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.module.category,name:queue_job.module_category_queue_job
+#: model:ir.ui.menu,name:queue_job.menu_queue_job_root
+msgid "Job Queue"
+msgstr ""
+
+#. module: queue_job
+#: model:res.groups,name:queue_job.group_queue_job_manager
+msgid "Job Queue Manager"
+msgstr ""
+
+#. module: queue_job
+#: model:mail.message.subtype,name:queue_job.mt_job_failed
+msgid "Job failed"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/controllers/main.py:119
+#, python-format
+msgid "Job interrupted and set to Done: nothing to do."
+msgstr ""
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_job_ids
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_job_ids
+#: model:ir.ui.menu,name:queue_job.menu_queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_search
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_tree
+msgid "Jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_kwargs
+msgid "Kwargs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job___last_update
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel___last_update
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function___last_update
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done___last_update
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job___last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job_write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:165
+#, python-format
+msgid "Manually set to done by {}"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_max_retries
+msgid "Max. retries"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_method_name
+msgid "Method name"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_model_name
+msgid "Model"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function_name
+msgid "Name"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:145
+#, python-format
+msgid "No action available for this job"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_parent_id
+msgid "Parent Channel"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:366
+#, python-format
+msgid "Parent channel required."
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_search
+#: selection:queue.job,state:0
+msgid "Pending"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_priority
+msgid "Priority"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.menu,name:queue_job.menu_queue
+msgid "Queue"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_job
+msgid "Queue Job"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_reason
+msgid "Reason to set to done"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_record_ids
+msgid "Record ids"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Related"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:271
+#, python-format
+msgid "Related Record"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:281
+#, python-format
+msgid "Related Records"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_requeue_job
+msgid "Requeue"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Requeue Job"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_requeue_job
+#: model:ir.ui.view,arch_db:queue_job.view_requeue_job
+msgid "Requeue Jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_result
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Result"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_jobs_to_done
+msgid "Set all selected jobs to done"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+msgid "Set jobs done"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_set_jobs_done
+msgid "Set jobs to done"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Set to 'Done'"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+msgid "Set to done"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:230
+#, python-format
+msgid "Something bad happened during the execution of the job. More details in the 'Exception Information' section."
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_date_started
+msgid "Start Date"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_search
+#: selection:queue.job,state:0
+msgid "Started"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_state
+#: model:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "State"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_func_string
+msgid "Task"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job_max_retries
+msgid "The job will fail if the number of tries reach the max. retries.\n"
+"Retries are infinite when empty."
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_requeue_job
+msgid "The selected jobs will be requeued."
+msgstr ""
+
+#. module: queue_job
+#: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+msgid "The selected jobs will be set to done."
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_uuid
+msgid "UUID"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_user_id
+msgid "User ID"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_requeue_job
+msgid "Wizard to requeue a selection of jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_base
+msgid "base"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:169
+#, python-format
+msgid "{} with reason: {}"
+msgstr ""
+
