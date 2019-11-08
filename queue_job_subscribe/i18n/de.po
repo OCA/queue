@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 9.0c\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-06-24 00:51+0000\n"
-"PO-Revision-Date: 2017-06-24 00:51+0000\n"
+"PO-Revision-Date: 2019-11-08 14:12+0000\n"
 "Last-Translator: Rudolf Schnapka <rs@techno-flex.de>, 2017\n"
 "Language-Team: German (https://www.transifex.com/oca/teams/23907/de/)\n"
 "MIME-Version: 1.0\n"
@@ -36,7 +36,7 @@ msgstr ""
 #. module: connector_job_subscribe
 #: model:ir.model.fields,field_description:connector_job_subscribe.field_res_users_subscribe_job
 msgid "Jobs Notifications"
-msgstr ""
+msgstr "Jobs-Hinweise"
 
 #. module: connector_job_subscribe
 #: model:ir.model,name:connector_job_subscribe.model_queue_job
