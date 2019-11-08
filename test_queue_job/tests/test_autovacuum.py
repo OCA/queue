@@ -1,31 +1,55 @@
 # Copyright 2019 Versada UAB
 # License LGPL-3 or later (https://www.gnu.org/licenses/lgpl).
 
-import datetime
+from datetime import datetime, timedelta
 
-from odoo.tests import common
-
-from odoo.addons.queue_job.job import Job
+from .common import JobCommonCase
 
 
-class TestQueueJobAutovacuumCronJob(common.TransactionCase):
+class TestQueueJobAutovacuumCronJob(JobCommonCase):
     def setUp(self):
         super().setUp()
-        self.queue_job = self.env["queue.job"]
-        self.method = self.env["test.queue.job"].testing_method
         self.cron_job = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
 
-    def test_old_jobs_are_deleted(self):
-        """
-        Old jobs are deleted by the autovacuum cron job.
-        """
-        test_job = Job(self.method)
-        test_job.set_done(result="ok")
-        test_job.date_done = datetime.datetime.now() - datetime.timedelta(
+    def test_old_jobs_are_deleted_by_cron_job(self):
+        """Old jobs are deleted by the autovacuum cron job."""
+        date_done = datetime.now() - timedelta(
             days=self.queue_job._removal_interval + 1
         )
-        test_job.store()
-
+        stored = self._create_job()
+        stored.write({"date_done": date_done})
         self.cron_job.method_direct_trigger()
+        self.assertFalse(stored.exists())
 
-        self.assertFalse(test_job.db_record().exists())
+    def test_autovacuum(self):
+        # test default removal interval
+        stored = self._create_job()
+        date_done = datetime.now() - timedelta(days=29)
+        stored.write({"date_done": date_done})
+        self.env["queue.job"].autovacuum()
+        self.assertEqual(len(self.env["queue.job"].search([])), 1)
+
+        date_done = datetime.now() - timedelta(days=31)
+        stored.write({"date_done": date_done})
+        self.env["queue.job"].autovacuum()
+        self.assertEqual(len(self.env["queue.job"].search([])), 0)
+
+    def test_autovacuum_multi_channel(self):
+        root_channel = self.env.ref("queue_job.channel_root")
+        channel_60days = self.env["queue.job.channel"].create(
+            {"name": "60days", "removal_interval": 60, "parent_id": root_channel.id}
+        )
+        date_done = datetime.now() - timedelta(days=31)
+        job_root = self._create_job()
+        job_root.write({"date_done": date_done})
+        job_60days = self._create_job()
+        job_60days.write({"channel": channel_60days.name, "date_done": date_done})
+
+        self.assertEqual(len(self.env["queue.job"].search([])), 2)
+        self.env["queue.job"].autovacuum()
+        self.assertEqual(len(self.env["queue.job"].search([])), 1)
+
+        date_done = datetime.now() - timedelta(days=61)
+        job_60days.write({"date_done": date_done})
+        self.env["queue.job"].autovacuum()
+        self.assertEqual(len(self.env["queue.job"].search([])), 0)
