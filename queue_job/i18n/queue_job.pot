@@ -494,6 +494,11 @@ msgid "Related Records"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__removal_interval
+msgid "Removal Interval"
+msgstr ""
+
+#. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
 msgid "Requeue"
 msgstr ""
