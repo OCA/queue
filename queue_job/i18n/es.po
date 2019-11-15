@@ -54,13 +54,13 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:362
+#: code:addons/queue_job/models/queue_job.py:370
 #, python-format
 msgid "Cannot change the root channel"
 msgstr "No puede modificar el canal root"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:369
+#: code:addons/queue_job/models/queue_job.py:377
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr "No puede eliminar el canal root"
@@ -363,7 +363,7 @@ msgid "Parent Channel"
 msgstr "Canal padre"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:354
+#: code:addons/queue_job/models/queue_job.py:362
 #, python-format
 msgid "Parent channel required."
 msgstr "Canal padre obligatorio."
@@ -400,16 +400,21 @@ msgid "Related"
 msgstr "Relacionado"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:262
+#: code:addons/queue_job/models/queue_job.py:267
 #, python-format
 msgid "Related Record"
 msgstr "Registro relacionado"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:272
+#: code:addons/queue_job/models/queue_job.py:277
 #, python-format
 msgid "Related Records"
 msgstr "Registros relacionados"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_removal_interval
+msgid "Removal Interval"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_requeue_job
