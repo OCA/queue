@@ -24,15 +24,11 @@ from odoo.addons.queue_job.job import (
     FAILED,
     identity_exact,
 )
+from .common import JobCommonCase
 
 
-class TestJobsOnTestingMethod(common.TransactionCase):
+class TestJobsOnTestingMethod(JobCommonCase):
     """ Test Job """
-
-    def setUp(self):
-        super(TestJobsOnTestingMethod, self).setUp()
-        self.queue_job = self.env['queue.job']
-        self.method = self.env['test.queue.job'].testing_method
 
     def test_new_job(self):
         """
@@ -324,7 +320,7 @@ class TestJobsOnTestingMethod(common.TransactionCase):
         self.assertEqual(job1.identity_key, expected_key)
 
 
-class TestJobs(common.TransactionCase):
+class TestJobs(JobCommonCase):
     """ Test jobs on other methods or with different job configuration """
 
     def test_description(self):
@@ -441,20 +437,7 @@ class TestJobs(common.TransactionCase):
         self.assertEquals({'mutable_kwarg': {'a': 1}}, job_instance.kwargs)
 
 
-class TestJobModel(common.TransactionCase):
-
-    def setUp(self):
-        super(TestJobModel, self).setUp()
-        self.queue_job = self.env['queue.job']
-        self.user = self.env['res.users']
-        self.method = self.env['test.queue.job'].testing_method
-
-    def _create_job(self):
-        test_job = Job(self.method)
-        test_job.store()
-        stored = Job.db_record_from_uuid(self.env, test_job.uuid)
-        self.assertEqual(len(stored), 1)
-        return stored
+class TestJobModel(JobCommonCase):
 
     def test_job_change_state(self):
         stored = self._create_job()
@@ -506,12 +489,6 @@ class TestJobModel(common.TransactionCase):
         self.assertFalse(inactiveusr.partner_id in followers)
         self.assertFalse(
             set([u.partner_id for u in group.users]) - set(followers))
-
-    def test_autovacuum(self):
-        stored = self._create_job()
-        stored.write({'date_done': '2000-01-01 00:00:00'})
-        self.env['queue.job'].autovacuum()
-        self.assertEqual(len(self.env['queue.job'].search([])), 0)
 
     def test_wizard_requeue(self):
         stored = self._create_job()
