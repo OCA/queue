@@ -19,8 +19,10 @@ odoo.define('base_import_async.import', function (require) {
                     _t("Your request is being processed"),
                     _t("You can check the status of this job in menu 'Queue / Jobs'.")
                 );
+                this.exit();
+            } else {
+                this._super.apply(this, arguments);
             }
-            this._super.apply(this, arguments);
         },
 
     });
