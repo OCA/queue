@@ -83,12 +83,10 @@ class BaseImportImport(models.TransientModel):
     def _create_csv_attachment(self, fields, data, options, file_name):
         # write csv
         f = StringIO()
-        writer = csv.writer(
-            f,
-            delimiter=str(options.get(OPT_SEPARATOR)),
-            quotechar=str(options.get(OPT_QUOTING)),
-        )
-        encoding = options.get(OPT_ENCODING, "utf-8")
+        writer = csv.writer(f,
+                            delimiter=str(options.get(OPT_SEPARATOR)) or ',',
+                            quotechar=str(options.get(OPT_QUOTING)))
+        encoding = options.get(OPT_ENCODING) or 'utf-8'
         writer.writerow(fields)
         for row in data:
             writer.writerow(row)
@@ -102,13 +100,11 @@ class BaseImportImport(models.TransientModel):
     @api.model
     def _read_csv_attachment(self, attachment, options):
         decoded_datas = base64.decodebytes(attachment.datas)
-        encoding = options.get(OPT_ENCODING, "utf-8")
+        encoding = options.get(OPT_ENCODING) or 'utf-8'
         f = TextIOWrapper(BytesIO(decoded_datas), encoding=encoding)
-        reader = csv.reader(
-            f,
-            delimiter=str(options.get(OPT_SEPARATOR)),
-            quotechar=str(options.get(OPT_QUOTING)),
-        )
+        reader = csv.reader(f,
+                            delimiter=str(options.get(OPT_SEPARATOR)) or ',',
+                            quotechar=str(options.get(OPT_QUOTING)))
 
         fields = next(reader)
         data = [row for row in reader]
