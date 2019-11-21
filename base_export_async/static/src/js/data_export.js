@@ -84,6 +84,7 @@ odoo.define('base_export_async.DataExport', function(require) {
                                 .filter(
                                     ':checked'
                                 ).val(),
+                            user_ids: [this.record.context.uid],
                         })
                     }],
                 }).then(function(result) {
