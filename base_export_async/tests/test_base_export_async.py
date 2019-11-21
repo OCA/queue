@@ -16,8 +16,9 @@ data_csv = {
             "ids": false,
             "domain": [],
             "context": {"lang": "en_US", "tz": "Europe/Brussels", "uid": 2},
-            "import_compat": false}"""
-}
+            "import_compat": false,
+            "user_ids": [2]
+            }"""}
 
 data_xls = {
     "data": """{"format": "xls", "model": "res.partner",
@@ -28,8 +29,9 @@ data_xls = {
             "ids": false,
             "domain": [],
             "context": {"lang": "en_US", "tz": "Europe/Brussels", "uid": 2},
-            "import_compat": false}"""
-}
+            "import_compat": false,
+            "user_ids": [2]
+            }"""}
 
 
 class TestBaseExportAsync(common.TransactionCase):

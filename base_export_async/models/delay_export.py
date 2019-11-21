@@ -17,14 +17,15 @@ _logger = logging.getLogger(__name__)
 
 class DelayExport(models.Model):
 
-    _name = "delay.export"
-    _description = "Allow to delay the export"
+    _name = 'delay.export'
+    _description = 'Asynchronous Export'
 
-    user_id = fields.Many2one("res.users", string="User", index=True)
+    user_ids = fields.Many2many('res.users', string='Users', index=True)
 
     @api.model
     def delay_export(self, data):
-        params = json.loads(data.get("data"))
+        """Delay the export, called from js"""
+        params = json.loads(data.get('data'))
         if not self.env.user.email:
             raise UserError(_("You must set an email address to your user."))
         self.with_delay().export(params)
@@ -34,12 +35,12 @@ class DelayExport(models.Model):
         export_format = params.get("format")
         raw_data = export_format != "csv"
 
-        item_names = ("model", "fields", "ids", "domain", "import_compat", "context")
-        items = operator.itemgetter(item_names)(params)
-        model_name, fields_name, ids, domain, import_compat, context = items
-        user = self.env["res.users"].browse([context.get("uid")])
-        if not user or not user.email:
-            raise UserError(_("The user doesn't have an email address."))
+        items = operator.itemgetter(
+            'model', 'fields', 'ids', 'domain',
+            'import_compat', 'context', 'user_ids'
+        )(params)
+        (model_name, fields_name, ids, domain,
+         import_compat, context, user_ids) = items
 
         model = self.env[model_name].with_context(
             import_compat=import_compat, **context
@@ -69,14 +70,29 @@ class DelayExport(models.Model):
     @api.model
     @job
     def export(self, params):
+        """Delayed export of a file sent by email
+
+        The ``params`` is a dict of parameters, contains:
+
+        * format: csv/excel
+        * model: model to export
+        * fields: list of fields to export, a list of dict:
+          [{'label': '', 'name': ''}]
+        * ids: list of ids to export
+        * domain: domain for the export
+        * context: context for the export (language, ...)
+        * import_compat: if the export is export/import compatible (boolean)
+        * user_ids: optional list of user ids who receive the file
+        """
         content = self._get_file_content(params)
 
-        model_name, context, export_format = operator.itemgetter(
-            "model", "context", "format"
+        items = operator.itemgetter(
+            'model', 'context', 'format', 'user_ids'
         )(params)
-        user = self.env["res.users"].browse([context.get("uid")])
+        model_name, context, export_format, user_ids = items
+        users = self.env['res.users'].browse(user_ids)
 
-        export_record = self.sudo().create({"user_id": user.id})
+        export_record = self.sudo().create({'user_ids': [(6, 0, users.ids)]})
 
         name = "{}.{}".format(model_name, export_format)
         attachment = self.env["ir.attachment"].create(
@@ -108,16 +124,13 @@ class DelayExport(models.Model):
         odoo_bot = self.sudo().env.ref("base.partner_root")
         email_from = odoo_bot.email
         model_description = self.env[model_name]._description
-        self.env["mail.mail"].create(
-            {
-                "email_from": email_from,
-                "reply_to": email_from,
-                "email_to": user.email,
-                "subject": _("Export {} {}").format(
-                    model_description, fields.Date.to_string(fields.Date.today())
-                ),
-                "body_html": _(
-                    """
+        self.env['mail.mail'].create({
+            'email_from': email_from,
+            'reply_to': email_from,
+            'recipient_ids': [(6, 0, users.mapped('partner_id').ids)],
+            'subject': _("Export {} {}").format(
+                model_description, fields.Date.to_string(fields.Date.today())),
+            'body_html': _("""
                 <p>Your export is available <a href="{}">here</a>.</p>
                 <p>It will be automatically deleted the {}.</p>
                 <p>&nbsp;</p>

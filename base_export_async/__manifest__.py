@@ -6,11 +6,14 @@
     "summary": """
         Asynchronous export with job queue
         """,
-    "version": "12.0.1.0.0",
-    "license": "AGPL-3",
-    "author": "ACSONE SA/NV, Odoo Community Association (OCA)",
-    "website": "https://github.com/OCA/queue",
-    "depends": ["web", "queue_job"],
+    'version': '12.0.1.1.0',
+    'license': 'AGPL-3',
+    'author': 'ACSONE SA/NV, Odoo Community Association (OCA)',
+    'website': 'https://github.com/OCA/queue',
+    'depends': [
+        'web',
+        'queue_job'
+    ],
     "data": [
         "views/assets.xml",
         "security/ir.model.access.csv",
