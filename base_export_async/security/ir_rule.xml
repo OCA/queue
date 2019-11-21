@@ -8,6 +8,6 @@
         <field name="perm_create" eval="False"/>
         <field name="perm_write" eval="False"/>
         <field name="perm_unlink" eval="False"/>
-        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="domain_force">[('user_ids', 'in', user.id)]</field>
     </record>
 </odoo>
