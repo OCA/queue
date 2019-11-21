@@ -114,8 +114,8 @@ msgid "The user doesn't have an email address."
 msgstr ""
 
 #. module: base_export_async
-#: model:ir.model.fields,field_description:base_export_async.field_delay_export__user_id
-msgid "User"
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__user_ids
+msgid "Users"
 msgstr ""
 
 #. module: base_export_async
