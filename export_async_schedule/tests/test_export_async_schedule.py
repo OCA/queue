@@ -133,6 +133,20 @@ class TestExportAsyncSchedule(common.SavepointCase):
         assert_next_schedule(1, "months", start_date + relativedelta(months=1))
         assert_next_schedule(2, "months", start_date + relativedelta(months=2))
 
+        self.schedule.end_of_month = True
+        assert_next_schedule(
+            1,
+            "months",
+            start_date
+            + relativedelta(months=1, day=31, hour=23, minute=59, second=59),
+        )
+        assert_next_schedule(
+            2,
+            "months",
+            start_date
+            + relativedelta(months=2, day=31, hour=23, minute=59, second=59),
+        )
+
     def test_run_schedule(self):
         in_future = datetime.now() + relativedelta(minutes=1)
         self.schedule.next_execution = in_future

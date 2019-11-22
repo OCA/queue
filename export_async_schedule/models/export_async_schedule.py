@@ -60,6 +60,7 @@ class ExportAsyncSchedule(models.Model):
         default="months",
         required=True,
     )
+    end_of_month = fields.Boolean()
 
     def name_get(self):
         result = []
@@ -79,7 +80,18 @@ class ExportAsyncSchedule(models.Model):
 
     def _compute_next_date(self):
         args = {self.interval_unit: self.interval}
+        if self.interval_unit == "months" and self.end_of_month:
+            # dateutil knows how to deal with variable days of months,
+            # it will put the latest possible day
+            args.update({"day": 31, "hour": 23, "minute": 59, "second": 59})
         return self.next_execution + relativedelta(**args)
+
+    @api.onchange("end_of_month")
+    def onchange_end_of_month(self):
+        if self.end_of_month:
+            self.next_execution = self.next_execution + relativedelta(
+                day=31, hour=23, minute=59, second=59
+            )
 
     @api.model
     def _get_fields_with_labels(self, model_name, export_fields):
