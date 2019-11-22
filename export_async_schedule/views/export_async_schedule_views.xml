@@ -50,6 +50,9 @@
                         <field name="next_execution"/>
                         <field name="interval"/>
                         <field name="interval_unit"/>
+                        <field name="end_of_month"
+                            attrs="{'invisible': [('interval_unit', '!=', 'months')]}"
+                        />
                     </group>
                 </group>
             </form>
