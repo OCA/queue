@@ -3,9 +3,11 @@
 
 import json
 
+import freezegun
+
+from odoo import fields
 import odoo.tests.common as common
 from dateutil.relativedelta import relativedelta
-from odoo import fields
 
 data_csv = {
     "data": """{"format": "csv", "model": "res.partner",
@@ -74,14 +76,13 @@ class TestBaseExportAsync(common.TransactionCase):
         params = json.loads(data_csv.get("data"))
         attachments = self.env["ir.attachment"].search([])
         self.delay_export_obj.export(params)
-        new_attachment = self.env["ir.attachment"].search([]) - attachments
-        time_to_live = (
-            self.env["ir.config_parameter"].sudo().get_param("attachment.ttl", 7)
-        )
-        date_today = fields.Date.today()
-        date_to_delete = date_today + relativedelta(days=-int(time_to_live))
-        # Update create_date with today - TTL
-        self.delay_export_obj.search([]).write({"create_date": date_to_delete})
-        self.delay_export_obj.sudo().cron_delete()
+        new_attachment = self.env['ir.attachment'].search([]) - attachments
+        time_to_live = self.env['ir.config_parameter'].sudo(). \
+            get_param('attachment.ttl', 7)
+        date_today = fields.Datetime.now()
+        date_past_ttl = date_today + relativedelta(days=int(time_to_live))
+        with freezegun.freeze_time(date_past_ttl):
+            self.delay_export_obj.cron_delete()
+
         # The attachment must be deleted
         self.assertFalse(new_attachment.exists())
