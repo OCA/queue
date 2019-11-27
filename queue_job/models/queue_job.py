@@ -240,7 +240,7 @@ class QueueJob(models.Model):
                 days=int(channel.removal_interval))
             jobs = self.search(
                 [('date_done', '<=', fields.Datetime.to_string(deadline)),
-                 ('channel', '=', channel.name)],
+                 ('channel', '=', channel.complete_name)],
             )
             if jobs:
                 jobs.unlink()
