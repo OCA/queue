@@ -215,7 +215,7 @@ class QueueJob(models.Model):
         for channel in self.env["queue.job.channel"].search([]):
             deadline = datetime.now() - timedelta(days=int(channel.removal_interval))
             jobs = self.search(
-                [("date_done", "<=", deadline), ("channel", "=", channel.name)]
+                [("date_done", "<=", deadline), ("channel", "=", channel.complete_name)]
             )
             if jobs:
                 jobs.unlink()
