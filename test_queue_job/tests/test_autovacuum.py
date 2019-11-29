@@ -46,7 +46,7 @@ class TestQueueJobAutovacuumCronJob(JobCommonCase):
         job_root = self._create_job()
         job_root.write({'date_done': date_done})
         job_60days = self._create_job()
-        job_60days.write({'channel': channel_60days.name,
+        job_60days.write({'channel': channel_60days.complete_name,
                           'date_done': date_done})
 
         self.assertEqual(len(self.env['queue.job'].search([])), 2)
