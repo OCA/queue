@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2019-08-31 16:23+0000\n"
+"PO-Revision-Date: 2019-12-13 09:05+0000\n"
 "Last-Translator: 黎伟杰 <674416404@qq.com>\n"
 "Language-Team: none\n"
 "Language: zh_CN\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 3.8\n"
+"X-Generator: Weblate 3.9.1\n"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -37,10 +37,8 @@ msgstr "活动"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_exception_decoration
-#, fuzzy
-#| msgid "Exception Information"
 msgid "Activity Exception Decoration"
-msgstr "异常信息"
+msgstr "活动异常装饰"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_state
@@ -243,12 +241,12 @@ msgstr "ID"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_exception_icon
 msgid "Icon"
-msgstr ""
+msgstr "图标"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "指示异常活动的图标。"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__identity_key
@@ -423,10 +421,8 @@ msgstr "操作次数"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_error_counter
-#, fuzzy
-#| msgid "Number of error"
 msgid "Number of errors"
-msgstr "错误个数"
+msgstr "错误数量"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction_counter
@@ -505,7 +501,7 @@ msgstr "相关记录"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__removal_interval
 msgid "Removal Interval"
-msgstr ""
+msgstr "清除间隔"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
@@ -536,10 +532,8 @@ msgstr "结果"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
-#, fuzzy
-#| msgid "Message Delivery error"
 msgid "SMS Delivery error"
-msgstr "消息递送错误"
+msgstr "短信传递错误"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
@@ -632,7 +626,7 @@ msgstr "所选作业将设置为完成。"
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr ""
+msgstr "记录的异常活动的类型。"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__uuid
