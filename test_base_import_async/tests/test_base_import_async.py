@@ -37,7 +37,30 @@ class TestBaseImportAsync(common.TransactionCase):
     }
 
     def setUp(self):
-        super(TestBaseImportAsync, self).setUp()
+        super().setUp()
+        # add xmlids that will be used in the test CSV file
+        self.env["ir.model.data"]._update_xmlids(
+            [
+                {
+                    "xml_id": "test_base_import_async.testjournal_xmlid",
+                    "record": self.env["account.journal"].search(
+                        [("code", "=", "CABA")]
+                    ),
+                },
+                {
+                    "xml_id": "test_base_import_async.a_recv_xmlid",
+                    "record": self.env["account.account"].search(
+                        [("code", "=", "121000")]
+                    ),
+                },
+                {
+                    "xml_id": "test_base_import_async.a_sale_xmlid",
+                    "record": self.env["account.account"].search(
+                        [("code", "=", "400000")]
+                    ),
+                },
+            ]
+        )
         self.import_obj = self.env["base_import.import"]
         self.move_obj = self.env["account.move"]
         self.job_obj = self.env["queue.job"]

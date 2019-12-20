@@ -4,7 +4,7 @@
 
 {
     "name": "Test suite for base_import_async",
-    "version": "12.0.1.0.0",
+    "version": "13.0.1.0.0",
     "author": "ACSONE SA/NV, Odoo Community Association (OCA)",
     "license": "AGPL-3",
     "website": "https://github.com/OCA/queue",
@@ -14,7 +14,7 @@
     Normally you don't need to install this.
     """,
     "depends": ["base_import_async", "account"],
-    "data": ["tests/data.xml"],
+    "data": [],
     "installable": True,
     "development_status": "Stable",
 }
