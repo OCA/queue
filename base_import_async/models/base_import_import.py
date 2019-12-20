@@ -33,7 +33,6 @@ DEFAULT_CHUNK_SIZE = 100
 class BaseImportImport(models.TransientModel):
     _inherit = "base_import.import"
 
-    @api.multi
     def do(self, fields, columns, options, dryrun=False):
         if dryrun or not options.get(OPT_USE_QUEUE):
             # normal import
@@ -73,14 +72,12 @@ class BaseImportImport(models.TransientModel):
         self._link_attachment_to_job(delayed_job, attachment)
         return []
 
-    @api.model
     def _link_attachment_to_job(self, delayed_job, attachment):
         queue_job = self.env["queue.job"].search(
             [("uuid", "=", delayed_job.uuid)], limit=1
         )
         attachment.write({"res_model": "queue.job", "res_id": queue_job.id})
 
-    @api.model
     @api.returns("ir.attachment")
     def _create_csv_attachment(self, fields, data, options, file_name):
         # write csv
@@ -97,11 +94,10 @@ class BaseImportImport(models.TransientModel):
         # create attachment
         datas = base64.encodebytes(f.getvalue().encode(encoding))
         attachment = self.env["ir.attachment"].create(
-            {"name": file_name, "datas": datas, "datas_fname": file_name}
+            {"name": file_name, "datas": datas, "store_fname": file_name}
         )
         return attachment
 
-    @api.model
     def _read_csv_attachment(self, attachment, options):
         decoded_datas = base64.decodebytes(attachment.datas)
         encoding = options.get(OPT_ENCODING) or "utf-8"
@@ -130,7 +126,6 @@ class BaseImportImport(models.TransientModel):
         if row_from < len(data):
             yield row_from, len(data) - 1
 
-    @api.model
     @job
     @related_action("_related_action_attachment")
     def _split_file(
@@ -179,7 +174,6 @@ class BaseImportImport(models.TransientModel):
             self._link_attachment_to_job(delayed_job, attachment)
             priority += 1
 
-    @api.model
     @job
     @related_action("_related_action_attachment")
     def _import_one_chunk(self, model_name, attachment, options):
