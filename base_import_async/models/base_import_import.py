@@ -10,9 +10,10 @@ from io import BytesIO, StringIO, TextIOWrapper
 from os.path import splitext
 
 from odoo import _, api, models
+from odoo.models import fix_import_export_id_paths
+
 from odoo.addons.queue_job.exception import FailedJobError
 from odoo.addons.queue_job.job import job, related_action
-from odoo.models import fix_import_export_id_paths
 
 # options defined in base_import/import.js
 OPT_HAS_HEADER = "headers"
@@ -37,7 +38,8 @@ class BaseImportImport(models.TransientModel):
         if dryrun or not options.get(OPT_USE_QUEUE):
             # normal import
             return super(BaseImportImport, self).do(
-                fields, columns, options, dryrun=dryrun)
+                fields, columns, options, dryrun=dryrun
+            )
 
         # asynchronous import
         try:
@@ -83,10 +85,12 @@ class BaseImportImport(models.TransientModel):
     def _create_csv_attachment(self, fields, data, options, file_name):
         # write csv
         f = StringIO()
-        writer = csv.writer(f,
-                            delimiter=str(options.get(OPT_SEPARATOR)) or ',',
-                            quotechar=str(options.get(OPT_QUOTING)))
-        encoding = options.get(OPT_ENCODING) or 'utf-8'
+        writer = csv.writer(
+            f,
+            delimiter=str(options.get(OPT_SEPARATOR)) or ",",
+            quotechar=str(options.get(OPT_QUOTING)),
+        )
+        encoding = options.get(OPT_ENCODING) or "utf-8"
         writer.writerow(fields)
         for row in data:
             writer.writerow(row)
@@ -100,11 +104,13 @@ class BaseImportImport(models.TransientModel):
     @api.model
     def _read_csv_attachment(self, attachment, options):
         decoded_datas = base64.decodebytes(attachment.datas)
-        encoding = options.get(OPT_ENCODING) or 'utf-8'
+        encoding = options.get(OPT_ENCODING) or "utf-8"
         f = TextIOWrapper(BytesIO(decoded_datas), encoding=encoding)
-        reader = csv.reader(f,
-                            delimiter=str(options.get(OPT_SEPARATOR)) or ',',
-                            quotechar=str(options.get(OPT_QUOTING)))
+        reader = csv.reader(
+            f,
+            delimiter=str(options.get(OPT_SEPARATOR)) or ",",
+            quotechar=str(options.get(OPT_QUOTING)),
+        )
 
         fields = next(reader)
         data = [row for row in reader]
