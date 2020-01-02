@@ -19,7 +19,7 @@
         <field name="name">queue.job.batch.form</field>
         <field name="model">queue.job.batch</field>
         <field name="arch" type="xml">
-            <form string="Job Batch" create="false" delete="false">
+            <form string="Job Batch" create="false" delete="false" edit="false">
                 <header>
                     <field name="state" widget="statusbar"/>
                 </header>
