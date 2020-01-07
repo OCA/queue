@@ -6,125 +6,127 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2020-01-07 06:19+0000\n"
+"Last-Translator: Enric Tobella <etobella@creublanca.es>\n"
 "Language-Team: none\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.10\n"
 
 #. module: queue_job_batch
 #: model:ir.model,name:queue_job_batch.model_queue_job_batch
 msgid "Batch of jobs"
-msgstr ""
+msgstr "Grupo de trabajos"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_company_id
 msgid "Company"
-msgstr ""
+msgstr "Compañía"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_completeness
 #: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_form
 #: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_tree
 msgid "Completeness"
-msgstr ""
+msgstr "Completo"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_display_name
 msgid "Display Name"
-msgstr ""
+msgstr "Nombre a mostrar"
 
 #. module: queue_job_batch
 #: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 #: selection:queue.job.batch,state:0
 msgid "Draft"
-msgstr ""
+msgstr "Borrador"
 
 #. module: queue_job_batch
 #: selection:queue.job.batch,state:0
 msgid "Enqueued"
-msgstr ""
+msgstr "En cola"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_failed_job_count
 msgid "Failed Job Count"
-msgstr ""
+msgstr "Número de trabajos fallados"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_failed_percentage
 msgid "Failed Percentage"
-msgstr ""
+msgstr "Porcentaje fallado"
 
 #. module: queue_job_batch
 #: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 #: selection:queue.job.batch,state:0
 msgid "Finished"
-msgstr ""
+msgstr "Finalizado"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_finished_job_count
 msgid "Finished Job Count"
-msgstr ""
+msgstr "Número de trabajos finalizados"
 
 #. module: queue_job_batch
 #: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "Group By"
-msgstr ""
+msgstr "Agrupar por"
 
 #. module: queue_job_batch
 #. openerp-web
 #: code:addons/queue_job_batch/static/src/xml/systray.xml:52
 #, python-format
 msgid "Hide"
-msgstr ""
+msgstr "Ocultar"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: queue_job_batch
 #: selection:queue.job.batch,state:0
 msgid "In Progress"
-msgstr ""
+msgstr "En Progreso"
 
 #. module: queue_job_batch
 #: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "In progress"
-msgstr ""
+msgstr "En progreso"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_is_read
 msgid "Is Read"
-msgstr ""
+msgstr "Leído"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_job_ids
 msgid "Job"
-msgstr ""
+msgstr "Trabajo"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_job_batch_id
 #: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_form
 msgid "Job Batch"
-msgstr ""
+msgstr "Grupo de trabajos"
 
 #. module: queue_job_batch
 #: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_tree
 msgid "Job Batches"
-msgstr ""
+msgstr "Grupos de trabajos"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_job_count
 msgid "Job Count"
-msgstr ""
+msgstr "Número de trabajos"
 
 #. module: queue_job_batch
 #: model:res.groups,name:queue_job_batch.group_queue_job_batch_user
 msgid "Job Queue Batch User"
-msgstr ""
+msgstr "Usar Grupos de trabajos en cola"
 
 #. module: queue_job_batch
 #. openerp-web
@@ -135,51 +137,51 @@ msgstr ""
 #: model:ir.ui.menu,name:queue_job_batch.menu_queue_job_batch
 #, python-format
 msgid "Job batches"
-msgstr ""
+msgstr "Grupos de trabajos"
 
 #. module: queue_job_batch
 #: model:ir.actions.act_window,name:queue_job_batch.action_queue_job_related
 #: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_form
 msgid "Jobs"
-msgstr ""
+msgstr "Trabajos"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch___last_update
 msgid "Last Modified on"
-msgstr ""
+msgstr "Última modificación en"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_name
 msgid "Name"
-msgstr ""
+msgstr "Nombre"
 
 #. module: queue_job_batch
 #. openerp-web
 #: code:addons/queue_job_batch/static/src/xml/systray.xml:26
 #, python-format
 msgid "No jobs to view."
-msgstr ""
+msgstr "Sin trabajos a visualizar."
 
 #. module: queue_job_batch
 #: model:ir.model,name:queue_job_batch.model_queue_job
 msgid "Queue Job"
-msgstr ""
+msgstr "Trabajo de Cola"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_state
 #: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "State"
-msgstr ""
+msgstr "Estado"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch_user_id
 #: model:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "User"
-msgstr ""
+msgstr "Usuario"
 
 #. module: queue_job_batch
 #. openerp-web
 #: code:addons/queue_job_batch/static/src/xml/systray.xml:16
 #, python-format
 msgid "View All"
-msgstr ""
+msgstr "Ver todos"
