@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2018-11-29 23:35+0000\n"
+"PO-Revision-Date: 2020-01-07 06:19+0000\n"
 "Last-Translator: Enric Tobella <etobella@creublanca.es>\n"
 "Language-Team: none\n"
 "Language: es\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.2.2\n"
+"X-Generator: Weblate 3.10\n"
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -45,7 +45,7 @@ msgstr "Args"
 #: model:ir.cron,cron_name:queue_job.ir_cron_autovacuum_queue_jobs
 #: model:ir.cron,name:queue_job.ir_cron_autovacuum_queue_jobs
 msgid "AutoVacuum Job Queue"
-msgstr ""
+msgstr "Limpieza automática de la cola de trabajos"
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_requeue_job
@@ -387,7 +387,7 @@ msgstr "Cola"
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job
 msgid "Queue Job"
-msgstr "Trabajo en cola"
+msgstr "Trabajo de Cola"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_record_ids
@@ -446,21 +446,17 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
 msgid "Set all selected jobs to done"
-msgstr ""
+msgstr "Marcar todos los trabajos seleccionados como realizados"
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
-#, fuzzy
-#| msgid "Set to 'Done'"
 msgid "Set jobs done"
-msgstr "Marcar como 'Realizado'"
+msgstr "Marcar trabajos como Realizado"
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_set_jobs_done
-#, fuzzy
-#| msgid "Set to 'Done'"
 msgid "Set jobs to done"
-msgstr "Marcar como 'Realizado'"
+msgstr "Marcar trabajos como Realizados"
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -469,10 +465,8 @@ msgstr "Marcar como 'Realizado'"
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
-#, fuzzy
-#| msgid "Set to 'Done'"
 msgid "Set to done"
-msgstr "Marcar como 'Realizado'"
+msgstr "Marcar como Realizado"
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:220
@@ -529,10 +523,8 @@ msgstr "Los trabajo seleccionados serán puestos en cola de nuevo."
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
-#, fuzzy
-#| msgid "The selected jobs will be requeued."
 msgid "The selected jobs will be set to done."
-msgstr "Los trabajo seleccionados serán puestos en cola de nuevo."
+msgstr "Los trabajo seleccionados serán marcados como realizados."
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_uuid
