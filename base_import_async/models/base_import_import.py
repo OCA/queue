@@ -10,9 +10,10 @@ from io import BytesIO, StringIO, TextIOWrapper
 from os.path import splitext
 
 from odoo import _, api, models
+from odoo.models import fix_import_export_id_paths
+
 from odoo.addons.queue_job.exception import FailedJobError
 from odoo.addons.queue_job.job import job, related_action
-from odoo.models import fix_import_export_id_paths
 
 # options defined in base_import/import.js
 OPT_HAS_HEADER = "headers"
@@ -32,11 +33,10 @@ DEFAULT_CHUNK_SIZE = 100
 class BaseImportImport(models.TransientModel):
     _inherit = "base_import.import"
 
-    @api.multi
-    def do(self, fields, options, dryrun=False):
+    def do(self, fields, columns, options, dryrun=False):
         if dryrun or not options.get(OPT_USE_QUEUE):
             # normal import
-            return super(BaseImportImport, self).do(fields, options, dryrun=dryrun)
+            return super().do(fields, columns, options, dryrun=dryrun)
 
         # asynchronous import
         try:
@@ -70,42 +70,39 @@ class BaseImportImport(models.TransientModel):
         self._link_attachment_to_job(delayed_job, attachment)
         return []
 
-    @api.model
     def _link_attachment_to_job(self, delayed_job, attachment):
         queue_job = self.env["queue.job"].search(
             [("uuid", "=", delayed_job.uuid)], limit=1
         )
         attachment.write({"res_model": "queue.job", "res_id": queue_job.id})
 
-    @api.model
     @api.returns("ir.attachment")
     def _create_csv_attachment(self, fields, data, options, file_name):
         # write csv
         f = StringIO()
         writer = csv.writer(
             f,
-            delimiter=str(options.get(OPT_SEPARATOR)),
+            delimiter=str(options.get(OPT_SEPARATOR)) or ",",
             quotechar=str(options.get(OPT_QUOTING)),
         )
-        encoding = options.get(OPT_ENCODING, "utf-8")
+        encoding = options.get(OPT_ENCODING) or "utf-8"
         writer.writerow(fields)
         for row in data:
             writer.writerow(row)
         # create attachment
         datas = base64.encodebytes(f.getvalue().encode(encoding))
         attachment = self.env["ir.attachment"].create(
-            {"name": file_name, "datas": datas, "datas_fname": file_name}
+            {"name": file_name, "datas": datas}
         )
         return attachment
 
-    @api.model
     def _read_csv_attachment(self, attachment, options):
         decoded_datas = base64.decodebytes(attachment.datas)
-        encoding = options.get(OPT_ENCODING, "utf-8")
+        encoding = options.get(OPT_ENCODING) or "utf-8"
         f = TextIOWrapper(BytesIO(decoded_datas), encoding=encoding)
         reader = csv.reader(
             f,
-            delimiter=str(options.get(OPT_SEPARATOR)),
+            delimiter=str(options.get(OPT_SEPARATOR)) or ",",
             quotechar=str(options.get(OPT_QUOTING)),
         )
 
@@ -127,7 +124,6 @@ class BaseImportImport(models.TransientModel):
         if row_from < len(data):
             yield row_from, len(data) - 1
 
-    @api.model
     @job
     @related_action("_related_action_attachment")
     def _split_file(
@@ -176,7 +172,6 @@ class BaseImportImport(models.TransientModel):
             self._link_attachment_to_job(delayed_job, attachment)
             priority += 1
 
-    @api.model
     @job
     @related_action("_related_action_attachment")
     def _import_one_chunk(self, model_name, attachment, options):
