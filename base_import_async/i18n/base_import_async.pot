@@ -1,12 +1,12 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* base_import_async
+# 	* base_import_async
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server 13.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: <>\n"
+"Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: base_import_async
-#: code:addons/base_import_async/models/queue_job.py:15
+#: code:addons/base_import_async/models/queue_job.py:0
 #, python-format
 msgid "Attachment"
 msgstr ""
@@ -25,20 +25,20 @@ msgid "Base Import"
 msgstr ""
 
 #. module: base_import_async
-#: code:addons/base_import_async/models/base_import_import.py:63
+#: code:addons/base_import_async/models/base_import_import.py:0
 #, python-format
 msgid "Import %s from file %s"
 msgstr ""
 
 #. module: base_import_async
-#: code:addons/base_import_async/models/base_import_import.py:153
+#: code:addons/base_import_async/models/base_import_import.py:0
 #, python-format
 msgid "Import %s from file %s - #%s - lines %s to %s"
 msgstr ""
 
 #. module: base_import_async
 #. openerp-web
-#: code:addons/base_import_async/static/src/xml/import.xml:10
+#: code:addons/base_import_async/static/src/xml/import.xml:0
 #, python-format
 msgid "Import in the background"
 msgstr ""
@@ -50,22 +50,24 @@ msgstr ""
 
 #. module: base_import_async
 #. openerp-web
-#: code:addons/base_import_async/static/src/xml/import.xml:7
+#: code:addons/base_import_async/static/src/xml/import.xml:0
 #, python-format
-msgid "When checked, the import will be executed as a background job,  after splitting your file in small chunks that will be processed independently.  Use this to import very large files."
+msgid ""
+"When checked, the import will be executed as a background job, after "
+"splitting your file in small chunks that will be processed independently. "
+"Use this to import very large files."
 msgstr ""
 
 #. module: base_import_async
 #. openerp-web
-#: code:addons/base_import_async/static/src/js/import.js:20
+#: code:addons/base_import_async/static/src/js/import.js:0
 #, python-format
 msgid "You can check the status of this job in menu 'Queue / Jobs'."
 msgstr ""
 
 #. module: base_import_async
 #. openerp-web
-#: code:addons/base_import_async/static/src/js/import.js:19
+#: code:addons/base_import_async/static/src/js/import.js:0
 #, python-format
 msgid "Your request is being processed"
 msgstr ""
-
