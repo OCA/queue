@@ -20,7 +20,7 @@ addon | version | summary
 [base_export_async](base_export_async/) | 12.0.1.0.0 | Asynchronous export with job queue
 [base_import_async](base_import_async/) | 12.0.1.0.0 | Import CSV files in the background
 [queue_job](queue_job/) | 12.0.1.1.0 | Job Queue
-[queue_job_batch](queue_job_batch/) | 12.0.1.0.0 | Job Queue Batch
+[queue_job_batch](queue_job_batch/) | 12.0.1.0.1 | Job Queue Batch
 [queue_job_cron](queue_job_cron/) | 12.0.1.1.0 | Scheduled Actions as Queue Jobs
 [test_base_import_async](test_base_import_async/) | 12.0.1.0.0 | Test suite for base_import_async. Normally you don't need to install this.
 [test_queue_job](test_queue_job/) | 12.0.1.0.0 | Queue Job Tests
