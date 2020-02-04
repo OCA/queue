@@ -6,43 +6,47 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2020-02-04 23:13+0000\n"
+"Last-Translator: Nelson Ramírez Sánchez <info@konos.cl>\n"
 "Language-Team: none\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.10\n"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "<span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number of retries is infinite.</span>"
 msgstr ""
+"<span class=\"oe_grey oe_inline\"> Si el max. reintentos es 0, el número de "
+"reintentos es infinito.</span>"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_needaction
 msgid "Action Needed"
-msgstr ""
+msgstr "Accion Necesaria"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_ids
 msgid "Activities"
-msgstr ""
+msgstr "Avtividades"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_state
 msgid "Activity State"
-msgstr ""
+msgstr "Estado de Actividades"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__args
 msgid "Args"
-msgstr ""
+msgstr "Argumentos"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_attachment_count
 msgid "Attachment Count"
-msgstr ""
+msgstr "# Adjuntos"
 
 #. module: queue_job
 #: model:ir.actions.server,name:queue_job.ir_cron_autovacuum_queue_jobs_ir_actions_server
@@ -60,19 +64,19 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Cancel"
-msgstr ""
+msgstr "Cancelar"
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:373
 #, python-format
 msgid "Cannot change the root channel"
-msgstr ""
+msgstr "No se puede cambiar el canal raíz"
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:380
 #, python-format
 msgid "Cannot remove the root channel"
-msgstr ""
+msgstr "No se puede eliminar el canal raíz"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__channel
