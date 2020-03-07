@@ -1,40 +1,38 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-
     <record id="ir_cron_view_form" model="ir.ui.view">
-         <field name="name">ir.cron.view.form (queue_job_cron)</field>
+        <field name="name">ir.cron.view.form (queue_job_cron)</field>
         <field name="model">ir.cron</field>
-        <field name="inherit_id" ref="base.ir_cron_view_form"/>
+        <field name="inherit_id" ref="base.ir_cron_view_form" />
         <field name="arch" type="xml">
             <field name="doall" position="after">
-                <field name="run_as_queue_job"/>
-                <field name="channel_id"
-                       attrs="{'invisible': [('run_as_queue_job', '=', False)],
-                                'required': [('run_as_queue_job', '=', True)]}"/>
+                <field name="run_as_queue_job" />
+                <field
+                    name="channel_id"
+                    attrs="{'invisible': [('run_as_queue_job', '=', False)],
+                                'required': [('run_as_queue_job', '=', True)]}"
+                />
             </field>
         </field>
     </record>
-
     <record id="ir_cron_view_tree" model="ir.ui.view">
         <field name="name">ir.cron.view.tree (queue_job_cron)</field>
         <field name="model">ir.cron</field>
-        <field name="inherit_id" ref="base.ir_cron_view_tree"/>
+        <field name="inherit_id" ref="base.ir_cron_view_tree" />
         <field name="arch" type="xml">
             <field name="active" position="after">
-                <field name="run_as_queue_job"/>
+                <field name="run_as_queue_job" />
             </field>
         </field>
     </record>
-
     <record id="ir_cron_view_search" model="ir.ui.view">
         <field name="name">ir.cron.view.search (queue_job_cron)</field>
         <field name="model">ir.cron</field>
-        <field name="inherit_id" ref="base.ir_cron_view_search"/>
+        <field name="inherit_id" ref="base.ir_cron_view_search" />
         <field name="arch" type="xml">
             <field name="active" position="after">
-                <field name="run_as_queue_job"/>
+                <field name="run_as_queue_job" />
             </field>
         </field>
     </record>
-
 </odoo>
