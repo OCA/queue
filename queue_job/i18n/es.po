@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2020-02-21 01:13+0000\n"
-"Last-Translator: Nelson Ramírez Sánchez <info@konos.cl>\n"
+"PO-Revision-Date: 2020-03-09 19:13+0000\n"
+"Last-Translator: Jesús Ventosinos Mayor <jesus@comunitea.com>\n"
 "Language-Team: none\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
@@ -193,13 +193,13 @@ msgstr "Información de Excepción"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__eta
 msgid "Execute only after"
-msgstr "Corre solo Después"
+msgstr "Ejecutar solo Después"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 #: selection:queue.job,state:0
 msgid "Failed"
-msgstr "Fracasó"
+msgstr "Fallido"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_follower_ids
@@ -291,7 +291,7 @@ msgstr "Gestor de Cola de Trabajo"
 #. module: queue_job
 #: model:mail.message.subtype,name:queue_job.mt_job_failed
 msgid "Job failed"
-msgstr "Trabajo Fracasó"
+msgstr "Trabajo fallido"
 
 #. module: queue_job
 #: code:addons/queue_job/controllers/main.py:100
@@ -568,7 +568,7 @@ msgstr "Fecha de Inicio"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 #: selection:queue.job,state:0
 msgid "Started"
-msgstr "Inició"
+msgstr "Empezado"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__state
