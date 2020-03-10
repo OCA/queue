@@ -137,6 +137,7 @@ import datetime
 import logging
 import os
 import select
+import socket
 import threading
 import time
 from contextlib import closing, contextmanager
@@ -251,11 +252,26 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
     thread.start()
 
 
+def enable_keepalive(connection):
+    s = socket.fromfd(connection.fileno(), socket.AF_INET, socket.SOCK_STREAM)
+    # Enable sending of keep-alive messages
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+    # Time the connection needs to remain idle before start sending
+    # keepalive probes
+    s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 60)
+    # Time between individual keepalive probes
+    s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 1)
+    # The maximum number of keepalive probes should send before dropping
+    # the connection
+    s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)
+
+
 class Database(object):
     def __init__(self, db_name):
         self.db_name = db_name
         connection_info = _connection_info_for(db_name)
         self.conn = psycopg2.connect(**connection_info)
+        enable_keepalive(self.conn)
         self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         self.has_queue_job = self._has_queue_job()
         if self.has_queue_job:
