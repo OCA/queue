@@ -15,6 +15,12 @@ Next
   process (when running with --workers > 0)
 
 
+13.0.1.2.0 (2020-03-10)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* Fix Multi-company access rules
+
+
 13.0.1.1.0 (2019-11-01)
 ~~~~~~~~~~~~~~~~~~~~~~~
 
