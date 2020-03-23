@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2019-12-13 09:05+0000\n"
+"PO-Revision-Date: 2020-03-23 06:13+0000\n"
 "Last-Translator: 黎伟杰 <674416404@qq.com>\n"
 "Language-Team: none\n"
 "Language: zh_CN\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 3.9.1\n"
+"X-Generator: Weblate 3.10\n"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -650,15 +650,13 @@ msgstr "用户"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__website_message_ids
-#, fuzzy
-#| msgid "Messages"
 msgid "Website Messages"
-msgstr "消息"
+msgstr "网站消息"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__website_message_ids
 msgid "Website communication history"
-msgstr ""
+msgstr "网站交流历史"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_requeue_job
