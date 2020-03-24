@@ -57,12 +57,16 @@ class TestJobSubscribe(common.TransactionCase):
         stored = self._create_failed_job()
         users = self.env['res.users'].search([
             ('groups_id', '=', self.ref('queue_job.group_queue_job_manager')),
+            ('subscribe_job', '=', True),
         ])
-        self.assertEqual(len(stored.message_follower_ids), len(users))
-        expected_partners = [u.partner_id for u in users]
-        self.assertSetEqual(set(stored.mapped(
-            'message_follower_ids.partner_id')),
-            set(expected_partners))
+        followers = stored.message_follower_ids.filtered(
+            lambda r: r.partner_id.user_ids)
+        # Odoo Bot is automatically assigned due to the behaviour of sudo
+        # This is changed on odoo 13.0
+        self.assertEqual(len(followers), len(users))
+        self.assertEqual(stored.mapped(
+            'message_follower_ids.partner_id.user_ids'),
+            users)
         followers_id = [f.id for f in stored.mapped(
             'message_follower_ids.partner_id')]
         self.assertIn(self.other_partner_a.id, followers_id)
@@ -77,11 +81,9 @@ class TestJobSubscribe(common.TransactionCase):
             ('groups_id', '=', self.ref('queue_job.group_queue_job_manager')),
             ('subscribe_job', '=', True),
         ])
-        self.assertEqual(len(stored.message_follower_ids), len(users))
-        expected_partners = [u.partner_id for u in users]
-        self.assertSetEqual(set(stored.mapped(
-            'message_follower_ids.partner_id')),
-            set(expected_partners))
+        self.assertEqual(stored.mapped(
+            'message_follower_ids.partner_id.user_ids'),
+            users)
         followers_id = [f.id for f in stored.mapped(
             'message_follower_ids.partner_id')]
         self.assertIn(self.other_partner_a.id, followers_id)
