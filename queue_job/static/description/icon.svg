@@ -11,12 +11,12 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    id="svg2"
    version="1.1"
-   inkscape:version="0.91 r13725"
+   inkscape:version="0.92.4 (f8dce91, 2019-08-02)"
    width="60"
    height="60"
    viewBox="0 0 60 60"
    sodipodi:docname="icon.svg"
-   inkscape:export-filename="icon.png"
+   inkscape:export-filename="./icon.png"
    inkscape:export-xdpi="192"
    inkscape:export-ydpi="192">
   <metadata
@@ -42,15 +42,15 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1855"
-     inkscape:window-height="1176"
+     inkscape:window-width="1920"
+     inkscape:window-height="1052"
      id="namedview4"
      showgrid="false"
      inkscape:zoom="8"
-     inkscape:cx="50.171984"
-     inkscape:cy="32.60344"
-     inkscape:window-x="65"
-     inkscape:window-y="24"
+     inkscape:cx="20.921984"
+     inkscape:cy="9.7064211"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg2"
      showguides="true"
@@ -58,43 +58,53 @@
     <sodipodi:guide
        position="4.140625,50.300781"
        orientation="-0.70710678,0.70710678"
-       id="guide3348" />
+       id="guide3348"
+       inkscape:locked="false" />
     <sodipodi:guide
        position="56.476562,43.945312"
        orientation="-0.70710678,0.70710678"
-       id="guide3350" />
+       id="guide3350"
+       inkscape:locked="false" />
     <sodipodi:guide
        position="0,41.75"
        orientation="1,0"
-       id="guide3360" />
+       id="guide3360"
+       inkscape:locked="false" />
     <sodipodi:guide
        position="60,60.074219"
        orientation="1,0"
-       id="guide3362" />
+       id="guide3362"
+       inkscape:locked="false" />
     <sodipodi:guide
        position="0.17578125,60"
        orientation="0,1"
-       id="guide3364" />
+       id="guide3364"
+       inkscape:locked="false" />
     <sodipodi:guide
        position="58.71196,-0.0055242717"
        orientation="0,1"
-       id="guide3366" />
+       id="guide3366"
+       inkscape:locked="false" />
     <sodipodi:guide
        position="15.558594,50.5"
        orientation="-0.70710678,0.70710678"
-       id="guide3345" />
+       id="guide3345"
+       inkscape:locked="false" />
     <sodipodi:guide
        position="56.101563,32.363281"
        orientation="-0.70710678,0.70710678"
-       id="guide3347" />
+       id="guide3347"
+       inkscape:locked="false" />
     <sodipodi:guide
        position="55.972656,21.027344"
        orientation="-0.70710678,0.70710678"
-       id="guide3349" />
+       id="guide3349"
+       inkscape:locked="false" />
     <sodipodi:guide
        position="55.863281,9.6914063"
        orientation="-0.70710678,0.70710678"
-       id="guide3351" />
+       id="guide3351"
+       inkscape:locked="false" />
   </sodipodi:namedview>
   <rect
      style="opacity:1;fill:#e74c3c;fill-opacity:1"
@@ -102,26 +112,27 @@
      width="60"
      height="60"
      x="0"
-     y="0" />
+     y="0"
+     ry="3.5" />
   <path
      style="opacity:1;fill:#000000;fill-opacity:0.39215686"
-     d="M 4.1318557,9.7144566 0.0078125,13.824141 0,60 l 46.171301,0.0088 9.791208,-9.800508 -4.088791,-7.131947 4.086426,-4.114418 -4.058547,-7.106958 4.016339,-4.017997 -4.036551,-7.171615 4.058726,-4.069362 -40.612885,-6.8632798 -4.011838,4.0145788 z"
+     d="M 4.1318557,9.7144566 0.0078125,13.824141 4.2297534e-4,57.5 c 0,0 0.66042738466,1.160638 1.24957702466,1.75 0.6775221,0.677766 1.6249999,0.750548 1.6249999,0.750548 l 43.2963011,0.0083 9.791208,-9.800508 -4.088791,-7.131947 4.086426,-4.114418 -4.058547,-7.106958 4.016339,-4.017997 -4.036551,-7.171615 4.058726,-4.069362 -40.612885,-6.8632798 -4.011838,4.0145788 z"
      id="rect4171"
      inkscape:connector-curvature="0"
-     sodipodi:nodetypes="cccccccccccccc" />
+     sodipodi:nodetypes="cccscccccccccccc" />
   <g
      id="g4169"
      transform="matrix(0.3061173,0,0,0.3061173,-1.0360053,-1.0457906)"
      style="fill:#ffffff;stroke:none" />
   <text
      xml:space="preserve"
-     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:52.32963562px;line-height:125%;font-family:FontAwesome;-inkscape-font-specification:FontAwesome;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:FontAwesome;-inkscape-font-specification:FontAwesome;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
      x="3.8388314"
      y="50.558071"
-     id="text3352"
-     sodipodi:linespacing="125%"><tspan
+     id="text3352"><tspan
        sodipodi:role="line"
        id="tspan3354"
        x="3.8388314"
-       y="50.558071"></tspan></text>
+       y="50.558071"
+       style="font-size:52.32963562px;line-height:1.25"></tspan></text>
 </svg>
