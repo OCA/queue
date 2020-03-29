@@ -380,7 +380,7 @@ ul.auto-toc {
    <span class="n">_name</span> <span class="o">=</span> <span class="s1">'my.model'</span>
 
    <span class="nd">&#64;job</span>
-   <span class="k">def</span> <span class="nf">my_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+   <span class="k">def</span> <span class="nf">my_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
        <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'executed with a: </span><span class="si">%s</span><span class="s1"> and k: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
 
 
@@ -510,7 +510,7 @@ you can set <cite>test_queue_job_no_delay=True</cite> in the context.</p>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUpClass</span><span class="p">()</span>
     <span class="bp">cls</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">env</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
-        <span class="n">test_queue_job_no_delay</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>  <span class="c1"># no jobs thanks</span>
+        <span class="n">test_queue_job_no_delay</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># no jobs thanks</span>
     <span class="p">))</span>
 </pre>
 <p>Then all your tests execute the job methods synchronously
