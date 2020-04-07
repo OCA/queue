@@ -1,13 +1,13 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* queue_job
+#   * queue_job
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-07 06:36+0000\n"
-"PO-Revision-Date: 2020-04-07 06:36+0000\n"
+"POT-Creation-Date: 2020-04-07 07:17+0000\n"
+"PO-Revision-Date: 2020-04-07 07:17+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -18,7 +18,7 @@ msgstr ""
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "<span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number of retries is infinite.</span>"
-msgstr "<span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number of retries is infinite.</span>"
+msgstr "<span class=\"oe_grey oe_inline\">如果最大重试是0,则重试无数次.</span>"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_account_bank_statement_import_journal_creation_journal_user
@@ -42,13 +42,13 @@ msgid "Cancel"
 msgstr "取消"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:354
+#: code:addons/queue_job/models/queue_job.py:382
 #, python-format
 msgid "Cannot change the root channel"
 msgstr "不能修改root频道"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:361
+#: code:addons/queue_job/models/queue_job.py:389
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr "不能删除root频道"
@@ -255,7 +255,7 @@ msgstr "作业打断设置完成:什么都不做"
 #: model:ir.ui.view,arch_db:queue_job.view_queue_job_search
 #: model:ir.ui.view,arch_db:queue_job.view_queue_job_tree
 msgid "Jobs"
-msgstr "工作"
+msgstr "作业"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_kwargs
@@ -288,8 +288,8 @@ msgstr "最后更新时间"
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:165
 #, python-format
-msgid "Manually set to done by %s"
-msgstr "%s手动设置完成"
+msgid "Manually set to done by {}"
+msgstr "{}手动设置完成"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_max_retries
@@ -324,7 +324,7 @@ msgid "Parent Channel"
 msgstr "父频道"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:346
+#: code:addons/queue_job/models/queue_job.py:374
 #, python-format
 msgid "Parent channel required."
 msgstr "父频道必填"
@@ -351,6 +351,11 @@ msgid "Queue Job"
 msgstr "队列作业"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done_reason
+msgid "Reason to set to done"
+msgstr "设置为完成的原因"
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_record_ids
 msgid "Record ids"
 msgstr "记录ids"
@@ -361,16 +366,21 @@ msgid "Related"
 msgstr "关联的"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:253
+#: code:addons/queue_job/models/queue_job.py:276
 #, python-format
 msgid "Related Record"
 msgstr "关联的记录"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:263
+#: code:addons/queue_job/models/queue_job.py:286
 #, python-format
 msgid "Related Records"
 msgstr "关联的记录"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel_removal_interval
+msgid "Removal interval"
+msgstr "移除间隔"
 
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_requeue_job
@@ -420,7 +430,7 @@ msgid "Set to done"
 msgstr "设置为完成"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:212
+#: code:addons/queue_job/models/queue_job.py:230
 #, python-format
 msgid "Something bad happened during the execution of the job. More details in the 'Exception Information' section."
 msgstr "执行作业时有不好的事情发生,更多的信息在异常信息里看到."
@@ -434,7 +444,7 @@ msgstr "开始日期"
 #: model:ir.ui.view,arch_db:queue_job.view_queue_job_search
 #: selection:queue.job,state:0
 msgid "Started"
-msgstr "开始的"
+msgstr "已开始"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_state
@@ -488,4 +498,10 @@ msgstr "重进队列向导"
 #: model:ir.model,name:queue_job.model_base
 msgid "base"
 msgstr "基础"
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:169
+#, python-format
+msgid "{} with reason: {}"
+msgstr "{} 原因: {}"
 
