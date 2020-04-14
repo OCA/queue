@@ -207,6 +207,15 @@ Changelog
 Next
 ~~~~
 
+* [ADD] Run jobrunner as a worker process instead of a thread in the main
+  process (when running with --workers > 0)
+
+
+13.0.1.2.0 (2020-03-10)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* Fix Multi-company access rules
+
 
 13.0.1.1.0 (2019-11-01)
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -252,6 +261,7 @@ Contributors
 * Laurent Mignon <laurent.mignon@acsone.eu>
 * Laetitia Gangloff <laetitia.gangloff@acsone.eu>
 * Cédric Pigeon <cedric.pigeon@acsone.eu>
+* Tatiana Deribina <tatiana.deribina@avoin.systems>
 
 Maintainers
 ~~~~~~~~~~~
