@@ -7,6 +7,7 @@ from datetime import date, datetime
 import dateutil
 
 from odoo import fields, models
+from odoo.tools.func import lazy
 
 
 class JobSerialized(fields.Field):
@@ -68,6 +69,8 @@ class JobEncoder(json.JSONEncoder):
             return {"_type": "datetime_isoformat", "value": obj.isoformat()}
         elif isinstance(obj, date):
             return {"_type": "date_isoformat", "value": obj.isoformat()}
+        elif isinstance(obj, lazy):
+            return obj._value
         return json.JSONEncoder.default(self, obj)
 
 
