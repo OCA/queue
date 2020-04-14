@@ -6,3 +6,4 @@
 * Laurent Mignon <laurent.mignon@acsone.eu>
 * Laetitia Gangloff <laetitia.gangloff@acsone.eu>
 * Cédric Pigeon <cedric.pigeon@acsone.eu>
+* Tatiana Deribina <tatiana.deribina@avoin.systems>
