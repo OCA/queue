@@ -54,13 +54,13 @@ msgid "Cancel"
 msgstr "Abbrechen"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:370
+#: code:addons/queue_job/models/queue_job.py:420
 #, python-format
 msgid "Cannot change the root channel"
 msgstr "Der Root-Kanal kann nicht geändert werden"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:377
+#: code:addons/queue_job/models/queue_job.py:427
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr "Der Root-Kanal kann nicht entfernt werden"
@@ -234,6 +234,13 @@ msgid "Identity Key"
 msgstr "Identitätsschlüssel"
 
 #. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:286
+#, fuzzy, python-format
+#| msgid "The selected jobs will be requeued."
+msgid "If both parameters are 0, ALL jobs will be requeued!"
+msgstr "Die ausgewählten Jobs werden erneut eingereiht."
+
+#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job_channel
 msgid "Job Channels"
 msgstr "Job-Kanäle"
@@ -287,6 +294,13 @@ msgid "Jobs"
 msgstr "Jobs"
 
 #. module: queue_job
+#: model:ir.actions.server,name:queue_job.ir_cron_queue_job_garbage_collector_ir_actions_server
+#: model:ir.cron,cron_name:queue_job.ir_cron_queue_job_garbage_collector
+#: model:ir.cron,name:queue_job.ir_cron_queue_job_garbage_collector
+msgid "Jobs Garbage Collector"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_kwargs
 msgid "Kwargs"
 msgstr "Kwargs"
@@ -320,7 +334,7 @@ msgid "Manual Numbering"
 msgstr "Manuelle Nummerierung"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:170
+#: code:addons/queue_job/models/queue_job.py:171
 #, python-format
 msgid "Manually set to done by %s"
 msgstr "Manuell als Erledigt markiert von: %s"
@@ -352,7 +366,7 @@ msgid "Next Check Number"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:148
+#: code:addons/queue_job/models/queue_job.py:149
 #, python-format
 msgid "No action available for this job"
 msgstr "Für diesen Job ist keine Aktion verfügbar"
@@ -363,7 +377,7 @@ msgid "Parent Channel"
 msgstr "Übergeordneter Kanal"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:362
+#: code:addons/queue_job/models/queue_job.py:412
 #, python-format
 msgid "Parent channel required."
 msgstr "Es ist ein übergeordneter Kanal notwendig."
@@ -400,13 +414,13 @@ msgid "Related"
 msgstr "Zugehörige Aktion anzeigen"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:267
+#: code:addons/queue_job/models/queue_job.py:317
 #, python-format
 msgid "Related Record"
 msgstr "Zugehöriger Datensatz"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:277
+#: code:addons/queue_job/models/queue_job.py:327
 #, python-format
 msgid "Related Records"
 msgstr "Zugehörige Datensätze"
@@ -469,7 +483,7 @@ msgid "Set to done"
 msgstr "Als Erledigt markieren"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:220
+#: code:addons/queue_job/models/queue_job.py:221
 #, python-format
 msgid ""
 "Something bad happened during the execution of the job. More details in the "
