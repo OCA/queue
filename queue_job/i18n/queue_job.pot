@@ -47,13 +47,13 @@ msgid "Cancel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:370
+#: code:addons/queue_job/models/queue_job.py:420
 #, python-format
 msgid "Cannot change the root channel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:377
+#: code:addons/queue_job/models/queue_job.py:427
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr ""
@@ -227,6 +227,12 @@ msgid "Identity Key"
 msgstr ""
 
 #. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:286
+#, python-format
+msgid "If both parameters are 0, ALL jobs will be requeued!"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job_channel
 msgid "Job Channels"
 msgstr ""
@@ -280,6 +286,13 @@ msgid "Jobs"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.actions.server,name:queue_job.ir_cron_queue_job_garbage_collector_ir_actions_server
+#: model:ir.cron,cron_name:queue_job.ir_cron_queue_job_garbage_collector
+#: model:ir.cron,name:queue_job.ir_cron_queue_job_garbage_collector
+msgid "Jobs Garbage Collector"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_kwargs
 msgid "Kwargs"
 msgstr ""
@@ -313,7 +326,7 @@ msgid "Manual Numbering"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:170
+#: code:addons/queue_job/models/queue_job.py:171
 #, python-format
 msgid "Manually set to done by %s"
 msgstr ""
@@ -345,7 +358,7 @@ msgid "Next Check Number"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:148
+#: code:addons/queue_job/models/queue_job.py:149
 #, python-format
 msgid "No action available for this job"
 msgstr ""
@@ -356,7 +369,7 @@ msgid "Parent Channel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:362
+#: code:addons/queue_job/models/queue_job.py:412
 #, python-format
 msgid "Parent channel required."
 msgstr ""
@@ -393,13 +406,13 @@ msgid "Related"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:267
+#: code:addons/queue_job/models/queue_job.py:317
 #, python-format
 msgid "Related Record"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:277
+#: code:addons/queue_job/models/queue_job.py:327
 #, python-format
 msgid "Related Records"
 msgstr ""
@@ -462,7 +475,7 @@ msgid "Set to done"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:220
+#: code:addons/queue_job/models/queue_job.py:221
 #, python-format
 msgid "Something bad happened during the execution of the job. More details in the 'Exception Information' section."
 msgstr ""
