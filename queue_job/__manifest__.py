@@ -1,11 +1,11 @@
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
+# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 
 {'name': 'Job Queue',
  'version': '11.0.1.2.0',
  'author': 'Camptocamp,ACSONE SA/NV,Odoo Community Association (OCA)',
  'website': 'https://github.com/OCA/queue/queue_job',
- 'license': 'AGPL-3',
+ 'license': 'LGPL-3',
  'category': 'Generic Modules',
  'depends': ['mail',
              'base_sparse_field'
