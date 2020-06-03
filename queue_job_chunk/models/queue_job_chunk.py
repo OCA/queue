@@ -33,14 +33,17 @@ class QueueJobChunk(models.Model):
         default="pending",
         string="State",
     )
+    state_info = fields.Text("Additional state information")
     model_id = fields.Char("Model ID")
     record_id = fields.Integer("Record ID")
     reference = fields.Char(string="Reference", selection=_compute_reference)
     company_id = fields.Many2one("res.company", default=_get_default_company_id)
 
+    @api.model_create_multi
     def create(self, vals):
         result = super().create(vals)
-        result.enqueue_job()
+        for rec in result:
+            rec.enqueue_job()
         return result
 
     def button_retry(self):
@@ -55,13 +58,15 @@ class QueueJobChunk(models.Model):
         usage = self.usage
         collection = self.env["collection.base"].new()
         apply_on = self.apply_on_model
-        self.model_id = apply_on
         with collection.work_on(apply_on) as work:
             processor = work.component(usage=usage)
             try:
                 result = processor.run(self.data_str)
-                self.state = "done"
-            except Exception:
+            except Exception as e:
                 self.state = "fail"
-                raise
+                self.state_info = str(e)
+                return False
+            self.model_id = result._name
+            self.record_id = result.id
+            self.state = "done"
             return result
