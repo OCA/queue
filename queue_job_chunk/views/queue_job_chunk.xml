@@ -6,19 +6,25 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="button_retry" type="object" attrs="{'invisible': [('state', '=', 'done')]}"/>
+                    <button name="button_retry" type="object" string="Retry job"
+                            attrs="{'invisible': [('state', '=', 'done')]}"
+                            class="btn-primary"
+                    />
                 </header>
                 <sheet>
                     <group>
-                        <field name="data_str"/>
-                        <field name="state"/>
-                        <field name="model_id"/>
-                        <field name="record_id"/>
-                        <field name="reference"/>
-                    </group>
-                    <group name="component">
-                        <field name="usage"/>
-                        <field name="apply_on_model"/>
+                        <group>
+                            <field name="data_str"/>
+                            <field name="model_id"/>
+                            <field name="record_id"/>
+                            <field name="reference" attrs="{'readonly': 1}"/>
+                            <field name="state" attrs="{'readonly': 1}"/>
+                            <field name="state_info" attrs="{'readonly': 1}"/>
+                        </group>
+                        <group name="component">
+                            <field name="usage"/>
+                            <field name="apply_on_model"/>
+                        </group>
                     </group>
                 </sheet>
             </form>
