@@ -9,19 +9,16 @@ from odoo.addons.queue_job.job import job
 class QueueJobChunk(models.Model):
     _name = "queue.job.chunk"
     _description = "Queue Job Chunk"
+    _inherit = "collection.base"
 
-    def _get_default_company_id(self):
-        for rec in self:
-            if rec.reference:
-                if "company_id" in rec.reference._fields:
-                    rec.company_id = rec.reference.company_id
-                    continue
-            rec.company_id = self.env.uid.company_id
-
-    @api.depends("model_id", "record_id")
+    @api.depends("model_name", "record_id")
     def _compute_reference(self):
-        for res in self:
-            res.reference = "{},{}".format(res.model, res.res_id)
+        for rec in self:
+            if rec.model_name and rec.record_id:
+                rec.reference = "{},{}".format(rec.model_name, rec.record_id)
+                record = self.env[rec.model_name].browse(rec.record_id)
+                if "company_id" in record._fields:
+                    rec.reference_company_id = record.company_id
 
     # component fields
     usage = fields.Char("Usage")
@@ -34,10 +31,10 @@ class QueueJobChunk(models.Model):
         string="State",
     )
     state_info = fields.Text("Additional state information")
-    model_id = fields.Char("Model ID")
+    model_name = fields.Char("Model ID")
     record_id = fields.Integer("Record ID")
-    reference = fields.Char(string="Reference", selection=_compute_reference)
-    company_id = fields.Many2one("res.company", default=_get_default_company_id)
+    reference = fields.Char(string="Reference", compute=_compute_reference)
+    reference_company_id = fields.Many2one("res.company", compute=_compute_reference)
 
     @api.model_create_multi
     def create(self, vals):
@@ -56,17 +53,14 @@ class QueueJobChunk(models.Model):
     def _enqueue_job(self):
         self.ensure_one()
         usage = self.usage
-        collection = self.env["collection.base"].new()
         apply_on = self.apply_on_model
-        with collection.work_on(apply_on) as work:
-            processor = work.component(usage=usage)
+        with self.work_on(apply_on) as work:
             try:
+                processor = work.component(usage=usage)
                 result = processor.run(self.data_str)
             except Exception as e:
                 self.state = "fail"
                 self.state_info = str(e)
                 return False
-            self.model_id = result._name
-            self.record_id = result.id
             self.state = "done"
             return result
