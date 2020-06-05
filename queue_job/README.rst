@@ -207,6 +207,9 @@ Changelog
 Next
 ~~~~
 
+* [ADD] Run jobrunner as a worker process instead of a thread in the main
+  process (when running with --workers > 0)
+
 
 13.0.1.2.0 (2020-03-10)
 ~~~~~~~~~~~~~~~~~~~~~~~
