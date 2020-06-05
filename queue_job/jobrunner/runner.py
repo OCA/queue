@@ -10,7 +10,7 @@ available Odoo workers
 How does it work?
 -----------------
 
-* It starts as a thread in the Odoo main process
+* It starts as a thread in the Odoo main process or as a new worker
 * It receives postgres NOTIFY messages each time jobs are
   added or updated in the queue_job table.
 * It maintains an in-memory priority queue of jobs that
@@ -366,6 +366,29 @@ class QueueJobRunner(object):
         self._stop = False
         self._stop_pipe = os.pipe()
 
+    @classmethod
+    def from_environ_or_config(cls):
+        scheme = (os.environ.get('ODOO_QUEUE_JOB_SCHEME') or
+                  queue_job_config.get("scheme"))
+        host = (os.environ.get('ODOO_QUEUE_JOB_HOST') or
+                queue_job_config.get("host") or
+                config['http_interface'])
+        port = (os.environ.get('ODOO_QUEUE_JOB_PORT') or
+                queue_job_config.get("port") or
+                config['http_port'])
+        user = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_USER') or
+                queue_job_config.get("http_auth_user"))
+        password = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD') or
+                    queue_job_config.get("http_auth_password"))
+        runner = cls(
+            scheme=scheme or 'http',
+            host=host or 'localhost',
+            port=port or 8069,
+            user=user,
+            password=password
+        )
+        return runner
+
     def get_db_names(self):
         if config['db_name']:
             db_names = config['db_name'].split(',')
@@ -480,10 +503,14 @@ class QueueJobRunner(object):
                     self.wait_notification()
             except KeyboardInterrupt:
                 self.stop()
-            except Exception:
-                _logger.exception("exception: sleeping %ds and retrying",
-                                  ERROR_RECOVERY_DELAY)
-                self.close_databases()
-                time.sleep(ERROR_RECOVERY_DELAY)
+            except Exception as e:
+                # Interrupted system call, i.e. KeyboardInterrupt during select
+                if isinstance(e, select.error) and e[0] == 4:
+                    self.stop()
+                else:
+                    _logger.exception("exception: sleeping %ds and retrying",
+                                      ERROR_RECOVERY_DELAY)
+                    self.close_databases()
+                    time.sleep(ERROR_RECOVERY_DELAY)
         self.close_databases(remove_jobs=False)
         _logger.info("stopped")

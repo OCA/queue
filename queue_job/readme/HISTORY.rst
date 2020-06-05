@@ -11,6 +11,9 @@
 Next
 ~~~~
 
+* [ADD] Run jobrunner as a worker process instead of a thread in the main
+  process (when running with --workers > 0)
+
 12.0.1.1.0 (2019-11-01)
 ~~~~~~~~~~~~~~~~~~~~~~~
 
