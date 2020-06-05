@@ -13,6 +13,6 @@ class Creator(Component):
     _name = "basic.creator"
     _usage = "basic_create"
 
-    def run(self, data):
-        data = json.loads(data)
+    def run(self):
+        data = json.loads(self.collection.data_str)
         return self.model.create(data)
