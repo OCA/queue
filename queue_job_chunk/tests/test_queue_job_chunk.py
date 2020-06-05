@@ -78,12 +78,12 @@ class TestQueueJobChunk(TransactionComponentCase):
 
     def test_create_chunk_without_company_id(self):
         chunk = self.env["queue.job.chunk"].create(self.chunk_data_state)
-        self.assertEqual(chunk.reference_company_id, self.env["res.company"])
+        self.assertEqual(chunk.company_id, self.env.user.company_id)
 
     def test_create_chunk_with_company_id(self):
         company = self.partner.company_id
         chunk = self.env["queue.job.chunk"].create(self.chunk_data_contact[0])
-        self.assertEqual(company, chunk.reference_company_id)
+        self.assertEqual(company, chunk.company_id)
 
     def test_reference(self):
         chunk = self.env["queue.job.chunk"].create(self.chunk_data_contact[0])

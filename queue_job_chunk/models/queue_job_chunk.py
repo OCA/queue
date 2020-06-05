@@ -18,7 +18,12 @@ class QueueJobChunk(models.Model):
                 rec.reference = "{},{}".format(rec.model_name, rec.record_id)
                 record = self.env[rec.model_name].browse(rec.record_id)
                 if "company_id" in record._fields:
-                    rec.reference_company_id = record.company_id
+                    rec.company_id = record.company_id
+                else:
+                    rec.company_id = self.env.user.company_id
+            else:
+                rec.reference = False
+                rec.company_id = False
 
     # component fields
     usage = fields.Char("Usage")
@@ -34,7 +39,7 @@ class QueueJobChunk(models.Model):
     model_name = fields.Char("Model ID")
     record_id = fields.Integer("Record ID")
     reference = fields.Char(string="Reference", compute=_compute_reference)
-    reference_company_id = fields.Many2one("res.company", compute=_compute_reference)
+    company_id = fields.Many2one("res.company", compute=_compute_reference)
 
     @api.model_create_multi
     def create(self, vals):
