@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_export_async_schedule_tree" model="ir.ui.view">
+        <field name="name">export.async.schedule.tree</field>
+        <field name="model">export.async.schedule</field>
+        <field name="arch" type="xml">
+            <tree string="Scheduled Exports">
+                <field name="model_id"/>
+                <field name="ir_export_id"/>
+                <field name="interval"/>
+                <field name="interval_unit"/>
+                <field name="next_execution"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_export_async_schedule_form" model="ir.ui.view">
+        <field name="name">export.async.schedule.form</field>
+        <field name="model">export.async.schedule</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_export" type="object"
+                        string="Test Export"/>
+                </header>
+                <div class="oe_button_box">
+                    <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                        <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                    </button>
+                </div>
+                <group>
+                    <group name="configuration" string="Export Configuration">
+                        <field name="model_id"
+                            options="{'no_open': True, 'no_create_edit': True}" />
+                        <field name="model_name" invisible="1" />
+                        <field name="user_ids"
+                            widget="many2many_tags"
+                            options="{'no_open': True, 'no_create_edit': True}" />
+                        <field name="lang" />
+                        <field name="domain"
+                            widget="domain"
+                            options="{'model': 'model_name', 'in_dialog': True}"/>
+                        <field name="ir_export_id"
+                            options="{'no_open': True, 'no_create_edit': True}" />
+                        <field name="export_format" />
+                        <field name="import_compat" />
+                    </group>
+                    <group name="scheduling" string="Scheduling">
+                        <field name="next_execution"/>
+                        <field name="interval"/>
+                        <field name="interval_unit"/>
+                        <field name="end_of_month"
+                            attrs="{'invisible': [('interval_unit', '!=', 'months')]}"
+                        />
+                    </group>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_export_async_schedule_search" model="ir.ui.view">
+        <field name="name">export.async.schedule.search</field>
+        <field name="model">export.async.schedule</field>
+        <field name="arch" type="xml">
+            <search string="Scheduled Exports">
+                <field name="model_id"/>
+                <field name="ir_export_id"/>
+                <field name="user_ids"/>
+                <field name="next_execution"/>
+                <field name="interval_unit"/>
+                <field name="active"/>
+                <separator/>
+                <filter string="All" name="all" domain="['|', ('active', '=', False), ('active', '=', True)]" />
+                <group expand="0" string="Group By">
+                    <filter string="Model" name="groupby_model_id" domain="[]" context="{'group_by': 'model_id'}"/>
+                    <filter string="Next Execution" name="groupby_next_execution" domain="[]" context="{'group_by': 'next_execution'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_export_async_schedule" model="ir.actions.act_window">
+        <field name="name">Scheduled Exports</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">export.async.schedule</field>
+        <field name="view_type">form</field>
+        <field name="help">Schedule Exports to send by email</field>
+    </record>
+
+    <menuitem
+        id="menu_export_async_schedule"
+        action="action_export_async_schedule"
+        parent="base.menu_automation"/>
+
+</odoo>
