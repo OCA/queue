@@ -10,6 +10,7 @@ setuptools.setup(
     install_requires=[
         'odoo12-addon-base_export_async',
         'odoo12-addon-base_import_async',
+        'odoo12-addon-export_async_schedule',
         'odoo12-addon-queue_job',
         'odoo12-addon-queue_job_batch',
         'odoo12-addon-queue_job_cron',
