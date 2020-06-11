@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* base_export_async
+# 	* base_export_async
 #
 msgid ""
 msgstr ""
@@ -17,9 +17,10 @@ msgstr ""
 "X-Generator: Weblate 3.7.1\n"
 
 #. module: base_export_async
-#: code:addons/base_export_async/models/delay_export.py:112
+#: code:addons/base_export_async/models/delay_export.py:129
 #, python-format
-msgid "\n"
+msgid ""
+"\n"
 "                <p>Your export is available <a href=\"{}\">here</a>.</p>\n"
 "                <p>It will be automatically deleted the {}.</p>\n"
 "                <p>&nbsp;</p>\n"
@@ -46,8 +47,10 @@ msgstr "(您将通过电子邮件收到导出)"
 
 #. module: base_export_async
 #: model:ir.model,name:base_export_async.model_delay_export
-msgid "Allow to delay the export"
-msgstr "允许延迟导出"
+#, fuzzy
+#| msgid "Asynchronous export"
+msgid "Asynchronous Export"
+msgstr "异步导出"
 
 #. module: base_export_async
 #. openerp-web
@@ -79,7 +82,7 @@ msgid "Display Name"
 msgstr "显示名称"
 
 #. module: base_export_async
-#: code:addons/base_export_async/models/delay_export.py:110
+#: code:addons/base_export_async/models/delay_export.py:127
 #, python-format
 msgid "Export {} {}"
 msgstr "导出{} {}"
@@ -119,25 +122,25 @@ msgid "Please select fields to export..."
 msgstr "请选择要导出的字段..."
 
 #. module: base_export_async
-#: code:addons/base_export_async/models/delay_export.py:42
-#, python-format
-msgid "The user doesn't have an email address."
-msgstr "用户没有电子邮件地址。"
-
-#. module: base_export_async
 #: model:ir.model.fields,field_description:base_export_async.field_delay_export__user_ids
 msgid "Users"
 msgstr "用户"
 
 #. module: base_export_async
-#: code:addons/base_export_async/models/delay_export.py:29
+#: code:addons/base_export_async/models/delay_export.py:30
 #, python-format
 msgid "You must set an email address to your user."
 msgstr "您必须为您的用户设置电子邮件地址。"
 
 #. module: base_export_async
 #. openerp-web
-#: code:addons/base_export_async/static/src/js/data_export.js:91
+#: code:addons/base_export_async/static/src/js/data_export.js:92
 #, python-format
 msgid "You will receive the export file by email as soon as it is finished."
 msgstr "完成后，您将通过电子邮件收到导出文件。"
+
+#~ msgid "Allow to delay the export"
+#~ msgstr "允许延迟导出"
+
+#~ msgid "The user doesn't have an email address."
+#~ msgstr "用户没有电子邮件地址。"
