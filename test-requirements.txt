@@ -1,0 +1,2 @@
+# freezegun > 0.3.11 has issue: module 'dateutil.tz' has no attribute 'UTC'
+freezegun<=0.3.11
