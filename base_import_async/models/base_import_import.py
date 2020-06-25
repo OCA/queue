@@ -44,7 +44,7 @@ class BaseImportImport(models.TransientModel):
             # Parse date and float field
             data = self._parse_import_data(data, import_fields, options)
         except ValueError as e:
-            return [{"type": "error", "message": str(e), "record": False}]
+            return {"messages": [{"type": "error", "message": str(e), "record": False}]}
 
         # get the translated model name to build
         # a meaningful job description
