@@ -10,14 +10,15 @@ msgstr ""
 "Project-Id-Version: Odoo Server 9.0c\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-06-24 00:51+0000\n"
-"PO-Revision-Date: 2017-06-24 00:51+0000\n"
-"Last-Translator: Rudolf Schnapka <rs@techno-flex.de>, 2017\n"
+"PO-Revision-Date: 2020-07-22 12:20+0000\n"
+"Last-Translator: c2cdidier <didier.donze@camptocamp.com>\n"
 "Language-Team: German (https://www.transifex.com/oca/teams/23907/de/)\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.10\n"
 
 #. module: queue_job_subscribe
 #: model_terms:ir.ui.view,arch_db:queue_job_subscribe.view_user_connector_form
@@ -36,12 +37,12 @@ msgstr ""
 #. module: queue_job_subscribe
 #: model:ir.model.fields,field_description:queue_job_subscribe.field_res_users__subscribe_job
 msgid "Job Notifications"
-msgstr ""
+msgstr "Job Benachrichtigungen"
 
 #. module: queue_job_subscribe
 #: model:ir.model,name:queue_job_subscribe.model_queue_job
 msgid "Queue Job"
-msgstr "Aufgabe in Warteschlange einreihen"
+msgstr "Warteschlange Job"
 
 #. module: queue_job_subscribe
 #: model:ir.model,name:queue_job_subscribe.model_res_users
