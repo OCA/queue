@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2019-07-12 14:43+0000\n"
-"Last-Translator: Maria Sparenberg <maria.sparenberg@gmx.net>\n"
+"PO-Revision-Date: 2020-07-22 12:20+0000\n"
+"Last-Translator: c2cdidier <didier.donze@camptocamp.com>\n"
 "Language-Team: none\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.7.1\n"
+"X-Generator: Weblate 3.10\n"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -243,12 +243,12 @@ msgstr "ID"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_exception_icon
 msgid "Icon"
-msgstr ""
+msgstr "Symbol"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "Symbol zur Kennzeichnung einer Ausnahmeaktivität."
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__identity_key
@@ -424,8 +424,6 @@ msgstr "Anzahl der Aktionen"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_error_counter
-#, fuzzy
-#| msgid "Number of error"
 msgid "Number of errors"
 msgstr "Anzahl der Fehler"
 
@@ -506,7 +504,7 @@ msgstr "Zugehörige Datensätze"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__removal_interval
 msgid "Removal Interval"
-msgstr ""
+msgstr "Entfernungsintervall"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
@@ -537,10 +535,8 @@ msgstr "Ergebnis"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
-#, fuzzy
-#| msgid "Message Delivery error"
 msgid "SMS Delivery error"
-msgstr "Fehler bei Nachrichtenübermittlung"
+msgstr "Fehler bei der SMS Nachrichtenübermittlung"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
@@ -636,7 +632,7 @@ msgstr "Die ausgewählten Jobs werden als Erledigt markiert."
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr ""
+msgstr "Typ der Ausnahmeaktivität im Datensatz."
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__uuid
@@ -660,15 +656,13 @@ msgstr "Benutzer"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__website_message_ids
-#, fuzzy
-#| msgid "Messages"
 msgid "Website Messages"
-msgstr "Nachrichten"
+msgstr "Website Nachrichten"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__website_message_ids
 msgid "Website communication history"
-msgstr ""
+msgstr "Historie der Website-Kommunikation"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_requeue_job
