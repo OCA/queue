@@ -21,4 +21,5 @@
  'installable': True,
  'development_status': 'Mature',
  'maintainers': ['guewen'],
+ 'post_init_hook': 'post_init_hook'
  }
