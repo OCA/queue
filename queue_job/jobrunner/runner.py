@@ -304,6 +304,11 @@ class Database(object):
             cr.execute(query, args)
             yield cr
 
+    def keep_alive(self):
+        query = "SELECT 1"
+        with closing(self.conn.cursor()) as cr:
+            cr.execute(query)
+
     def set_job_enqueued(self, uuid):
         with closing(self.conn.cursor()) as cr:
             cr.execute(
@@ -416,6 +421,12 @@ class QueueJobRunner(object):
 
     def process_notifications(self):
         for db in self.db_by_name.values():
+            if not db.conn.notifies:
+                # If there are no activity in the queue_job table it seems that
+                # tcp keepalives are not sent (in that very specific scenario),
+                # causing some intermediaries (such as haproxy) to close the
+                # connection, making the jobrunner to restart on a socket error
+                db.keep_alive()
             while db.conn.notifies:
                 if self._stop:
                     break
