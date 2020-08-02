@@ -249,6 +249,12 @@ msgid "Identity Key"
 msgstr ""
 
 #. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid "If both parameters are 0, ALL jobs will be requeued!"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_unread
 msgid "If checked, new messages require your attention."
@@ -316,6 +322,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.actions.server,name:queue_job.ir_cron_queue_job_garbage_collector_ir_actions_server
+#: model:ir.cron,cron_name:queue_job.ir_cron_queue_job_garbage_collector
+#: model:ir.cron,name:queue_job.ir_cron_queue_job_garbage_collector
+msgid "Jobs Garbage Collector"
 msgstr ""
 
 #. module: queue_job
