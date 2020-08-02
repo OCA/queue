@@ -2,6 +2,16 @@
 <odoo>
     <data noupdate="1">
 
+        <record id="ir_cron_queue_job_garbage_collector" model="ir.cron">
+            <field name="name">Jobs Garbage Collector</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field ref="model_queue_job" name="model_id"/>
+            <field name="state">code</field>
+            <field name="code">model.requeue_stuck_jobs()</field>
+        </record>
+
         <!-- Queue-job-related subtypes for messaging / Chatter -->
         <record id="mt_job_failed" model="mail.message.subtype">
             <field name="name">Job failed</field>
