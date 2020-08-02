@@ -254,6 +254,13 @@ msgid "Identity Key"
 msgstr "身份密钥"
 
 #. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, fuzzy, python-format
+#| msgid "The selected jobs will be requeued."
+msgid "If both parameters are 0, ALL jobs will be requeued!"
+msgstr "所选作业将重新排队。"
+
+#. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_unread
 msgid "If checked, new messages require your attention."
@@ -322,6 +329,13 @@ msgstr "作业中断并设置为已完成：无需执行任何操作。"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Jobs"
 msgstr "作业"
+
+#. module: queue_job
+#: model:ir.actions.server,name:queue_job.ir_cron_queue_job_garbage_collector_ir_actions_server
+#: model:ir.cron,cron_name:queue_job.ir_cron_queue_job_garbage_collector
+#: model:ir.cron,name:queue_job.ir_cron_queue_job_garbage_collector
+msgid "Jobs Garbage Collector"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__kwargs
