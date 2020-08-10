@@ -283,6 +283,7 @@ Contributors
 * Laurent Mignon <laurent.mignon@acsone.eu>
 * Laetitia Gangloff <laetitia.gangloff@acsone.eu>
 * Cédric Pigeon <cedric.pigeon@acsone.eu>
+* Souheil Bejaoui <souheil.bejaoui@acsone.eu>
 
 Maintainers
 ~~~~~~~~~~~
