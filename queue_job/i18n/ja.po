@@ -236,7 +236,6 @@ msgstr "特定キー"
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:286
 #, fuzzy, python-format
-#| msgid "The selected jobs will be requeued."
 msgid "If both parameters are 0, ALL jobs will be requeued!"
 msgstr "選択されたジョブは再キューされます。"
 
@@ -465,14 +464,12 @@ msgstr ""
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 #, fuzzy
-#| msgid "Set to 'Done'"
 msgid "Set jobs done"
 msgstr "「完了」にする"
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_set_jobs_done
 #, fuzzy
-#| msgid "Set to 'Done'"
 msgid "Set jobs to done"
 msgstr "「完了」にする"
 
@@ -484,7 +481,6 @@ msgstr "「完了」にする"
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 #, fuzzy
-#| msgid "Set to 'Done'"
 msgid "Set to done"
 msgstr "「完了」にする"
 
@@ -544,7 +540,6 @@ msgstr "選択されたジョブは再キューされます。"
 #. module: queue_job
 #: model:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 #, fuzzy
-#| msgid "The selected jobs will be requeued."
 msgid "The selected jobs will be set to done."
 msgstr "選択されたジョブは再キューされます。"
 
