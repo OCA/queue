@@ -211,6 +211,16 @@ msgid "Failed"
 msgstr "Fehlgeschlagen"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__ttype
+msgid "Field Type"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_ir_model_fields
+msgid "Fields"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_follower_ids
 msgid "Followers"
 msgstr "Abonnenten"
@@ -311,6 +321,13 @@ msgstr "Job-Warteschlange"
 #: model:res.groups,name:queue_job.group_queue_job_manager
 msgid "Job Queue Manager"
 msgstr "Job-Warteschlangenverwalter"
+
+#. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__ir_model_fields__ttype__job_serialized
+#, fuzzy
+#| msgid "Job failed"
+msgid "Job Serialized"
+msgstr "Job ist fehlgeschlagen"
 
 #. module: queue_job
 #: model:mail.message.subtype,name:queue_job.mt_job_failed
