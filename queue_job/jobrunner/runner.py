@@ -252,12 +252,20 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
     thread.start()
 
 
-def enable_keepalive(connection):
-    s = socket.fromfd(connection.fileno(), socket.AF_INET, socket.SOCK_STREAM)
+def enable_keepalive(connection: psycopg2.extensions.connection, is_unix_socket: bool):
+    # this is incorrect as connection could be of Unix type
+    # Use socket.AF_UNIX if using a socket
+    if is_unix_socket:
+        s = socket.fromfd(connection.fileno(), socket.AF_UNIX, socket.SOCK_STREAM)
+    else:
+        s = socket.fromfd(connection.fileno(), socket.AF_INET, socket.SOCK_STREAM)
     # Enable sending of keep-alive messages
     s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+    if is_unix_socket:
+        return
     # Time the connection needs to remain idle before start sending
     # keepalive probes
+    # crash when using a socket, so only done if it is not one
     s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 60)
     # Time between individual keepalive probes
     s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 1)
@@ -271,7 +279,17 @@ class Database(object):
         self.db_name = db_name
         connection_info = _connection_info_for(db_name)
         self.conn = psycopg2.connect(**connection_info)
-        enable_keepalive(self.conn)
+        # TODO also check ENV VAR
+        if 'dsn' in connection_info:
+            # TODO detect host in dsn
+            is_unix_socket = False
+        else:
+            if "host" in connection_info:
+                is_unix_socket = connection_info["host"].startswith("/")
+            else:
+                # TODO depends on whether UNIX socket is supported
+                is_unix_socket = False
+        enable_keepalive(self.conn, is_unix_socket)
         self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         self.has_queue_job = self._has_queue_job()
         if self.has_queue_job:

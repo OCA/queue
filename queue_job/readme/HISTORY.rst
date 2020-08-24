@@ -15,6 +15,7 @@ Next
   process (when running with --workers > 0)
 * [REF] ``@job`` and ``@related_action`` deprecated, any method can be delayed,
   and configured using ``queue.job.function`` records
+* [FIX] Handle connection to the database via Unix socket correctly.
 
 
 13.0.1.2.0 (2020-03-10)
