@@ -34,19 +34,7 @@ class RunJobController(http.Controller):
         env.cr.commit()
         _logger.debug("%s done", job)
 
-    @http.route("/queue_job/session", type="http", auth="none")
-    def session(self):
-        """Used by the jobrunner to spawn a session
-
-        The queue jobrunner uses anonymous sessions when it calls
-        ``/queue_job/runjob``.  To avoid having thousands of anonymous
-        sessions, before running jobs, it creates a ``requests.Session``
-        and does a GET on ``/queue_job/session``, providing it a cookie
-        which will be used for subsequent calls to runjob.
-        """
-        return ""
-
-    @http.route("/queue_job/runjob", type="http", auth="none")
+    @http.route("/queue_job/runjob", type="http", auth="none", save_session=False)
     def runjob(self, db, job_uuid, **kw):
         http.request.session.db = db
         env = http.request.env(user=odoo.SUPERUSER_ID)
