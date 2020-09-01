@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright 2018 ACSONE SA/NV
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.addons.queue_job.job import job, DEFAULT_PRIORITY
+from odoo.addons.queue_job.exception import JobError
 
 
 class MailMail(models.Model):
@@ -20,13 +21,15 @@ class MailMail(models.Model):
     def _send_mail_jobified(self):
         """
         Send the email if
-        - the state is 'outgoing'
         - the mail exists.
+        - the state is 'outgoing'
         :return: str
         """
         self.ensure_one()
         if not self.exists():
             return "mail.mail record (id=%d) no longer exists" % self.id
+        elif self.state == 'exception':
+            raise JobError(_('Could not send mail'), self.failure_reason)
         elif self.state != 'outgoing':
             return "Not in Outgoing state, ignoring"
         self.send(auto_commit=False, raise_exception=True)
@@ -51,6 +54,7 @@ class MailMail(models.Model):
             for mail_outgoing in mails_outgoing:
                 identity_key = mail_outgoing._build_entity_key()
                 mail_outgoing.with_delay(
+                    max_retries=1,
                     priority=mail_outgoing.mail_job_priority,
                     description=description,
                     identity_key=identity_key)._send_mail_jobified()
@@ -65,7 +69,12 @@ class MailMail(models.Model):
         :return: str
         """
         self.ensure_one()
-        identity_key = self._name + ',' + str(self.id)
+        # add ',X' to the identity_key to signify that this mail should not
+        # trigger another message when it fails to send, to avoid loops.
+        if self.subtype_id == self.env.ref('queue_job.mt_job_failed'):
+            identity_key = self._name + ',' + str(self.id) + ',X'
+        else:
+            identity_key = self._name + ',' + str(self.id)
         return identity_key
 
     @api.model
