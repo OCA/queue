@@ -1,4 +1,4 @@
-11.0.1.0.1 (2018-08-28)
+10.0.1.0.1 (2020-09-01)
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-* Migration of mail_connector_queue (from v8.0 in connector repo)
+* Backport of mail_queue_job v11.0
