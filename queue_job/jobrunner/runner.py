@@ -18,6 +18,35 @@ How does it work?
 * It does not run jobs itself, but asks Odoo to run them through an
   anonymous ``/queue_job/runjob`` HTTP request. [1]_
 
+How does concurrent job runners work?
+-------------------------------------
+
+If several nodes (on different hosts or not) of job runners are started,
+a shared lock ensures that only one job runner works on a database at
+a time. These rules are to take in consideration:
+
+* The identifier of the shared lock is based on the database list provided,
+  so either ``--database``/``db_name`` or all the databases in PostgreSQL.
+* When 2 job runners with the exact same list of databases are started,
+  only the first one will work. The second one will wait and take over
+  if the first one is stopped.
+
+Caveats:
+
+* If 2 job runners have a database in common but a different list (e.g.
+  ``db_name=project1,project2`` and ``db_name=project2,project3``), both job
+  runners will work and listen to ``project2``, which will lead to unexpected
+  behavior.
+* The same applies when no database is specified and all the cluster's databases
+  are used. If a job runner is started on the cluster's databases, a new database
+  is created and a second job runner is started, they'll both work on a same set
+  of databases with unexpected behaviors.
+* PostgreSQL advisory locks are based on a integer, the list of database names
+  is sorted, hashed and converted to an int64, so we lose information in the
+  identifier. A low risk of collision is possible. If it happens some day, we
+  should add an option for a custom lock identifier.
+
+
 How to use it?
 --------------
 
@@ -135,6 +164,7 @@ Caveat
 
 from contextlib import closing
 import datetime
+import hashlib
 import logging
 import os
 import select
@@ -151,6 +181,8 @@ from odoo.tools import config
 from .channels import ChannelManager, PENDING, ENQUEUED, NOT_DONE
 
 SELECT_TIMEOUT = 60
+TRY_ACQUIRE_INTERVAL = 30  # seconds
+SHARED_LOCK_KEEP_ALIVE = 60  # seconds
 ERROR_RECOVERY_DELAY = 5
 
 _logger = logging.getLogger(__name__)
@@ -256,8 +288,52 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
     thread.start()
 
 
-class Database(object):
+class SharedLockDatabase(object):
+    def __init__(self, db_name, lock_name):
+        self.db_name = db_name
+        self.lock_ident = self.name_to_int64(lock_name)
+        connection_info = _connection_info_for(db_name)
+        self.conn = psycopg2.connect(**connection_info)
+        self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        self.acquired = False
+        self.try_acquire()
 
+    @staticmethod
+    def name_to_int64(lock_name):
+        hasher = hashlib.sha256()
+        hasher.update(lock_name.encode("utf-8"))
+        # pg_try_advisory_lock is limited to an 8-byte (64bit) signed integer
+        return int.from_bytes(hasher.digest()[:8], byteorder="big", signed=True)
+
+    def try_acquire(self):
+        self.acquired = self._acquire()
+
+    def _acquire(self):
+        with closing(self.conn.cursor()) as cr:
+            cr.execute("SET idle_in_transaction_session_timeout = 60000;")
+            # session level lock
+            cr.execute("SELECT pg_try_advisory_lock(%s);", (self.lock_ident,))
+            acquired = cr.fetchone()[0]
+        return acquired
+
+    def keep_alive(self):
+        query = "SELECT 1"
+        with closing(self.conn.cursor()) as cr:
+            cr.execute(query)
+
+    def close(self):
+        # pylint: disable=except-pass
+        # if close fail for any reason, it's either because it's already closed
+        # and we don't care, or for any reason but anyway it will be closed on
+        # del
+        try:
+            self.conn.close()
+        except Exception:
+            pass
+        self.conn = None
+
+
+class QueueDatabase(object):
     def __init__(self, db_name):
         self.db_name = db_name
         connection_info = _connection_info_for(db_name)
@@ -357,6 +433,11 @@ class QueueJobRunner(object):
         if channel_config_string is None:
             channel_config_string = _channels()
         self.channel_manager.simple_configure(channel_config_string)
+
+        self.shared_lock_db = None
+        # TODO: how to detect new databases or databases
+        #       on which queue_job is installed after server start?
+        self.list_db_names = self.get_db_names()
         self.db_by_name = {}
         self._stop = False
         self._stop_pipe = os.pipe()
@@ -377,11 +458,22 @@ class QueueJobRunner(object):
             except Exception:
                 _logger.warning('error closing database %s',
                                 db_name, exc_info=True)
+
         self.db_by_name = {}
+
+        if self.shared_lock_db:
+            try:
+                self.shared_lock_db.close()
+            except Exception:
+                _logger.warning(
+                    "error closing database %s",
+                    self.shared_lock_db.db_name,
+                    exc_info=True,
+                )
 
     def initialize_databases(self):
         for db_name in self.get_db_names():
-            db = Database(db_name)
+            db = QueueDatabase(db_name)
             if not db.has_queue_job:
                 _logger.debug('queue_job is not installed for db %s', db_name)
             else:
@@ -450,6 +542,12 @@ class QueueJobRunner(object):
                 for conn in conns:
                     conn.poll()
 
+    def keep_alive_shared_lock(self):
+        self.shared_lock_db.keep_alive()
+
+    def _lock_ident(self):
+        return "qj:{}".format("-".join(sorted(self.list_db_names)))
+
     def stop(self):
         _logger.info("graceful stop requested")
         self._stop = True
@@ -461,16 +559,42 @@ class QueueJobRunner(object):
         while not self._stop:
             # outer loop does exception recovery
             try:
+                # When concurrent jobrunners are started, the first to win the
+                # race acquires an advisory lock on PostgreSQL and gets to
+                # work. When a jobrunner is stopped, the lock is released, and
+                # another node can take over.
+                self.shared_lock_db = SharedLockDatabase("postgres", self._lock_ident())
+                if not self.shared_lock_db.acquired:
+                    self.close_databases()
+                    _logger.info("already started on another node")
+                    # no database to work with... retry later in case a concurrent
+                    # node is stopped
+                    time.sleep(TRY_ACQUIRE_INTERVAL)
+                    continue
+
                 _logger.info("initializing database connections")
-                # TODO: how to detect new databases or databases
-                #       on which queue_job is installed after server start?
                 self.initialize_databases()
                 _logger.info("database connections ready")
+
+                last_keep_alive = None
+
                 # inner loop does the normal processing
                 while not self._stop:
                     self.process_notifications()
                     self.run_jobs()
                     self.wait_notification()
+                    if (
+                        not last_keep_alive
+                        or time.time() >= last_keep_alive + SHARED_LOCK_KEEP_ALIVE
+                    ):
+                        last_keep_alive = time.time()
+                        # send a keepalive on the shared lock connection at
+                        # most every 60 seconds
+                        self.keep_alive_shared_lock()
+                        # TODO here, when we have no "db_name", we could list again
+                        # the databases and if the list changed, try to acquire a new
+                        # lock
+
             except KeyboardInterrupt:
                 self.stop()
             except Exception:
