@@ -142,6 +142,20 @@ class TestJobsOnTestingMethod(JobCommonCase):
         self.assertEquals(job_a.date_started,
                           datetime(2015, 3, 15, 16, 41, 0))
 
+    def test_worker_pid(self):
+        """When a job is started, it gets the PID of the worker that starts it"""
+        method = self.env["res.users"].mapped
+        job_a = Job(method)
+        self.assertFalse(job_a.worker_pid)
+        with mock.patch("os.getpid", autospec=True) as mock_getpid:
+            mock_getpid.return_value = 99999
+            job_a.set_started()
+            self.assertEqual(job_a.worker_pid, 99999)
+
+        # reset the pid
+        job_a.set_pending()
+        self.assertFalse(job_a.worker_pid)
+
     def test_set_done(self):
         job_a = Job(self.method)
         datetime_path = 'odoo.addons.queue_job.job.datetime'
@@ -187,6 +201,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
                        eta=eta,
                        description="My description")
         test_job.user_id = 1
+        test_job.worker_pid = 99999  # normally set on "set_start"
         test_job.company_id = self.env.ref("base.main_company").id
         test_job.store()
         job_read = Job.load(self.env, test_job.uuid)
@@ -203,6 +218,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         self.assertEqual(test_job.result, job_read.result)
         self.assertEqual(test_job.user_id, job_read.user_id)
         self.assertEqual(test_job.company_id, job_read.company_id)
+        self.assertEqual(test_job.worker_pid, 99999)
         delta = timedelta(seconds=1)  # DB does not keep milliseconds
         self.assertAlmostEqual(test_job.date_created, job_read.date_created,
                                delta=delta)

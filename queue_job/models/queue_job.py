@@ -90,6 +90,7 @@ class QueueJob(models.Model):
                           index=True)
 
     identity_key = fields.Char()
+    worker_pid = fields.Integer()
 
     @api.model_cr
     def init(self):
