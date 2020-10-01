@@ -5,6 +5,7 @@ import functools
 import hashlib
 import inspect
 import logging
+import os
 import sys
 import uuid
 from datetime import datetime, timedelta
@@ -314,6 +315,7 @@ class Job(object):
         if stored.company_id:
             job_.company_id = stored.company_id.id
         job_.identity_key = stored.identity_key
+        job_.worker_pid = stored.worker_pid
         return job_
 
     def job_record_with_same_identity_key(self):
@@ -498,6 +500,7 @@ class Job(object):
         self._eta = None
         self.eta = eta
         self.channel = channel
+        self.worker_pid = None
 
     def perform(self):
         """Execute the job.
@@ -541,6 +544,7 @@ class Job(object):
             "date_done": False,
             "eta": False,
             "identity_key": False,
+            "worker_pid": self.worker_pid,
         }
 
         if self.date_enqueued:
@@ -642,6 +646,7 @@ class Job(object):
         self.state = PENDING
         self.date_enqueued = None
         self.date_started = None
+        self.worker_pid = None
         if reset_retry:
             self.retry = 0
         if result is not None:
@@ -651,10 +656,12 @@ class Job(object):
         self.state = ENQUEUED
         self.date_enqueued = datetime.now()
         self.date_started = None
+        self.worker_pid = None
 
     def set_started(self):
         self.state = STARTED
         self.date_started = datetime.now()
+        self.worker_pid = os.getpid()
 
     def set_done(self, result=None):
         self.state = DONE

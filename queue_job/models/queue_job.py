@@ -81,6 +81,7 @@ class QueueJob(models.Model):
     )
 
     identity_key = fields.Char()
+    worker_pid = fields.Integer()
 
     def init(self):
         self._cr.execute(

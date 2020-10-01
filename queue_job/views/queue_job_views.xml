@@ -49,6 +49,7 @@
                                 groups="base.group_multi_company"
                             />
                             <field name="user_id" />
+                            <field name="worker_pid" groups="base.group_no_one" />
                         </group>
                         <group>
                             <field name="date_created" />
