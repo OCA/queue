@@ -587,7 +587,19 @@ class Job(object):
     def func(self):
         recordset = self.recordset.with_context(job_uuid=self.uuid)
         recordset = recordset.with_user(self.user_id)
-        return getattr(recordset, self.method_name)
+        recordset_method = getattr(recordset, self.method_name)
+        if not recordset:
+            # record has been deleted meanwhile, execute an empty func
+            def func(*args, **kwargs):
+                return None
+            # FIXME what about other properties? maybe we should only
+            # check this "if self.recordset" in the perform method,
+            # but we should check not to do a SELECT to check for
+            # existence in each method...
+            func.__doc__ = recordset_method.__doc__
+            func.__name__ = recordset_method.__name__
+            return func
+        return recordset_method
 
     @property
     def identity_key(self):

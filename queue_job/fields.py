@@ -91,7 +91,7 @@ class JobDecoder(json.JSONDecoder):
             model = self.env[obj["model"]]
             if obj.get("uid"):
                 model = model.with_user(obj["uid"])
-            return model.browse(obj["ids"])
+            return model.browse(obj["ids"]).exists()
         elif type_ == "datetime_isoformat":
             return dateutil.parser.parse(obj["value"])
         elif type_ == "date_isoformat":
