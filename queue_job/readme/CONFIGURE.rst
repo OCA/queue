@@ -41,3 +41,22 @@
 
 .. [1] It works with the threaded Odoo server too, although this way
        of running Odoo is obviously not for production purposes.
+
+Odoo.sh configuration
+~~~~~~~~~~~~~~~~~~~~~
+
+When using odoo.sh, the configuration in ``.config/odoo/odoo.conf`` must include
+(at least):
+
+
+.. code-block::
+
+   [options]
+   server_wide_modules=web,queue_job
+
+   [queue_job]
+   host=<your-odoo-instance>.odoo.com
+   scheme=https
+   port=443
+
+Example of host: ``myproject-main-1552740.dev.odoo.com``
