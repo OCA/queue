@@ -8,3 +8,4 @@
 * Cédric Pigeon <cedric.pigeon@acsone.eu>
 * Tatiana Deribina <tatiana.deribina@avoin.systems>
 * Souheil Bejaoui <souheil.bejaoui@acsone.eu>
+* Eric Antones <eantones@nuobit.com>
