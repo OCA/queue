@@ -60,11 +60,13 @@
                     <group colspan="4">
                         <div>
                             <label for="retry" string="Current try / max. retries" />
-                            <field name="retry" class="oe_inline" /> /
+                            <field name="retry" class="oe_inline" />
+                            /
                             <field name="max_retries" class="oe_inline" />
-                            <span
-                                class="oe_grey oe_inline"
-                            > If the max. retries is 0, the number of retries is infinite.</span>
+                            <span class="oe_grey oe_inline">
+                                If the max. retries is 0, the number of retries is
+                                infinite.
+                            </span>
                         </div>
                     </group>
                     <group
@@ -172,10 +174,12 @@
         <field name="name">Jobs</field>
         <field name="res_model">queue.job</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{'search_default_pending': 1,
+        <field name="context">
+            {'search_default_pending': 1,
                                'search_default_enqueued': 1,
                                'search_default_started': 1,
-                               'search_default_failed': 1}</field>
+                               'search_default_failed': 1}
+        </field>
         <field name="view_id" ref="view_queue_job_tree" />
         <field name="search_view_id" ref="view_queue_job_search" />
     </record>

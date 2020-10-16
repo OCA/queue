@@ -267,7 +267,10 @@ class QueueJob(models.Model):
     def _get_stuck_jobs_to_requeue(self, enqueued_delta, started_delta):
         job_model = self.env["queue.job"]
         stuck_jobs = job_model.search(
-            self._get_stuck_jobs_domain(enqueued_delta, started_delta,)
+            self._get_stuck_jobs_domain(
+                enqueued_delta,
+                started_delta,
+            )
         )
         return stuck_jobs
 

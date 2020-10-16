@@ -43,7 +43,7 @@ class Base(models.AbstractModel):
         channel=None,
         identity_key=None,
     ):
-        """ Return a ``DelayableRecordset``
+        """Return a ``DelayableRecordset``
 
         The returned instance allow to enqueue any method of the recordset's
         Model which is decorated by :func:`~odoo.addons.queue_job.job.job`.

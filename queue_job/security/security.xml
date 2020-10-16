@@ -19,9 +19,9 @@
             <field name="name">Job Queue multi-company</field>
             <field name="model_id" ref="model_queue_job" />
             <field name="global" eval="True" />
-            <field
-                name="domain_force"
-            >['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="domain_force">
+                ['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]
+            </field>
         </record>
     </data>
 </odoo>
