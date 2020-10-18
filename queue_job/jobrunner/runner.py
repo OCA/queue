@@ -278,12 +278,28 @@ class Database(object):
                 "SELECT 1 FROM pg_tables WHERE tablename=%s", ("ir_module_module",)
             )
             if not cr.fetchone():
+                _logger.debug("%s doesn't seem to be an odoo db", self.db_name)
                 return False
             cr.execute(
                 "SELECT 1 FROM ir_module_module WHERE name=%s AND state=%s",
                 ("queue_job", "installed"),
             )
-            return cr.fetchone()
+            if not cr.fetchone():
+                _logger.debug("queue_job is not installed for db %s", self.db_name)
+                return False
+            cr.execute(
+                """SELECT COUNT(1)
+                FROM information_schema.triggers
+                WHERE event_object_table = %s
+                AND trigger_name = %s""",
+                ("queue_job", "queue_job_notify"),
+            )
+            if cr.fetchone()[0] != 3:  # INSERT, DELETE, UPDATE
+                _logger.error(
+                    "queue_job_notify trigger is missing in db %s", self.db_name
+                )
+                return False
+            return True
 
     def _initialize(self):
         with closing(self.conn.cursor()) as cr:
@@ -393,9 +409,7 @@ class QueueJobRunner(object):
     def initialize_databases(self):
         for db_name in self.get_db_names():
             db = Database(db_name)
-            if not db.has_queue_job:
-                _logger.debug("queue_job is not installed for db %s", db_name)
-            else:
+            if db.has_queue_job:
                 self.db_by_name[db_name] = db
                 with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
                     for job_data in cr:
