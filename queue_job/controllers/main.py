@@ -31,6 +31,7 @@ class RunJobController(http.Controller):
         job.perform()
         job.set_done()
         job.store()
+        env["base"].flush()
         env.cr.commit()
         _logger.debug("%s done", job)
 
