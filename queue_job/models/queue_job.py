@@ -14,6 +14,7 @@ from odoo.addons.base_sparse_field.models.fields import Serialized
 
 from ..job import STATES, DONE, PENDING, Job
 from ..fields import JobSerialized
+from ..job import DONE, PENDING, STATES, Job, job
 
 _logger = logging.getLogger(__name__)
 
@@ -333,6 +334,10 @@ class QueueJob(models.Model):
                 'domain': [('id', 'in', records.ids)],
             })
         return action
+
+    @job
+    def _test_job(self):
+        _logger.info("Running test job.")
 
 
 class RequeueJob(models.TransientModel):
