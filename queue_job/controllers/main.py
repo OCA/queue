@@ -7,6 +7,7 @@ import traceback
 from io import StringIO
 
 from psycopg2 import OperationalError
+from werkzeug.exceptions import Forbidden
 
 import odoo
 from odoo import _, http, tools
@@ -109,3 +110,35 @@ class RunJobController(http.Controller):
             raise
 
         return ""
+
+    @http.route("/queue_job/create_test_job", type="http", auth="user")
+    def create_test_job(
+        self, priority=None, max_retries=None, channel="root", description="Test job"
+    ):
+        if not http.request.env.user.has_group("base.group_erp_manager"):
+            raise Forbidden(_("Access Denied"))
+
+        if priority is not None:
+            try:
+                priority = int(priority)
+            except ValueError:
+                priority = None
+
+        if max_retries is not None:
+            try:
+                max_retries = int(max_retries)
+            except ValueError:
+                max_retries = None
+
+        delayed = (
+            http.request.env["queue.job"]
+            .with_delay(
+                priority=priority,
+                max_retries=max_retries,
+                channel=channel,
+                description=description,
+            )
+            ._test_job()
+        )
+
+        return delayed.db_record().uuid

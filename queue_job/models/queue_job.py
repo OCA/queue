@@ -8,7 +8,7 @@ from odoo import _, api, exceptions, fields, models
 from odoo.osv import expression
 
 from ..fields import JobSerialized
-from ..job import DONE, PENDING, STATES, Job
+from ..job import DONE, PENDING, STATES, Job, job
 
 _logger = logging.getLogger(__name__)
 
@@ -305,6 +305,10 @@ class QueueJob(models.Model):
                 }
             )
         return action
+
+    @job
+    def _test_job(self):
+        _logger.info("Running test job.")
 
 
 class RequeueJob(models.TransientModel):
