@@ -35,8 +35,10 @@ How to use it?
     or ``False`` if unset.
   - ``ODOO_QUEUE_JOB_JOBRUNNER_DB_PORT=5432``, default ``db_port``
     or ``False`` if unset.
+  - ``ODOO_QUEUE_JOB_JOBRUNNER_DB_OWNERS=instance-a,instance-b``, default empty.
+  - ``ODOO_QUEUE_JOB_JOBRUNNER_DB_EXCLUDED=database-b2``, default empty.
 
-* Alternatively, configure the channels through the Odoo configuration
+* Alternatively, configure the module through the Odoo configuration
   file, like:
 
 .. code-block:: ini
@@ -50,6 +52,8 @@ How to use it?
   http_auth_password = s3cr3t
   jobrunner_db_host = master-db
   jobrunner_db_port = 5432
+  jobrunner_db_owners = instance-a,instance-b
+  jobrunner_db_excluded = database-b2
 
 * Or, if using ``anybox.recipe.odoo``, add this to your buildout configuration:
 
@@ -136,6 +140,7 @@ Caveat
 import datetime
 import logging
 import os
+import re
 import select
 import threading
 import time
@@ -389,11 +394,67 @@ class QueueJobRunner(object):
         )
         return runner
 
+    def get_db_owners(self):
+        db_owners = [
+            owner.strip()
+            for owner in (
+                os.environ.get("ODOO_QUEUE_JOB_JOBRUNNER_DB_OWNERS")
+                or queue_job_config.get("jobrunner_db_owners", "")
+            ).split(",")
+            if owner.strip()
+        ]
+
+        return db_owners
+
+    def get_db_excluded(self):
+        db_excluded = [
+            db.strip()
+            for db in (
+                os.environ.get("ODOO_QUEUE_JOB_JOBRUNNER_DB_EXCLUDED")
+                or queue_job_config.get("jobrunner_db_excluded", "")
+            ).split(",")
+            if db.strip()
+        ]
+
+        return db_excluded
+
     def get_db_names(self):
+        db_owners = self.get_db_owners()
+
         if config["db_name"]:
             db_names = config["db_name"].split(",")
+        elif db_owners:
+            # custom version of odoo.service.db.list_dbs()
+            # to list databases owned by a given set of pg usernames,
+            # not only the current_user
+            # https://github.com/odoo/odoo/blob/aeebe275016b47c359ffc4a07ac5b7f03534701c/odoo/service/db.py#L364
+            chosen_template = config["db_template"]
+            templates_list = tuple({"postgres", chosen_template})
+            db = odoo.sql_db.db_connect("postgres")
+            with closing(db.cursor()) as cr:
+                try:
+                    cr.execute(
+                        "select datname from pg_database where datdba in (select usesysid from pg_user where usename in %s) and not datistemplate and datallowconn and datname not in %s order by datname",
+                        (tuple(db_owners), templates_list,),
+                    )
+                    db_names = [odoo.tools.ustr(name) for (name,) in cr.fetchall()]
+                except Exception:
+                    _logger.exception(
+                        "Failed to retrieve databases owned by %s",
+                        db_owners,
+                        exc_info=True,
+                    )
+                    db_names = []
         else:
             db_names = odoo.service.db.exp_list(True)
+
+        for db_pattern in self.get_db_excluded():
+            regex = re.compile(db_pattern)
+            for db in db_names[:]:
+                if regex.match(db):
+                    _logger.debug("ignoring %s, as it's configured as excluded", db)
+                    db_names.remove(db)
+
         return db_names
 
     def close_databases(self, remove_jobs=True):
