@@ -21,6 +21,12 @@ msgid ""
 msgstr ""
 
 #. module: queue_job
+#: code:addons/queue_job/controllers/main.py:0
+#, python-format
+msgid "Access Denied"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_needaction
 msgid "Action Needed"
 msgstr ""
