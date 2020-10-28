@@ -5,6 +5,7 @@ import json
 from datetime import datetime, date
 
 import dateutil
+import lxml
 
 from odoo import fields, models
 
@@ -41,6 +42,11 @@ class JobEncoder(json.JSONEncoder):
         elif isinstance(obj, date):
             return {'_type': 'date_isoformat',
                     'value': obj.isoformat()}
+        elif isinstance(obj, lxml.etree._Element):
+            return {
+                "_type": "etree_element",
+                "value": lxml.etree.tostring(obj, encoding=str),
+            }
         return json.JSONEncoder.default(self, obj)
 
 
@@ -68,4 +74,6 @@ class JobDecoder(json.JSONDecoder):
             return dateutil.parser.parse(obj['value'])
         elif type_ == 'date_isoformat':
             return dateutil.parser.parse(obj['value']).date()
+        elif type_ == "etree_element":
+            return lxml.etree.fromstring(obj["value"])
         return obj
