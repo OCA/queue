@@ -4,7 +4,7 @@
 from odoo import fields, models
 
 from odoo.addons.queue_job.exception import RetryableJobError
-from odoo.addons.queue_job.job import job, related_action
+from odoo.addons.queue_job.job import job, job_auto_delay, related_action
 
 
 class QueueJob(models.Model):
@@ -68,6 +68,19 @@ class TestQueueJob(models.Model):
         mutable_arg.append(2)
         mutable_kwarg["b"] = 2
         return mutable_arg, mutable_kwarg
+
+    @job_auto_delay
+    def delay_me(self, arg, kwarg=None):
+        return arg, kwarg
+
+    def delay_me_options_job_options(self):
+        return {
+            "identity_key": "my_job_identity",
+        }
+
+    @job_auto_delay
+    def delay_me_options(self):
+        return "ok"
 
 
 class TestQueueChannel(models.Model):

@@ -899,3 +899,78 @@ def related_action(action=None, **kwargs):
         return func
 
     return decorate
+
+
+def job_auto_delay(func=None, default_channel="root", retry_pattern=None):
+    """Decorator to automatically delay as job method when called
+
+    The decorator applies ``odoo.addons.queue_job.job`` at the same time,
+    so the decorated method is listed in job functions. The arguments
+    are the same, propagated to the ``job`` decorator.
+
+    When a method is decorated by ``job_auto_delay``, any call to the method
+    will not directly execute the method's body, but will instead enqueue a
+    job.
+
+    A typical use case is when a method in a module we don't control is called
+    synchronously in the middle of another method, and we'd like all the calls
+    to this method become asynchronous.
+
+    The options of the job usually passed to ``with_delay()`` (priority,
+    description, identity_key, ...) can be returned in a dictionary by a method
+    named after the name of the method suffixed by ``_job_options`` which takes
+    the same parameters as the initial method.
+
+    It is still possible to directly execute the method by setting a key
+    ``_job_force_sync`` to True in the environment context.
+
+    Example:
+    .. code-block:: python
+        class ProductProduct(models.Model):
+            _inherit = 'product.product'
+
+            def foo_job_options(self, arg1):
+                return {
+                  "priority": 100,
+                  "description": "Saying hello to {}".format(arg1)
+                }
+
+            @job_auto_delay(default_channel="root.channel1")
+            def foo(self, arg1):
+                print("hello", arg1)
+
+            def button_x(self):
+                foo("world")
+
+    The result when ``button_x`` is called, is that a new job for ``foo`` is
+    delayed.
+    """
+    if func is None:
+        return functools.partial(
+            job_auto_delay, default_channel=default_channel, retry_pattern=retry_pattern
+        )
+
+    def auto_delay(self, *args, **kwargs):
+        if (
+            self.env.context.get("job_uuid")
+            or self.env.context.get("_job_force_sync")
+            or self.env.context.get("test_queue_job_no_delay")
+        ):
+            # we are in the job execution
+            return func(self, *args, **kwargs)
+        else:
+            # replace the synchronous call by a job on itself
+            method_name = func.__name__
+            job_options_method = getattr(
+                self, "{}_job_options".format(method_name), None
+            )
+            job_options = {}
+            if job_options_method:
+                job_options.update(job_options_method(*args, **kwargs))
+            delayed = self.with_delay(**job_options)
+            return getattr(delayed, method_name)(*args, **kwargs)
+
+    return functools.update_wrapper(
+        auto_delay,
+        job(func, default_channel=default_channel, retry_pattern=retry_pattern),
+    )
