@@ -4,6 +4,8 @@
 import json
 from datetime import date, datetime
 
+from lxml import etree
+
 from odoo.tests import common
 
 # pylint: disable=odoo-addons-relative-import
@@ -80,4 +82,29 @@ class TestJson(common.TransactionCase):
         value_json = '["a", 1, {"_type": "date_isoformat",' '"value": "2017-04-19"}]'
         expected = ["a", 1, date(2017, 4, 19)]
         value = json.loads(value_json, cls=JobDecoder, env=self.env)
+        self.assertEqual(value, expected)
+
+    def test_encoder_etree(self):
+        etree_el = etree.Element("root", attr="val")
+        etree_el.append(etree.Element("child", attr="val"))
+        value = ["a", 1, etree_el]
+        value_json = json.dumps(value, cls=JobEncoder)
+        expected = [
+            "a",
+            1,
+            {
+                "_type": "etree_element",
+                "value": '<root attr="val"><child attr="val"/></root>',
+            },
+        ]
+        self.assertEqual(json.loads(value_json), expected)
+
+    def test_decoder_etree(self):
+        value_json = '["a", 1, {"_type": "etree_element", "value": \
+        "<root attr=\\"val\\"><child attr=\\"val\\"/></root>"}]'
+        etree_el = etree.Element("root", attr="val")
+        etree_el.append(etree.Element("child", attr="val"))
+        expected = ["a", 1, etree.tostring(etree_el)]
+        value = json.loads(value_json, cls=JobDecoder, env=self.env)
+        value[2] = etree.tostring(value[2])
         self.assertEqual(value, expected)
