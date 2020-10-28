@@ -64,6 +64,33 @@ class TestQueueJob(models.Model):
         mutable_kwarg['b'] = 2
         return mutable_arg, mutable_kwarg
 
+    def delay_me(self, arg, kwarg=None):
+        return arg, kwarg
+
+    def delay_me_options_job_options(self):
+        return {
+            "identity_key": "my_job_identity",
+        }
+
+    def delay_me_options(self):
+        return "ok"
+
+    def delay_me_context_key(self):
+        return "ok"
+
+    def _register_hook(self):
+        self._patch_method("delay_me", self._patch_job_auto_delay("delay_me"))
+        self._patch_method(
+            "delay_me_options", self._patch_job_auto_delay("delay_me_options")
+        )
+        self._patch_method(
+            "delay_me_context_key",
+            self._patch_job_auto_delay(
+                "delay_me_context_key", context_key="auto_delay_delay_me_context_key"
+            ),
+        )
+        return super()._register_hook()
+
 
 class TestQueueChannel(models.Model):
 
