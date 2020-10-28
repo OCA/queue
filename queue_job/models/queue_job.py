@@ -35,7 +35,7 @@ class QueueJob(models.Model):
     company_id = fields.Many2one(
         comodel_name="res.company", string="Company", index=True
     )
-    name = fields.Char(string="Description", readonly=True)
+    name = fields.Char(string="Description", readonly=True, index=True)
 
     model_name = fields.Char(string="Model", readonly=True)
     method_name = fields.Char(readonly=True)
@@ -54,7 +54,7 @@ class QueueJob(models.Model):
     date_created = fields.Datetime(string="Created Date", readonly=True)
     date_started = fields.Datetime(string="Start Date", readonly=True)
     date_enqueued = fields.Datetime(string="Enqueue Time", readonly=True)
-    date_done = fields.Datetime(readonly=True)
+    date_done = fields.Datetime(readonly=True, index=True)
 
     eta = fields.Datetime(string="Execute only after")
     retry = fields.Integer(string="Current try")
