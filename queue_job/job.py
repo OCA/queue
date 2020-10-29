@@ -246,15 +246,12 @@ class Job(object):
     @classmethod
     def _load_from_db_record(cls, job_db_record):
         stored = job_db_record
-        env = job_db_record.env
 
         args = stored.args
         kwargs = stored.kwargs
         method_name = stored.method_name
 
-        model = env[stored.model_name]
-
-        recordset = model.browse(stored.record_ids)
+        recordset = stored.records
         method = getattr(recordset, method_name)
 
         eta = None
@@ -281,8 +278,6 @@ class Job(object):
         job_.state = stored.state
         job_.result = stored.result if stored.result else None
         job_.exc_info = stored.exc_info if stored.exc_info else None
-        job_.user_id = stored.user_id.id if stored.user_id else None
-        job_.model_name = stored.model_name if stored.model_name else None
         job_.retry = stored.retry
         job_.max_retries = stored.max_retries
         if stored.company_id:
@@ -389,7 +384,6 @@ class Job(object):
 
         recordset = func.__self__
         env = recordset.env
-        self.model_name = recordset._name
         self.method_name = func.__name__
         self.recordset = recordset
 
@@ -443,7 +437,6 @@ class Job(object):
         self.result = None
         self.exc_info = None
 
-        self.user_id = env.uid
         if 'company_id' in env.context:
             company_id = env.context['company_id']
         else:
@@ -531,7 +524,7 @@ class Job(object):
                          'date_created': date_created,
                          'model_name': self.model_name,
                          'method_name': self.method_name,
-                         'record_ids': self.recordset.ids,
+                         'records': self.recordset.ids,
                          'args': self.args,
                          'kwargs': self.kwargs,
                          })
@@ -584,6 +577,14 @@ class Job(object):
         if self._uuid is None:
             self._uuid = str(uuid.uuid4())
         return self._uuid
+
+    @property
+    def model_name(self):
+        return self.recordset._name
+
+    @property
+    def user_id(self):
+        return self.recordset.env.uid
 
     @property
     def eta(self):
@@ -859,7 +860,7 @@ def related_action(action=None, **kwargs):
             def related_action_partner(self):
                 self.ensure_one()
                 model = self.model_name
-                partner = self.env[model].browse(self.record_ids)
+                partner = self.records
                 # possibly get the real ID if partner_id is a binding ID
                 action = {
                     'name': _("Partner"),
