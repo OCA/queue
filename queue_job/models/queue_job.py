@@ -43,21 +43,34 @@ class QueueJob(models.Model):
         "date_created",
         "model_name",
         "method_name",
-        "record_ids",
+        "records",
         "args",
         "kwargs",
     )
 
     uuid = fields.Char(string="UUID", readonly=True, index=True, required=True)
-    user_id = fields.Many2one(comodel_name="res.users", string="User ID", required=True)
+    user_id = fields.Many2one(
+        comodel_name="res.users",
+        string="User ID",
+        compute="_compute_user_id",
+        inverse="_inverse_user_id",
+        store=True,
+    )
     company_id = fields.Many2one(
         comodel_name="res.company", string="Company", index=True
     )
     name = fields.Char(string="Description", readonly=True)
 
-    model_name = fields.Char(string="Model", readonly=True)
+    model_name = fields.Char(
+        string="Model", compute="_compute_model_name", store=True, readonly=True
+    )
     method_name = fields.Char(readonly=True)
-    record_ids = JobSerialized(readonly=True, base_type=list)
+    # record_ids field is only for backward compatibility (e.g. used in related
+    # actions), can be removed (replaced by "records") in 14.0
+    record_ids = JobSerialized(compute="_compute_record_ids", base_type=list)
+    records = JobSerialized(
+        string="Record(s)", readonly=True, base_type=models.BaseModel,
+    )
     args = JobSerialized(readonly=True, base_type=tuple)
     kwargs = JobSerialized(readonly=True, base_type=dict)
     func_string = fields.Char(
@@ -113,6 +126,25 @@ class QueueJob(models.Model):
                 "'enqueued') AND identity_key IS NOT NULL;"
             )
 
+    @api.depends("records")
+    def _compute_user_id(self):
+        for record in self:
+            record.user_id = record.records.env.uid
+
+    def _inverse_user_id(self):
+        for record in self.with_context(_job_edit_sentinel=self.EDIT_SENTINEL):
+            record.records = record.records.with_user(record.user_id.id)
+
+    @api.depends("records")
+    def _compute_model_name(self):
+        for record in self:
+            record.model_name = record.records._name
+
+    @api.depends("records")
+    def _compute_record_ids(self):
+        for record in self:
+            record.record_ids = record.records.ids
+
     def _inverse_channel(self):
         for record in self:
             record.override_channel = record.channel
@@ -137,11 +169,10 @@ class QueueJob(models.Model):
             record.channel_method_name = channel_method_name
             record.job_function_id = function
 
-    @api.depends("model_name", "method_name", "record_ids", "args", "kwargs")
+    @api.depends("model_name", "method_name", "records", "args", "kwargs")
     def _compute_func_string(self):
         for record in self:
-            record_ids = record.record_ids
-            model = repr(self.env[record.model_name].browse(record_ids))
+            model = repr(record.records)
             args = [repr(arg) for arg in record.args]
             kwargs = ["{}={!r}".format(key, val) for key, val in record.kwargs.items()]
             all_args = ", ".join(args + kwargs)
@@ -327,8 +358,7 @@ class QueueJob(models.Model):
 
         """
         self.ensure_one()
-        model_name = self.model_name
-        records = self.env[model_name].browse(self.record_ids).exists()
+        records = self.records.exists()
         if not records:
             return None
         action = {

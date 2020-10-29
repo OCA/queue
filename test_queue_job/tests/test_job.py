@@ -193,7 +193,6 @@ class TestJobsOnTestingMethod(JobCommonCase):
             eta=eta,
             description="My description",
         )
-        test_job.user_id = 1
         test_job.worker_pid = 99999  # normally set on "set_start"
         test_job.company_id = self.env.ref("base.main_company").id
         test_job.store()
@@ -252,7 +251,6 @@ class TestJobsOnTestingMethod(JobCommonCase):
             priority=15,
             description=u"My dé^Wdescription",
         )
-        test_job.user_id = 1
         test_job.store()
         job_read = Job.load(self.env, test_job.uuid)
         self.assertEqual(test_job.args, job_read.args)
@@ -270,7 +268,6 @@ class TestJobsOnTestingMethod(JobCommonCase):
             priority=15,
             description="My dé^Wdescription",
         )
-        test_job.user_id = 1
         test_job.store()
         job_read = Job.load(self.env, test_job.uuid)
         self.assertEqual(job_read.args, ("öô¿‽", "ñě"))
@@ -300,7 +297,6 @@ class TestJobsOnTestingMethod(JobCommonCase):
             description="Test I am the first one",
             identity_key=id_key,
         )
-        test_job_1.user_id = 1
         test_job_1.store()
         job1 = Job.load(self.env, test_job_1.uuid)
         self.assertEqual(job1.identity_key, id_key)
@@ -506,6 +502,12 @@ class TestJobModel(JobCommonCase):
         delayable = self.env["test.queue.job"].with_delay(channel="root.sub.sub")
         test_job = delayable.testing_method(return_context=True)
         self.assertEqual("root.sub.sub", test_job.channel)
+
+    def test_job_change_user_id(self):
+        demo_user = self.env.ref("base.user_demo")
+        stored = self._create_job()
+        stored.user_id = demo_user
+        self.assertEqual(stored.records.env.uid, demo_user.id)
 
 
 class TestJobStorageMultiCompany(common.TransactionCase):
