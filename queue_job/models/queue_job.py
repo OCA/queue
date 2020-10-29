@@ -49,6 +49,7 @@ class QueueJob(models.Model):
     )
 
     uuid = fields.Char(string="UUID", readonly=True, index=True, required=True)
+    # maybe be better to keep this one out of "func_env" for searches?
     user_id = fields.Many2one(comodel_name="res.users", string="User ID", required=True)
     company_id = fields.Many2one(
         comodel_name="res.company", string="Company", index=True
@@ -58,6 +59,8 @@ class QueueJob(models.Model):
     model_name = fields.Char(string="Model", readonly=True)
     method_name = fields.Char(readonly=True)
     record_ids = JobSerialized(readonly=True, base_type=list)
+    # TODO store a context in func_env, based on https://github.com/OCA/queue/pull/121
+    func_env = JobSerialized(readonly=True, base_type=dict)
     args = JobSerialized(readonly=True, base_type=tuple)
     kwargs = JobSerialized(readonly=True, base_type=dict)
     func_string = fields.Char(
