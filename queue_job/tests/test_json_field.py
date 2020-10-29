@@ -17,6 +17,19 @@ class TestJson(common.TransactionCase):
     def test_encoder_recordset(self):
         demo_user = self.env.ref("base.user_demo")
         partner = self.env(user=demo_user).ref("base.main_partner")
+        value = partner
+        value_json = json.dumps(value, cls=JobEncoder)
+        expected = {
+            "uid": demo_user.id,
+            "_type": "odoo_recordset",
+            "model": "res.partner",
+            "ids": [partner.id],
+        }
+        self.assertEqual(json.loads(value_json), expected)
+
+    def test_encoder_recordset_list(self):
+        demo_user = self.env.ref("base.user_demo")
+        partner = self.env(user=demo_user).ref("base.main_partner")
         value = ["a", 1, partner]
         value_json = json.dumps(value, cls=JobEncoder)
         expected = [
@@ -35,6 +48,19 @@ class TestJson(common.TransactionCase):
         demo_user = self.env.ref("base.user_demo")
         partner = self.env(user=demo_user).ref("base.main_partner")
         value_json = (
+            '{"_type": "odoo_recordset",'
+            '"model": "res.partner",'
+            '"ids": [%s],"uid": %s}' % (partner.id, demo_user.id)
+        )
+        expected = partner
+        value = json.loads(value_json, cls=JobDecoder, env=self.env)
+        self.assertEqual(value, expected)
+        self.assertEqual(demo_user, expected.env.user)
+
+    def test_decoder_recordset_list(self):
+        demo_user = self.env.ref("base.user_demo")
+        partner = self.env(user=demo_user).ref("base.main_partner")
+        value_json = (
             '["a", 1, '
             '{"_type": "odoo_recordset",'
             '"model": "res.partner",'
@@ -45,7 +71,7 @@ class TestJson(common.TransactionCase):
         self.assertEqual(value, expected)
         self.assertEqual(demo_user, expected[2].env.user)
 
-    def test_decoder_recordset_without_user(self):
+    def test_decoder_recordset_list_without_user(self):
         value_json = (
             '["a", 1, {"_type": "odoo_recordset",' '"model": "res.users", "ids": [1]}]'
         )

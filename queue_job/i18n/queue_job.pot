@@ -544,8 +544,8 @@ msgid "Queue jobs must created by calling 'with_delay()'."
 msgstr ""
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__record_ids
-msgid "Record"
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__records
+msgid "Record(s)"
 msgstr ""
 
 #. module: queue_job
