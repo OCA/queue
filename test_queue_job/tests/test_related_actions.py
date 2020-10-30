@@ -23,15 +23,9 @@ class TestRelatedAction(common.SavepointCase):
         self.assertEqual(act_kwargs, {"b": 4})
 
     def test_decorator_empty(self):
-        """ Job with decorator without value disable the default action
+        """Job with decorator without value disable the default action
 
-        The function is::
-
-            @job
-            @related_action()  # default action returns None
-            def testing_related_action__return_none(self):
-                return
-
+        The ``related_action`` configuration is: ``{"enable": False}``
         """
         # default action returns None
         job_ = self.record.with_delay().testing_related_action__return_none()
@@ -50,12 +44,7 @@ class TestRelatedAction(common.SavepointCase):
 
         When called on no record.
 
-        The function is::
-
-            @job
-            def testing_related_action__no(self):
-                return
-
+        The ``related_action`` configuration is: ``{}``
         """
         job_ = self.model.with_delay().testing_related_action__no()
         expected = None
@@ -75,12 +64,7 @@ class TestRelatedAction(common.SavepointCase):
 
         When called on one record.
 
-        The function is::
-
-            @job
-            def testing_related_action__no(self):
-                return
-
+        The ``related_action`` configuration is: ``{}``
         """
         job_ = self.record.with_delay().testing_related_action__no()
         expected = {
@@ -97,12 +81,7 @@ class TestRelatedAction(common.SavepointCase):
 
         When called on several record.
 
-        The function is::
-
-            @job
-            def testing_related_action__no(self):
-                return
-
+        The ``related_action`` configuration is: ``{}``
         """
         job_ = self.records.with_delay().testing_related_action__no()
         expected = {
@@ -119,12 +98,12 @@ class TestRelatedAction(common.SavepointCase):
 
         The function is::
 
-            @job
-            @related_action(action='testing_related__url',
-                            url='https://en.wikipedia.org/wiki/{subject}')
-            def testing_related_action__store(self):
-                return
+        The ``related_action`` configuration is::
 
+            {
+                "func_name": "testing_related__url",
+                "kwargs": {"url": "https://en.wikipedia.org/wiki/{subject}"}
+            }
         """
         job_ = self.record.with_delay().testing_related_action__store("Discworld")
         expected = {
