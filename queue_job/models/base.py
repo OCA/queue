@@ -21,6 +21,7 @@ class Base(models.AbstractModel):
 
     _inherit = "base"
 
+    # TODO deprecated by :job-no-decorator:
     def _register_hook(self):
         """Register marked jobs"""
         super(Base, self)._register_hook()

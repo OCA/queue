@@ -1,20 +1,22 @@
 # Copyright 2013-2016 Camptocamp SA
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+import ast
 import logging
+from collections import namedtuple
 from datetime import datetime, timedelta
 
-from odoo import _, api, exceptions, fields, models
+from odoo import _, api, exceptions, fields, models, tools
 from odoo.osv import expression
 
 from ..fields import JobSerialized
-from ..job import DONE, PENDING, STATES, Job, job
+from ..job import DONE, PENDING, STATES, Job, job_function_name
+
+# TODO deprecated by :job-no-decorator:
+channel_func_name = job_function_name
+
 
 _logger = logging.getLogger(__name__)
-
-
-def channel_func_name(model, method):
-    return "<{}>.{}".format(model._name, method.__name__)
 
 
 class QueueJob(models.Model):
@@ -102,14 +104,18 @@ class QueueJob(models.Model):
     @api.depends("job_function_id.channel_id")
     def _compute_channel(self):
         for record in self:
-            record.channel = record.override_channel or record.job_function_id.channel
+            channel = (
+                record.override_channel or record.job_function_id.channel or "root"
+            )
+            if record.channel != channel:
+                record.channel = channel
 
     @api.depends("model_name", "method_name", "job_function_id.channel_id")
     def _compute_job_function(self):
         for record in self:
             model = self.env[record.model_name]
             method = getattr(model, record.method_name)
-            channel_method_name = channel_func_name(model, method)
+            channel_method_name = job_function_name(model, method)
             func_model = self.env["queue.job.function"]
             function = func_model.search([("name", "=", channel_method_name)], limit=1)
             record.channel_method_name = channel_method_name
@@ -306,7 +312,6 @@ class QueueJob(models.Model):
             )
         return action
 
-    @job
     def _test_job(self):
         _logger.info("Running test job.")
 
@@ -412,8 +417,24 @@ class JobFunction(models.Model):
     _description = "Job Functions"
     _log_access = False
 
+    JobConfig = namedtuple(
+        "JobConfig",
+        "channel "
+        "retry_pattern "
+        "related_action_enable "
+        "related_action_func_name "
+        "related_action_kwargs ",
+    )
+
     def _default_channel(self):
         return self.env.ref("queue_job.channel_root")
+
+    # TODO if 2 modules create an entry for the same method, do what:
+    # * forbid? bad idea, prevent installing module
+    # * hack create method to merge them, does it work regarding xmlids
+    #   and uninstallation of modules?
+    # * keep both records and let the user delete (or add "active" field)
+    #   one of them, otherwise, take the first one
 
     name = fields.Char(index=True)
     channel_id = fields.Many2one(
@@ -423,7 +444,43 @@ class JobFunction(models.Model):
         default=lambda r: r._default_channel(),
     )
     channel = fields.Char(related="channel_id.complete_name", store=True, readonly=True)
+    retry_pattern = JobSerialized(string="Retry Pattern (serialized)", base_type=dict)
+    edit_retry_pattern = fields.Text(
+        string="Retry Pattern",
+        compute="_compute_edit_retry_pattern",
+        inverse="_inverse_edit_retry_pattern",
+    )
+    related_action = JobSerialized(string="Related Action (serialized)", base_type=dict)
+    edit_related_action = fields.Text(
+        string="Related Action",
+        compute="_compute_edit_related_action",
+        inverse="_inverse_edit_related_action",
+    )
 
+    @api.depends("retry_pattern")
+    def _compute_edit_retry_pattern(self):
+        for record in self:
+            retry_pattern = record._parse_retry_pattern()
+            record.edit_retry_pattern = str(retry_pattern)
+
+    def _inverse_edit_retry_pattern(self):
+        try:
+            self.retry_pattern = ast.literal_eval(self.edit_retry_pattern or "{}")
+        except (ValueError, TypeError):
+            raise exceptions.UserError(self._retry_pattern_format_error_message())
+
+    @api.depends("related_action")
+    def _compute_edit_related_action(self):
+        for record in self:
+            record.edit_related_action = str(record.related_action)
+
+    def _inverse_edit_related_action(self):
+        try:
+            self.related_action = ast.literal_eval(self.edit_related_action or "{}")
+        except (ValueError, TypeError):
+            raise exceptions.UserError(self._related_action_format_error_message())
+
+    # TODO deprecated by :job-no-decorator:
     def _find_or_create_channel(self, channel_path):
         channel_model = self.env["queue.job.channel"]
         parts = channel_path.split(".")
@@ -445,8 +502,110 @@ class JobFunction(models.Model):
                 )
         return channel
 
+    def job_default_config(self):
+        return self.JobConfig(
+            channel="root",
+            retry_pattern={},
+            related_action_enable=True,
+            related_action_func_name=None,
+            related_action_kwargs={},
+        )
+
+    def _parse_retry_pattern(self):
+        try:
+            # as json can't have integers as keys and the field is stored
+            # as json, convert back to int
+            retry_pattern = {
+                int(try_count): postpone_seconds
+                for try_count, postpone_seconds in self.retry_pattern.items()
+            }
+        except ValueError:
+            _logger.error(
+                "Invalid retry pattern for job function %s,"
+                " keys could not be parsed as integers, fallback"
+                " to the default retry pattern.",
+                self.name,
+            )
+            retry_pattern = {}
+        return retry_pattern
+
+    @tools.ormcache("name")
+    def job_config(self, name):
+        config = self.search([("name", "=", name)], limit=1)
+        if not config:
+            return self.job_default_config()
+        retry_pattern = config._parse_retry_pattern()
+        return self.JobConfig(
+            channel=config.channel,
+            retry_pattern=retry_pattern,
+            related_action_enable=config.related_action.get("enable", True),
+            related_action_func_name=config.related_action.get("func_name"),
+            related_action_kwargs=config.related_action.get("kwargs"),
+        )
+
+    def _retry_pattern_format_error_message(self):
+        return _(
+            "Unexpected format of Retry Pattern for {}.\n"
+            "Example of valid format:\n"
+            "{{1: 300, 5: 600, 10: 1200, 15: 3000}}"
+        ).format(self.name)
+
+    @api.constrains("retry_pattern")
+    def _check_retry_pattern(self):
+        for record in self:
+            retry_pattern = record.retry_pattern
+            if not retry_pattern:
+                continue
+
+            all_values = list(retry_pattern) + list(retry_pattern.values())
+            for value in all_values:
+                try:
+                    int(value)
+                except ValueError:
+                    raise exceptions.UserError(
+                        record._retry_pattern_format_error_message()
+                    )
+
+    def _related_action_format_error_message(self):
+        return _(
+            "Unexpected format of Related Action for {}.\n"
+            "Example of valid format:\n"
+            '{{"enable": True, "func_name": "related_action_foo",'
+            ' "kwargs" {{"limit": 10}}}}'
+        ).format(self.name)
+
+    @api.constrains("related_action")
+    def _check_related_action(self):
+        valid_keys = ("enable", "func_name", "kwargs")
+        for record in self:
+            related_action = record.related_action
+            if not related_action:
+                continue
+
+            if any(key not in valid_keys for key in related_action):
+                raise exceptions.UserError(
+                    record._related_action_format_error_message()
+                )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        self.clear_caches()
+        return records
+
+    def write(self, values):
+        res = super().write(values)
+        self.clear_caches()
+        return res
+
+    def unlink(self):
+        res = super().unlink()
+        self.clear_caches()
+        return res
+
+    # TODO deprecated by :job-no-decorator:
     def _register_job(self, model, job_method):
-        func_name = channel_func_name(model, job_method)
+        func_name = job_function_name(model, job_method)
         if not self.search_count([("name", "=", func_name)]):
             channel = self._find_or_create_channel(job_method.default_channel)
             self.create({"name": func_name, "channel_id": channel.id})
