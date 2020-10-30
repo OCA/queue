@@ -290,10 +290,12 @@
         <field name="name">queue.job.function.form</field>
         <field name="model">queue.job.function</field>
         <field name="arch" type="xml">
-            <form string="Job Functions" create="false" delete="false">
+            <form string="Job Functions">
                 <group>
                     <field name="name" readonly="1" />
                     <field name="channel_id" />
+                    <field name="edit_retry_pattern" widget="ace" />
+                    <field name="edit_related_action" widget="ace" />
                 </group>
             </form>
         </field>
@@ -302,7 +304,7 @@
         <field name="name">queue.job.function.tree</field>
         <field name="model">queue.job.function</field>
         <field name="arch" type="xml">
-            <tree create="false" delete="false">
+            <tree>
                 <field name="name" />
                 <field name="channel_id" />
             </tree>
