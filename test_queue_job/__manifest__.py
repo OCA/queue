@@ -9,7 +9,10 @@
  'depends': ['queue_job',
              ],
  'website': 'http://www.camptocamp.com',
- 'data': ['security/ir.model.access.csv',
-          ],
+ 'data': [
+     'data/queue_job_channel_data.xml',
+     'data/queue_job_function_data.xml',
+     'security/ir.model.access.csv',
+ ],
  'installable': True,
  }

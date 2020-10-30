@@ -1,4 +1,4 @@
-# Copyright 2013-2016 Camptocamp
+# Copyright 2013-2020 Camptocamp
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import inspect
@@ -34,6 +34,10 @@ DEFAULT_MAX_RETRIES = 5
 RETRY_INTERVAL = 10 * 60  # seconds
 
 _logger = logging.getLogger(__name__)
+
+
+def job_function_name(model, method):
+    return "<{}>.{}".format(model._name, method.__name__)
 
 
 class DelayableRecordset(object):
@@ -72,12 +76,6 @@ class DelayableRecordset(object):
                 (name, self.recordset)
             )
         recordset_method = getattr(self.recordset, name)
-        if not getattr(recordset_method, 'delayable', None):
-            raise AttributeError(
-                'method %s on %s is not allowed to be delayed, '
-                'it should be decorated with odoo.addons.queue_job.job.job' %
-                (name, self.recordset)
-            )
 
         def delay(*args, **kwargs):
             return Job.enqueue(recordset_method,
@@ -406,6 +404,10 @@ class Job(object):
         self.job_model = self.env['queue.job']
         self.job_model_name = 'queue.job'
 
+        self.job_config = self.env["queue.job.function"].job_config(
+            job_function_name(self.recordset, func)
+        )
+
         self.state = PENDING
 
         self.retry = 0
@@ -632,7 +634,10 @@ class Job(object):
         return '<Job %s, priority:%d>' % (self.uuid, self.priority)
 
     def _get_retry_seconds(self, seconds=None):
-        retry_pattern = self.func.retry_pattern
+        retry_pattern = self.job_config.retry_pattern
+        if not retry_pattern:
+            # TODO deprecated by :job-no-decorator:
+            retry_pattern = getattr(self.func, "retry_pattern", None)
         if not seconds and retry_pattern:
             # ordered from higher to lower count of retries
             patt = sorted(retry_pattern.items(), key=lambda t: t[0])
@@ -661,18 +666,27 @@ class Job(object):
 
     def related_action(self):
         record = self.db_record()
-        if hasattr(self.func, 'related_action'):
+        if not self.job_config.related_action_enable:
+            return None
+
+        funcname = self.job_config.related_action_func_name
+        if not funcname and hasattr(self.func, 'related_action'):
+            # TODO deprecated by :job-no-decorator:
             funcname = self.func.related_action
             # decorator is set but empty: disable the default one
             if not funcname:
                 return None
-        else:
+
+        if not funcname:
             funcname = record._default_related_action
         if not isinstance(funcname, str):
             raise ValueError('related_action must be the name of the '
                              'method on queue.job as string')
         action = getattr(record, funcname)
-        action_kwargs = getattr(self.func, 'kwargs', {})
+        action_kwargs = self.job_config.related_action_kwargs
+        if not action_kwargs:
+            # TODO deprecated by :job-no-decorator:
+            action_kwargs = getattr(self.func, 'kwargs', {})
         return action(**action_kwargs)
 
 
@@ -681,6 +695,7 @@ def _is_model_method(func):
             isinstance(func.__self__.__class__, odoo.models.MetaModel))
 
 
+# TODO deprecated by :job-no-decorator:
 def job(func=None, default_channel='root', retry_pattern=None):
     """Decorator for job methods.
 
@@ -767,6 +782,25 @@ def job(func=None, default_channel='root', retry_pattern=None):
         return functools.partial(job, default_channel=default_channel,
                                  retry_pattern=retry_pattern)
 
+    xml_fields = [
+        '    <field name="name"><![CDATA[<[insert model]>._test_job]]></field>\n'
+    ]
+    if default_channel:
+        xml_fields.append('    <field name="channel_id" ref="[insert channel xmlid]"/>')
+    if retry_pattern:
+        xml_fields.append('    <field name="retry_pattern">{retry_pattern}</field>')
+
+    xml_record = (
+        '<record id="job_function_[insert model]_{method}"'
+        ' model="queue.job.function">\n' + "\n".join(xml_fields) + "\n</record>"
+    ).format(**{"method": func.__name__, "retry_pattern": retry_pattern})
+    # TODO same for related action
+    _logger.warning(
+        "@job is deprecated and no longer needed, if you need custom options, "
+        "use an XML record:\n%s",
+        xml_record,
+    )
+
     def delay_from_model(*args, **kwargs):
         raise AttributeError(
             "method.delay() can no longer be used, the general form is "
@@ -788,6 +822,7 @@ def job(func=None, default_channel='root', retry_pattern=None):
     return func
 
 
+# TODO deprecated by :job-no-decorator:
 def related_action(action=None, **kwargs):
     """Attach a *Related Action* to a job (decorator)
 
@@ -853,6 +888,28 @@ def related_action(action=None, **kwargs):
 
     """
     def decorate(func):
+        related_action_dict = {
+            "func_name": action,
+        }
+        if kwargs:
+            related_action_dict["kwargs"] = kwargs
+
+        xml_fields = (
+            '    <field name="name"><![CDATA[<[insert model]>._test_job]]></field>\n'
+            '    <field name="related_action">{related_action}</field>'
+        )
+
+        xml_record = (
+            '<record id="job_function_[insert model]_{method}"'
+            ' model="queue.job.function">\n' + xml_fields + "\n</record>"
+        ).format(**{"method": func.__name__, "related_action": action})
+        _logger.warning(
+            "@related_action is deprecated and no longer needed,"
+            " add these options in a 'queue.job.function'"
+            " XML record:\n%s",
+            xml_record,
+        )
+
         func.related_action = action
         func.kwargs = kwargs
         return func
