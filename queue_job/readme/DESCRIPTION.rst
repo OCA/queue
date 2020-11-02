@@ -9,12 +9,10 @@ Example:
 .. code-block:: python
 
   from odoo import models, fields, api
-  from odoo.addons.queue_job.job import job
 
   class MyModel(models.Model):
      _name = 'my.model'
 
-     @job
      def my_method(self, a, k=None):
          _logger.info('executed with a: %s and k: %s', a, k)
 
@@ -26,8 +24,8 @@ Example:
           self.env['my.model'].with_delay().my_method('a', k=2)
 
 
-In the snippet of code above, when we call ``button_do_stuff``, a job capturing
-the method and arguments will be postponed.  It will be executed as soon as the
+In the snippet of code above, when we call ``button_do_stuff``, a job **capturing
+the method and arguments** will be postponed.  It will be executed as soon as the
 Jobrunner has a free bucket, which can be instantaneous if no other job is
 running.
 
