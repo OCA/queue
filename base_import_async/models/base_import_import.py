@@ -13,7 +13,6 @@ from odoo import _, api, models
 from odoo.models import fix_import_export_id_paths
 
 from odoo.addons.queue_job.exception import FailedJobError
-from odoo.addons.queue_job.job import job, related_action
 
 # options defined in base_import/import.js
 OPT_HAS_HEADER = "headers"
@@ -124,8 +123,6 @@ class BaseImportImport(models.TransientModel):
         if row_from < len(data):
             yield row_from, len(data) - 1
 
-    @job
-    @related_action("_related_action_attachment")
     def _split_file(
         self,
         model_name,
@@ -172,8 +169,6 @@ class BaseImportImport(models.TransientModel):
             self._link_attachment_to_job(delayed_job, attachment)
             priority += 1
 
-    @job
-    @related_action("_related_action_attachment")
     def _import_one_chunk(self, model_name, attachment, options):
         model_obj = self.env[model_name]
         fields, data = self._read_csv_attachment(attachment, options)
