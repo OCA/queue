@@ -293,6 +293,8 @@
             <form string="Job Functions">
                 <group>
                     <field name="name" readonly="1" />
+                    <field name="model_id" required="1" />
+                    <field name="method" required="1" />
                     <field name="channel_id" />
                     <field name="edit_retry_pattern" widget="ace" />
                     <field name="edit_related_action" widget="ace" />

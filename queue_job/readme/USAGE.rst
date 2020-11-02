@@ -25,7 +25,8 @@ Example of job function:
 .. code-block:: XML
 
     <record id="job_function_sale_order_action_done" model="queue.job.function">
-        <field name="name"><![CDATA[<sale.order>.action_done]]></field>
+        <field name="model_id" ref="sale.model_sale_order"</field>
+        <field name="method">action_done</field>
         <field name="channel_id" ref="channel_sale" />
         <field name="related_action" eval='{"func_name": "custom_related_action"}' />
         <field name="retry_pattern" eval="{1: 60, 2: 180, 3: 10, 5: 300}" />
