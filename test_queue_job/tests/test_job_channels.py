@@ -4,7 +4,7 @@
 import odoo.tests.common as common
 from odoo import exceptions
 
-from odoo.addons.queue_job.job import Job, job, job_function_name
+from odoo.addons.queue_job.job import Job, job
 
 
 class TestJobChannels(common.TransactionCase):
@@ -37,7 +37,9 @@ class TestJobChannels(common.TransactionCase):
 
     def test_channel_on_job(self):
         method = self.env["test.queue.channel"].job_a
-        path_a = job_function_name(self.env["test.queue.channel"], method)
+        path_a = self.env["queue.job.function"].job_function_name(
+            "test.queue.channel", "job_a"
+        )
         job_func = self.function_model.search([("name", "=", path_a)])
 
         self.assertEquals(job_func.channel, "root")
@@ -71,8 +73,9 @@ class TestJobChannels(common.TransactionCase):
         self.assertEquals(stored.channel, "root")
 
     def test_set_channel_from_record(self):
-        method = self.env["test.queue.channel"].job_sub_channel
-        func_name = job_function_name(self.env["test.queue.channel"], method)
+        func_name = self.env["queue.job.function"].job_function_name(
+            "test.queue.channel", "job_sub_channel"
+        )
         job_func = self.function_model.search([("name", "=", func_name)])
         self.assertEqual(job_func.channel, "root.sub.subsub")
 
