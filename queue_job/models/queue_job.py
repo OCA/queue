@@ -3,6 +3,7 @@
 
 import ast
 import logging
+import re
 from collections import namedtuple
 from datetime import datetime, timedelta
 
@@ -10,13 +11,12 @@ from odoo import _, api, exceptions, fields, models, tools
 from odoo.osv import expression
 
 from ..fields import JobSerialized
-from ..job import DONE, PENDING, STATES, Job, job_function_name
-
-# TODO alias for backward compatibility deprecated by :job-no-decorator:
-channel_func_name = job_function_name
-
+from ..job import DONE, PENDING, STATES, Job
 
 _logger = logging.getLogger(__name__)
+
+
+regex_job_function_name = re.compile(r"^<([0-9a-z_\.]+)>\.([0-9a-zA-Z_]+)$")
 
 
 class QueueJob(models.Model):
@@ -129,10 +129,10 @@ class QueueJob(models.Model):
     @api.depends("model_name", "method_name", "job_function_id.channel_id")
     def _compute_job_function(self):
         for record in self:
-            model = self.env[record.model_name]
-            method = getattr(model, record.method_name)
-            channel_method_name = job_function_name(model, method)
             func_model = self.env["queue.job.function"]
+            channel_method_name = func_model.job_function_name(
+                record.model_name, record.method_name
+            )
             function = func_model.search([("name", "=", channel_method_name)], limit=1)
             record.channel_method_name = channel_method_name
             record.job_function_id = function
@@ -311,7 +311,7 @@ class QueueJob(models.Model):
     def _get_stuck_jobs_to_requeue(self, enqueued_delta, started_delta):
         job_model = self.env["queue.job"]
         stuck_jobs = job_model.search(
-            self._get_stuck_jobs_domain(enqueued_delta, started_delta,)
+            self._get_stuck_jobs_domain(enqueued_delta, started_delta)
         )
         return stuck_jobs
 
@@ -491,7 +491,17 @@ class JobFunction(models.Model):
     def _default_channel(self):
         return self.env.ref("queue_job.channel_root")
 
-    name = fields.Char(index=True)
+    name = fields.Char(
+        compute="_compute_name", inverse="_inverse_name", index=True, store=True,
+    )
+
+    # model and method should be required, but the required flag doesn't
+    # let a chance to _inverse_name to be executed
+    model_id = fields.Many2one(
+        comodel_name="ir.model", string="Model", ondelete="cascade"
+    )
+    method = fields.Char()
+
     channel_id = fields.Many2one(
         comodel_name="queue.job.channel",
         string="Channel",
@@ -521,6 +531,26 @@ class JobFunction(models.Model):
         "See the module description for details.",
     )
 
+    @api.depends("model_id.model", "method")
+    def _compute_name(self):
+        for record in self:
+            if not (record.model_id and record.method):
+                record.name = ""
+                continue
+            record.name = self.job_function_name(record.model_id.model, record.method)
+
+    def _inverse_name(self):
+        groups = regex_job_function_name.match(self.name)
+        if not groups:
+            raise exceptions.UserError(_("Invalid job function: {}").format(self.name))
+        model_name = groups[1]
+        method = groups[2]
+        model = self.env["ir.model"].search([("model", "=", model_name)], limit=1)
+        if not model:
+            raise exceptions.UserError(_("Model {} not found").format(model_name))
+        self.model_id = model.id
+        self.method = method
+
     @api.depends("retry_pattern")
     def _compute_edit_retry_pattern(self):
         for record in self:
@@ -543,6 +573,10 @@ class JobFunction(models.Model):
             self.related_action = ast.literal_eval(self.edit_related_action or "{}")
         except (ValueError, TypeError):
             raise exceptions.UserError(self._related_action_format_error_message())
+
+    @staticmethod
+    def job_function_name(model_name, method_name):
+        return "<{}>.{}".format(model_name, method_name)
 
     # TODO deprecated by :job-no-decorator:
     def _find_or_create_channel(self, channel_path):
@@ -686,7 +720,7 @@ class JobFunction(models.Model):
 
     # TODO deprecated by :job-no-decorator:
     def _register_job(self, model, job_method):
-        func_name = job_function_name(model, job_method)
+        func_name = self.job_function_name(model._name, job_method.__name__)
         if not self.search_count([("name", "=", func_name)]):
             channel = self._find_or_create_channel(job_method.default_channel)
             self.create({"name": func_name, "channel_id": channel.id})
