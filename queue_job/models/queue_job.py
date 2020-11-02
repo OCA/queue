@@ -32,6 +32,22 @@ class QueueJob(models.Model):
     _removal_interval = 30  # days
     _default_related_action = "related_action_open_record"
 
+    # This must be passed in a context key "_job_edit_sentinel" to write on
+    # protected fields. It protects against crafting "queue.job" records from
+    # RPC (e.g. on internal methods). When ``with_delay`` is used, the sentinel
+    # is set.
+    EDIT_SENTINEL = object()
+    _protected_fields = (
+        "uuid",
+        "name",
+        "date_created",
+        "model_name",
+        "method_name",
+        "record_ids",
+        "args",
+        "kwargs",
+    )
+
     uuid = fields.Char(string="UUID", readonly=True, index=True, required=True)
     user_id = fields.Many2one(comodel_name="res.users", string="User ID", required=True)
     company_id = fields.Many2one(
@@ -131,6 +147,33 @@ class QueueJob(models.Model):
             all_args = ", ".join(args + kwargs)
             record.func_string = "{}.{}({})".format(model, record.method_name, all_args)
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        if self.env.context.get("_job_edit_sentinel") is not self.EDIT_SENTINEL:
+            # Prevent to create a queue.job record "raw" from RPC.
+            # ``with_delay()`` must be used.
+            raise exceptions.AccessError(
+                _("Queue jobs must created by calling 'with_delay()'.")
+            )
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if self.env.context.get("_job_edit_sentinel") is not self.EDIT_SENTINEL:
+            write_on_protected_fields = [
+                fieldname for fieldname in vals if fieldname in self._protected_fields
+            ]
+            if write_on_protected_fields:
+                raise exceptions.AccessError(
+                    _("Not allowed to change field(s): {}").format(
+                        write_on_protected_fields
+                    )
+                )
+
+        if vals.get("state") == "failed":
+            self._message_post_on_failure()
+
+        return super().write(vals)
+
     def open_related_action(self):
         """Open the related action associated to the job"""
         self.ensure_one()
@@ -175,12 +218,6 @@ class QueueJob(models.Model):
             msg = record._message_failed_job()
             if msg:
                 record.message_post(body=msg, subtype="queue_job.mt_job_failed")
-
-    def write(self, vals):
-        res = super(QueueJob, self).write(vals)
-        if vals.get("state") == "failed":
-            self._message_post_on_failure()
-        return res
 
     def _subscribe_users_domain(self):
         """Subscribe all users having the 'Queue Job Manager' group"""
