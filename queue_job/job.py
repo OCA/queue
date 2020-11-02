@@ -35,10 +35,6 @@ RETRY_INTERVAL = 10 * 60  # seconds
 _logger = logging.getLogger(__name__)
 
 
-def job_function_name(model, method):
-    return "<{}>.{}".format(model._name, method.__name__)
-
-
 class DelayableRecordset(object):
     """Allow to delay a method for a recordset
 
@@ -451,7 +447,9 @@ class Job(object):
         self.job_model_name = "queue.job"
 
         self.job_config = self.env["queue.job.function"].job_config(
-            job_function_name(self.recordset, func)
+            self.env["queue.job.function"].job_function_name(
+                self.model_name, self.method_name
+            )
         )
 
         self.state = PENDING
@@ -838,7 +836,8 @@ def job(func=None, default_channel="root", retry_pattern=None):
         )
 
     xml_fields = [
-        '    <field name="name"><![CDATA[<[insert model]>._test_job]]></field>\n'
+        '    <field name="model_id" ref="[insert model xmlid]" />\n'
+        '    <field name="method">_test_job</field>\n'
     ]
     if default_channel:
         xml_fields.append('    <field name="channel_id" ref="[insert channel xmlid]"/>')
@@ -849,7 +848,6 @@ def job(func=None, default_channel="root", retry_pattern=None):
         '<record id="job_function_[insert model]_{method}"'
         ' model="queue.job.function">\n' + "\n".join(xml_fields) + "\n</record>"
     ).format(**{"method": func.__name__, "retry_pattern": retry_pattern})
-    # TODO same for related action
     _logger.warning(
         "@job is deprecated and no longer needed, if you need custom options, "
         "use an XML record:\n%s",
@@ -951,7 +949,8 @@ def related_action(action=None, **kwargs):
             related_action_dict["kwargs"] = kwargs
 
         xml_fields = (
-            '    <field name="name"><![CDATA[<[insert model]>._test_job]]></field>\n'
+            '    <field name="model_id" ref="[insert model xmlid]" />\n'
+            '    <field name="method">_test_job</field>\n'
             '    <field name="related_action">{related_action}</field>'
         )
 
