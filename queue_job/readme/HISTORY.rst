@@ -13,6 +13,8 @@ Next
 
 * [ADD] Run jobrunner as a worker process instead of a thread in the main
   process (when running with --workers > 0)
+* [REF] ``@job`` and ``@related_action`` deprecated, any method can be delayed,
+  and configured using ``queue.job.function`` records
 
 12.0.1.1.0 (2019-11-01)
 ~~~~~~~~~~~~~~~~~~~~~~~
