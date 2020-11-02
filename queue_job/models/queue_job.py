@@ -389,6 +389,31 @@ class JobChannel(models.Model):
             if record.name != "root" and not record.parent_id:
                 raise exceptions.ValidationError(_("Parent channel required."))
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = self.browse()
+        if self.env.context.get("install_mode"):
+            # installing a module that creates a channel: rebinds the channel
+            # to an existing one (likely we already had the channel created by
+            # the @job decorator previously)
+            new_vals_list = []
+            for vals in vals_list:
+                name = vals.get("name")
+                parent_id = vals.get("parent_id")
+                if name and parent_id:
+                    existing = self.search(
+                        [("name", "=", name), ("parent_id", "=", parent_id)]
+                    )
+                    if existing:
+                        if not existing.get_metadata()[0].get("noupdate"):
+                            existing.write(vals)
+                        records |= existing
+                        continue
+                new_vals_list.append(vals)
+            vals_list = new_vals_list
+        records |= super().create(vals_list)
+        return records
+
     def write(self, values):
         for channel in self:
             if (
@@ -428,13 +453,6 @@ class JobFunction(models.Model):
 
     def _default_channel(self):
         return self.env.ref("queue_job.channel_root")
-
-    # TODO if 2 modules create an entry for the same method, do what:
-    # * forbid? bad idea, prevent installing module
-    # * hack create method to merge them, does it work regarding xmlids
-    #   and uninstallation of modules?
-    # * keep both records and let the user delete (or add "active" field)
-    #   one of them, otherwise, take the first one
 
     name = fields.Char(index=True)
     channel_id = fields.Many2one(
@@ -589,7 +607,24 @@ class JobFunction(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        records = super().create(vals_list)
+        records = self.browse()
+        if self.env.context.get("install_mode"):
+            # installing a module that creates a job function: rebinds the record
+            # to an existing one (likely we already had the job function created by
+            # the @job decorator previously)
+            new_vals_list = []
+            for vals in vals_list:
+                name = vals.get("name")
+                if name:
+                    existing = self.search([("name", "=", name)], limit=1)
+                    if existing:
+                        if not existing.get_metadata()[0].get("noupdate"):
+                            existing.write(vals)
+                        records |= existing
+                        continue
+                new_vals_list.append(vals)
+            vals_list = new_vals_list
+        records |= super().create(vals_list)
         self.clear_caches()
         return records
 
