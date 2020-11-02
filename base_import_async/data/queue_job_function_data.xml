@@ -1,0 +1,21 @@
+<odoo noupdate="1">
+    <record id="job_function_base_import_import_split_file" model="queue.job.function">
+        <field name="model_id" ref="base_import.model_base_import_import" />
+        <field name="method">_split_file</field>
+        <field
+            name="related_action"
+            eval='{"func_name": "_related_action_attachment"}'
+        />
+    </record>
+    <record
+        id="job_function_base_import_import_import_one_chunk"
+        model="queue.job.function"
+    >
+        <field name="model_id" ref="base_import.model_base_import_import" />
+        <field name="method">_import_one_chunk</field>
+        <field
+            name="related_action"
+            eval='{"func_name": "_related_action_attachment"}'
+        />
+    </record>
+</odoo>
