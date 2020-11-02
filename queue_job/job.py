@@ -557,9 +557,14 @@ class Job(object):
         if self.identity_key:
             vals["identity_key"] = self.identity_key
 
+        job_model = self.env["queue.job"]
+        # The sentinel is used to prevent edition sensitive fields (such as
+        # method_name) from RPC methods.
+        edit_sentinel = job_model.EDIT_SENTINEL
+
         db_record = self.db_record()
         if db_record:
-            db_record.write(vals)
+            db_record.with_context(_job_edit_sentinel=edit_sentinel).write(vals)
         else:
             date_created = self.date_created
             # The following values must never be modified after the
@@ -581,7 +586,7 @@ class Job(object):
             if self.channel:
                 vals.update({"channel": self.channel})
 
-            self.env[self.job_model_name].sudo().create(vals)
+            job_model.with_context(_job_edit_sentinel=edit_sentinel).sudo().create(vals)
 
     def db_record(self):
         return self.db_record_from_uuid(self.env, self.uuid)
