@@ -452,7 +452,6 @@ class TestJobs(JobCommonCase):
         self.assertEquals(([1],), job_instance.args)
         self.assertEquals({'mutable_kwarg': {'a': 1}}, job_instance.kwargs)
 
-
 class TestJobModel(JobCommonCase):
 
     def test_job_change_state(self):
