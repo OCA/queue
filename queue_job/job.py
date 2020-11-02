@@ -47,9 +47,6 @@ class DelayableRecordset(object):
         delayable = DelayableRecordset(recordset, priority=20)
         delayable.method(args, kwargs)
 
-    ``method`` must be a method of the recordset's Model, decorated with
-    :func:`~odoo.addons.queue_job.job.job`.
-
     The method call will be processed asynchronously in the job queue, with
     the passed arguments.
 
@@ -749,6 +746,9 @@ def _is_model_method(func):
 def job(func=None, default_channel="root", retry_pattern=None):
     """Decorator for job methods.
 
+    Deprecated. Use ``queue.job.function`` XML records (details in
+    ``readme/USAGE.rst``).
+
     It enables the possibility to use a Model's method as a job function.
 
     Optional argument:
@@ -876,6 +876,9 @@ def job(func=None, default_channel="root", retry_pattern=None):
 # TODO deprecated by :job-no-decorator:
 def related_action(action=None, **kwargs):
     """Attach a *Related Action* to a job (decorator)
+
+    Deprecated. Use ``queue.job.function`` XML records (details in
+    ``readme/USAGE.rst``).
 
     A *Related Action* will appear as a button on the Odoo view.
     The button will execute the action, usually it will open the

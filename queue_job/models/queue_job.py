@@ -12,7 +12,7 @@ from odoo.osv import expression
 from ..fields import JobSerialized
 from ..job import DONE, PENDING, STATES, Job, job_function_name
 
-# TODO deprecated by :job-no-decorator:
+# TODO alias for backward compatibility deprecated by :job-no-decorator:
 channel_func_name = job_function_name
 
 
@@ -467,12 +467,21 @@ class JobFunction(models.Model):
         string="Retry Pattern",
         compute="_compute_edit_retry_pattern",
         inverse="_inverse_edit_retry_pattern",
+        help="Pattern expressing from the count of retries on retryable errors,"
+        " the number of of seconds to postpone the next execution.\n"
+        "Example: {1: 10, 5: 20, 10: 30, 15: 300}.\n"
+        "See the module description for details.",
     )
     related_action = JobSerialized(string="Related Action (serialized)", base_type=dict)
     edit_related_action = fields.Text(
         string="Related Action",
         compute="_compute_edit_related_action",
         inverse="_inverse_edit_related_action",
+        help="The action when the button *Related Action* is used on a job. "
+        "The default action is to open the view of the record related "
+        "to the job. Configured as a dictionary with optional keys: "
+        "enable, func_name, kwargs.\n"
+        "See the module description for details.",
     )
 
     @api.depends("retry_pattern")
