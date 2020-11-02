@@ -14,5 +14,5 @@
     "data": ["data/queue_job_function_data.xml", "views/base_import_async.xml"],
     "qweb": ["static/src/xml/import.xml"],
     "installable": True,
-    "development_status": "Stable",
+    "development_status": "Production/Stable",
 }
