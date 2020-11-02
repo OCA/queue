@@ -4,8 +4,6 @@ import logging
 
 from odoo import api, fields, models
 
-from odoo.addons.queue_job.job import job
-
 _logger = logging.getLogger(__name__)
 
 
@@ -30,7 +28,6 @@ class IrCron(models.Model):
             else:
                 cron.channel_id = False
 
-    @job(default_channel="root.ir_cron")
     def _run_job_as_queue_job(self, server_action):
         return server_action.run()
 
