@@ -68,7 +68,7 @@ class QueueMixin(models.AbstractModel):
         return {
             "context": self._context,
             "domain": [("id", "in", self.queue_job_ids.ids)],
-            "name": _("%s - Queue jobs") % self.name,
+            "name": _("Queue jobs"),
             "res_model": "queue.job",
             "type": "ir.actions.act_window",
             "view_mode": "tree,form",
