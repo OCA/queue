@@ -26,7 +26,7 @@ class TestQueueJobCron(TransactionCase):
         self.assertEqual(qjob.name, cron.name)
         self.assertEqual(qjob.priority, cron.priority)
         self.assertEqual(qjob.user_id, cron.user_id)
-        self.assertEqual(qjob.channel, cron.channel_id.name)
+        self.assertEqual(qjob.channel, cron.channel_id.complete_name)
 
     def test_queue_job_cron_depends(self):
         cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
