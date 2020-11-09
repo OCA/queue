@@ -446,9 +446,13 @@ class Job(object):
         self.job_model = self.env["queue.job"]
         self.job_model_name = "queue.job"
 
-        self.job_config = self.env["queue.job.function"].job_config(
-            self.env["queue.job.function"].job_function_name(
-                self.model_name, self.method_name
+        self.job_config = (
+            self.env["queue.job.function"]
+            .sudo()
+            .job_config(
+                self.env["queue.job.function"].job_function_name(
+                    self.model_name, self.method_name
+                )
             )
         )
 
