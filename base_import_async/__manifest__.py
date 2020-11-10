@@ -23,5 +23,5 @@
         'static/src/xml/import.xml',
     ],
     'installable': True,
-    'development_status': 'Stable',
+    'development_status': 'Production/Stable',
 }
