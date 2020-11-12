@@ -21,6 +21,7 @@ class Base(models.AbstractModel):
 
     _inherit = "base"
 
+    # TODO deprecated by :job-no-decorator:
     def _register_hook(self):
         """Register marked jobs"""
         super(Base, self)._register_hook()
@@ -45,15 +46,22 @@ class Base(models.AbstractModel):
     ):
         """ Return a ``DelayableRecordset``
 
-        The returned instance allow to enqueue any method of the recordset's
-        Model which is decorated by :func:`~odoo.addons.queue_job.job.job`.
+        The returned instance allows to enqueue any method of the recordset's
+        Model.
 
         Usage::
 
             self.env['res.users'].with_delay().write({'name': 'test'})
 
-        In the line above, in so far ``write`` is allowed to be delayed with
-        ``@job``, the write will be executed in an asynchronous job.
+        ``with_delay()`` accepts job properties which specify how the job will
+        be executed.
+
+        Usage with job properties::
+
+            delayable = env['a.model'].with_delay(priority=30, eta=60*60*5)
+            delayable.export_one_thing(the_thing_to_export)
+            # => the job will be executed with a low priority and not before a
+            # delay of 5 hours from now
 
         :param priority: Priority of the job, 0 being the higher priority.
                          Default is 10.
@@ -69,7 +77,9 @@ class Base(models.AbstractModel):
                         defined on the function
         :param identity_key: key uniquely identifying the job, if specified
                              and a job with the same key has not yet been run,
-                             the new job will not be added.
+                             the new job will not be added. It is either a
+                             string, either a function that takes the job as
+                             argument (see :py:func:`..job.identity_exact`).
         :return: instance of a DelayableRecordset
         :rtype: :class:`odoo.addons.queue_job.job.DelayableRecordset`
 

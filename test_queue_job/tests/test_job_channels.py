@@ -35,71 +35,49 @@ class TestJobChannels(common.TransactionCase):
         with self.assertRaises(exceptions.Warning):
             self.root_channel.name = "leaf"
 
-    def test_register_jobs(self):
-        self.env["queue.job.function"].search([]).unlink()
-        self.env["queue.job.channel"].search([("name", "!=", "root")]).unlink()
-
-        method_a = self.env["test.queue.channel"].job_a
-        self.env["queue.job.function"]._register_job(
-            self.env["test.queue.channel"], method_a
-        )
-        method_b = self.env["test.queue.channel"].job_b
-        self.env["queue.job.function"]._register_job(
-            self.env["test.queue.channel"], method_b
-        )
-
-        path_a = "<test.queue.channel>.job_a"
-        path_b = "<test.queue.channel>.job_b"
-        self.assertTrue(self.function_model.search([("name", "=", path_a)]))
-        self.assertTrue(self.function_model.search([("name", "=", path_b)]))
-
     def test_channel_on_job(self):
-        self.env["queue.job.function"].search([]).unlink()
-        self.env["queue.job.channel"].search([("name", "!=", "root")]).unlink()
-
         method = self.env["test.queue.channel"].job_a
-        self.env["queue.job.function"]._register_job(
-            self.env["test.queue.channel"], method
+        path_a = self.env["queue.job.function"].job_function_name(
+            "test.queue.channel", "job_a"
         )
-        path_a = "<{}>.{}".format(method.__self__.__class__._name, method.__name__)
         job_func = self.function_model.search([("name", "=", path_a)])
+
         self.assertEquals(job_func.channel, "root")
 
         test_job = Job(method)
         test_job.store()
-        stored = self.env["queue.job"].search([("uuid", "=", test_job.uuid)])
+        stored = test_job.db_record()
         self.assertEquals(stored.channel, "root")
         job_read = Job.load(self.env, test_job.uuid)
         self.assertEquals(job_read.channel, "root")
 
-        channel = self.channel_model.create(
-            {"name": "sub", "parent_id": self.root_channel.id}
-        )
-        job_func.channel_id = channel
+        sub_channel = self.env.ref("test_queue_job.channel_sub")
+        job_func.channel_id = sub_channel
 
         test_job = Job(method)
         test_job.store()
-        stored = self.env["queue.job"].search([("uuid", "=", test_job.uuid)])
+        stored = test_job.db_record()
         self.assertEquals(stored.channel, "root.sub")
 
         # it's also possible to override the channel
-        test_job = Job(method, channel="root.sub.sub.sub")
+        test_job = Job(method, channel="root.sub")
         test_job.store()
-        stored = self.env["queue.job"].search([("uuid", "=", test_job.uuid)])
+        stored = test_job.db_record()
         self.assertEquals(stored.channel, test_job.channel)
 
-    def test_default_channel(self):
-        self.env["queue.job.function"].search([]).unlink()
-        self.env["queue.job.channel"].search([("name", "!=", "root")]).unlink()
+    def test_default_channel_no_xml(self):
+        """Channel on job is root if there is no queue.job.function record"""
+        test_job = Job(self.env["res.users"].browse)
+        test_job.store()
+        stored = test_job.db_record()
+        self.assertEquals(stored.channel, "root")
 
-        method = self.env["test.queue.channel"].job_sub_channel
-        self.env["queue.job.function"]._register_job(
-            self.env["test.queue.channel"], method
+    def test_set_channel_from_record(self):
+        func_name = self.env["queue.job.function"].job_function_name(
+            "test.queue.channel", "job_sub_channel"
         )
-        self.assertEquals(method.default_channel, "root.sub.subsub")
-
-        path_a = "<{}>.{}".format(method.__self__.__class__._name, method.__name__)
-        job_func = self.function_model.search([("name", "=", path_a)])
+        job_func = self.function_model.search([("name", "=", func_name)])
+        self.assertEqual(job_func.channel, "root.sub.subsub")
 
         channel = job_func.channel_id
         self.assertEquals(channel.name, "subsub")
@@ -107,6 +85,7 @@ class TestJobChannels(common.TransactionCase):
         self.assertEquals(channel.parent_id.parent_id.name, "root")
         self.assertEquals(job_func.channel, "root.sub.subsub")
 
+    # TODO deprecated by :job-no-decorator:
     def test_job_decorator(self):
         """ Test the job decorator """
         default_channel = "channel"

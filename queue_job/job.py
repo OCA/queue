@@ -1,4 +1,4 @@
-# Copyright 2013-2016 Camptocamp
+# Copyright 2013-2020 Camptocamp
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import functools
@@ -42,9 +42,6 @@ class DelayableRecordset(object):
         delayable = DelayableRecordset(recordset, priority=20)
         delayable.method(args, kwargs)
 
-    ``method`` must be a method of the recordset's Model, decorated with
-    :func:`~odoo.addons.queue_job.job.job`.
-
     The method call will be processed asynchronously in the job queue, with
     the passed arguments.
 
@@ -78,12 +75,6 @@ class DelayableRecordset(object):
                 )
             )
         recordset_method = getattr(self.recordset, name)
-        if not getattr(recordset_method, "delayable", None):
-            raise AttributeError(
-                "method %s on %s is not allowed to be delayed, "
-                "it should be decorated with odoo.addons.queue_job.job.job"
-                % (name, self.recordset)
-            )
 
         def delay(*args, **kwargs):
             return Job.enqueue(
@@ -453,6 +444,16 @@ class Job(object):
         self.job_model = self.env["queue.job"]
         self.job_model_name = "queue.job"
 
+        self.job_config = (
+            self.env["queue.job.function"]
+            .sudo()
+            .job_config(
+                self.env["queue.job.function"].job_function_name(
+                    self.model_name, self.method_name
+                )
+            )
+        )
+
         self.state = PENDING
 
         self.retry = 0
@@ -554,9 +555,14 @@ class Job(object):
         if self.identity_key:
             vals["identity_key"] = self.identity_key
 
+        job_model = self.env["queue.job"]
+        # The sentinel is used to prevent edition sensitive fields (such as
+        # method_name) from RPC methods.
+        edit_sentinel = job_model.EDIT_SENTINEL
+
         db_record = self.db_record()
         if db_record:
-            db_record.write(vals)
+            db_record.with_context(_job_edit_sentinel=edit_sentinel).write(vals)
         else:
             date_created = self.date_created
             # The following values must never be modified after the
@@ -578,7 +584,7 @@ class Job(object):
             if self.channel:
                 vals.update({"channel": self.channel})
 
-            self.env[self.job_model_name].sudo().create(vals)
+            job_model.with_context(_job_edit_sentinel=edit_sentinel).sudo().create(vals)
 
     def db_record(self):
         return self.db_record_from_uuid(self.env, self.uuid)
@@ -672,7 +678,10 @@ class Job(object):
         return "<Job %s, priority:%d>" % (self.uuid, self.priority)
 
     def _get_retry_seconds(self, seconds=None):
-        retry_pattern = self.func.retry_pattern
+        retry_pattern = self.job_config.retry_pattern
+        if not retry_pattern:
+            # TODO deprecated by :job-no-decorator:
+            retry_pattern = getattr(self.func, "retry_pattern", None)
         if not seconds and retry_pattern:
             # ordered from higher to lower count of retries
             patt = sorted(retry_pattern.items(), key=lambda t: t[0])
@@ -701,12 +710,18 @@ class Job(object):
 
     def related_action(self):
         record = self.db_record()
-        if hasattr(self.func, "related_action"):
+        if not self.job_config.related_action_enable:
+            return None
+
+        funcname = self.job_config.related_action_func_name
+        if not funcname and hasattr(self.func, "related_action"):
+            # TODO deprecated by :job-no-decorator:
             funcname = self.func.related_action
             # decorator is set but empty: disable the default one
             if not funcname:
                 return None
-        else:
+
+        if not funcname:
             funcname = record._default_related_action
         if not isinstance(funcname, str):
             raise ValueError(
@@ -714,7 +729,10 @@ class Job(object):
                 "method on queue.job as string"
             )
         action = getattr(record, funcname)
-        action_kwargs = getattr(self.func, "kwargs", {})
+        action_kwargs = self.job_config.related_action_kwargs
+        if not action_kwargs:
+            # TODO deprecated by :job-no-decorator:
+            action_kwargs = getattr(self.func, "kwargs", {})
         return action(**action_kwargs)
 
 
@@ -724,8 +742,12 @@ def _is_model_method(func):
     )
 
 
+# TODO deprecated by :job-no-decorator:
 def job(func=None, default_channel="root", retry_pattern=None):
     """Decorator for job methods.
+
+    Deprecated. Use ``queue.job.function`` XML records (details in
+    ``readme/USAGE.rst``).
 
     It enables the possibility to use a Model's method as a job function.
 
@@ -810,6 +832,25 @@ def job(func=None, default_channel="root", retry_pattern=None):
             job, default_channel=default_channel, retry_pattern=retry_pattern
         )
 
+    xml_fields = [
+        '    <field name="model_id" ref="[insert model xmlid]" />\n'
+        '    <field name="method">_test_job</field>\n'
+    ]
+    if default_channel:
+        xml_fields.append('    <field name="channel_id" ref="[insert channel xmlid]"/>')
+    if retry_pattern:
+        xml_fields.append('    <field name="retry_pattern">{retry_pattern}</field>')
+
+    xml_record = (
+        '<record id="job_function_[insert model]_{method}"'
+        ' model="queue.job.function">\n' + "\n".join(xml_fields) + "\n</record>"
+    ).format(**{"method": func.__name__, "retry_pattern": retry_pattern})
+    _logger.warning(
+        "@job is deprecated and no longer needed, if you need custom options, "
+        "use an XML record:\n%s",
+        xml_record,
+    )
+
     def delay_from_model(*args, **kwargs):
         raise AttributeError(
             "method.delay() can no longer be used, the general form is "
@@ -832,8 +873,12 @@ def job(func=None, default_channel="root", retry_pattern=None):
     return func
 
 
+# TODO deprecated by :job-no-decorator:
 def related_action(action=None, **kwargs):
     """Attach a *Related Action* to a job (decorator)
+
+    Deprecated. Use ``queue.job.function`` XML records (details in
+    ``readme/USAGE.rst``).
 
     A *Related Action* will appear as a button on the Odoo view.
     The button will execute the action, usually it will open the
@@ -894,6 +939,29 @@ def related_action(action=None, **kwargs):
     """
 
     def decorate(func):
+        related_action_dict = {
+            "func_name": action,
+        }
+        if kwargs:
+            related_action_dict["kwargs"] = kwargs
+
+        xml_fields = (
+            '    <field name="model_id" ref="[insert model xmlid]" />\n'
+            '    <field name="method">_test_job</field>\n'
+            '    <field name="related_action">{related_action}</field>'
+        )
+
+        xml_record = (
+            '<record id="job_function_[insert model]_{method}"'
+            ' model="queue.job.function">\n' + xml_fields + "\n</record>"
+        ).format(**{"method": func.__name__, "related_action": action})
+        _logger.warning(
+            "@related_action is deprecated and no longer needed,"
+            " add these options in a 'queue.job.function'"
+            " XML record:\n%s",
+            xml_record,
+        )
+
         func.related_action = action
         func.kwargs = kwargs
         return func
