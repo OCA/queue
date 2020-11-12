@@ -374,12 +374,10 @@ ul.auto-toc {
 <p>Example:</p>
 <pre class="code python literal-block">
 <span class="kn">from</span> <span class="nn">odoo</span> <span class="kn">import</span> <span class="n">models</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">api</span>
-<span class="kn">from</span> <span class="nn">odoo.addons.queue_job.job</span> <span class="kn">import</span> <span class="n">job</span>
 
 <span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
    <span class="n">_name</span> <span class="o">=</span> <span class="s1">'my.model'</span>
 
-   <span class="nd">&#64;job</span>
    <span class="k">def</span> <span class="nf">my_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
        <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'executed with a: </span><span class="si">%s</span><span class="s1"> and k: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
 
@@ -390,8 +388,8 @@ ul.auto-toc {
     <span class="k">def</span> <span class="nf">button_do_stuff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">'my.model'</span><span class="p">]</span><span class="o">.</span><span class="n">with_delay</span><span class="p">()</span><span class="o">.</span><span class="n">my_method</span><span class="p">(</span><span class="s1">'a'</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre>
-<p>In the snippet of code above, when we call <tt class="docutils literal">button_do_stuff</tt>, a job capturing
-the method and arguments will be postponed.  It will be executed as soon as the
+<p>In the snippet of code above, when we call <tt class="docutils literal">button_do_stuff</tt>, a job <strong>capturing
+the method and arguments</strong> will be postponed.  It will be executed as soon as the
 Jobrunner has a free bucket, which can be instantaneous if no other job is
 running.</p>
 <p>Features:</p>
@@ -496,6 +494,96 @@ of running Odoo is obviously not for production purposes.</td></tr>
 </ol>
 <div class="section" id="developers">
 <h2><a class="toc-backref" href="#id10">Developers</a></h2>
+<p><strong>Configure default options for jobs</strong></p>
+<p>In earlier versions, jobs could be configured using the <tt class="docutils literal">&#64;job</tt> decorator.
+This is now obsolete, they can be configured using optional <tt class="docutils literal">queue.job.function</tt>
+and <tt class="docutils literal">queue.job.channel</tt> XML records.</p>
+<p>Example of channel:</p>
+<pre class="code XML literal-block">
+<span class="nt">&lt;record</span> <span class="na">id=</span><span class="s">&quot;channel_sale&quot;</span> <span class="na">model=</span><span class="s">&quot;queue.job.channel&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;field</span> <span class="na">name=</span><span class="s">&quot;name&quot;</span><span class="nt">&gt;</span>sale<span class="nt">&lt;/field&gt;</span>
+    <span class="nt">&lt;field</span> <span class="na">name=</span><span class="s">&quot;parent_id&quot;</span> <span class="na">ref=</span><span class="s">&quot;queue_job.channel_root&quot;</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/record&gt;</span>
+</pre>
+<p>Example of job function:</p>
+<pre class="code XML literal-block">
+<span class="nt">&lt;record</span> <span class="na">id=</span><span class="s">&quot;job_function_sale_order_action_done&quot;</span> <span class="na">model=</span><span class="s">&quot;queue.job.function&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;field</span> <span class="na">name=</span><span class="s">&quot;model_id&quot;</span> <span class="na">ref=</span><span class="s">&quot;sale.model_sale_order&quot;</span><span class="err">&lt;/field</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;field</span> <span class="na">name=</span><span class="s">&quot;method&quot;</span><span class="nt">&gt;</span>action_done<span class="nt">&lt;/field&gt;</span>
+    <span class="nt">&lt;field</span> <span class="na">name=</span><span class="s">&quot;channel_id&quot;</span> <span class="na">ref=</span><span class="s">&quot;channel_sale&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;field</span> <span class="na">name=</span><span class="s">&quot;related_action&quot;</span> <span class="na">eval=</span><span class="s">'{&quot;func_name&quot;: &quot;custom_related_action&quot;}'</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;field</span> <span class="na">name=</span><span class="s">&quot;retry_pattern&quot;</span> <span class="na">eval=</span><span class="s">&quot;{1: 60, 2: 180, 3: 10, 5: 300}&quot;</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/record&gt;</span>
+</pre>
+<p>The general form for the <tt class="docutils literal">name</tt> is: <tt class="docutils literal"><span class="pre">&lt;model.name&gt;.method</span></tt>.</p>
+<p>The channel, related action and retry pattern options are optional, they are
+documented below.</p>
+<p>When writing modules, if 2+ modules add a job function or channel with the same
+name (and parent for channels), they’ll be merged in the same record, even if
+they have different xmlids. On uninstall, the merged record is deleted when all
+the modules using it are uninstalled.</p>
+<p><strong>Job function: channel</strong></p>
+<p>The channel where the job will be delayed. The default channel is <tt class="docutils literal">root</tt>.</p>
+<p><strong>Job function: related action</strong></p>
+<p>The <em>Related Action</em> appears as a button on the Job’s view.
+The button will execute the defined action.</p>
+<p>The default one is to open the view of the record related to the job (form view
+when there is a single record, list view for several records).
+In many cases, the default related action is enough and doesn’t need
+customization, but it can be customized by providing a dictionary on the job
+function:</p>
+<pre class="code python literal-block">
+<span class="p">{</span>
+    <span class="s2">&quot;enable&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">&quot;func_name&quot;</span><span class="p">:</span> <span class="s2">&quot;related_action_partner&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;kwargs&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Partner&quot;</span><span class="p">},</span>
+<span class="p">}</span>
+</pre>
+<ul class="simple">
+<li><tt class="docutils literal">enable</tt>: when <tt class="docutils literal">False</tt>, the button has no effect (default: <tt class="docutils literal">True</tt>)</li>
+<li><tt class="docutils literal">func_name</tt>: name of the method on <tt class="docutils literal">queue.job</tt> that returns an action</li>
+<li><tt class="docutils literal">kwargs</tt>: extra arguments to pass to the related action method</li>
+</ul>
+<p>Example of related action code:</p>
+<pre class="code python literal-block">
+<span class="k">class</span> <span class="nc">QueueJob</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">_inherit</span> <span class="o">=</span> <span class="s1">'queue.job'</span>
+
+    <span class="k">def</span> <span class="nf">related_action_partner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_one</span><span class="p">()</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span>
+        <span class="n">partner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="o">.</span><span class="n">browse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">record_ids</span><span class="p">)</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">'name'</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s1">'type'</span><span class="p">:</span> <span class="s1">'ir.actions.act_window'</span><span class="p">,</span>
+            <span class="s1">'res_model'</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+            <span class="s1">'view_type'</span><span class="p">:</span> <span class="s1">'form'</span><span class="p">,</span>
+            <span class="s1">'view_mode'</span><span class="p">:</span> <span class="s1">'form'</span><span class="p">,</span>
+            <span class="s1">'res_id'</span><span class="p">:</span> <span class="n">partner</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">action</span>
+</pre>
+<p><strong>Job function: retry pattern</strong></p>
+<p>When a job fails with a retryable error type, it is automatically
+retried later. By default, the retry is always 10 minutes later.</p>
+<p>A retry pattern can be configured on the job function. What a pattern represents
+is “from X tries, postpone to Y seconds”. It is expressed as a dictionary where
+keys are tries and values are seconds to postpone as integers:</p>
+<pre class="code python literal-block">
+<span class="p">{</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="mi">10</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+    <span class="mi">15</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+<span class="p">}</span>
+</pre>
+<p>Based on this configuration, we can tell that:</p>
+<ul class="simple">
+<li>5 first retries are postponed 10 seconds later</li>
+<li>retries 5 to 10 postponed 20 seconds later</li>
+<li>retries 10 to 15 postponed 30 seconds later</li>
+<li>all subsequent retries postponed 5 minutes later</li>
+</ul>
 <p><strong>Bypass jobs on running Odoo</strong></p>
 <p>When you are developing (ie: connector modules) you might want
 to bypass the queue job and run your code immediately.</p>
@@ -555,6 +643,8 @@ or other documents where this fragment is included. ] -->
 <ul class="simple">
 <li>[ADD] Run jobrunner as a worker process instead of a thread in the main
 process (when running with –workers &gt; 0)</li>
+<li>[REF] <tt class="docutils literal">&#64;job</tt> and <tt class="docutils literal">&#64;related_action</tt> deprecated, any method can be delayed,
+and configured using <tt class="docutils literal">queue.job.function</tt> records</li>
 </ul>
 </div>
 <div class="section" id="id3">
