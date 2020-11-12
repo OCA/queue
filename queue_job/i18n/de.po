@@ -292,6 +292,12 @@ msgstr ""
 "Wenn es gesetzt ist, gibt es einige Nachrichten mit einem Übertragungsfehler."
 
 #. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid "Invalid job function: {}"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_is_follower
 msgid "Is Follower"
 msgstr "Ist Abonnent"
@@ -418,14 +424,28 @@ msgid "Messages"
 msgstr "Nachrichten"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__method
+#, fuzzy
+#| msgid "Method Name"
+msgid "Method"
+msgstr "Methodenname"
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__method_name
 msgid "Method Name"
 msgstr "Methodenname"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__model_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__model_id
 msgid "Model"
 msgstr "Modell"
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid "Model {} not found"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__name
@@ -453,6 +473,12 @@ msgstr "Typ der nächsten Aktivität"
 #, python-format
 msgid "No action available for this job"
 msgstr "Für diesen Job ist keine Aktion verfügbar"
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid "Not allowed to change field(s): {}"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_needaction_counter
@@ -496,6 +522,15 @@ msgid "Parent channel required."
 msgstr "Es ist ein übergeordneter Kanal notwendig."
 
 #. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_retry_pattern
+msgid ""
+"Pattern expressing from the count of retries on retryable errors, the number "
+"of of seconds to postpone the next execution.\n"
+"Example: {1: 10, 5: 20, 10: 30, 15: 300}.\n"
+"See the module description for details."
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__pending
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Pending"
@@ -517,6 +552,12 @@ msgid "Queue Job"
 msgstr "Job einreihen"
 
 #. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid "Queue jobs must created by calling 'with_delay()'."
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__record_ids
 msgid "Record"
 msgstr "Datensatz"
@@ -525,6 +566,18 @@ msgstr "Datensatz"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Related"
 msgstr "Zugehörige Aktion anzeigen"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_related_action
+#, fuzzy
+#| msgid "Related Record"
+msgid "Related Action"
+msgstr "Zugehöriger Datensatz"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__related_action
+msgid "Related Action (serialized)"
+msgstr ""
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:0
@@ -569,6 +622,16 @@ msgstr "Verantwortlicher Benutzer"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Result"
 msgstr "Ergebnis"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_retry_pattern
+msgid "Retry Pattern"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__retry_pattern
+msgid "Retry Pattern (serialized)"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
@@ -646,6 +709,15 @@ msgid "Task"
 msgstr "Aufgabe"
 
 #. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_related_action
+msgid ""
+"The action when the button *Related Action* is used on a job. The default "
+"action is to open the view of the record related to the job. Configured as a "
+"dictionary with optional keys: enable, func_name, kwargs.\n"
+"See the module description for details."
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__max_retries
 msgid ""
 "The job will fail if the number of tries reach the max. retries.\n"
@@ -675,6 +747,25 @@ msgstr "Typ der Ausnahmeaktivität im Datensatz."
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__uuid
 msgid "UUID"
 msgstr "UUID"
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid ""
+"Unexpected format of Related Action for {}.\n"
+"Example of valid format:\n"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs"
+"\" {{\"limit\": 10}}}}"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid ""
+"Unexpected format of Retry Pattern for {}.\n"
+"Example of valid format:\n"
+"{{1: 300, 5: 600, 10: 1200, 15: 3000}}"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_unread

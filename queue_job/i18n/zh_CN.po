@@ -289,6 +289,12 @@ msgid "If checked, some messages have a delivery error."
 msgstr "如果勾选此项， 某些消息将会产生传递错误。"
 
 #. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid "Invalid job function: {}"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_is_follower
 msgid "Is Follower"
 msgstr "关注者"
@@ -415,14 +421,28 @@ msgid "Messages"
 msgstr "消息"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__method
+#, fuzzy
+#| msgid "Method Name"
+msgid "Method"
+msgstr "方法名称"
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__method_name
 msgid "Method Name"
 msgstr "方法名称"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__model_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__model_id
 msgid "Model"
 msgstr "模型"
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid "Model {} not found"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__name
@@ -450,6 +470,12 @@ msgstr "下一活动类型"
 #, python-format
 msgid "No action available for this job"
 msgstr "此作业无法执行任何操作"
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid "Not allowed to change field(s): {}"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_needaction_counter
@@ -493,6 +519,15 @@ msgid "Parent channel required."
 msgstr "父频道必填。"
 
 #. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_retry_pattern
+msgid ""
+"Pattern expressing from the count of retries on retryable errors, the number "
+"of of seconds to postpone the next execution.\n"
+"Example: {1: 10, 5: 20, 10: 30, 15: 300}.\n"
+"See the module description for details."
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__pending
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Pending"
@@ -514,6 +549,12 @@ msgid "Queue Job"
 msgstr "队列作业"
 
 #. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid "Queue jobs must created by calling 'with_delay()'."
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__record_ids
 msgid "Record"
 msgstr "记录"
@@ -522,6 +563,18 @@ msgstr "记录"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Related"
 msgstr "相关的"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_related_action
+#, fuzzy
+#| msgid "Related Record"
+msgid "Related Action"
+msgstr "相关记录"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__related_action
+msgid "Related Action (serialized)"
+msgstr ""
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:0
@@ -566,6 +619,16 @@ msgstr "负责的用户"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Result"
 msgstr "结果"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_retry_pattern
+msgid "Retry Pattern"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__retry_pattern
+msgid "Retry Pattern (serialized)"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
@@ -642,6 +705,15 @@ msgid "Task"
 msgstr "任务"
 
 #. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_related_action
+msgid ""
+"The action when the button *Related Action* is used on a job. The default "
+"action is to open the view of the record related to the job. Configured as a "
+"dictionary with optional keys: enable, func_name, kwargs.\n"
+"See the module description for details."
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__max_retries
 msgid ""
 "The job will fail if the number of tries reach the max. retries.\n"
@@ -669,6 +741,25 @@ msgstr "记录的异常活动的类型。"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__uuid
 msgid "UUID"
 msgstr "UUID"
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid ""
+"Unexpected format of Related Action for {}.\n"
+"Example of valid format:\n"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs"
+"\" {{\"limit\": 10}}}}"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid ""
+"Unexpected format of Retry Pattern for {}.\n"
+"Example of valid format:\n"
+"{{1: 300, 5: 600, 10: 1200, 15: 3000}}"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_unread
