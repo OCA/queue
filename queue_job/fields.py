@@ -63,7 +63,8 @@ class JobEncoder(json.JSONEncoder):
                     'model': obj._name,
                     'ids': obj.ids,
                     'uid': obj.env.uid,
-                    }
+                    "su": obj.env.su,
+            }
         elif isinstance(obj, datetime):
             return {'_type': 'datetime_isoformat',
                     'value': obj.isoformat()}
