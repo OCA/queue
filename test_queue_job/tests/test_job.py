@@ -428,6 +428,26 @@ class TestJobs(JobCommonCase):
         self.assertEquals(([1],), job_instance.args)
         self.assertEquals({"mutable_kwarg": {"a": 1}}, job_instance.kwargs)
 
+    def test_store_env_su_no_sudo(self):
+        demo_user = self.env.ref("base.user_demo")
+        self.env = self.env(user=demo_user)
+        delayable = self.env["test.queue.job"].with_delay()
+        test_job = delayable.testing_method()
+        stored = test_job.db_record()
+        job_instance = Job.load(self.env, stored.uuid)
+        self.assertFalse(job_instance.recordset.env.su)
+        self.assertTrue(job_instance.user_id, demo_user)
+
+    def test_store_env_su_sudo(self):
+        demo_user = self.env.ref("base.user_demo")
+        self.env = self.env(user=demo_user)
+        delayable = self.env["test.queue.job"].sudo().with_delay()
+        test_job = delayable.testing_method()
+        stored = test_job.db_record()
+        job_instance = Job.load(self.env, stored.uuid)
+        self.assertTrue(job_instance.recordset.env.su)
+        self.assertTrue(job_instance.user_id, demo_user)
+
 
 class TestJobModel(JobCommonCase):
     def test_job_change_state(self):
