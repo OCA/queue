@@ -797,6 +797,11 @@ msgstr "Historie der Website-Kommunikation"
 msgid "Wizard to requeue a selection of jobs"
 msgstr "Assistent zur erneuten Einreihung einer Job-Auswahl"
 
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
+msgid "Worker Pid"
+msgstr ""
+
 #~ msgid "If checked new messages require your attention."
 #~ msgstr ""
 #~ "Wenn es gesetzt ist, erfordern neue Nachrichten Ihre Aufmerksamkeit."
