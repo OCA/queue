@@ -24,6 +24,7 @@ class TestJson(common.TransactionCase):
             "_type": "odoo_recordset",
             "model": "res.partner",
             "ids": [partner.id],
+            "su": False,
         }
         self.assertEqual(json.loads(value_json), expected)
 
@@ -40,6 +41,7 @@ class TestJson(common.TransactionCase):
                 "_type": "odoo_recordset",
                 "model": "res.partner",
                 "ids": [partner.id],
+                "su": False,
             },
         ]
         self.assertEqual(json.loads(value_json), expected)
@@ -50,6 +52,7 @@ class TestJson(common.TransactionCase):
         value_json = (
             '{"_type": "odoo_recordset",'
             '"model": "res.partner",'
+            '"su": false,'
             '"ids": [%s],"uid": %s}' % (partner.id, demo_user.id)
         )
         expected = partner
@@ -64,6 +67,7 @@ class TestJson(common.TransactionCase):
             '["a", 1, '
             '{"_type": "odoo_recordset",'
             '"model": "res.partner",'
+            '"su": false,'
             '"ids": [%s],"uid": %s}]' % (partner.id, demo_user.id)
         )
         expected = ["a", 1, partner]
