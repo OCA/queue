@@ -552,7 +552,7 @@ function:</p>
     <span class="k">def</span> <span class="nf">related_action_partner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensure_one</span><span class="p">()</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span>
-        <span class="n">partner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="o">.</span><span class="n">browse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">record_ids</span><span class="p">)</span>
+        <span class="n">partner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span>
         <span class="n">action</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">'name'</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
             <span class="s1">'type'</span><span class="p">:</span> <span class="s1">'ir.actions.act_window'</span><span class="p">,</span>
