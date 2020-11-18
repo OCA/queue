@@ -560,6 +560,13 @@ msgid "Record"
 msgstr "记录"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__records
+#, fuzzy
+#| msgid "Record"
+msgid "Record(s)"
+msgstr "记录"
+
+#. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Related"
 msgstr "相关的"
