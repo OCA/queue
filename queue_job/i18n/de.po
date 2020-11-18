@@ -563,6 +563,13 @@ msgid "Record"
 msgstr "Datensatz"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__records
+#, fuzzy
+#| msgid "Record"
+msgid "Record(s)"
+msgstr "Datensatz"
+
+#. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Related"
 msgstr "Zugehörige Aktion anzeigen"
