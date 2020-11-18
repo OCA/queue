@@ -214,7 +214,7 @@ Example of related action code:
         def related_action_partner(self, name):
             self.ensure_one()
             model = self.model_name
-            partner = self.env[model].browse(self.record_ids)
+            partner = self.records
             action = {
                 'name': name,
                 'type': 'ir.actions.act_window',
