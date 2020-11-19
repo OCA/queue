@@ -74,10 +74,10 @@ class RunJobController(http.Controller):
                 if err.pgcode not in PG_CONCURRENCY_ERRORS_TO_RETRY:
                     raise
 
-                retry_postpone(
-                    job, tools.ustr(err.pgerror, errors="replace"), seconds=PG_RETRY
-                )
                 _logger.debug("%s OperationalError, postponed", job)
+                raise RetryableJobError(
+                    tools.ustr(err.pgerror, errors="replace"), seconds=PG_RETRY
+                )
 
         except NothingToDoJob as err:
             if str(err):
@@ -92,6 +92,10 @@ class RunJobController(http.Controller):
             # delay the job later, requeue
             retry_postpone(job, str(err), seconds=err.seconds)
             _logger.debug("%s postponed", job)
+            # Do not trigger the error up because we don't want an exception
+            # traceback in the logs we should have the traceback when all
+            # retries are exhausted
+            env.cr.rollback()
 
         except (FailedJobError, Exception):
             buff = StringIO()
