@@ -15,6 +15,6 @@
     """,
     "depends": ["base_import_async", "account"],
     "data": [],
-    "installable": True,
+    "installable": False,
     "development_status": "Production/Stable",
 }
