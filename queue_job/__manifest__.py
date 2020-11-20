@@ -17,7 +17,7 @@
         "data/queue_data.xml",
         "data/queue_job_function_data.xml",
     ],
-    "installable": True,
+    "installable": False,
     "development_status": "Mature",
     "maintainers": ["guewen"],
     "post_init_hook": "post_init_hook",
