@@ -44,7 +44,7 @@ class Base(models.AbstractModel):
         channel=None,
         identity_key=None,
     ):
-        """ Return a ``DelayableRecordset``
+        """Return a ``DelayableRecordset``
 
         The returned instance allows to enqueue any method of the recordset's
         Model.
