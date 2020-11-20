@@ -34,7 +34,7 @@ class TestQueueJob(models.Model):
     name = fields.Char()
 
     def testing_method(self, *args, **kwargs):
-        """ Method used for tests
+        """Method used for tests
 
         Return always the arguments and keyword arguments received
         """
@@ -79,7 +79,7 @@ class TestQueueChannel(models.Model):
     # TODO deprecated by :job-no-decorator:
     @property
     def dummy_property(self):
-        """ Return foo
+        """Return foo
 
         Only there to check that properties are compatible
         with the automatic registration of job methods
