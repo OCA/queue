@@ -30,9 +30,9 @@ class TestJobChannels(common.TransactionCase):
             self.channel_model.create({"name": "sub"})
 
     def test_channel_root(self):
-        with self.assertRaises(exceptions.Warning):
+        with self.assertRaises(exceptions.UserError):
             self.root_channel.unlink()
-        with self.assertRaises(exceptions.Warning):
+        with self.assertRaises(exceptions.UserError):
             self.root_channel.name = "leaf"
 
     def test_channel_on_job(self):
