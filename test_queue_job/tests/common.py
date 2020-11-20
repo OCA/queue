@@ -12,9 +12,6 @@ class JobCommonCase(common.TransactionCase):
         self.queue_job = self.env["queue.job"]
         self.user = self.env["res.users"]
         self.method = self.env["test.queue.job"].testing_method
-        self.env["queue.job.function"]._register_job(
-            self.env["test.queue.job"], self.method
-        )
 
     def _create_job(self):
         test_job = Job(self.method)
