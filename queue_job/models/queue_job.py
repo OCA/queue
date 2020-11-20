@@ -250,7 +250,7 @@ class QueueJob(models.Model):
         for record in self:
             msg = record._message_failed_job()
             if msg:
-                record.message_post(body=msg, subtype="queue_job.mt_job_failed")
+                record.message_post(body=msg, subtype_xmlid="queue_job.mt_job_failed")
 
     def _subscribe_users_domain(self):
         """Subscribe all users having the 'Queue Job Manager' group"""
