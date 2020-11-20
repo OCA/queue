@@ -613,28 +613,6 @@ class JobFunction(models.Model):
     def job_function_name(model_name, method_name):
         return "<{}>.{}".format(model_name, method_name)
 
-    # TODO deprecated by :job-no-decorator:
-    def _find_or_create_channel(self, channel_path):
-        channel_model = self.env["queue.job.channel"]
-        parts = channel_path.split(".")
-        parts.reverse()
-        channel_name = parts.pop()
-        assert channel_name == "root", "A channel path starts with 'root'"
-        # get the root channel
-        channel = channel_model.search([("name", "=", channel_name)])
-        while parts:
-            channel_name = parts.pop()
-            parent_channel = channel
-            channel = channel_model.search(
-                [("name", "=", channel_name), ("parent_id", "=", parent_channel.id)],
-                limit=1,
-            )
-            if not channel:
-                channel = channel_model.create(
-                    {"name": channel_name, "parent_id": parent_channel.id}
-                )
-        return channel
-
     def job_default_config(self):
         return self.JobConfig(
             channel="root",
@@ -752,10 +730,3 @@ class JobFunction(models.Model):
         res = super().unlink()
         self.clear_caches()
         return res
-
-    # TODO deprecated by :job-no-decorator:
-    def _register_job(self, model, job_method):
-        func_name = self.job_function_name(model._name, job_method.__name__)
-        if not self.search_count([("name", "=", func_name)]):
-            channel = self._find_or_create_channel(job_method.default_channel)
-            self.create({"name": func_name, "channel_id": channel.id})
