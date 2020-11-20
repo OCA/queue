@@ -10,5 +10,5 @@
     "category": "Generic Modules",
     "depends": ["queue_job"],
     "data": ["views/res_users_view.xml"],
-    "installable": True,
+    "installable": False,
 }
