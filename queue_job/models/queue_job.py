@@ -69,7 +69,9 @@ class QueueJob(models.Model):
     # actions), can be removed (replaced by "records") in 14.0
     record_ids = JobSerialized(compute="_compute_record_ids", base_type=list)
     records = JobSerialized(
-        string="Record(s)", readonly=True, base_type=models.BaseModel,
+        string="Record(s)",
+        readonly=True,
+        base_type=models.BaseModel,
     )
     args = JobSerialized(readonly=True, base_type=tuple)
     kwargs = JobSerialized(readonly=True, base_type=dict)
@@ -522,7 +524,10 @@ class JobFunction(models.Model):
         return self.env.ref("queue_job.channel_root")
 
     name = fields.Char(
-        compute="_compute_name", inverse="_inverse_name", index=True, store=True,
+        compute="_compute_name",
+        inverse="_inverse_name",
+        index=True,
+        store=True,
     )
 
     # model and method should be required, but the required flag doesn't
