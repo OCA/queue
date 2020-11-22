@@ -49,7 +49,6 @@ msgstr "(Der Export wird per Mail bereitgestellt.)"
 #. module: base_export_async
 #: model:ir.model,name:base_export_async.model_delay_export
 #, fuzzy
-#| msgid "Asynchronous export"
 msgid "Asynchronous Export"
 msgstr "Asynchroner Export"
 
