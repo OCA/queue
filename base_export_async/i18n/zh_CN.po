@@ -48,7 +48,6 @@ msgstr "(您将通过电子邮件收到导出)"
 #. module: base_export_async
 #: model:ir.model,name:base_export_async.model_delay_export
 #, fuzzy
-#| msgid "Asynchronous export"
 msgid "Asynchronous Export"
 msgstr "异步导出"
 
