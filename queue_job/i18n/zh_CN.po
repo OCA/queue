@@ -272,7 +272,6 @@ msgstr "身份密钥"
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:0
 #, fuzzy, python-format
-#| msgid "The selected jobs will be requeued."
 msgid "If both parameters are 0, ALL jobs will be requeued!"
 msgstr "所选作业将重新排队。"
 
@@ -334,7 +333,6 @@ msgstr "作业队列管理员"
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__ir_model_fields__ttype__job_serialized
 #, fuzzy
-#| msgid "Job failed"
 msgid "Job Serialized"
 msgstr "作业失败"
 
@@ -423,7 +421,6 @@ msgstr "消息"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__method
 #, fuzzy
-#| msgid "Method Name"
 msgid "Method"
 msgstr "方法名称"
 
@@ -562,7 +559,6 @@ msgstr "记录"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__records
 #, fuzzy
-#| msgid "Record"
 msgid "Record(s)"
 msgstr "记录"
 
@@ -574,7 +570,6 @@ msgstr "相关的"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_related_action
 #, fuzzy
-#| msgid "Related Record"
 msgid "Related Action"
 msgstr "相关记录"
 
