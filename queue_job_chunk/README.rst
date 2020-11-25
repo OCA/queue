@@ -13,9 +13,9 @@ Job Queue Chunk
 .. |badge2| image:: https://img.shields.io/badge/licence-AGPL--3-blue.png
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
-.. |badge3| image:: https://img.shields.io/badge/github-akretion%2Fodoo--incubator-lightgray.png?logo=github
-    :target: https://github.com/akretion/odoo-incubator/tree/12.0/queue_job_chunk
-    :alt: akretion/odoo-incubator
+.. |badge3| image:: https://img.shields.io/badge/github-akretion%2Fsale--import-lightgray.png?logo=github
+    :target: https://github.com/akretion/sale-import/tree/14.0/queue_job_chunk
+    :alt: akretion/sale-import
 
 |badge1| |badge2| |badge3| 
 
@@ -29,16 +29,16 @@ Adds the notion of queue job chunks, essentially a queue job with some metadata.
 Usage
 =====
 
-Use it
-TODO
+1. Create a queue job chunk using relevant fields to specify which service to use
+2. Use menu to check its status and if you want to, modify its contents to re-run it
 
 Bug Tracker
 ===========
 
-Bugs are tracked on `GitHub Issues <https://github.com/akretion/odoo-incubator/issues>`_.
+Bugs are tracked on `GitHub Issues <https://github.com/akretion/sale-import/issues>`_.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us smashing it by providing a detailed and welcomed
-`feedback <https://github.com/akretion/odoo-incubator/issues/new?body=module:%20queue_job_chunk%0Aversion:%2012.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
+`feedback <https://github.com/akretion/sale-import/issues/new?body=module:%20queue_job_chunk%0Aversion:%2014.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
 
 Do not contact contributors directly about support or help with technical issues.
 
@@ -66,6 +66,6 @@ The development of this module has been financially supported by:
 Maintainers
 ~~~~~~~~~~~
 
-This module is part of the `akretion/odoo-incubator <https://github.com/akretion/odoo-incubator/tree/12.0/queue_job_chunk>`_ project on GitHub.
+This module is part of the `akretion/sale-import <https://github.com/akretion/sale-import/tree/14.0/queue_job_chunk>`_ project on GitHub.
 
 You are welcome to contribute.
