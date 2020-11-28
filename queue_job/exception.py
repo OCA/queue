@@ -29,7 +29,7 @@ class RetryableJobError(JobError):
     """
 
     def __init__(self, msg, seconds=None, ignore_retry=False):
-        super(RetryableJobError, self).__init__(msg)
+        super().__init__(msg)
         self.seconds = seconds
         self.ignore_retry = ignore_retry
 
