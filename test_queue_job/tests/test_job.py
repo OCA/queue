@@ -9,6 +9,7 @@ import mock
 import odoo.tests.common as common
 from odoo import SUPERUSER_ID
 
+from odoo.addons.queue_job import identity_exact
 from odoo.addons.queue_job.exception import (
     FailedJobError,
     NoSuchJobError,
@@ -22,7 +23,6 @@ from odoo.addons.queue_job.job import (
     RETRY_INTERVAL,
     STARTED,
     Job,
-    identity_exact,
 )
 
 from .common import JobCommonCase
