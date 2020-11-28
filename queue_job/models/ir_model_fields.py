@@ -9,5 +9,5 @@ class IrModelFields(models.Model):
 
     ttype = fields.Selection(
         selection_add=[("job_serialized", "Job Serialized")],
-        ondelete={'job_serialized': 'cascade'},
+        ondelete={"job_serialized": "cascade"},
     )
