@@ -392,7 +392,7 @@ class Job(object):
         channel=None,
         identity_key=None,
     ):
-        """ Create a Job
+        """Create a Job
 
         :param func: function to execute
         :type func: function
