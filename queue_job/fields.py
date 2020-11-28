@@ -97,7 +97,7 @@ class JobDecoder(json.JSONDecoder):
 
     def __init__(self, *args, **kwargs):
         env = kwargs.pop("env")
-        super(JobDecoder, self).__init__(object_hook=self.object_hook, *args, **kwargs)
+        super().__init__(object_hook=self.object_hook, *args, **kwargs)
         assert env
         self.env = env
 
