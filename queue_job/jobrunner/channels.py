@@ -117,7 +117,7 @@ class SafeSet(set):
     def remove(self, o):
         # pylint: disable=missing-return,except-pass
         try:
-            super(SafeSet, self).remove(o)
+            super().remove(o)
         except KeyError:
             pass
 
