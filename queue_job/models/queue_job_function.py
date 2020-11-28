@@ -161,7 +161,7 @@ class QueueJobFunction(models.Model):
             retry_pattern=retry_pattern,
             related_action_enable=config.related_action.get("enable", True),
             related_action_func_name=config.related_action.get("func_name"),
-            related_action_kwargs=config.related_action.get("kwargs"),
+            related_action_kwargs=config.related_action.get("kwargs", {}),
         )
 
     def _retry_pattern_format_error_message(self):
