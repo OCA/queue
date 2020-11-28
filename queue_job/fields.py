@@ -25,7 +25,7 @@ class JobSerialized(fields.Field):
     type = "job_serialized"
     column_type = ("text", "text")
 
-    _slots = {"_base_type": type}
+    _base_type = None
 
     # these are the default values when we convert an empty value
     _default_json_mapping = {
