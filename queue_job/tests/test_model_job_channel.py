@@ -9,7 +9,7 @@ from odoo.tests import common
 
 class TestJobChannel(common.TransactionCase):
     def setUp(self):
-        super(TestJobChannel, self).setUp()
+        super().setUp()
         self.Channel = self.env["queue.job.channel"]
         self.root_channel = self.Channel.search([("name", "=", "root")])
 

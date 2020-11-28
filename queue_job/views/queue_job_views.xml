@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
+
     <record id="view_queue_job_form" model="ir.ui.view">
         <field name="name">queue.job.form</field>
         <field name="model">queue.job</field>
@@ -91,6 +92,7 @@
             </form>
         </field>
     </record>
+
     <record id="view_queue_job_tree" model="ir.ui.view">
         <field name="name">queue.job.tree</field>
         <field name="model">queue.job</field>
@@ -113,6 +115,7 @@
             </tree>
         </field>
     </record>
+
     <record id="view_queue_job_search" model="ir.ui.view">
         <field name="name">queue.job.search</field>
         <field name="model">queue.job</field>
@@ -169,6 +172,7 @@
             </search>
         </field>
     </record>
+
     <record id="action_queue_job" model="ir.actions.act_window">
         <field name="name">Jobs</field>
         <field name="res_model">queue.job</field>
@@ -180,185 +184,5 @@
         <field name="view_id" ref="view_queue_job_tree" />
         <field name="search_view_id" ref="view_queue_job_search" />
     </record>
-    <record id="view_requeue_job" model="ir.ui.view">
-        <field name="name">Requeue Jobs</field>
-        <field name="model">queue.requeue.job</field>
-        <field name="arch" type="xml">
-            <form string="Requeue Jobs">
-                <group string="The selected jobs will be requeued.">
-                    <field name="job_ids" nolabel="1" />
-                </group>
-                <footer>
-                    <button
-                        name="requeue"
-                        string="Requeue"
-                        type="object"
-                        class="oe_highlight"
-                    />
-                    <button string="Cancel" class="oe_link" special="cancel" />
-                </footer>
-            </form>
-        </field>
-    </record>
-    <record id="view_set_jobs_done" model="ir.ui.view">
-        <field name="name">Set Jobs to Done</field>
-        <field name="model">queue.jobs.to.done</field>
-        <field name="arch" type="xml">
-            <form string="Set jobs done">
-                <group string="The selected jobs will be set to done.">
-                    <field name="job_ids" nolabel="1" />
-                </group>
-                <footer>
-                    <button
-                        name="set_done"
-                        string="Set to done"
-                        type="object"
-                        class="oe_highlight"
-                    />
-                    <button string="Cancel" class="oe_link" special="cancel" />
-                </footer>
-            </form>
-        </field>
-    </record>
-    <record id="action_requeue_job" model="ir.actions.act_window">
-        <field name="name">Requeue Jobs</field>
-        <field name="res_model">queue.requeue.job</field>
-        <field name="view_mode">form</field>
-        <field name="view_id" ref="view_requeue_job" />
-        <field name="target">new</field>
-        <field name="binding_model_id" ref="queue_job.model_queue_job" />
-    </record>
-    <record id="action_set_jobs_done" model="ir.actions.act_window">
-        <field name="name">Set jobs to done</field>
-        <field name="res_model">queue.jobs.to.done</field>
-        <field name="view_mode">form</field>
-        <field name="view_id" ref="view_set_jobs_done" />
-        <field name="target">new</field>
-        <field name="binding_model_id" ref="queue_job.model_queue_job" />
-    </record>
-    <record id="view_queue_job_channel_form" model="ir.ui.view">
-        <field name="name">queue.job.channel.form</field>
-        <field name="model">queue.job.channel</field>
-        <field name="arch" type="xml">
-            <form string="Channels">
-                <group>
-                    <field
-                        name="name"
-                        attrs="{'required': [('name', '!=', 'root')], 'readonly': [('name', '=', 'root')]}"
-                    />
-                    <field
-                        name="parent_id"
-                        attrs="{'required': [('name', '!=', 'root')], 'readonly': [('name', '=', 'root')]}"
-                    />
-                    <field name="complete_name" />
-                    <field name="removal_interval" />
-                </group>
-                <group>
-                    <field name="job_function_ids" widget="many2many_tags" />
-                </group>
-            </form>
-        </field>
-    </record>
-    <record id="view_queue_job_channel_tree" model="ir.ui.view">
-        <field name="name">queue.job.channel.tree</field>
-        <field name="model">queue.job.channel</field>
-        <field name="arch" type="xml">
-            <tree>
-                <field name="complete_name" />
-            </tree>
-        </field>
-    </record>
-    <record id="view_queue_job_channel_search" model="ir.ui.view">
-        <field name="name">queue.job.channel.search</field>
-        <field name="model">queue.job.channel</field>
-        <field name="arch" type="xml">
-            <search string="Channels">
-                <field name="name" />
-                <field name="complete_name" />
-                <field name="parent_id" />
-            </search>
-        </field>
-    </record>
-    <record id="action_queue_job_channel" model="ir.actions.act_window">
-        <field name="name">Channels</field>
-        <field name="res_model">queue.job.channel</field>
-        <field name="view_mode">tree,form</field>
-        <field name="context">{}</field>
-        <field name="view_id" ref="view_queue_job_channel_tree" />
-    </record>
-    <record id="view_queue_job_function_form" model="ir.ui.view">
-        <field name="name">queue.job.function.form</field>
-        <field name="model">queue.job.function</field>
-        <field name="arch" type="xml">
-            <form string="Job Functions">
-                <group>
-                    <field name="name" readonly="1" />
-                    <field name="model_id" required="1" />
-                    <field name="method" required="1" />
-                    <field name="channel_id" />
-                    <field name="edit_retry_pattern" widget="ace" />
-                    <field name="edit_related_action" widget="ace" />
-                </group>
-            </form>
-        </field>
-    </record>
-    <record id="view_queue_job_function_tree" model="ir.ui.view">
-        <field name="name">queue.job.function.tree</field>
-        <field name="model">queue.job.function</field>
-        <field name="arch" type="xml">
-            <tree>
-                <field name="name" />
-                <field name="channel_id" />
-            </tree>
-        </field>
-    </record>
-    <record id="view_queue_job_function_search" model="ir.ui.view">
-        <field name="name">queue.job.function.search</field>
-        <field name="model">queue.job.function</field>
-        <field name="arch" type="xml">
-            <search string="Job Functions">
-                <field name="name" />
-                <field name="channel_id" />
-                <group expand="0" string="Group By">
-                    <filter
-                        name="group_by_channel"
-                        string="Channel"
-                        context="{'group_by': 'channel_id'}"
-                    />
-                </group>
-            </search>
-        </field>
-    </record>
-    <record id="action_queue_job_function" model="ir.actions.act_window">
-        <field name="name">Job Functions</field>
-        <field name="res_model">queue.job.function</field>
-        <field name="view_mode">tree,form</field>
-        <field name="context">{}</field>
-        <field name="view_id" ref="view_queue_job_function_tree" />
-    </record>
-    <menuitem
-        id="menu_queue_job_root"
-        name="Job Queue"
-        web_icon="queue_job,static/description/icon.png"
-        groups="group_queue_job_manager"
-    />
-    <menuitem id="menu_queue" name="Queue" parent="menu_queue_job_root" />
-    <menuitem
-        id="menu_queue_job"
-        action="action_queue_job"
-        sequence="10"
-        parent="menu_queue"
-    />
-    <menuitem
-        id="menu_queue_job_channel"
-        action="action_queue_job_channel"
-        sequence="12"
-        parent="menu_queue"
-    />
-    <menuitem
-        id="menu_queue_job_function"
-        action="action_queue_job_function"
-        sequence="14"
-        parent="menu_queue"
-    />
+
 </odoo>
