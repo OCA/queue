@@ -104,8 +104,12 @@ class QueueJobFunction(models.Model):
 
     def _inverse_edit_retry_pattern(self):
         try:
-            self.retry_pattern = ast.literal_eval(self.edit_retry_pattern or "{}")
-        except (ValueError, TypeError):
+            edited = (self.edit_retry_pattern or "").strip()
+            if edited:
+                self.retry_pattern = ast.literal_eval(edited)
+            else:
+                self.retry_pattern = {}
+        except (ValueError, TypeError, SyntaxError):
             raise exceptions.UserError(self._retry_pattern_format_error_message())
 
     @api.depends("related_action")
@@ -115,8 +119,12 @@ class QueueJobFunction(models.Model):
 
     def _inverse_edit_related_action(self):
         try:
-            self.related_action = ast.literal_eval(self.edit_related_action or "{}")
-        except (ValueError, TypeError):
+            edited = (self.edit_related_action or "").strip()
+            if edited:
+                self.related_action = ast.literal_eval(edited)
+            else:
+                self.related_action = {}
+        except (ValueError, TypeError, SyntaxError):
             raise exceptions.UserError(self._related_action_format_error_message())
 
     @staticmethod
