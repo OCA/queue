@@ -25,7 +25,7 @@ Example of job function:
 .. code-block:: XML
 
     <record id="job_function_sale_order_action_done" model="queue.job.function">
-        <field name="model_id" ref="sale.model_sale_order"</field>
+        <field name="model_id" ref="sale.model_sale_order" />
         <field name="method">action_done</field>
         <field name="channel_id" ref="channel_sale" />
         <field name="related_action" eval='{"func_name": "custom_related_action"}' />
