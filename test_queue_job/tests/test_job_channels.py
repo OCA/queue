@@ -4,7 +4,7 @@
 import odoo.tests.common as common
 from odoo import exceptions
 
-from odoo.addons.queue_job.job import Job, job
+from odoo.addons.queue_job.job import Job
 
 
 class TestJobChannels(common.TransactionCase):
@@ -30,9 +30,9 @@ class TestJobChannels(common.TransactionCase):
             self.channel_model.create({"name": "sub"})
 
     def test_channel_root(self):
-        with self.assertRaises(exceptions.Warning):
+        with self.assertRaises(exceptions.UserError):
             self.root_channel.unlink()
-        with self.assertRaises(exceptions.Warning):
+        with self.assertRaises(exceptions.UserError):
             self.root_channel.name = "leaf"
 
     def test_channel_on_job(self):
@@ -84,17 +84,6 @@ class TestJobChannels(common.TransactionCase):
         self.assertEquals(channel.parent_id.name, "sub")
         self.assertEquals(channel.parent_id.parent_id.name, "root")
         self.assertEquals(job_func.channel, "root.sub.subsub")
-
-    # TODO deprecated by :job-no-decorator:
-    def test_job_decorator(self):
-        """ Test the job decorator """
-        default_channel = "channel"
-        retry_pattern = {1: 5}
-        partial = job(
-            None, default_channel=default_channel, retry_pattern=retry_pattern
-        )
-        self.assertEquals(partial.keywords.get("default_channel"), default_channel)
-        self.assertEquals(partial.keywords.get("retry_pattern"), retry_pattern)
 
     def test_default_removal_interval(self):
         channel = self.channel_model.create(

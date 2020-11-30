@@ -1,7 +1,6 @@
 # Copyright 2016 Camptocamp
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
-import inspect
 import logging
 import os
 
@@ -21,20 +20,6 @@ class Base(models.AbstractModel):
 
     _inherit = "base"
 
-    # TODO deprecated by :job-no-decorator:
-    def _register_hook(self):
-        """Register marked jobs"""
-        super(Base, self)._register_hook()
-        job_methods = [
-            method
-            for __, method in inspect.getmembers(
-                self.__class__, predicate=inspect.isfunction
-            )
-            if getattr(method, "delayable", None)
-        ]
-        for job_method in job_methods:
-            self.env["queue.job.function"]._register_job(self, job_method)
-
     def with_delay(
         self,
         priority=None,
@@ -44,7 +29,7 @@ class Base(models.AbstractModel):
         channel=None,
         identity_key=None,
     ):
-        """ Return a ``DelayableRecordset``
+        """Return a ``DelayableRecordset``
 
         The returned instance allows to enqueue any method of the recordset's
         Model.

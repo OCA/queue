@@ -9,7 +9,7 @@ from odoo.addons.queue_job.job import Job
 
 class JobCounter:
     def __init__(self, env):
-        super(JobCounter, self).__init__()
+        super().__init__()
         self.env = env
         self.existing = self.search_all()
 

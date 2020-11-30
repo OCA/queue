@@ -25,7 +25,7 @@ class JobSerialized(fields.Field):
     type = "job_serialized"
     column_type = ("text", "text")
 
-    _slots = {"_base_type": type}
+    _base_type = None
 
     # these are the default values when we convert an empty value
     _default_json_mapping = {
@@ -97,7 +97,7 @@ class JobDecoder(json.JSONDecoder):
 
     def __init__(self, *args, **kwargs):
         env = kwargs.pop("env")
-        super(JobDecoder, self).__init__(object_hook=self.object_hook, *args, **kwargs)
+        super().__init__(object_hook=self.object_hook, *args, **kwargs)
         assert env
         self.env = env
 

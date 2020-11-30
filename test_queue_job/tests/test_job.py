@@ -9,6 +9,7 @@ import mock
 import odoo.tests.common as common
 from odoo import SUPERUSER_ID
 
+from odoo.addons.queue_job import identity_exact
 from odoo.addons.queue_job.exception import (
     FailedJobError,
     NoSuchJobError,
@@ -22,7 +23,6 @@ from odoo.addons.queue_job.job import (
     RETRY_INTERVAL,
     STARTED,
     Job,
-    identity_exact,
 )
 
 from .common import JobCommonCase
@@ -327,7 +327,7 @@ class TestJobs(JobCommonCase):
     """ Test jobs on other methods or with different job configuration """
 
     def test_description(self):
-        """ If no description is given to the job, it
+        """If no description is given to the job, it
         should be computed from the function
         """
         # if a docstring is defined for the function
@@ -610,8 +610,8 @@ class TestJobStorageMultiCompany(common.TransactionCase):
         )
 
     def test_job_no_company_id(self):
-        """ if we put an empty company_id in the context
-         jobs are created without company_id
+        """if we put an empty company_id in the context
+        jobs are created without company_id
         """
         env = self.env(context={"company_id": None})
         stored = self._create_job(env)
