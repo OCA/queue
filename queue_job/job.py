@@ -376,7 +376,7 @@ class Job(object):
     def db_record_from_uuid(env, job_uuid):
         model = env["queue.job"].sudo()
         record = model.search([("uuid", "=", job_uuid)], limit=1)
-        return record.with_env(env)
+        return record.with_env(env).sudo()
 
     def __init__(
         self,
