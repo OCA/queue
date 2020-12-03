@@ -19,7 +19,7 @@ Available addons
 ----------------
 addon | version | summary
 --- | --- | ---
-[queue_job](queue_job/) | 14.0.1.0.0 | Job Queue
+[queue_job](queue_job/) | 14.0.1.0.1 | Job Queue
 [test_queue_job](test_queue_job/) | 14.0.1.0.0 | Queue Job Tests
 
 
