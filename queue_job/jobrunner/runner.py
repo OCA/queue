@@ -140,6 +140,7 @@ import select
 import threading
 import time
 from contextlib import closing, contextmanager
+from distutils.util import strtobool
 
 import psycopg2
 import requests
@@ -150,6 +151,7 @@ from odoo.tools import config
 
 from . import queue_job_config
 from .channels import ENQUEUED, NOT_DONE, PENDING, ChannelManager
+from .dblistener import DBListenerThread
 
 SELECT_TIMEOUT = 60
 ERROR_RECOVERY_DELAY = 5
@@ -163,6 +165,10 @@ _logger = logging.getLogger(__name__)
 #
 # On the other hand, the odoo configuration file can be extended at will,
 # so we check it in addition to the environment variables.
+
+
+def is_true(strval):
+    return bool(strtobool(strval or "0".lower()))
 
 
 def _channels():
@@ -396,25 +402,40 @@ class QueueJobRunner(object):
             db_names = odoo.service.db.exp_list(True)
         return db_names
 
+    def close_database(self, db_name, remove_jobs=True):
+        if db_name not in self.db_by_name:
+            _logger.debug("database %s is unknown", db_name)
+            return
+        try:
+            db = self.db_by_name.pop(db_name)
+            if remove_jobs:
+                self.channel_manager.remove_db(db_name)
+            db.close()
+            _logger.info("closed database %s", db_name)
+        except Exception:
+            _logger.warning("error closing database %s", db_name, exc_info=True)
+
     def close_databases(self, remove_jobs=True):
-        for db_name, db in self.db_by_name.items():
-            try:
-                if remove_jobs:
-                    self.channel_manager.remove_db(db_name)
-                db.close()
-            except Exception:
-                _logger.warning("error closing database %s", db_name, exc_info=True)
-        self.db_by_name = {}
+        # we use a copy of keys because dict.keys() returns an iterator
+        # which would otherwise raise a
+        # RuntimeError: dictionary changed size during iteration
+        for db_name in list(self.db_by_name.keys()):
+            self.close_database(db_name, remove_jobs)
+
+    def initialize_database(self, db_name):
+        db = Database(db_name)
+        if not db.has_queue_job:
+            _logger.debug("queue_job is not installed for db %s", db_name)
+        else:
+            self.db_by_name[db_name] = db
+            with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
+                for job_data in cr:
+                    self.channel_manager.notify(db_name, *job_data)
+            _logger.info("queue job runner ready for db %s", db_name)
 
     def initialize_databases(self):
         for db_name in self.get_db_names():
-            db = Database(db_name)
-            if db.has_queue_job:
-                self.db_by_name[db_name] = db
-                with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
-                    for job_data in cr:
-                        self.channel_manager.notify(db_name, *job_data)
-                _logger.info("queue job runner ready for db %s", db_name)
+            self.initialize_database(db_name)
 
     def run_jobs(self):
         now = _odoo_now()
@@ -492,12 +513,17 @@ class QueueJobRunner(object):
 
     def run(self):
         _logger.info("starting")
+        if is_true(
+            os.environ.get("ODOO_QUEUE_JOB_JOBRUNNER_ENABLE_DBLISTENER")
+        ) or queue_job_config.get("jobrunner_enable_dblistener", False):
+            self.listener_thread = DBListenerThread(
+                jobrunner=self, connection_info=_connection_info_for("postgres")
+            )
+            self.listener_thread.start()
         while not self._stop:
             # outer loop does exception recovery
             try:
                 _logger.info("initializing database connections")
-                # TODO: how to detect new databases or databases
-                #       on which queue_job is installed after server start?
                 self.initialize_databases()
                 _logger.info("database connections ready")
                 # inner loop does the normal processing

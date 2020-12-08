@@ -142,3 +142,16 @@ class RunJobController(http.Controller):
         )
 
         return delayed.db_record().uuid
+
+    @http.route("/queue_job/notify_db_listener", type="http", auth="user")
+    def notify_db_listener(self, action="add"):
+        if not http.request.env.user.has_group("base.group_erp_manager"):
+            raise Forbidden(_("Access Denied"))
+
+        with odoo.sql_db.db_connect("postgres").cursor() as cr_postgres:
+            cr_postgres.execute(
+                "notify queue_job_db_listener, %s",
+                ("{} {}".format(action, http.request.env.cr.dbname),),
+            )
+
+        return ""
