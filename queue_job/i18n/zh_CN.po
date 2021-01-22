@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2021-01-18 05:44+0000\n"
+"PO-Revision-Date: 2021-01-22 12:44+0000\n"
 "Last-Translator: 黎伟杰 <674416404@qq.com>\n"
 "Language-Team: none\n"
 "Language: zh_CN\n"
@@ -332,9 +332,8 @@ msgstr "作业队列管理员"
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__ir_model_fields__ttype__job_serialized
-#, fuzzy
 msgid "Job Serialized"
-msgstr "作业失败"
+msgstr "作业序列化"
 
 #. module: queue_job
 #: model:mail.message.subtype,name:queue_job.mt_job_failed
@@ -362,12 +361,12 @@ msgstr "作业"
 #: model:ir.cron,cron_name:queue_job.ir_cron_queue_job_garbage_collector
 #: model:ir.cron,name:queue_job.ir_cron_queue_job_garbage_collector
 msgid "Jobs Garbage Collector"
-msgstr ""
+msgstr "作业垃圾收集器"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__kwargs
 msgid "Kwargs"
-msgstr "关键字参数"
+msgstr "Kwargs"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job____last_update
@@ -420,9 +419,8 @@ msgstr "消息"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__method
-#, fuzzy
 msgid "Method"
-msgstr "方法名称"
+msgstr "方法"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__method_name
@@ -439,7 +437,7 @@ msgstr "模型"
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Model {} not found"
-msgstr ""
+msgstr "Model {} 找不到"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__name
