@@ -35,6 +35,10 @@ class QueueJobChannel(models.Model):
             if not record.name:
                 complete_name = ""  # new record
             elif record.parent_id:
+                if not record.parent_id.complete_name:
+                    # self is not sorted, parent_id.complete_name
+                    # is may be not computed yet
+                    record.parent_id._compute_complete_name()
                 complete_name = ".".join([record.parent_id.complete_name, record.name])
             else:
                 complete_name = record.name
