@@ -107,8 +107,8 @@ class QueueJob(models.Model):
         compute="_compute_channel", inverse="_inverse_channel", store=True, index=True
     )
 
-    identity_key = fields.Char()
-    worker_pid = fields.Integer()
+    identity_key = fields.Char(readonly=True)
+    worker_pid = fields.Integer(readonly=True)
 
     def init(self):
         self._cr.execute(
