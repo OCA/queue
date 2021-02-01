@@ -120,7 +120,10 @@ class QueueJob(models.Model):
             raise exceptions.AccessError(
                 _("Queue jobs must be created by calling 'with_delay()'.")
             )
-        return super().create(vals_list)
+        return super(
+            QueueJob,
+            self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True),
+        ).create(vals_list)
 
     def write(self, vals):
         if self.env.context.get("_job_edit_sentinel") is not self.EDIT_SENTINEL:
@@ -192,9 +195,10 @@ class QueueJob(models.Model):
         # subscribe the users now to avoid to subscribe them
         # at every job creation
         domain = self._subscribe_users_domain()
-        users = self.env["res.users"].search(domain)
-        self.message_subscribe(partner_ids=users.mapped("partner_id").ids)
+        base_users = self.env["res.users"].search(domain)
         for record in self:
+            users = base_users | record.user_id
+            record.message_subscribe(partner_ids=users.mapped("partner_id").ids)
             msg = record._message_failed_job()
             if msg:
                 record.message_post(body=msg, subtype_xmlid="queue_job.mt_job_failed")
