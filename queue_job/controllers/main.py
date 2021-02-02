@@ -108,7 +108,7 @@ class RunJobController(http.Controller):
 
     @http.route("/queue_job/create_test_job", type="http", auth="user")
     def create_test_job(
-        self, priority=None, max_retries=None, channel="root", description="Test job"
+        self, priority=None, max_retries=None, channel=None, description="Test job"
     ):
         if not http.request.env.user.has_group("base.group_erp_manager"):
             raise Forbidden(_("Access Denied"))
