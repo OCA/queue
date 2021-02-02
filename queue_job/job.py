@@ -439,13 +439,7 @@ class Job(object):
         self.job_model_name = "queue.job"
 
         self.job_config = (
-            self.env["queue.job.function"]
-            .sudo()
-            .job_config(
-                self.env["queue.job.function"].job_function_name(
-                    self.model_name, self.method_name
-                )
-            )
+            self.env["queue.job.function"].sudo().job_config(self.job_function_name)
         )
 
         self.state = PENDING
@@ -558,26 +552,34 @@ class Job(object):
         if db_record:
             db_record.with_context(_job_edit_sentinel=edit_sentinel).write(vals)
         else:
-            date_created = self.date_created
-            # The following values must never be modified after the
-            # creation of the job
             vals.update(
                 {
+                    "user_id": self.env.uid,
+                    "channel": self.channel,
+                    # The following values must never be modified after the
+                    # creation of the job
                     "uuid": self.uuid,
                     "name": self.description,
-                    "date_created": date_created,
+                    "func_string": self.func_string,
+                    "date_created": self.date_created,
+                    "model_name": self.recordset._name,
                     "method_name": self.method_name,
+                    "job_function_id": self.job_config.job_function_id,
+                    "channel_method_name": self.job_function_name,
                     "records": self.recordset,
                     "args": self.args,
                     "kwargs": self.kwargs,
                 }
             )
-            # it the channel is not specified, lets the job_model compute
-            # the right one to use
-            if self.channel:
-                vals.update({"channel": self.channel})
-
             job_model.with_context(_job_edit_sentinel=edit_sentinel).sudo().create(vals)
+
+    @property
+    def func_string(self):
+        model = repr(self.recordset)
+        args = [repr(arg) for arg in self.args]
+        kwargs = ["{}={!r}".format(key, val) for key, val in self.kwargs.items()]
+        all_args = ", ".join(args + kwargs)
+        return "{}.{}({})".format(model, self.method_name, all_args)
 
     def db_record(self):
         return self.db_record_from_uuid(self.env, self.uuid)
@@ -586,6 +588,11 @@ class Job(object):
     def func(self):
         recordset = self.recordset.with_context(job_uuid=self.uuid)
         return getattr(recordset, self.method_name)
+
+    @property
+    def job_function_name(self):
+        func_model = self.env["queue.job.function"].sudo()
+        return func_model.job_function_name(self.recordset._name, self.method_name)
 
     @property
     def identity_key(self):
@@ -643,6 +650,14 @@ class Job(object):
             self._eta = datetime.now() + timedelta(seconds=value)
         else:
             self._eta = value
+
+    @property
+    def channel(self):
+        return self._channel or self.job_config.channel
+
+    @channel.setter
+    def channel(self, value):
+        self._channel = value
 
     def set_pending(self, result=None, reset_retry=True):
         self.state = PENDING
