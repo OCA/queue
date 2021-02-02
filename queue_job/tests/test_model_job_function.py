@@ -31,7 +31,7 @@ class TestJobFunction(common.SavepointCase):
         channel = self.env["queue.job.channel"].create(
             {"name": "foo", "parent_id": self.env.ref("queue_job.channel_root").id}
         )
-        self.env["queue.job.function"].create(
+        job_function = self.env["queue.job.function"].create(
             {
                 "model_id": self.env.ref("base.model_res_users").id,
                 "method": "read",
@@ -52,5 +52,6 @@ class TestJobFunction(common.SavepointCase):
                 related_action_enable=True,
                 related_action_func_name="related_action_foo",
                 related_action_kwargs={"b": 1},
+                job_function_id=job_function.id,
             ),
         )

@@ -48,6 +48,9 @@ class QueueJob(models.Model):
         "date_created",
         "model_name",
         "method_name",
+        "func_string",
+        "channel_method_name",
+        "job_function_id",
         "records",
         "args",
         "kwargs",
@@ -66,9 +69,7 @@ class QueueJob(models.Model):
                                  string='Company', index=True)
     name = fields.Char(string='Description', readonly=True)
 
-    model_name = fields.Char(
-        string='Model', compute="_compute_model_name", store=True, readonly=True
-    )
+    model_name = fields.Char(string='Model', readonly=True)
     method_name = fields.Char(readonly=True)
     # record_ids field is only for backward compatibility (e.g. used in related
     # actions), can be removed (replaced by "records") in 14.0
@@ -78,9 +79,7 @@ class QueueJob(models.Model):
     )
     args = JobSerialized(readonly=True, base_type=tuple)
     kwargs = JobSerialized(readonly=True, base_type=dict)
-    func_string = fields.Char(
-        string="Task", compute="_compute_func_string", readonly=True, store=True
-    )
+    func_string = fields.Char(string="Task", readonly=True)
 
     state = fields.Selection(STATES,
                              readonly=True,
@@ -103,20 +102,16 @@ class QueueJob(models.Model):
              "max. retries.\n"
              "Retries are infinite when empty.",
     )
+    # FIXME the name of this field is very confusing
+
     channel_method_name = fields.Char(readonly=True,
                                       compute='_compute_job_function',
                                       store=True)
     job_function_id = fields.Many2one(comodel_name='queue.job.function',
-                                      compute='_compute_job_function',
                                       string='Job Function',
-                                      readonly=True,
-                                      store=True)
+                                      readonly=True)
 
-    override_channel = fields.Char()
-    channel = fields.Char(compute='_compute_channel',
-                          inverse='_inverse_channel',
-                          store=True,
-                          index=True)
+    channel = fields.Char(index=True)
 
     identity_key = fields.Char(readonly=True)
     worker_pid = fields.Integer(readonly=True)
@@ -135,63 +130,9 @@ class QueueJob(models.Model):
             )
 
     @api.depends("records")
-    def _compute_user_id(self):
-        for record in self:
-            record.user_id = record.records.env.uid
-
-    def _inverse_user_id(self):
-        for record in self.with_context(_job_edit_sentinel=self.EDIT_SENTINEL):
-            record.records = record.records.with_user(record.user_id.id)
-
-    @api.depends("records")
-    def _compute_model_name(self):
-        for record in self:
-            record.model_name = record.records._name
-
-    @api.depends("records")
     def _compute_record_ids(self):
         for record in self:
             record.record_ids = record.records.ids
-
-    @api.multi
-    def _inverse_channel(self):
-        for record in self:
-            record.override_channel = record.channel
-
-    @api.multi
-    @api.depends('job_function_id.channel_id')
-    def _compute_channel(self):
-        for record in self:
-            channel = (
-                record.override_channel or record.job_function_id.channel or "root"
-            )
-            if record.channel != channel:
-                record.channel = channel
-
-    @api.multi
-    @api.depends('model_name', 'method_name', 'job_function_id.channel_id')
-    def _compute_job_function(self):
-        for record in self:
-            func_model = self.env["queue.job.function"]
-            channel_method_name = func_model.job_function_name(
-                record.model_name, record.method_name
-            )
-            function = func_model.search([('name', '=', channel_method_name)], limit=1)
-            record.channel_method_name = channel_method_name
-            record.job_function_id = function
-
-    @api.multi
-    @api.depends('model_name', 'method_name', 'records', 'args', 'kwargs')
-    def _compute_func_string(self):
-        for record in self:
-            model = repr(record.records)
-            args = [repr(arg) for arg in record.args]
-            kwargs = ['%s=%r' % (key, val) for key, val
-                      in record.kwargs.items()]
-            all_args = ', '.join(args + kwargs)
-            record.func_string = (
-                "%s.%s(%s)" % (model, record.method_name, all_args)
-            )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -199,7 +140,7 @@ class QueueJob(models.Model):
             # Prevent to create a queue.job record "raw" from RPC.
             # ``with_delay()`` must be used.
             raise exceptions.AccessError(
-                _("Queue jobs must created by calling 'with_delay()'.")
+                _("Queue jobs must be created by calling 'with_delay()'.")
             )
         return super(
             QueueJob,
@@ -218,10 +159,25 @@ class QueueJob(models.Model):
                     )
                 )
 
+        different_user_jobs = self.browse()
+        if vals.get("user_id"):
+            different_user_jobs = self.filtered(
+                lambda records: records.env.user.id != vals["user_id"]
+            )
+
         if vals.get("state") == "failed":
             self._message_post_on_failure()
 
-        return super().write(vals)
+        result = super().write(vals)
+
+        for record in different_user_jobs:
+            # the user is stored in the env of the record, but we still want to
+            # have a stored user_id field to be able to search/groupby, so
+            # synchronize the env of records with user_id
+            super(QueueJob, record).write(
+                {"records": record.records.with_user(vals["user_id"])}
+            )
+        return result
 
     @api.multi
     def open_related_action(self):
@@ -550,7 +506,8 @@ class JobFunction(models.Model):
         "retry_pattern "
         "related_action_enable "
         "related_action_func_name "
-        "related_action_kwargs ",
+        "related_action_kwargs "
+        "job_function_id ",
     )
 
     @api.model
@@ -675,6 +632,7 @@ class JobFunction(models.Model):
             related_action_enable=True,
             related_action_func_name=None,
             related_action_kwargs={},
+            job_function_id=None,
         )
 
     def _parse_retry_pattern(self):
@@ -707,6 +665,7 @@ class JobFunction(models.Model):
             related_action_enable=config.related_action.get("enable", True),
             related_action_func_name=config.related_action.get("func_name"),
             related_action_kwargs=config.related_action.get("kwargs"),
+            job_function_id=config.id,
         )
 
     def _retry_pattern_format_error_message(self):
