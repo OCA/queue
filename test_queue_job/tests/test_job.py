@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 import mock
 
 import odoo.tests.common as common
-from odoo import SUPERUSER_ID
 
 from odoo.addons.queue_job.exception import (
     FailedJobError,
@@ -481,7 +480,7 @@ class TestJobModel(JobCommonCase):
         stored.write({"state": "failed"})
         self.assertEqual(stored.state, FAILED)
         messages = stored.message_ids
-        self.assertEqual(len(messages), 2)
+        self.assertEqual(len(messages), 1)
 
     def test_follower_when_write_fail(self):
         """Check that inactive users doesn't are not followers even if
@@ -540,6 +539,22 @@ class TestJobStorageMultiCompany(common.TransactionCase):
         User = self.env["res.users"]
         Company = self.env["res.company"]
         Partner = self.env["res.partner"]
+
+        main_company = self.env.ref("base.main_company")
+
+        self.partner_user = Partner.create(
+            {"name": "Simple User", "email": "simple.user@example.com"}
+        )
+        self.simple_user = User.create(
+            {
+                "partner_id": self.partner_user.id,
+                "company_ids": [(4, main_company.id)],
+                "login": "simple_user",
+                "name": "simple user",
+                "groups_id": [],
+            }
+        )
+
         self.other_partner_a = Partner.create(
             {"name": "My Company a", "is_company": True, "email": "test@tes.ttest"}
         )
@@ -556,7 +571,7 @@ class TestJobStorageMultiCompany(common.TransactionCase):
                 "company_id": self.other_company_a.id,
                 "company_ids": [(4, self.other_company_a.id)],
                 "login": "my_login a",
-                "name": "my user",
+                "name": "my user A",
                 "groups_id": [(4, grp_queue_job_manager)],
             }
         )
@@ -576,15 +591,10 @@ class TestJobStorageMultiCompany(common.TransactionCase):
                 "company_id": self.other_company_b.id,
                 "company_ids": [(4, self.other_company_b.id)],
                 "login": "my_login_b",
-                "name": "my user 1",
+                "name": "my user B",
                 "groups_id": [(4, grp_queue_job_manager)],
             }
         )
-
-    def _subscribe_users(self, stored):
-        domain = stored._subscribe_users_domain()
-        users = self.env["res.users"].search(domain)
-        stored.message_subscribe(partner_ids=users.mapped("partner_id").ids)
 
     def _create_job(self, env):
         self.cr.execute("delete from queue_job")
@@ -631,11 +641,14 @@ class TestJobStorageMultiCompany(common.TransactionCase):
         # queue_job.group_queue_job_manager must be followers
         User = self.env["res.users"]
         no_company_context = dict(self.env.context, company_id=None)
-        no_company_env = self.env(context=no_company_context)
+        no_company_env = self.env(user=self.simple_user, context=no_company_context)
         stored = self._create_job(no_company_env)
-        self._subscribe_users(stored)
-        users = User.with_context(active_test=False).search(
-            [("groups_id", "=", self.ref("queue_job.group_queue_job_manager"))]
+        stored._message_post_on_failure()
+        users = (
+            User.search(
+                [("groups_id", "=", self.ref("queue_job.group_queue_job_manager"))]
+            )
+            + stored.user_id
         )
         self.assertEqual(len(stored.message_follower_ids), len(users))
         expected_partners = [u.partner_id for u in users]
@@ -649,13 +662,13 @@ class TestJobStorageMultiCompany(common.TransactionCase):
         # jobs created for a specific company_id are followed only by
         # company's members
         company_a_context = dict(self.env.context, company_id=self.other_company_a.id)
-        company_a_env = self.env(context=company_a_context)
+        company_a_env = self.env(user=self.simple_user, context=company_a_context)
         stored = self._create_job(company_a_env)
         stored.with_user(self.other_user_a.id)
-        self._subscribe_users(stored)
-        # 2 because admin + self.other_partner_a
+        stored._message_post_on_failure()
+        # 2 because simple_user (creator of job) + self.other_partner_a
         self.assertEqual(len(stored.message_follower_ids), 2)
-        users = User.browse([SUPERUSER_ID, self.other_user_a.id])
+        users = self.simple_user + self.other_user_a
         expected_partners = [u.partner_id for u in users]
         self.assertSetEqual(
             set(stored.message_follower_ids.mapped("partner_id")),
