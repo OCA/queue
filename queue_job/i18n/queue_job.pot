@@ -493,11 +493,6 @@ msgid "Number of unread messages"
 msgstr ""
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__override_channel
-msgid "Override Channel"
-msgstr ""
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__parent_id
 msgid "Parent Channel"
 msgstr ""
@@ -540,7 +535,7 @@ msgstr ""
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
-msgid "Queue jobs must created by calling 'with_delay()'."
+msgid "Queue jobs must be created by calling 'with_delay()'."
 msgstr ""
 
 #. module: queue_job
