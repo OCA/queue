@@ -498,11 +498,6 @@ msgid "Number of unread messages"
 msgstr "未读消息数量"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__override_channel
-msgid "Override Channel"
-msgstr "覆盖频道"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__parent_id
 msgid "Parent Channel"
 msgstr "父频道"
@@ -546,7 +541,7 @@ msgstr "队列作业"
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
-msgid "Queue jobs must created by calling 'with_delay()'."
+msgid "Queue jobs must be created by calling 'with_delay()'."
 msgstr ""
 
 #. module: queue_job
@@ -795,6 +790,9 @@ msgstr "重新排队向导所选的作业"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr ""
+
+#~ msgid "Override Channel"
+#~ msgstr "覆盖频道"
 
 #~ msgid "If checked new messages require your attention."
 #~ msgstr "查看是否有需要留意的新消息。"
