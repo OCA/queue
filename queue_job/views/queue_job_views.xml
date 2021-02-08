@@ -57,6 +57,8 @@
                             <field name="date_enqueued" />
                             <field name="date_started" />
                             <field name="date_done" />
+                            <!-- Do not use float_time as it does not work properly -->
+                            <field name="exec_time" string="Time (s)" />
                         </group>
                     </group>
                     <group colspan="4">
@@ -109,10 +111,34 @@
                 <field name="eta" />
                 <field name="date_created" />
                 <field name="date_done" />
+                <field name="exec_time" widget="float_time" />
                 <field name="uuid" />
                 <field name="channel" />
                 <field name="company_id" groups="base.group_multi_company" />
             </tree>
+        </field>
+    </record>
+
+    <record id="view_queue_job_pivot" model="ir.ui.view">
+        <field name="name">queue.job.pivot</field>
+        <field name="model">queue.job</field>
+        <field name="arch" type="xml">
+            <pivot string="Jobs">
+                <field name="exec_time" type="measure" />
+                <field name="job_function_id" type="row" />
+                <field name="date_done" type="col" interval="week" />
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_queue_job_graph" model="ir.ui.view">
+        <field name="name">queue.job.graph</field>
+        <field name="model">queue.job</field>
+        <field name="arch" type="xml">
+            <graph string="Jobs">
+                <field name="job_function_id" type="row" />
+                <field name="exec_time" type="measure" />
+            </graph>
         </field>
     </record>
 
@@ -182,7 +208,7 @@
     <record id="action_queue_job" model="ir.actions.act_window">
         <field name="name">Jobs</field>
         <field name="res_model">queue.job</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
         <field name="context">{'search_default_pending': 1,
                                'search_default_enqueued': 1,
                                'search_default_started': 1,
