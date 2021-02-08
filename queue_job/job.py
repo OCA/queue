@@ -527,6 +527,7 @@ class Job(object):
             "date_enqueued": False,
             "date_started": False,
             "date_done": False,
+            "exec_time": False,
             "eta": False,
             "identity_key": False,
             "worker_pid": self.worker_pid,
@@ -538,6 +539,8 @@ class Job(object):
             vals["date_started"] = self.date_started
         if self.date_done:
             vals["date_done"] = self.date_done
+        if self.exec_time:
+            vals["exec_time"] = self.exec_time
         if self.eta:
             vals["eta"] = self.eta
         if self.identity_key:
@@ -658,6 +661,12 @@ class Job(object):
     @channel.setter
     def channel(self, value):
         self._channel = value
+
+    @property
+    def exec_time(self):
+        if self.date_done and self.date_started:
+            return (self.date_done - self.date_started).total_seconds()
+        return None
 
     def set_pending(self, result=None, reset_retry=True):
         self.state = PENDING
