@@ -126,6 +126,7 @@
                 <field name="func_string" />
                 <field name="channel" />
                 <field name="job_function_id" />
+                <field name="model_name" />
                 <field
                     name="company_id"
                     groups="base.group_multi_company"
@@ -167,6 +168,11 @@
                         name="group_by_state"
                         string="State"
                         context="{'group_by': 'state'}"
+                    />
+                    <filter
+                        name="group_by_model_name"
+                        string="Model"
+                        context="{'group_by': 'model_name'}"
                     />
                 </group>
             </search>
