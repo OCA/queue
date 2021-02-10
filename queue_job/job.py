@@ -672,6 +672,7 @@ class Job(object):
         self.state = PENDING
         self.date_enqueued = None
         self.date_started = None
+        self.date_done = None
         self.worker_pid = None
         if reset_retry:
             self.retry = 0
