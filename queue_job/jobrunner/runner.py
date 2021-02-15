@@ -393,8 +393,32 @@ class QueueJobRunner(object):
         if config["db_name"]:
             db_names = config["db_name"].split(",")
         else:
-            db_names = odoo.service.db.exp_list(True)
+            db_names = self.get_list_dbs()
         return db_names
+
+    def get_list_dbs(self):
+        if not odoo.tools.config['dbfilter'] and odoo.tools.config['db_name']:
+            # In case --db-filter is not provided and --database is passed, Odoo will not
+            # fetch the list of databases available on the postgres server and instead will
+            # use the value of --database as comma seperated list of exposed databases.
+            res = sorted(db.strip() for db in odoo.tools.config['db_name'].split(','))
+            return res
+
+        chosen_template = odoo.tools.config['db_template']
+        jobrunner_db_dbfilter = odoo.tools.config.misc.get('queue_job').get('jobrunner_db_dbfilter')
+        if jobrunner_db_dbfilter:
+            templates_list = tuple(set(['postgres', chosen_template] + jobrunner_db_dbfilter.split(',')))
+        else:
+            templates_list = tuple(set(['postgres', chosen_template]))
+        db = odoo.sql_db.db_connect('postgres')
+        with closing(db.cursor()) as cr:
+            try:
+                cr.execute("select datname from pg_database where datdba=(select usesysid from pg_user where usename=current_user) and not datistemplate and datallowconn and datname not in %s order by datname", (templates_list,))
+                res = [odoo.tools.ustr(name) for (name,) in cr.fetchall()]
+            except Exception:
+                _logger.exception('Listing databases failed:')
+                res = []
+        return res
 
     def close_databases(self, remove_jobs=True):
         for db_name, db in self.db_by_name.items():
@@ -502,6 +526,10 @@ class QueueJobRunner(object):
                 _logger.info("database connections ready")
                 # inner loop does the normal processing
                 while not self._stop:
+                    if set(self.db_by_name.keys()) != set(self.get_db_names()):
+                        _logger.info("reinitialize database connections")
+                        self.initialize_databases()
+                        _logger.info("reinitialize database connections ready")
                     self.process_notifications()
                     self.run_jobs()
                     self.wait_notification()
