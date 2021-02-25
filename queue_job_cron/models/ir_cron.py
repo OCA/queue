@@ -32,14 +32,19 @@ class IrCron(models.Model):
         return server_action.run()
 
     def method_direct_trigger(self):
-        if self.run_as_queue_job:
-            return self.with_delay(
-                priority=self.priority,
-                description=self.name,
-                channel=self.channel_id.complete_name,
-            )._run_job_as_queue_job(server_action=self.ir_actions_server_id)
-        else:
-            return super().method_direct_trigger()
+        for cron in self:
+            if not cron.run_as_queue_job:
+                super(IrCron, cron).method_direct_trigger()
+            else:
+                _cron = cron.with_user(cron.user_id).with_context(
+                    lastcall=cron.lastcall
+                )
+                _cron.with_delay(
+                    priority=_cron.priority,
+                    description=_cron.name,
+                    channel=_cron.channel_id.complete_name,
+                )._run_job_as_queue_job(server_action=_cron.ir_actions_server_id)
+        return True
 
     def _callback(self, cron_name, server_action_id, job_id):
         cron = self.env["ir.cron"].sudo().browse(job_id)
