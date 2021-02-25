@@ -3,12 +3,12 @@
 
 {
     "name": "Scheduled Actions as Queue Jobs",
-    "version": "13.0.2.1.0",
+    "version": "14.0.1.0.0",
     "author": "ACSONE SA/NV,Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/queue",
     "license": "AGPL-3",
     "category": "Generic Modules",
     "depends": ["queue_job"],
     "data": ["data/data.xml", "views/ir_cron_view.xml"],
-    "installable": False,
+    "installable": True,
 }
