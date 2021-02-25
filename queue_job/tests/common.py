@@ -4,7 +4,7 @@ from contextlib import contextmanager
 
 import mock
 
-from odoo.addons.queue_job.job import Job
+from ..job import Job
 
 
 class JobCounter:

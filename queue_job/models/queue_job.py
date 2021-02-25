@@ -296,7 +296,6 @@ class QueueJob(models.Model):
                 )
                 if jobs:
                     jobs.unlink()
-                    self.env.cr.commit()
                 else:
                     break
         return True
