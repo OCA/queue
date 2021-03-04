@@ -6,48 +6,50 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2021-03-04 16:45+0000\n"
+"Last-Translator: Pedro Castro Silva <pedrocs@exo.pt>\n"
 "Language-Team: none\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 4.3.2\n"
 
 #. module: base_import_async
 #: code:addons/base_import_async/models/queue_job.py:15
 #, python-format
 msgid "Attachment"
-msgstr ""
+msgstr "Anexo"
 
 #. module: base_import_async
 #: model:ir.model,name:base_import_async.model_base_import_import
 msgid "Base Import"
-msgstr ""
+msgstr "Importação Base"
 
 #. module: base_import_async
 #: code:addons/base_import_async/models/base_import_import.py:63
 #, python-format
 msgid "Import %s from file %s"
-msgstr ""
+msgstr "Importar %s a partir do ficheiro %s"
 
 #. module: base_import_async
 #: code:addons/base_import_async/models/base_import_import.py:153
 #, python-format
 msgid "Import %s from file %s - #%s - lines %s to %s"
-msgstr ""
+msgstr "Importar %s a partir do ficheiro %s - #%s - linhas %s a %s"
 
 #. module: base_import_async
 #. openerp-web
 #: code:addons/base_import_async/static/src/xml/import.xml:10
 #, python-format
 msgid "Import in the background"
-msgstr ""
+msgstr "Importar em background"
 
 #. module: base_import_async
 #: model:ir.model,name:base_import_async.model_queue_job
 msgid "Queue Job"
-msgstr ""
+msgstr "Trabalho em Fila"
 
 #. module: base_import_async
 #. openerp-web
@@ -55,17 +57,20 @@ msgstr ""
 #, python-format
 msgid "When checked, the import will be executed as a background job,  after splitting your file in small chunks that will be processed independently.  Use this to import very large files."
 msgstr ""
+"Quando assinalado, a importação será executada como um trabalho em fila, "
+"após separação do ficheiro em pequenas partes que serão processadas de forma "
+"independente. Use para importar ficheiros muito grandes."
 
 #. module: base_import_async
 #. openerp-web
 #: code:addons/base_import_async/static/src/js/import.js:20
 #, python-format
 msgid "You can check the status of this job in menu 'Queue / Jobs'."
-msgstr ""
+msgstr "Pode verificar o estado deste trabalho no menu 'Fila / Trabalhos'."
 
 #. module: base_import_async
 #. openerp-web
 #: code:addons/base_import_async/static/src/js/import.js:19
 #, python-format
 msgid "Your request is being processed"
-msgstr ""
+msgstr "O seu pedido está a ser processado"
