@@ -303,7 +303,7 @@ msgid "Job failed"
 msgstr "Job ist fehlgeschlagen"
 
 #. module: queue_job
-#: code:addons/queue_job/controllers/main.py:100
+#: code:addons/queue_job/controllers/main.py:102
 #, python-format
 msgid "Job interrupted and set to Done: nothing to do."
 msgstr "Job unterbrochen und als Erledigt markiert: Es ist nicht zu tun."
