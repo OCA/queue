@@ -3,11 +3,13 @@
 import logging
 
 from odoo.tools.sql import column_exists
+from odoo.addons.queue_job.hooks.post_init_hook import post_init_hook
 
 _logger = logging.getLogger(__name__)
 
 
 def migrate(cr, version):
+    post_init_hook(cr, None)
     if not column_exists(cr, "queue_job", "exec_time"):
         # Disable trigger otherwise the update takes ages.
         cr.execute(
