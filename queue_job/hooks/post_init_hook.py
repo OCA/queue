@@ -2,11 +2,14 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import logging
+from odoo.addons.queue_job.hooks.post_init_hook import post_init_hook
 
 logger = logging.getLogger(__name__)
 
 
+
 def post_init_hook(cr, registry):
+    post_init_hook(cr, None)
     # this is the trigger that sends notifications when jobs change
     logger.info("Create queue_job_notify trigger")
     cr.execute(
