@@ -5,11 +5,13 @@
 
 def migrate(cr, version):
     """Extract from old `func_name` field the name of the method to be put
-    on `method_name`.
+    on `method_name`. Drop notify trigger for drastically better performance.
     """
     if not version:
         return
     cr.execute(
-        """UPDATE queue_job
+        """
+        DROP TRIGGER IF EXISTS queue_job_notify ON queue_job;
+        UPDATE queue_job
         SET method_name = reverse(split_part(reverse(func_name), '.', 1))"""
     )
