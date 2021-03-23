@@ -51,6 +51,8 @@
                             />
                             <field name="user_id" />
                             <field name="worker_pid" groups="base.group_no_one" />
+                            <field name="worker_hostname" groups="base.groups_no_one"/>
+                            <field name="db_backend_pid" groups="base.groups_no_one"/>
                         </group>
                         <group>
                             <field name="date_created" />

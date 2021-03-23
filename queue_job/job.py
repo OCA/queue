@@ -8,6 +8,7 @@ import os
 import sys
 import uuid
 from datetime import datetime, timedelta
+from socket import gethostname
 
 import odoo
 
@@ -241,6 +242,19 @@ class Job(object):
         be added to a channel if the existing job with the same key is not yet
         started or executed.
 
+    .. attribute::worker_pid
+
+        The process ID of the worker that is executing or has executed a Job.
+
+    ..attribute::worker_hostname
+
+        The name of the host where the worker is running. (Useful in scaled
+        environments to determine the node on which the process is executed.
+
+    ..attribute::db_backend_pid
+
+        Process ID of the database backend.
+
     """
 
     @classmethod
@@ -301,6 +315,8 @@ class Job(object):
             job_.company_id = stored.company_id.id
         job_.identity_key = stored.identity_key
         job_.worker_pid = stored.worker_pid
+        job_.worker_hostname = stored.worker_hostname
+        job_.db_backend_pid = stored.db_backend_pid
         return job_
 
     def job_record_with_same_identity_key(self):
@@ -494,6 +510,8 @@ class Job(object):
         self.eta = eta
         self.channel = channel
         self.worker_pid = None
+        self.worker_hostname = None
+        self.db_backend_pid = None
 
     def perform(self):
         """Execute the job.
@@ -537,6 +555,8 @@ class Job(object):
             "eta": False,
             "identity_key": False,
             "worker_pid": self.worker_pid,
+            "worker_hostname": self.worker_hostname,
+            "db_backend_pid": self.db_backend_pid,
         }
 
         if self.date_enqueued:
@@ -645,11 +665,17 @@ class Job(object):
         else:
             self._eta = value
 
+    def get_db_backend_pid(self):
+        self.env.cr.execute("SELECT pg_backend_id();")
+        return self.env.cr.fetchone()
+
     def set_pending(self, result=None, reset_retry=True):
         self.state = PENDING
         self.date_enqueued = None
         self.date_started = None
         self.worker_pid = None
+        self.worker_hostname = None
+        self.db_backend_pid = None
         if reset_retry:
             self.retry = 0
         if result is not None:
@@ -660,16 +686,22 @@ class Job(object):
         self.date_enqueued = datetime.now()
         self.date_started = None
         self.worker_pid = None
+        self.worker_hostname = None
+        self.db_backend_pid = None
 
     def set_started(self):
         self.state = STARTED
         self.date_started = datetime.now()
         self.worker_pid = os.getpid()
+        self.worker_hostname = gethostname()
+        self.db_backend_pid = self.get_db_backend_pid()
 
     def set_done(self, result=None):
         self.state = DONE
         self.exc_info = None
         self.date_done = datetime.now()
+        self.work_pid = None
+        self.db_backend_pid = None
         if result is not None:
             self.result = result
 
