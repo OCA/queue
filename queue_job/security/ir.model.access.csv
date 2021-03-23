@@ -3,4 +3,5 @@ access_queue_job_manager,queue job manager,queue_job.model_queue_job,queue_job.g
 access_queue_job_function_manager,queue job functions manager,queue_job.model_queue_job_function,queue_job.group_queue_job_manager,1,1,1,1
 access_queue_job_channel_manager,queue job channel manager,queue_job.model_queue_job_channel,queue_job.group_queue_job_manager,1,1,1,1
 access_queue_requeue_job,queue requeue job manager,queue_job.model_queue_requeue_job,queue_job.group_queue_job_manager,1,1,1,1
+access_queue_terminate_job,queue terminate job manager,queue_job.model_queue_terminate_job,queue_job.group_queue_job_manager,1,1,1,1
 access_queue_jobs_to_done,queue jobs to done manager,queue_job.model_queue_jobs_to_done,queue_job.group_queue_job_manager,1,1,1,1
