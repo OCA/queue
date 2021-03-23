@@ -8,6 +8,14 @@
             <form string="Jobs" create="false" delete="false">
                 <header>
                     <button
+                        name="terminate"
+                        states="started"
+                        class="oe_highlight"
+                        string="Terminate Job"
+                        type="object"
+                        groups="queue_job.group_queue_job_manager"
+                    />
+                    <button
                         name="requeue"
                         states="failed"
                         class="oe_highlight"
