@@ -8,6 +8,7 @@ import os
 import sys
 import uuid
 from datetime import datetime, timedelta
+from socket import gethostname
 
 import odoo
 
@@ -241,6 +242,19 @@ class Job(object):
         be added to a channel if the existing job with the same key is not yet
         started or executed.
 
+    .. attribute::worker_pid
+
+        The process ID of the worker that is executing or has executed a Job.
+
+    ..attribute::worker_hostname
+
+        The name of the host where the worker is running. (Useful in scaled
+        environments to determine the node on which the process is executed.
+
+    ..attribute::db_txid
+
+        ID of the database transaction.
+
     """
 
     @classmethod
@@ -301,6 +315,8 @@ class Job(object):
             job_.company_id = stored.company_id.id
         job_.identity_key = stored.identity_key
         job_.worker_pid = stored.worker_pid
+        job_.worker_hostname = stored.worker_hostname
+        job_.db_txid = stored.db_txid
         return job_
 
     def job_record_with_same_identity_key(self):
@@ -494,6 +510,8 @@ class Job(object):
         self.eta = eta
         self.channel = channel
         self.worker_pid = None
+        self.worker_hostname = None
+        self.db_txid = None
 
     def perform(self):
         """Execute the job.
@@ -502,6 +520,8 @@ class Job(object):
         """
         self.retry += 1
         try:
+            # Get and store the transaction ID of the job
+            self.set_db_txid()
             self.result = self.func(*tuple(self.args), **self.kwargs)
         except RetryableJobError as err:
             if err.ignore_retry:
@@ -537,6 +557,7 @@ class Job(object):
             "eta": False,
             "identity_key": False,
             "worker_pid": self.worker_pid,
+            "worker_hostname": self.worker_hostname,
         }
 
         if self.date_enqueued:
@@ -549,6 +570,8 @@ class Job(object):
             vals["eta"] = self.eta
         if self.identity_key:
             vals["identity_key"] = self.identity_key
+        if self.db_txid:
+            vals["db_txid"] = self.db_txid
 
         job_model = self.env["queue.job"]
         # The sentinel is used to prevent edition sensitive fields (such as
@@ -645,11 +668,45 @@ class Job(object):
         else:
             self._eta = value
 
+    def get_db_txid(self):
+        """
+        Get the current if of the database transaction the job is running in. Only store
+        the 32bit representation variant in the database so it can be compared directly
+        to the 'backend_xid' in pg_stat_activity.
+        """
+        if self.env.cr._cnx.server_version >= 130000:
+            self.env.cr.execute(
+                "SELECT (pg_current_xact_id()::text::bigint % (2^32)::bigint)::text"
+            )
+        else:
+            self.env.cr.execute("SELECT (txid_current() % (2^32)::bigint)::text;")
+        return self.env.cr.fetchone()[0]
+
+    def set_db_txid(self):
+        """
+        Use a new cursor to update the queue_job record of this job with the
+        transaction ID the process is running in. The new cursor is necessary because
+        after each commit the transaction ID changes (cfr. stored() is executed), which
+        makes the transaction ID useless otherwise.
+        """
+        tx_id = self.get_db_txid()
+        db_record = self.db_record()
+        if not db_record:
+            return
+        with odoo.sql_db.db_connect(self.env.cr.dbname).cursor() as separate_cr:
+            separate_cr.execute(
+                "UPDATE queue_job SET db_txid = %(tx_id)s WHERE id = %(rec_id)s;",
+                {"tx_id": tx_id, "rec_id": db_record.id},
+            )
+            separate_cr.commit()
+
     def set_pending(self, result=None, reset_retry=True):
         self.state = PENDING
         self.date_enqueued = None
         self.date_started = None
         self.worker_pid = None
+        self.worker_hostname = None
+        self.db_txid = None
         if reset_retry:
             self.retry = 0
         if result is not None:
@@ -660,11 +717,14 @@ class Job(object):
         self.date_enqueued = datetime.now()
         self.date_started = None
         self.worker_pid = None
+        self.worker_hostname = None
+        self.db_txid = None
 
     def set_started(self):
         self.state = STARTED
         self.date_started = datetime.now()
         self.worker_pid = os.getpid()
+        self.worker_hostname = gethostname()
 
     def set_done(self, result=None):
         self.state = DONE

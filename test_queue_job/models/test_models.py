@@ -1,7 +1,8 @@
 # Copyright 2016 Camptocamp SA
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
-from odoo import fields, models
+from odoo import _, fields, models
+from odoo.exceptions import UserError
 
 from odoo.addons.queue_job.exception import RetryableJobError
 
@@ -43,6 +44,10 @@ class TestQueueJob(models.Model):
         if kwargs.get("return_context"):
             return self.env.context
         return args, kwargs
+
+    def test_long_running_method(self):
+        self.env.cr.execute("""select pg_sleep(5 * 60);""")
+        raise UserError(_("Sleep was not interrupted."))
 
     def no_description(self):
         return
