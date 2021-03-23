@@ -97,8 +97,8 @@ class TestJobsOnTestingMethod(JobCommonCase):
 
     def test_on_model_method(self):
         job_ = Job(self.env["test.queue.job"].testing_method)
-        self.assertEquals(job_.model_name, "test.queue.job")
-        self.assertEquals(job_.method_name, "testing_method")
+        self.assertEqual(job_.model_name, "test.queue.job")
+        self.assertEqual(job_.method_name, "testing_method")
 
     def test_invalid_function(self):
         with self.assertRaises(TypeError):
@@ -107,11 +107,11 @@ class TestJobsOnTestingMethod(JobCommonCase):
     def test_set_pending(self):
         job_a = Job(self.method)
         job_a.set_pending(result="test")
-        self.assertEquals(job_a.state, PENDING)
+        self.assertEqual(job_a.state, PENDING)
         self.assertFalse(job_a.date_enqueued)
         self.assertFalse(job_a.date_started)
-        self.assertEquals(job_a.retry, 0)
-        self.assertEquals(job_a.result, "test")
+        self.assertEqual(job_a.retry, 0)
+        self.assertEqual(job_a.result, "test")
 
     def test_set_enqueued(self):
         job_a = Job(self.method)
@@ -120,8 +120,8 @@ class TestJobsOnTestingMethod(JobCommonCase):
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
             job_a.set_enqueued()
 
-        self.assertEquals(job_a.state, ENQUEUED)
-        self.assertEquals(job_a.date_enqueued, datetime(2015, 3, 15, 16, 41, 0))
+        self.assertEqual(job_a.state, ENQUEUED)
+        self.assertEqual(job_a.date_enqueued, datetime(2015, 3, 15, 16, 41, 0))
         self.assertFalse(job_a.date_started)
 
     def test_set_started(self):
@@ -131,8 +131,8 @@ class TestJobsOnTestingMethod(JobCommonCase):
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
             job_a.set_started()
 
-        self.assertEquals(job_a.state, STARTED)
-        self.assertEquals(job_a.date_started, datetime(2015, 3, 15, 16, 41, 0))
+        self.assertEqual(job_a.state, STARTED)
+        self.assertEqual(job_a.date_started, datetime(2015, 3, 15, 16, 41, 0))
 
     def test_worker_pid(self):
         """When a job is started, it gets the PID of the worker that starts it"""
@@ -155,16 +155,16 @@ class TestJobsOnTestingMethod(JobCommonCase):
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
             job_a.set_done(result="test")
 
-        self.assertEquals(job_a.state, DONE)
-        self.assertEquals(job_a.result, "test")
-        self.assertEquals(job_a.date_done, datetime(2015, 3, 15, 16, 41, 0))
+        self.assertEqual(job_a.state, DONE)
+        self.assertEqual(job_a.result, "test")
+        self.assertEqual(job_a.date_done, datetime(2015, 3, 15, 16, 41, 0))
         self.assertFalse(job_a.exc_info)
 
     def test_set_failed(self):
         job_a = Job(self.method)
         job_a.set_failed(exc_info="failed test")
-        self.assertEquals(job_a.state, FAILED)
-        self.assertEquals(job_a.exc_info, "failed test")
+        self.assertEqual(job_a.state, FAILED)
+        self.assertEqual(job_a.exc_info, "failed test")
 
     def test_postpone(self):
         job_a = Job(self.method)
@@ -173,8 +173,8 @@ class TestJobsOnTestingMethod(JobCommonCase):
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
             job_a.postpone(result="test", seconds=60)
 
-        self.assertEquals(job_a.eta, datetime(2015, 3, 15, 16, 42, 0))
-        self.assertEquals(job_a.result, "test")
+        self.assertEqual(job_a.eta, datetime(2015, 3, 15, 16, 42, 0))
+        self.assertEqual(job_a.result, "test")
         self.assertFalse(job_a.exc_info)
 
     def test_store(self):
@@ -287,7 +287,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         job_instance = delayable.testing_method("a", k=1)
         self.assertTrue(job_instance)
         result = job_instance.perform()
-        self.assertEquals(result, (("a",), {"k": 1}))
+        self.assertEqual(result, (("a",), {"k": 1}))
 
     def test_job_identity_key_str(self):
         id_key = "e294e8444453b09d59bdb6efbfec1323"
@@ -393,11 +393,11 @@ class TestJobs(JobCommonCase):
         recs = rec1 + rec2
         job_instance = recs.with_delay().mapped("name")
         self.assertTrue(job_instance)
-        self.assertEquals(job_instance.args, ("name",))
-        self.assertEquals(job_instance.recordset, recs)
-        self.assertEquals(job_instance.model_name, "test.queue.job")
-        self.assertEquals(job_instance.method_name, "mapped")
-        self.assertEquals(["test1", "test2"], job_instance.perform())
+        self.assertEqual(job_instance.args, ("name",))
+        self.assertEqual(job_instance.recordset, recs)
+        self.assertEqual(job_instance.model_name, "test.queue.job")
+        self.assertEqual(job_instance.method_name, "mapped")
+        self.assertEqual(["test1", "test2"], job_instance.perform())
 
     def test_job_identity_key_no_duplicate(self):
         """ If a job with same identity key in queue do not add a new one """
@@ -415,7 +415,7 @@ class TestJobs(JobCommonCase):
         job_instance = delayable.job_alter_mutable([1], mutable_kwarg={"a": 1})
         self.assertTrue(job_instance)
         result = job_instance.perform()
-        self.assertEquals(result, ([1, 2], {"a": 1, "b": 2}))
+        self.assertEqual(result, ([1, 2], {"a": 1, "b": 2}))
         job_instance.set_done()
         # at this point, the 'args' and 'kwargs' of the job instance
         # might have been modified, but they must never be modified in
@@ -425,8 +425,8 @@ class TestJobs(JobCommonCase):
         # jobs are always loaded before being performed, so we simulate
         # this behavior here to check if we have the correct initial arguments
         job_instance = Job.load(self.env, job_instance.uuid)
-        self.assertEquals(([1],), job_instance.args)
-        self.assertEquals({"mutable_kwarg": {"a": 1}}, job_instance.kwargs)
+        self.assertEqual(([1],), job_instance.args)
+        self.assertEqual({"mutable_kwarg": {"a": 1}}, job_instance.kwargs)
 
     def test_store_env_su_no_sudo(self):
         demo_user = self.env.ref("base.user_demo")
