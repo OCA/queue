@@ -21,7 +21,7 @@ odoo.define('queue_job_batch.systray', function (require) {
             this._super();
             var self = this;
             session.user_has_group(
-                'queue_job_batch.group_queue_job_batch_user'
+                'queue_job_batch.group_queue_job_batch_user_systray'
             ).then(function (data) {
                 self.manager = data;
                 if (data) {
@@ -32,7 +32,7 @@ odoo.define('queue_job_batch.systray', function (require) {
         start: function () {
             var self = this;
             session.user_has_group(
-                'queue_job_batch.group_queue_job_batch_user'
+                'queue_job_batch.group_queue_job_batch_user_systray'
             ).then(function (data) {
                 self.manager = data;
                 if (data) {
