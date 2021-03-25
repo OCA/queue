@@ -30,13 +30,13 @@ msgid "Cancel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:382
+#: code:addons/queue_job/models/queue_job.py:432
 #, python-format
 msgid "Cannot change the root channel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:389
+#: code:addons/queue_job/models/queue_job.py:439
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr ""
@@ -186,6 +186,12 @@ msgid "Identity key"
 msgstr ""
 
 #. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:295
+#, python-format
+msgid "If both parameters are 0, ALL jobs will be requeued!"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job_channel
 msgid "Job Channels"
 msgstr ""
@@ -269,7 +275,7 @@ msgid "Last Updated on"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:165
+#: code:addons/queue_job/models/queue_job.py:166
 #, python-format
 msgid "Manually set to done by {}"
 msgstr ""
@@ -296,7 +302,7 @@ msgid "Name"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:145
+#: code:addons/queue_job/models/queue_job.py:146
 #, python-format
 msgid "No action available for this job"
 msgstr ""
@@ -307,7 +313,7 @@ msgid "Parent Channel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:374
+#: code:addons/queue_job/models/queue_job.py:424
 #, python-format
 msgid "Parent channel required."
 msgstr ""
@@ -349,13 +355,13 @@ msgid "Related"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:276
+#: code:addons/queue_job/models/queue_job.py:326
 #, python-format
 msgid "Related Record"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:286
+#: code:addons/queue_job/models/queue_job.py:336
 #, python-format
 msgid "Related Records"
 msgstr ""
@@ -413,7 +419,7 @@ msgid "Set to done"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:230
+#: code:addons/queue_job/models/queue_job.py:231
 #, python-format
 msgid "Something bad happened during the execution of the job. More details in the 'Exception Information' section."
 msgstr ""
@@ -477,7 +483,7 @@ msgid "base"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:169
+#: code:addons/queue_job/models/queue_job.py:170
 #, python-format
 msgid "{} with reason: {}"
 msgstr ""
