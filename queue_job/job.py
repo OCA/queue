@@ -214,6 +214,14 @@ class Job(object):
 
         A description of the result (for humans).
 
+    .. attribute:: exc_name
+
+        Exception error name when the job failed.
+
+    .. attribute:: exc_message
+
+        Exception error message when the job failed.
+
     .. attribute:: exc_info
 
         Exception information (traceback) when the job failed.
@@ -476,6 +484,8 @@ class Job(object):
         self.date_done = None
 
         self.result = None
+        self.exc_name = None
+        self.exc_message = None
         self.exc_info = None
 
         if "company_id" in env.context:
@@ -537,6 +547,8 @@ class Job(object):
             "priority": self.priority,
             "retry": self.retry,
             "max_retries": self.max_retries,
+            "exc_name": self.exc_name,
+            "exc_message": self.exc_message,
             "exc_info": self.exc_info,
             "company_id": self.company_id,
             "result": str(self.result) if self.result else False,
@@ -717,15 +729,17 @@ class Job(object):
 
     def set_done(self, result=None):
         self.state = DONE
+        self.exc_name = None
         self.exc_info = None
         self.date_done = datetime.now()
         if result is not None:
             self.result = result
 
-    def set_failed(self, exc_info=None):
+    def set_failed(self, **kw):
         self.state = FAILED
-        if exc_info is not None:
-            self.exc_info = exc_info
+        for k, v in kw.items():
+            if v is not None:
+                setattr(self, k, v)
 
     def __repr__(self):
         return "<Job %s, priority:%d>" % (self.uuid, self.priority)
@@ -756,6 +770,7 @@ class Job(object):
         """
         eta_seconds = self._get_retry_seconds(seconds)
         self.eta = timedelta(seconds=eta_seconds)
+        self.exc_name = None
         self.exc_info = None
         if result is not None:
             self.result = result
