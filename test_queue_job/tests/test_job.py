@@ -163,9 +163,15 @@ class TestJobsOnTestingMethod(JobCommonCase):
 
     def test_set_failed(self):
         job_a = Job(self.method)
-        job_a.set_failed(exc_info="failed test")
-        self.assertEqual(job_a.state, FAILED)
-        self.assertEqual(job_a.exc_info, "failed test")
+        job_a.set_failed(
+            exc_info="failed test",
+            exc_name="FailedTest",
+            exc_message="Sadly this job failed",
+        )
+        self.assertEquals(job_a.state, FAILED)
+        self.assertEquals(job_a.exc_info, "failed test")
+        self.assertEquals(job_a.exc_name, "FailedTest")
+        self.assertEquals(job_a.exc_message, "Sadly this job failed")
 
     def test_postpone(self):
         job_a = Job(self.method)
