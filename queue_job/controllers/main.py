@@ -106,6 +106,7 @@ class RunJobController(http.Controller):
                 job.env = api.Environment(new_cr, SUPERUSER_ID, {})
                 job.set_failed(exc_info=buff.getvalue())
                 job.store()
+                buff.close()
             raise
 
         return ""
