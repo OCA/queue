@@ -233,6 +233,16 @@ class TestJobsOnTestingMethod(JobCommonCase):
         stored = self.queue_job.search([("uuid", "=", test_job.uuid)])
         self.assertEqual(len(stored), 1)
 
+    def test_store_extra_data(self):
+        test_job = Job(self.method)
+        test_job.store()
+        stored = self.queue_job.search([("uuid", "=", test_job.uuid)])
+        self.assertEqual(stored.additional_info, "JUST_TESTING")
+        test_job.set_failed(exc_info="failed test", exc_name="FailedTest")
+        test_job.store()
+        stored.invalidate_cache()
+        self.assertEqual(stored.additional_info, "JUST_TESTING_BUT_FAILED")
+
     def test_read(self):
         eta = datetime.now() + timedelta(hours=5)
         test_job = Job(
