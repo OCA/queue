@@ -10,6 +10,8 @@ class QueueJob(models.Model):
 
     _inherit = 'queue.job'
 
+    additional_info = fields.Char()
+
     @api.multi
     def testing_related_method(self, **kwargs):
         return self, kwargs
@@ -90,6 +92,12 @@ class TestQueueJob(models.Model):
             ),
         )
         return super()._register_hook()
+
+    def _job_store_values(self, job):
+        value = "JUST_TESTING"
+        if job.state == "failed":
+            value += "_BUT_FAILED"
+        return {"additional_info": value}
 
 
 class TestQueueChannel(models.Model):
