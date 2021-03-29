@@ -155,17 +155,23 @@ class TestJobsOnTestingMethod(JobCommonCase):
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
             job_a.set_done(result="test")
 
-        self.assertEquals(job_a.state, DONE)
-        self.assertEquals(job_a.result, "test")
-        self.assertEquals(job_a.date_done, datetime(2015, 3, 15, 16, 41, 0))
-        self.assertEquals(job_a.exec_time, 60.0)
+        self.assertEqual(job_a.state, DONE)
+        self.assertEqual(job_a.result, "test")
+        self.assertEqual(job_a.date_done, datetime(2015, 3, 15, 16, 41, 0))
+        self.assertEqual(job_a.exec_time, 60.0)
         self.assertFalse(job_a.exc_info)
 
     def test_set_failed(self):
         job_a = Job(self.method)
-        job_a.set_failed(exc_info="failed test")
+        job_a.set_failed(
+            exc_info="failed test",
+            exc_name="FailedTest",
+            exc_message="Sadly this job failed",
+        )
         self.assertEqual(job_a.state, FAILED)
         self.assertEqual(job_a.exc_info, "failed test")
+        self.assertEqual(job_a.exc_name, "FailedTest")
+        self.assertEqual(job_a.exc_message, "Sadly this job failed")
 
     def test_postpone(self):
         job_a = Job(self.method)
