@@ -112,6 +112,8 @@
                 <field name="date_created" />
                 <field name="date_done" />
                 <field name="exec_time" widget="float_time" />
+                <field name="exc_name" />
+                <field name="exc_message" />
                 <field name="uuid" />
                 <field name="channel" />
                 <field name="company_id" groups="base.group_multi_company" />
@@ -153,6 +155,10 @@
                 <field name="channel" />
                 <field name="job_function_id" />
                 <field name="model_name" />
+                <field name="exc_name" />
+                <field name="exc_message" />
+                <field name="exc_info" />
+                <field name="result" />
                 <field
                     name="company_id"
                     groups="base.group_multi_company"
@@ -199,6 +205,16 @@
                         name="group_by_model_name"
                         string="Model"
                         context="{'group_by': 'model_name'}"
+                    />
+                    <filter
+                        name="group_by_exc_name"
+                        string="Exception"
+                        context="{'group_by': 'exc_name'}"
+                    />
+                    <filter
+                        name="group_by_exc_message"
+                        string="Exception message"
+                        context="{'group_by': 'exc_message'}"
                     />
                 </group>
             </search>
