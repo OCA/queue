@@ -9,6 +9,7 @@ from io import StringIO
 from psycopg2 import OperationalError
 from werkzeug.exceptions import Forbidden
 
+import odoo
 from odoo import SUPERUSER_ID, _, api, http, registry, tools
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
@@ -102,10 +103,13 @@ class RunJobController(http.Controller):
             traceback.print_exc(file=buff)
             _logger.error(buff.getvalue())
             job.env.clear()
-            with registry(job.env.cr.dbname).cursor() as new_cr:
-                job.env = api.Environment(new_cr, SUPERUSER_ID, {})
-                job.set_failed(exc_info=buff.getvalue())
-                job.store()
+            with odoo.api.Environment.manage():
+                with odoo.registry(job.env.cr.dbname).cursor() as new_cr:
+                    job.env = job.env(cr=new_cr)
+                    job.set_failed(exc_info=buff.getvalue())
+                    job.store()
+                    new_cr.commit()
+                    buff.close()
             raise
 
         return ""
