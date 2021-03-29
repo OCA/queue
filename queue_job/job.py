@@ -516,6 +516,22 @@ class Job(object):
 
     def store(self):
         """Store the Job"""
+        job_model = self.env["queue.job"]
+        # The sentinel is used to prevent edition sensitive fields (such as
+        # method_name) from RPC methods.
+        edit_sentinel = job_model.EDIT_SENTINEL
+
+        db_record = self.db_record()
+        if db_record:
+            db_record.with_context(_job_edit_sentinel=edit_sentinel).write(
+                self._store_values()
+            )
+        else:
+            job_model.with_context(_job_edit_sentinel=edit_sentinel).sudo().create(
+                self._store_values(create=True)
+            )
+
+    def _store_values(self, create=False):
         vals = {
             "state": self.state,
             "priority": self.priority,
@@ -546,15 +562,7 @@ class Job(object):
         if self.identity_key:
             vals["identity_key"] = self.identity_key
 
-        job_model = self.env["queue.job"]
-        # The sentinel is used to prevent edition sensitive fields (such as
-        # method_name) from RPC methods.
-        edit_sentinel = job_model.EDIT_SENTINEL
-
-        db_record = self.db_record()
-        if db_record:
-            db_record.with_context(_job_edit_sentinel=edit_sentinel).write(vals)
-        else:
+        if create:
             vals.update(
                 {
                     "user_id": self.env.uid,
@@ -574,7 +582,24 @@ class Job(object):
                     "kwargs": self.kwargs,
                 }
             )
-            job_model.with_context(_job_edit_sentinel=edit_sentinel).sudo().create(vals)
+
+        vals_from_model = self._store_values_from_model()
+        # Sanitize values: make sure you cannot screw core values
+        vals_from_model = {k: v for k, v in vals_from_model.items() if k not in vals}
+        vals.update(vals_from_model)
+        return vals
+
+    def _store_values_from_model(self):
+        vals = {}
+        value_handlers_candidates = (
+            "_job_store_values_for_" + self.method_name,
+            "_job_store_values",
+        )
+        for candidate in value_handlers_candidates:
+            handler = getattr(self.recordset, candidate, None)
+            if handler is not None:
+                vals = handler(self)
+        return vals
 
     @property
     def func_string(self):
