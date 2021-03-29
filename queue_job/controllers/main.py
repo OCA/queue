@@ -111,6 +111,7 @@ class RunJobController(http.Controller):
                     job.set_failed(exc_info=buff.getvalue())
                     job.store()
                     new_cr.commit()
+                    buff.close()
             raise
 
         return ""
