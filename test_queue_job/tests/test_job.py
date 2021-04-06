@@ -36,7 +36,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         Create a job
         """
         test_job = Job(self.method)
-        self.assertEqual(test_job.func, self.method)
+        self.assertEqual(test_job.func.__func__, self.method.__func__)
 
     def test_eta(self):
         """ When an `eta` is datetime, it uses it """
@@ -199,7 +199,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         job_read = Job.load(self.env, test_job.uuid)
         self.assertEqual(test_job.uuid, job_read.uuid)
         self.assertEqual(test_job.model_name, job_read.model_name)
-        self.assertEqual(test_job.func, job_read.func)
+        self.assertEqual(test_job.func.__func__, job_read.func.__func__)
         self.assertEqual(test_job.args, job_read.args)
         self.assertEqual(test_job.kwargs, job_read.kwargs)
         self.assertEqual(test_job.method_name, job_read.method_name)
