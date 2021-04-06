@@ -60,3 +60,9 @@ When using odoo.sh, the configuration in ``.config/odoo/odoo.conf`` must include
    port=443
 
 Example of host: ``myproject-main-1552740.dev.odoo.com``
+
+.. note::
+    Odoo.sh puts workers to sleep when they stop receiving HTTP requests.
+    Jobs scheduled in the future or by a scheduled action could therefore not run.
+    A workaround is to wake up the workers periodically using an external
+    service (a simple GET on any URL served by Odoo is enough).
