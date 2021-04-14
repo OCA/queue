@@ -10,4 +10,6 @@ from odoo.addons.queue_job.jobrunner import channels
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(channels))
+    for test in tests:
+        test.test_tags = {"standard", "at_install", "queue_job"}
     return tests
