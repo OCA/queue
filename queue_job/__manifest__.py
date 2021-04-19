@@ -17,7 +17,7 @@
           'security/ir.model.access.csv',
           'views/queue_job_views.xml',
           'data/queue_data.xml',
-          "data/queue_job_function_data.xml",],
+          "data/queue_job_function_data.xml"],
  'installable': True,
  'development_status': 'Mature',
  'maintainers': ['guewen'],

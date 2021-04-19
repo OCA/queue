@@ -143,8 +143,8 @@
                 <field name="func_string"/>
                 <field name="channel"/>
                 <field name="job_function_id"/>
-                <fieldname="model_name" />
-                <fieldname="exc_name" />
+                <field name="model_name" />
+                <field name="exc_name" />
                 <field name="exc_message" />
                 <field name="exc_info" />
                 <field name="result" />

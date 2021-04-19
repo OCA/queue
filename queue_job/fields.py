@@ -26,18 +26,28 @@ class JobSerialized(fields.Field):
 
     _slots = {"_base_type": type}
 
-    _default_json_mapping = {dict: "{}", list: "[]", tuple: "[]"}
+    _default_json_mapping = {
+        dict: "{}",
+        list: "[]",
+        tuple: "[]",
+        models.BaseModel: lambda env: json.dumps(
+            {"_type": "odoo_recordset", "model": "base", "ids": [], "uid": env.uid}
+        ),
+    }
 
     def __init__(self, string=fields.Default, base_type=fields.Default, **kwargs):
         super().__init__(string=string, _base_type=base_type, **kwargs)
 
     def _setup_attrs(self, model, name):
         super()._setup_attrs(model, name)
-        if not self._base_type_default_json():
+        if self._base_type not in self._default_json_mapping:
             raise ValueError("%s is not a supported base type" % (self._base_type))
 
-    def _base_type_default_json(self):
-        return self._default_json_mapping.get(self._base_type)
+    def _base_type_default_json(self, env):
+        default_json = self._default_json_mapping.get(self._base_type)
+        if not isinstance(default_json, str):
+            default_json = default_json(env)
+        return default_json
 
     def convert_to_column(self, value, record, values=None, validate=True):
         return self.convert_to_cache(value, record, validate=validate)
@@ -63,8 +73,7 @@ class JobEncoder(json.JSONEncoder):
                     'model': obj._name,
                     'ids': obj.ids,
                     'uid': obj.env.uid,
-                    "su": obj.env.su,
-            }
+                    }
         elif isinstance(obj, datetime):
             return {'_type': 'datetime_isoformat',
                     'value': obj.isoformat()}

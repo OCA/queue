@@ -9,13 +9,7 @@ from datetime import datetime, timedelta
 
 from odoo import _, api, exceptions, fields, models, tools
 from odoo.osv import expression
-# Import `Serialized` field straight to avoid:
-# * remember to use --load=base_sparse_field...
-# * make pytest happy
-# * make everybody happy :
-from odoo.addons.base_sparse_field.models.fields import Serialized
 
-from ..job import STATES, DONE, PENDING, Job
 from ..fields import JobSerialized
 from ..job import DONE, PENDING, STATES, Job
 
@@ -61,10 +55,7 @@ class QueueJob(models.Model):
                        index=True,
                        required=True)
     user_id = fields.Many2one(comodel_name='res.users',
-                              string='User ID',
-                              compute="_compute_user_id",
-        inverse="_inverse_user_id",
-        store=True,)
+                              string='User ID')
     company_id = fields.Many2one(comodel_name='res.company',
                                  string='Company', index=True)
     name = fields.Char(string='Description', readonly=True)
@@ -182,7 +173,7 @@ class QueueJob(models.Model):
             # have a stored user_id field to be able to search/groupby, so
             # synchronize the env of records with user_id
             super(QueueJob, record).write(
-                {"records": record.records.with_user(vals["user_id"])}
+                {"records": record.records.sudo(vals["user_id"])}
             )
         return result
 
@@ -573,8 +564,8 @@ class JobFunction(models.Model):
         groups = regex_job_function_name.match(self.name)
         if not groups:
             raise exceptions.UserError(_("Invalid job function: {}").format(self.name))
-        model_name = groups[1]
-        method = groups[2]
+        model_name = groups.group(1)
+        method = groups.group(2)
         model = self.env["ir.model"].search([("model", "=", model_name)], limit=1)
         if not model:
             raise exceptions.UserError(_("Model {} not found").format(model_name))

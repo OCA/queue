@@ -517,7 +517,7 @@ class Job(object):
                 'eta': False,
                 'identity_key': False,
                 "worker_pid": self.worker_pid,
-        }
+                }
 
         if self.date_enqueued:
             vals['date_enqueued'] = self.date_enqueued

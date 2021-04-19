@@ -6,7 +6,7 @@ import inspect
 import logging
 import os
 
-from odoo import api, models, api
+from odoo import api, models
 from ..job import DelayableRecordset
 
 _logger = logging.getLogger(__name__)

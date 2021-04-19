@@ -6,7 +6,6 @@ import hashlib
 from datetime import datetime, timedelta
 import mock
 
-from odoo import SUPERUSER_ID
 import odoo.tests.common as common
 
 from odoo.addons.queue_job.exception import (
@@ -466,6 +465,7 @@ class TestJobs(JobCommonCase):
         job_instance = Job.load(self.env, job_instance.uuid)
         self.assertEquals(([1],), job_instance.args)
         self.assertEquals({'mutable_kwarg': {'a': 1}}, job_instance.kwargs)
+
 
 class TestJobModel(JobCommonCase):
 
