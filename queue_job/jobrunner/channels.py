@@ -25,7 +25,7 @@ class PriorityQueue(object):
     >>> q.add(3)
     >>> q.add(3)
     >>> q.add(1)
-    >>> q[0]
+    >>> q[25]
     1
     >>> len(q)
     3
