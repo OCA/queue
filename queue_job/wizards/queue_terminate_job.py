@@ -19,7 +19,7 @@ class QueueTerminateJob(models.TransientModel):
         res = (
             self.env["queue.job"]
             .browse(res)
-            .filtered(lambda qj: qj.state == "started")
+            .filtered(lambda qj: qj.state == "started" and qj.db_txid)
             .ids
         )
 

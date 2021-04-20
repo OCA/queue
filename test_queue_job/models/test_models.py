@@ -45,7 +45,13 @@ class TestQueueJob(models.Model):
             return self.env.context
         return args, kwargs
 
-    def test_long_running_method(self):
+    def testing_long_running_method(self):
+        """Method used for manual testing of job termination
+
+        Configure this method as job function to trigger a long running
+        database transaction which can then be used to test the job termination
+        functionality from the UI.
+        """
         self.env.cr.execute("""select pg_sleep(5 * 60);""")
         raise UserError(_("Sleep was not interrupted."))
 
