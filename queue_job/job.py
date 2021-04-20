@@ -670,7 +670,7 @@ class Job(object):
 
     def get_db_txid(self):
         """
-        Get the current if of the database transaction the job is running in. Only store
+        Get the current ID of the database transaction the job is running in. Only store
         the 32bit representation variant in the database so it can be compared directly
         to the 'backend_xid' in pg_stat_activity.
         """
@@ -683,16 +683,17 @@ class Job(object):
         return self.env.cr.fetchone()[0]
 
     def set_db_txid(self):
-        """
+        """Store transaction ID on current job record.
+
         Use a new cursor to update the queue_job record of this job with the
         transaction ID the process is running in. The new cursor is necessary because
         after each commit the transaction ID changes (cfr. stored() is executed), which
         makes the transaction ID useless otherwise.
         """
-        tx_id = self.get_db_txid()
         db_record = self.db_record()
         if not db_record:
             return
+        tx_id = self.get_db_txid()
         with odoo.sql_db.db_connect(self.env.cr.dbname).cursor() as separate_cr:
             separate_cr.execute(
                 "UPDATE queue_job SET db_txid = %(tx_id)s WHERE id = %(rec_id)s;",
