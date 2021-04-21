@@ -1,6 +1,7 @@
 # Copyright 2019 Camptocamp
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 import doctest
+import sys
 from contextlib import contextmanager
 
 import mock
@@ -108,8 +109,13 @@ def load_doctests(module):
 
     def load_tests(loader, tests, ignore):
         """
-        Apply the 'test_tags' attribute to each DocTestCase found by the DocTestSuite
+        Apply the 'test_tags' attribute to each DocTestCase found by the DocTestSuite.
+        Also extend the DocTestCase class trivially to fit the class teardown
+        that Odoo backported for its own test classes from Python 3.8.
         """
+        if sys.version_info < (3, 8):
+            doctest.DocTestCase.doClassCleanups = lambda: None
+            doctest.DocTestCase.tearDown_exceptions = []
         tests.addTests(doctest.DocTestSuite(module))
         for test in tests:
             test.test_tags = {"standard", "at_install", "queue_job", "doctests"}
