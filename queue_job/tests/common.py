@@ -5,8 +5,6 @@ from contextlib import contextmanager
 
 import mock
 
-from odoo.tests import BaseCase, tagged
-
 # pylint: disable=odoo-addons-relative-import
 from odoo.addons.queue_job.job import Job
 
@@ -102,26 +100,6 @@ def mock_with_delay():
         yield delayable_cls, delayable
 
 
-@tagged("doctest")
-class OdooDocTestCase(BaseCase):
-    """
-    We need a custom DocTestCase class in order to:
-    - define test_tags to run as part of standard tests
-    - output a more meaningful test name than default "DocTestCase.runTest"
-    """
-
-    __qualname__ = "doctests for "
-
-    def __init__(self, test):
-        self.__test = test
-        self.__name = test._dt_test.name
-        super().__init__(self.__name)
-
-    def __getattr__(self, item):
-        if item == self.__name:
-            return self.__test
-
-
 def load_doctests(module):
     """
     Generates a tests loading method for the doctests of the given module
@@ -129,8 +107,12 @@ def load_doctests(module):
     """
 
     def load_tests(loader, tests, ignore):
-        for test in doctest.DocTestSuite(module):
-            tests.addTest(OdooDocTestCase(test))
+        """
+        Apply the 'test_tags' attribute to each DocTestCase found by the DocTestSuite
+        """
+        tests.addTests(doctest.DocTestSuite(module))
+        for test in tests:
+            test.test_tags = {"standard", "at_install", "queue_job", "doctests"}
         return tests
 
     return load_tests
