@@ -7,8 +7,7 @@ from contextlib import contextmanager
 
 import mock
 
-# pylint: disable=odoo-addons-relative-import
-from odoo.addons.queue_job.job import Job
+from ..job import Job
 
 
 class JobCounter:
