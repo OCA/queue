@@ -148,6 +148,33 @@ class TestJobsOnTestingMethod(JobCommonCase):
         job_a.set_pending()
         self.assertFalse(job_a.worker_pid)
 
+    def test_db_txid(self):
+        """
+        When a job is started, the databse transaction ID of the process is stored on
+        the job.
+        """
+
+        # Mock the effect of set_db_txid
+        def mock_set_db_txid(self):
+            self.env.cr.execute(
+                "UPDATE queue_job SET db_txid = 8888 WHERE id = %(rec_id)s;",
+                {"rec_id": job_a.db_record().id},
+            )
+
+        method = self.env["res.users"].mapped
+        job_a = Job(method, args=["login"])
+        job_a.store()
+        self.assertFalse(job_a.db_txid)
+
+        with mock.patch.object(Job, "set_db_txid", new=mock_set_db_txid):
+            job_a.perform()
+            job_a = Job.load(self.env, job_a.uuid)
+            self.assertEqual(job_a.db_txid, "8888")
+
+        # Reset on pending
+        job_a.set_pending()
+        self.assertFalse(job_a.db_txid)
+
     def test_set_done(self):
         job_a = Job(self.method)
         datetime_path = "odoo.addons.queue_job.job.datetime"
