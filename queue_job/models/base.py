@@ -79,10 +79,14 @@ class Base(models.AbstractModel):
             @mute_logger('odoo.addons.queue_job.models.base')
         """
         if os.getenv("TEST_QUEUE_JOB_NO_DELAY"):
-            _logger.warn("`TEST_QUEUE_JOB_NO_DELAY` env var found. NO JOB scheduled.")
+            _logger.warning(
+                "`TEST_QUEUE_JOB_NO_DELAY` env var found. NO JOB scheduled."
+            )
             return self
         if self.env.context.get("test_queue_job_no_delay"):
-            _logger.warn("`test_queue_job_no_delay` ctx key found. NO JOB scheduled.")
+            _logger.warning(
+                "`test_queue_job_no_delay` ctx key found. NO JOB scheduled."
+            )
             return self
         return DelayableRecordset(
             self,
