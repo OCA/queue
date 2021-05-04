@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* test_queue_job
+# 	* test_queue_job
 #
 msgid ""
 msgstr ""
@@ -31,6 +31,7 @@ msgid "Created on"
 msgstr "创建时间"
 
 #. module: test_queue_job
+#: model:ir.model.fields,field_description:test_queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel__display_name
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__display_name
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action__display_name
@@ -38,6 +39,7 @@ msgid "Display Name"
 msgstr "显示名称"
 
 #. module: test_queue_job
+#: model:ir.model.fields,field_description:test_queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel__id
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__id
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action__id
@@ -45,6 +47,7 @@ msgid "ID"
 msgstr "ID"
 
 #. module: test_queue_job
+#: model:ir.model.fields,field_description:test_queue_job.field_queue_job____last_update
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel____last_update
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job____last_update
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action____last_update
@@ -74,6 +77,12 @@ msgstr "名称"
 #: model:ir.model,name:test_queue_job.model_queue_job
 msgid "Queue Job"
 msgstr "队列作业"
+
+#. module: test_queue_job
+#: code:addons/test_queue_job/models/test_models.py:0
+#, python-format
+msgid "Sleep was not interrupted."
+msgstr ""
 
 #. module: test_queue_job
 #: model:ir.model,name:test_queue_job.model_test_queue_channel
