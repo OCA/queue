@@ -26,6 +26,13 @@ msgstr ""
 "auf 0 gesetzt ist,  wird dies als unendlich interpretiert.</span>"
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.queue_terminate_job_view_form
+msgid ""
+"A job that is terminated will have the state 'Failed' and an error message "
+"containing 'terminating connection due to administrator command'"
+msgstr ""
+
+#. module: queue_job
 #: code:addons/queue_job/controllers/main.py:0
 #, python-format
 msgid "Access Denied"
@@ -44,7 +51,6 @@ msgstr "Aktivitäten"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_exception_decoration
 #, fuzzy
-#| msgid "Exception Information"
 msgid "Activity Exception Decoration"
 msgstr "Exception-Information"
 
@@ -52,6 +58,16 @@ msgstr "Exception-Information"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_state
 msgid "Activity State"
 msgstr "Aktivitätsstatus"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_type_icon
+msgid "Activity Type Icon"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Are you sure?"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__args
@@ -76,19 +92,20 @@ msgid "Base"
 msgstr "Basis"
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.queue_terminate_job_view_form
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Cancel"
 msgstr "Abbrechen"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
+#: code:addons/queue_job/models/queue_job_channel.py:0
 #, python-format
 msgid "Cannot change the root channel"
 msgstr "Der Root-Kanal kann nicht geändert werden"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
+#: code:addons/queue_job/models/queue_job_channel.py:0
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr "Der Root-Kanal kann nicht entfernt werden"
@@ -139,6 +156,7 @@ msgstr "Erstellt am"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__create_uid
 msgid "Created by"
 msgstr "Erstellt von"
 
@@ -146,6 +164,7 @@ msgstr "Erstellt von"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__create_date
 msgid "Created on"
 msgstr "Erstellt am"
 
@@ -160,6 +179,11 @@ msgid "Current try / max. retries"
 msgstr "Aktueller Versuch / max. Anzahl der Wiederholung"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__db_txid
+msgid "Database transaction ID"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_done
 msgid "Date Done"
 msgstr "Erledigt am"
@@ -170,11 +194,13 @@ msgid "Description"
 msgstr "Beschreibung"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__display_name
 msgid "Display Name"
 msgstr "Anzeigename"
 
@@ -217,6 +243,14 @@ msgid "Failed"
 msgstr "Fehlgeschlagen"
 
 #. module: queue_job
+#: code:addons/queue_job/wizards/queue_terminate_job.py:0
+#, python-format
+msgid ""
+"Failed to terminate the following jobs:\n"
+"%s"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__ttype
 msgid "Field Type"
 msgstr ""
@@ -242,17 +276,24 @@ msgid "Followers (Partners)"
 msgstr "Abonnenten (Partner)"
 
 #. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr ""
+
+#. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Group By"
 msgstr "Gruppieren nach"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__id
 msgid "ID"
 msgstr "ID"
 
@@ -272,13 +313,6 @@ msgid "Identity Key"
 msgstr "Identitätsschlüssel"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
-#, fuzzy, python-format
-#| msgid "The selected jobs will be requeued."
-msgid "If both parameters are 0, ALL jobs will be requeued!"
-msgstr "Die ausgewählten Jobs werden erneut eingereiht."
-
-#. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_unread
 msgid "If checked, new messages require your attention."
@@ -292,7 +326,7 @@ msgstr ""
 "Wenn es gesetzt ist, gibt es einige Nachrichten mit einem Übertragungsfehler."
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
+#: code:addons/queue_job/models/queue_job_function.py:0
 #, python-format
 msgid "Invalid job function: {}"
 msgstr ""
@@ -337,7 +371,6 @@ msgstr "Job-Warteschlangenverwalter"
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__ir_model_fields__ttype__job_serialized
 #, fuzzy
-#| msgid "Job failed"
 msgid "Job Serialized"
 msgstr "Job ist fehlgeschlagen"
 
@@ -356,6 +389,7 @@ msgstr "Job unterbrochen und als Erledigt markiert: Es ist nicht zu tun."
 #: model:ir.actions.act_window,name:queue_job.action_queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__job_ids
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__job_ids
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__job_ids
 #: model:ir.ui.menu,name:queue_job.menu_queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
@@ -375,11 +409,13 @@ msgid "Kwargs"
 msgstr "Kwargs"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job____last_update
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job____last_update
 msgid "Last Modified on"
 msgstr "Zuletzt geändert am"
 
@@ -387,6 +423,7 @@ msgstr "Zuletzt geändert am"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__write_uid
 msgid "Last Updated by"
 msgstr "Zuletzt aktualisiert von"
 
@@ -394,6 +431,7 @@ msgstr "Zuletzt aktualisiert von"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__write_date
 msgid "Last Updated on"
 msgstr "Zuletzt aktualisiert am"
 
@@ -426,7 +464,6 @@ msgstr "Nachrichten"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__method
 #, fuzzy
-#| msgid "Method Name"
 msgid "Method"
 msgstr "Methodenname"
 
@@ -442,7 +479,7 @@ msgid "Model"
 msgstr "Modell"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
+#: code:addons/queue_job/models/queue_job_function.py:0
 #, python-format
 msgid "Model {} not found"
 msgstr ""
@@ -516,7 +553,7 @@ msgid "Parent Channel"
 msgstr "Übergeordneter Kanal"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
+#: code:addons/queue_job/models/queue_job_channel.py:0
 #, python-format
 msgid "Parent channel required."
 msgstr "Es ist ein übergeordneter Kanal notwendig."
@@ -565,7 +602,6 @@ msgstr "Datensatz"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__records
 #, fuzzy
-#| msgid "Record"
 msgid "Record(s)"
 msgstr "Datensatz"
 
@@ -577,7 +613,6 @@ msgstr "Zugehörige Aktion anzeigen"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_related_action
 #, fuzzy
-#| msgid "Related Record"
 msgid "Related Action"
 msgstr "Zugehöriger Datensatz"
 
@@ -585,18 +620,6 @@ msgstr "Zugehöriger Datensatz"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__related_action
 msgid "Related Action (serialized)"
 msgstr ""
-
-#. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
-#, python-format
-msgid "Related Record"
-msgstr "Zugehöriger Datensatz"
-
-#. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
-#, python-format
-msgid "Related Records"
-msgstr "Zugehörige Datensätze"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__removal_interval
@@ -671,16 +694,6 @@ msgid "Set to done"
 msgstr "Als Erledigt markieren"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
-#, python-format
-msgid ""
-"Something bad happened during the execution of the job. More details in the "
-"'Exception Information' section."
-msgstr ""
-"Bei der Ausführung des Jobs ist etwas Ungewöhnliches passiert. Beachten Sie "
-"die Details im Abschnitt \"Exception-Information\"."
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_started
 msgid "Start Date"
 msgstr "Gestartet am"
@@ -716,6 +729,18 @@ msgid "Task"
 msgstr "Aufgabe"
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.queue_terminate_job_view_form
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Terminate"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.queue_terminate_job_action
+#: model_terms:ir.ui.view,arch_db:queue_job.queue_terminate_job_view_form
+msgid "Terminate Jobs"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_related_action
 msgid ""
 "The action when the button *Related Action* is used on a job. The default "
@@ -746,6 +771,11 @@ msgid "The selected jobs will be set to done."
 msgstr "Die ausgewählten Jobs werden als Erledigt markiert."
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.queue_terminate_job_view_form
+msgid "The selected jobs will be terminated."
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Typ der Ausnahmeaktivität im Datensatz."
@@ -756,7 +786,7 @@ msgid "UUID"
 msgstr "UUID"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
+#: code:addons/queue_job/models/queue_job_function.py:0
 #, python-format
 msgid ""
 "Unexpected format of Related Action for {}.\n"
@@ -766,7 +796,7 @@ msgid ""
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
+#: code:addons/queue_job/models/queue_job_function.py:0
 #, python-format
 msgid ""
 "Unexpected format of Retry Pattern for {}.\n"
@@ -790,24 +820,48 @@ msgid "User ID"
 msgstr "Benutzer"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__website_message_ids
-msgid "Website Messages"
-msgstr "Website Nachrichten"
-
-#. module: queue_job
-#: model:ir.model.fields,help:queue_job.field_queue_job__website_message_ids
-msgid "Website communication history"
-msgstr "Historie der Website-Kommunikation"
-
-#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_requeue_job
 msgid "Wizard to requeue a selection of jobs"
 msgstr "Assistent zur erneuten Einreihung einer Job-Auswahl"
 
 #. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_terminate_job
+msgid "Wizard to terminate a job"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_hostname
+msgid "Worker Hostname"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr ""
+
+#, fuzzy
+#~| msgid "The selected jobs will be requeued."
+#~ msgid "If both parameters are 0, ALL jobs will be requeued!"
+#~ msgstr "Die ausgewählten Jobs werden erneut eingereiht."
+
+#~ msgid "Related Record"
+#~ msgstr "Zugehöriger Datensatz"
+
+#~ msgid "Related Records"
+#~ msgstr "Zugehörige Datensätze"
+
+#~ msgid ""
+#~ "Something bad happened during the execution of the job. More details in "
+#~ "the 'Exception Information' section."
+#~ msgstr ""
+#~ "Bei der Ausführung des Jobs ist etwas Ungewöhnliches passiert. Beachten "
+#~ "Sie die Details im Abschnitt \"Exception-Information\"."
+
+#~ msgid "Website Messages"
+#~ msgstr "Website Nachrichten"
+
+#~ msgid "Website communication history"
+#~ msgstr "Historie der Website-Kommunikation"
 
 #~ msgid "If checked new messages require your attention."
 #~ msgstr ""
