@@ -21,6 +21,13 @@ msgid ""
 msgstr ""
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.queue_terminate_job_view_form
+msgid ""
+"A job that is terminated will have the state 'Failed' and an error message "
+"containing 'terminating connection due to administrator command'"
+msgstr ""
+
+#. module: queue_job
 #: code:addons/queue_job/controllers/main.py:0
 #, python-format
 msgid "Access Denied"
@@ -52,6 +59,11 @@ msgid "Activity Type Icon"
 msgstr ""
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Are you sure?"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__args
 msgid "Args"
 msgstr ""
@@ -74,6 +86,7 @@ msgid "Base"
 msgstr ""
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.queue_terminate_job_view_form
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Cancel"
@@ -137,6 +150,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__create_uid
 msgid "Created by"
 msgstr ""
 
@@ -144,6 +158,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__create_date
 msgid "Created on"
 msgstr ""
 
@@ -155,6 +170,11 @@ msgstr ""
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Current try / max. retries"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__db_txid
+msgid "Database transaction ID"
 msgstr ""
 
 #. module: queue_job
@@ -174,6 +194,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__display_name
 msgid "Display Name"
 msgstr ""
 
@@ -213,6 +234,14 @@ msgstr ""
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__failed
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Failed"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/wizards/queue_terminate_job.py:0
+#, python-format
+msgid ""
+"Failed to terminate the following jobs:\n"
+"%s"
 msgstr ""
 
 #. module: queue_job
@@ -258,6 +287,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__id
 msgid "ID"
 msgstr ""
 
@@ -274,12 +304,6 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__identity_key
 msgid "Identity Key"
-msgstr ""
-
-#. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
-#, python-format
-msgid "If both parameters are 0, ALL jobs will be requeued!"
 msgstr ""
 
 #. module: queue_job
@@ -357,6 +381,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:queue_job.action_queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__job_ids
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__job_ids
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__job_ids
 #: model:ir.ui.menu,name:queue_job.menu_queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
@@ -382,6 +407,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job____last_update
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job____last_update
 msgid "Last Modified on"
 msgstr ""
 
@@ -389,6 +415,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__write_uid
 msgid "Last Updated by"
 msgstr ""
 
@@ -396,6 +423,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_terminate_job__write_date
 msgid "Last Updated on"
 msgstr ""
 
@@ -582,18 +610,6 @@ msgid "Related Action (serialized)"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
-#, python-format
-msgid "Related Record"
-msgstr ""
-
-#. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
-#, python-format
-msgid "Related Records"
-msgstr ""
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__removal_interval
 msgid "Removal Interval"
 msgstr ""
@@ -666,14 +682,6 @@ msgid "Set to done"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
-#, python-format
-msgid ""
-"Something bad happened during the execution of the job. More details in the "
-"'Exception Information' section."
-msgstr ""
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_started
 msgid "Start Date"
 msgstr ""
@@ -705,6 +713,18 @@ msgid "Task"
 msgstr ""
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.queue_terminate_job_view_form
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Terminate"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.queue_terminate_job_action
+#: model_terms:ir.ui.view,arch_db:queue_job.queue_terminate_job_view_form
+msgid "Terminate Jobs"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_related_action
 msgid ""
 "The action when the button *Related Action* is used on a job. The default action is to open the view of the record related to the job. Configured as a dictionary with optional keys: enable, func_name, kwargs.\n"
@@ -726,6 +746,11 @@ msgstr ""
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "The selected jobs will be set to done."
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.queue_terminate_job_view_form
+msgid "The selected jobs will be terminated."
 msgstr ""
 
 #. module: queue_job
@@ -774,6 +799,16 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_requeue_job
 msgid "Wizard to requeue a selection of jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_terminate_job
+msgid "Wizard to terminate a job"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_hostname
+msgid "Worker Hostname"
 msgstr ""
 
 #. module: queue_job
