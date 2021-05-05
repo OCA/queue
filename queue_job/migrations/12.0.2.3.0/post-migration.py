@@ -15,16 +15,18 @@ def migrate(cr, version):
 
 
 def _compute_jobs_new_values(env):
-    for job in env["queue.job"].search(
+    job_exc_infos = env["queue.job"].search(
         [("state", "=", "failed"), ("exc_info", "!=", False)]
-    ):
-        exception_details = _get_exception_details(job)
+    ).read(fields=["exc_info"])
+    for job_row in job_exc_infos:
+        exception_details = _get_exception_details(job_row["exc_info"])
         if exception_details:
-            job.update(exception_details)
+            job = env["queue.job"].browse(job_row["id"])
+            job.write(exception_details)
 
 
-def _get_exception_details(job):
-    for line in reversed(job.exc_info.splitlines()):
+def _get_exception_details(exc_info):
+    for line in reversed(exc_info.splitlines()):
         if _find_exception(line):
             name, msg = line.split(":", 1)
             return {
