@@ -3,6 +3,7 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 from odoo import api, SUPERUSER_ID
+from odoo.addons.queue_job.job import DONE
 
 
 def migrate(cr, version):
@@ -28,3 +29,8 @@ def migrate(cr, version):
                     method.im_class._name, method.__name__,
                 ),
             })
+    # recompute func_string after other addons have adapted their
+    # args/kwargs/record_ids
+    records = QueueJob.search([('state', 'not in', [DONE])])
+    records._recompute_todo(QueueJob._fields['func_string'])
+    records.recompute()
