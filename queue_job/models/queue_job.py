@@ -8,7 +8,7 @@ from odoo import _, api, exceptions, fields, models
 from odoo.osv import expression
 
 from ..fields import JobSerialized
-from ..job import DONE, PENDING, STARTED, STATES, Job
+from ..job import DONE, PENDING, STATES, Job
 
 _logger = logging.getLogger(__name__)
 
@@ -109,8 +109,6 @@ class QueueJob(models.Model):
 
     identity_key = fields.Char()
     worker_pid = fields.Integer()
-    worker_hostname = fields.Char()
-    db_txid = fields.Char(string="Database transaction ID")
 
     def init(self):
         self._cr.execute(
@@ -236,73 +234,6 @@ class QueueJob(models.Model):
     def requeue(self):
         self._change_job_state(PENDING)
         return True
-
-    def button_terminate(self):
-        self.terminate()
-        return {
-            "type": "ir.actions.client",
-            "tag": "reload",
-        }
-
-    def terminate(self, raise_error=True):
-        """Attempt to kill the backend process related to the running job."""
-        error_jobs = self.env["queue.job"]
-        for record in self:
-            # Check if the job can be terminated
-            if record.state != STARTED:
-                error_message = _(
-                    f"Unable to terminate job {record.uuid} because it is not started"
-                )
-                _logger.warning(error_message)
-                if raise_error:
-                    raise exceptions.UserError(error_message)
-                continue
-
-            elif not record.db_txid:
-                error_message = _(
-                    f"Unable to terminate job {record.uuid}. Missing 'db_txid'",
-                )
-                _logger.warning(error_message)
-                if raise_error:
-                    raise exceptions.UserError(error_message)
-                continue
-
-            try:
-                _logger.warning(
-                    "Terminating backend process with transaction %s for job %s",
-                    record.db_txid,
-                    record.uuid,
-                )
-                self.env.cr.execute(
-                    """
-                SELECT pg_terminate_backend(pid) FROM pg_stat_activity
-                WHERE backend_xid = %(db_txid)s
-                AND state != 'idle';
-                """,
-                    {"db_txid": self.db_txid},
-                )
-                terminated_pid = self.env.cr.fetchone()
-                if terminated_pid:
-                    _logger.warning(
-                        "Successfully terminated backend_pid: %s", terminated_pid
-                    )
-                else:
-                    error_message = _(
-                        f"Failed to terminate job {record.uuid} for an unknown reason."
-                    )
-                    _logger.warning(error_message)
-                    if raise_error:
-                        raise exceptions.UserError(error_message)
-
-            except Exception:
-                _logger.warning(
-                    "Failed to terminate backend process transaction %s for job %s",
-                    record.db_txid,
-                    record.uuid,
-                )
-                error_jobs += record
-
-        return error_jobs
 
     def _message_post_on_failure(self):
         # subscribe the users now to avoid to subscribe them
