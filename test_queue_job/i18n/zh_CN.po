@@ -79,12 +79,6 @@ msgid "Queue Job"
 msgstr "队列作业"
 
 #. module: test_queue_job
-#: code:addons/test_queue_job/models/test_models.py:0
-#, python-format
-msgid "Sleep was not interrupted."
-msgstr ""
-
-#. module: test_queue_job
 #: model:ir.model,name:test_queue_job.model_test_queue_channel
 msgid "Test model for queue.channel"
 msgstr "测试模型 queue.channel"
