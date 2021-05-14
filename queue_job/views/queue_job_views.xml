@@ -20,6 +20,12 @@
                         string="Set to 'Done'"
                         type="object"
                         groups="queue_job.group_queue_job_manager"/>
+                    <button name="button_cancelled"
+                        states="pending,enqueued,failed"
+                        class="oe_highlight"
+                        string="Cancel job"
+                        type="object"
+                        groups="queue_job.group_queue_job_manager"/>
                     <button name="open_related_action"
                         string="Related"
                         type="object"
@@ -27,7 +33,7 @@
                     <field name="state"
                         widget="statusbar"
                         statusbar_visible="pending,enqueued,started,done"
-                        statusbar_colors='{"failed":"red","done":"green"}'/>
+                        statusbar_colors='{"failed":"red","done":"green","cancelled":"yellow"}'/>
                 </header>
                 <sheet>
                     <h1>
@@ -229,6 +235,22 @@
         </field>
     </record>
 
+    <record id="view_set_jobs_cancelled" model="ir.ui.view">
+        <field name="name">Cancel Jobs</field>
+        <field name="model">queue.jobs.to.cancelled</field>
+        <field name="arch" type="xml">
+            <form>
+                <group string="The selected jobs will be cancelled.">
+                    <field name="job_ids" nolabel="1"/>
+                </group>
+                <footer>
+                    <button name="set_cancelled" string="Cancel jobs" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="oe_link" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
     <record id="action_requeue_job" model="ir.actions.act_window">
         <field name="name">Requeue Jobs</field>
         <field name="res_model">queue.requeue.job</field>
@@ -245,6 +267,16 @@
         <field name="view_type">form</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="view_set_jobs_done"/>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="queue_job.model_queue_job" />
+    </record>
+
+    <record id="action_set_jobs_cancelled" model="ir.actions.act_window">
+        <field name="name">Cancel jobs</field>
+        <field name="res_model">queue.jobs.to.cancelled</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_set_jobs_cancelled"/>
         <field name="target">new</field>
         <field name="binding_model_id" ref="queue_job.model_queue_job" />
     </record>

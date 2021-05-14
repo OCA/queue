@@ -11,7 +11,7 @@ from odoo import _, api, exceptions, fields, models, tools
 from odoo.osv import expression
 
 from ..fields import JobSerialized
-from ..job import DONE, PENDING, STATES, Job
+from ..job import CANCELLED, DONE, PENDING, STATES, Job
 
 _logger = logging.getLogger(__name__)
 
@@ -91,6 +91,7 @@ class QueueJob(models.Model):
         group_operator="avg",
         help="Time required to execute this job in seconds. Average when grouped.",
     )
+    date_cancelled = fields.Datetime(readonly=True)
 
     eta = fields.Datetime(string='Execute only after')
     retry = fields.Integer(string='Current try')
@@ -200,6 +201,8 @@ class QueueJob(models.Model):
                 job_.set_done(result=result)
             elif state == PENDING:
                 job_.set_pending(result=result)
+            elif state == CANCELLED:
+                job_.set_cancelled(result=result)
             else:
                 raise ValueError('State not supported: %s' % state)
             job_.store()
@@ -208,6 +211,12 @@ class QueueJob(models.Model):
     def button_done(self):
         result = _('Manually set to done by %s') % self.env.user.name
         self._change_job_state(DONE, result=result)
+        return True
+
+    @api.multi
+    def button_cancelled(self):
+        result = _('Cancelled by %s') % self.env.user.name
+        self._change_job_state(CANCELLED, result=result)
         return True
 
     @api.multi
@@ -271,7 +280,9 @@ class QueueJob(models.Model):
             deadline = datetime.now() - timedelta(
                 days=int(channel.removal_interval))
             jobs = self.search(
-                [('date_done', '<=', deadline),
+                ['|',
+                 ('date_done', '<=', deadline),
+                 ('date_cancelled', '<=', deadline),
                  ('channel', '=', channel.complete_name)],
             )
             if jobs:
@@ -397,6 +408,20 @@ class SetJobsToDone(models.TransientModel):
     def set_done(self):
         jobs = self.job_ids
         jobs.button_done()
+        return {'type': 'ir.actions.act_window_close'}
+
+
+class SetJobsToCancelled(models.TransientModel):
+    _inherit = 'queue.requeue.job'
+    _name = 'queue.jobs.to.cancelled'
+    _description = 'Cancel all selected jobs'
+
+    @api.multi
+    def set_cancelled(self):
+        jobs = self.job_ids.filtered(
+            lambda x: x.state in ('pending', 'failed', 'enqueued')
+        )
+        jobs.button_cancelled()
         return {'type': 'ir.actions.act_window_close'}
 
 
