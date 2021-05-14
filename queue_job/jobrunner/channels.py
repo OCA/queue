@@ -564,8 +564,8 @@ class Channel(object):
             found_job = False
             for generator in generators:
                 try:
-                    job = next(generator)
-                    self._queue.add(job)
+                    next_job = next(generator)
+                    self._queue.add(next_job)
                     found_job = True
                     if jobs_to_get is not None:  # Add a single job
                         jobs_to_get -= 1
@@ -594,7 +594,8 @@ class Channel(object):
 
         jobs_to_get = jobs_to_get_orig
         found_job = True
-        while self.has_capacity() or (jobs_to_get and found_job):
+        while self.has_capacity() or (
+                not self.sequential and jobs_to_get and found_job):
             found_job = False
             job = self._queue.pop(now)
             if not job:
@@ -609,10 +610,6 @@ class Channel(object):
                     )
                     if overcapacity > 0:
                         for job in self.get_jobs_to_run(now, jobs_to_get=overcapacity):
-                            # Do not parallel run jobs from sequential channel
-                            if job.channel.sequential and any(
-                                    r.channel == job.channel for r in self._running):
-                                continue
                             _logger.debug(
                                 "job %s marked running in channel %s", job.uuid, self
                             )
@@ -752,10 +749,11 @@ class ChannelManager(object):
     (but without the root channel having more capacity available)
 
     >>> cm = ChannelManager()
-    >>> cm.simple_configure('root:2,T:2:throttle=2')
+    >>> cm.simple_configure('root:4,T:2:throttle=2')
     >>> cm.notify(db, 'T', 'T1', 1, 0, 10, None, 'pending')
     >>> cm.notify(db, 'T', 'T2', 2, 0, 10, None, 'pending')
     >>> cm.notify(db, 'T', 'T3', 3, 0, 10, None, 'pending')
+    >>> cm.notify(db, 'T', 'T4', 4, 0, 10, None, 'pending')
 
     >>> pp(list(cm.get_jobs_to_run(now=100)))
     [<ChannelJob T1>]
@@ -769,19 +767,22 @@ class ChannelManager(object):
     []
     >>> cm.get_wakeup_time()  # no wakeup time, since queue is full
     0
+
+    # Job T3 can start at 104 because the overcapacity of the root channel is applied.
+
     >>> pp(list(cm.get_jobs_to_run(now=104)))
-    []
+    [<ChannelJob T3>]
     >>> cm.get_wakeup_time()  # queue is still full
     0
 
     >>> cm.notify(db, 'T', 'T1', 1, 0, 10, None, 'done')
     >>> pp(list(cm.get_jobs_to_run(now=105)))
-    [<ChannelJob T3>]
+    []
     >>> cm.get_wakeup_time()  # queue is full
     0
     >>> cm.notify(db, 'T', 'T2', 1, 0, 10, None, 'done')
     >>> cm.get_wakeup_time()
-    107
+    106
 
     Test wakeup time behaviour in presence of eta. (But without the root channel having
     more capacity available.)
@@ -922,6 +923,26 @@ class ChannelManager(object):
     >>> pp(list(cm.get_jobs_to_run(now=100)))
     [<ChannelJob C3>]
 
+    # Sequential channels are respected within an overflow configuration
+
+    >>> cm = ChannelManager()
+    >>> cm.simple_configure('root:4,C:2,D:1:sequential')
+    >>> cm.notify(db, 'C', 'C1', 1, 0, 10, None, 'pending')
+    >>> cm.notify(db, 'C', 'C2', 2, 0, 10, None, 'pending')
+    >>> cm.notify(db, 'C', 'C3', 3, 0, 10, None, 'pending')
+    >>> cm.notify(db, 'C', 'C4', 4, 0, 10, None, 'pending')
+    >>> cm.notify(db, 'D', 'D1', 5, 0, 10, None, 'pending')
+    >>> cm.notify(db, 'D', 'D2', 6, 0, 10, None, 'pending')
+    >>> cm.notify(db, 'D', 'D3', 6, 0, 10, None, 'pending')
+    >>> pp(list(cm.get_jobs_to_run(now=100)))
+    [<ChannelJob C1>, <ChannelJob C2>, <ChannelJob D1>, <ChannelJob C3>]
+
+    >>> cm.notify(db, 'C', 'C1', 1, 0, 10, None, 'done')
+    >>> cm.notify(db, 'C', 'C2', 2, 0, 10, None, 'done')
+    >>> cm.notify(db, 'D', 'D1', 5, 0, 10, None, 'done')
+
+    >>> pp(list(cm.get_jobs_to_run(now=100)))
+    [<ChannelJob C4>, <ChannelJob D2>]
     """
 
     def __init__(self):
