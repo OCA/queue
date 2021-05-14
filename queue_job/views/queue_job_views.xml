@@ -23,12 +23,20 @@
                         type="object"
                         groups="queue_job.group_queue_job_manager"
                     />
+                    <button
+                        name="button_cancelled"
+                        states="pending,enqueued,failed"
+                        class="oe_highlight"
+                        string="Cancel job"
+                        type="object"
+                        groups="queue_job.group_queue_job_manager"
+                    />
                     <button name="open_related_action" string="Related" type="object" />
                     <field
                         name="state"
                         widget="statusbar"
                         statusbar_visible="pending,enqueued,started,done"
-                        statusbar_colors='{"failed":"red","done":"green"}'
+                        statusbar_colors='{"failed":"red","done":"green","cancelled":"yellow"}'
                     />
                 </header>
                 <sheet>
