@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* base_import_async
+# 	* base_import_async
 #
 msgid ""
 msgstr ""
@@ -34,7 +34,7 @@ msgid "Import %s from file %s"
 msgstr "Importar %s a partir do ficheiro %s"
 
 #. module: base_import_async
-#: code:addons/base_import_async/models/base_import_import.py:153
+#: code:addons/base_import_async/models/base_import_import.py:154
 #, python-format
 msgid "Import %s from file %s - #%s - lines %s to %s"
 msgstr "Importar %s a partir do ficheiro %s - #%s - linhas %s a %s"
@@ -55,7 +55,10 @@ msgstr "Trabalho em Fila"
 #. openerp-web
 #: code:addons/base_import_async/static/src/xml/import.xml:7
 #, python-format
-msgid "When checked, the import will be executed as a background job,  after splitting your file in small chunks that will be processed independently.  Use this to import very large files."
+msgid ""
+"When checked, the import will be executed as a background job,  after "
+"splitting your file in small chunks that will be processed independently.  "
+"Use this to import very large files."
 msgstr ""
 "Quando assinalado, a importação será executada como um trabalho em fila, "
 "após separação do ficheiro em pequenas partes que serão processadas de forma "
