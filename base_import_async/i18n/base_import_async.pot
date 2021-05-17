@@ -26,7 +26,7 @@ msgid "Import %s from file %s"
 msgstr ""
 
 #. module: base_import_async
-#: code:addons/base_import_async/models/base_import_import.py:156
+#: code:addons/base_import_async/models/base_import_import.py:157
 #, python-format
 msgid "Import %s from file %s - #%s - lines %s to %s"
 msgstr ""
