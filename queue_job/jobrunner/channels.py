@@ -522,7 +522,7 @@ class Channel(object):
             return True
         return len(self._running) < self.capacity
 
-    def get_jobs_to_run(self, now, jobs_to_get=None):
+    def get_jobs_to_run(self, now, jobs_to_get=None):  # noqa: C901
         """Get jobs that are ready to run in channel.
 
         This works by enqueuing jobs that are ready to run in children
@@ -595,7 +595,8 @@ class Channel(object):
         jobs_to_get = jobs_to_get_orig
         found_job = True
         while self.has_capacity() or (
-                not self.sequential and jobs_to_get and found_job):
+            not self.sequential and not self.throttle and jobs_to_get and found_job
+        ):
             found_job = False
             job = self._queue.pop(now)
             if not job:
@@ -745,15 +746,13 @@ class ChannelManager(object):
     >>> cm.get_wakeup_time()
     104
 
-    Let's test throttling in combination with a queue reaching full capacity
-    (but without the root channel having more capacity available)
+    Let's test throttling in combination with a queue reaching full capacity.
 
     >>> cm = ChannelManager()
     >>> cm.simple_configure('root:4,T:2:throttle=2')
     >>> cm.notify(db, 'T', 'T1', 1, 0, 10, None, 'pending')
     >>> cm.notify(db, 'T', 'T2', 2, 0, 10, None, 'pending')
     >>> cm.notify(db, 'T', 'T3', 3, 0, 10, None, 'pending')
-    >>> cm.notify(db, 'T', 'T4', 4, 0, 10, None, 'pending')
 
     >>> pp(list(cm.get_jobs_to_run(now=100)))
     [<ChannelJob T1>]
@@ -767,22 +766,19 @@ class ChannelManager(object):
     []
     >>> cm.get_wakeup_time()  # no wakeup time, since queue is full
     0
-
-    # Job T3 can start at 104 because the overcapacity of the root channel is applied.
-
     >>> pp(list(cm.get_jobs_to_run(now=104)))
-    [<ChannelJob T3>]
+    []
     >>> cm.get_wakeup_time()  # queue is still full
     0
 
     >>> cm.notify(db, 'T', 'T1', 1, 0, 10, None, 'done')
     >>> pp(list(cm.get_jobs_to_run(now=105)))
-    []
+    [<ChannelJob T3>]
     >>> cm.get_wakeup_time()  # queue is full
     0
     >>> cm.notify(db, 'T', 'T2', 1, 0, 10, None, 'done')
     >>> cm.get_wakeup_time()
-    106
+    107
 
     Test wakeup time behaviour in presence of eta. (But without the root channel having
     more capacity available.)
