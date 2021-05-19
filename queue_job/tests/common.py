@@ -1,5 +1,8 @@
 # Copyright 2019 Camptocamp
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+import doctest
+import logging
+import sys
 from contextlib import contextmanager
 
 import mock
@@ -96,3 +99,51 @@ def mock_with_delay():
         delayable = mock.MagicMock(name="DelayableBinding")
         delayable_cls.return_value = delayable
         yield delayable_cls, delayable
+
+
+class OdooDocTestCase(doctest.DocTestCase):
+    """
+    We need a custom DocTestCase class in order to:
+    - define test_tags to run as part of standard tests
+    - output a more meaningful test name than default "DocTestCase.runTest"
+    """
+
+    def __init__(self, doctest, optionflags=0, setUp=None, tearDown=None, checker=None):
+        super().__init__(
+            doctest._dt_test,
+            optionflags=optionflags,
+            setUp=setUp,
+            tearDown=tearDown,
+            checker=checker,
+        )
+
+    def setUp(self):
+        """Log an extra statement which test is started."""
+        super(OdooDocTestCase, self).setUp()
+        logging.getLogger(__name__).info("Running tests for %s", self._dt_test.name)
+
+
+def load_doctests(module):
+    """
+    Generates a tests loading method for the doctests of the given module
+    https://docs.python.org/3/library/unittest.html#load-tests-protocol
+    """
+
+    def load_tests(loader, tests, ignore):
+        """
+        Apply the 'test_tags' attribute to each DocTestCase found by the DocTestSuite.
+        Also extend the DocTestCase class trivially to fit the class teardown
+        that Odoo backported for its own test classes from Python 3.8.
+        """
+        if sys.version_info < (3, 8):
+            doctest.DocTestCase.doClassCleanups = lambda: None
+            doctest.DocTestCase.tearDown_exceptions = []
+
+        for test in doctest.DocTestSuite(module):
+            odoo_test = OdooDocTestCase(test)
+            odoo_test.test_tags = {"standard", "at_install", "queue_job", "doctest"}
+            tests.addTest(odoo_test)
+
+        return tests
+
+    return load_tests
