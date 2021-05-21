@@ -4,3 +4,4 @@ from . import test_json_field
 from . import test_model_job_channel
 from . import test_model_job_function
 from . import test_queue_job_protected_write
+from . import test_wizards
