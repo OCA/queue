@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright 2017-2018 Tecnativa - Pedro M. Baeza
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
+import logging
 
 from odoo import api, SUPERUSER_ID
-from odoo.addons.queue_job.job import DONE
 
 
 def migrate(cr, version):
@@ -13,6 +13,7 @@ def migrate(cr, version):
     if not version:
         return
     env = api.Environment(cr, SUPERUSER_ID, {})
+    logger = logging.getLogger("odoo.addons.queue.migrations")
     QueueJob = env['queue.job']
     groups = QueueJob.read_group(
         [], ['model_name', 'method_name'], ['model_name', 'method_name'],
@@ -31,6 +32,21 @@ def migrate(cr, version):
             })
     # recompute func_string after other addons have adapted their
     # args/kwargs/record_ids
-    records = QueueJob.search([('state', 'not in', [DONE])])
-    records._recompute_todo(QueueJob._fields['func_string'])
-    records.recompute()
+    records = env["queue.job"].search([])
+    total = len(records)
+    count = 0
+    error = 0
+    for record in records:
+        count += 1
+        if not count % 1000:
+            logger.info("Recomputing func_string of job %s of %s",
+                        count, total)
+        try:
+            record._compute_func_string()
+        except KeyError:  # unknown model or non-compliant arguments
+            error += 1
+            logger.debug("Could not recompute func_string of queue.job#%s",
+                         record.id)
+
+    if error:
+        logger.warning("Could not recompute func_string of %s jobs", error)

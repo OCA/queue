@@ -5,7 +5,6 @@ import json
 import logging
 from cPickle import Unpickler
 from StringIO import StringIO
-from odoo.addons.queue_job.job import DONE
 from odoo.addons.queue_job.fields import JobEncoder
 
 
@@ -32,16 +31,24 @@ def migrate_args_kwargs(cr):
     (func_name, args, kwargs) pickled in a binary string. Ignore done
     jobs for performance reasons"""
     cr.execute(
-        'select id, func from queue_job where state not in %s',
-        (tuple([DONE]),),
+        'select id, func from queue_job'
     )
-    for _id, func in cr.fetchall():
+    records = cr.fetchall()
+    total = len(records)
+    count = 0
+    error = 0
+    for _id, func in records:
+        count += 1
+        if not count % 1000:
+            _logger.info("Parsing arguments of job %s of %s",
+                         count, total)
         try:
             func_name, args, kwargs = Unpickler(StringIO(func)).load()
         except Exception:
             _logger.exception(
                 'Failed to parse func column for queue_job#%s', _id,
             )
+            error += 1
             continue
         cr.execute(
             'update queue_job set args=%s, kwargs=%s where id=%s',
@@ -51,3 +58,5 @@ def migrate_args_kwargs(cr):
                 _id,
             ),
         )
+    if error:
+        _logger.warning("Could not parse arguments of %s jobs", error)
