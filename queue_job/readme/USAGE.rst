@@ -159,3 +159,130 @@ Tip: you can do this at test case level like this
 
 Then all your tests execute the job methods synchronously
 without delaying any jobs.
+
+Delaying jobs
+~~~~~~~~~~~~~
+
+The fast way to enqueue a job for a method is to use ``with_delay()`` on a record
+or model:
+
+
+.. code-block:: python
+
+   def button_done(self):
+       self.with_delay().print_confirmation_document(self.state)
+       self.write({"state": "done"})
+       return True
+
+Here, the method ``print_confirmation_document`` will be executed asynchronously
+as a job. ``with_delay()`` can take several parameters to define more precisely how
+the job is executed (priority, ...).
+
+All the arguments passed to the method being delayed are stored in the job and
+passed to the method when it is executed asynchronously, including ``self``, so
+the current record is maintained during the job execution (warning: the context
+is not kept).
+
+Dependencies can be expressed between jobs. To start a graph of jobs, use ``delayable()``
+on a record or model. The following is the equivalent of ``with_delay()`` but using the
+long form:
+
+.. code-block:: python
+
+   def button_done(self):
+       delayable = self.delayable()
+       delayable.print_confirmation_document(self.state)
+       delayable.delay()
+       self.write({"state": "done"})
+       return True
+
+Methods of Delayable objects return itself, so it can be used as a builder pattern,
+which in some cases allow to build the jobs dynamically:
+
+.. code-block:: python
+
+    def button_generate_simple_with_delayable(self):
+        self.ensure_one()
+        # Introduction of a delayable object, using a builder pattern
+        # allowing to chain jobs or set properties. The delay() method
+        # on the delayable object actually stores the delayable objects
+        # in the queue_job table
+        (
+            self.delayable()
+            .generate_thumbnail((50, 50))
+            .set(priority=30)
+            .set(description=_("generate xxx"))
+            .delay()
+        )
+
+The simplest way to define a dependency is to use ``.done(job)`` on a Delayable:
+
+.. code-block:: python
+
+    def button_chain_done(self):
+        self.ensure_one()
+        job1 = self.browse(1).delayable().generate_thumbnail((50, 50))
+        job2 = self.browse(1).delayable().generate_thumbnail((50, 50))
+        job3 = self.browse(1).delayable().generate_thumbnail((50, 50))
+        # job 3 is executed when job 2 is done which is executed when job 1 is done
+        job1.done(job2.done(job3)).delay()
+
+Delayables can be chained to form more complex graphs using the ``chain()`` and
+``group()`` primitives.
+A chain represents a sequence of jobs to execute in order, a group represents
+jobs which can be executed in parallel. Using ``chain()`` has the same effect as
+using several nested ``done()`` but is more readable. Both can be combined to
+form a graph, for instance we can group [A] of jobs, which blocks another group
+[B] of jobs. When and only when all the jobs of the group [A] are executed, the
+jobs of the group [B] are executed. The code would look like:
+
+.. code-block:: python
+
+   from odoo.addons.queue_job import group, chain
+
+   def button_done(self):
+       group_a = group(self.delayable().method_foo(), self.delayable().method_bar())
+       group_b = group(self.delayable().method_baz(1), self.delayable().method_baz(2))
+       chain(group_a, group_b).delay()
+       self.write({"state": "done"})
+       return True
+
+Note: ``delay()`` must be called on the delayable, chain, or group which is at the top
+of the graph. In the example above, if it was called on ``group_a``, then ``group_b``
+would never be delayed (but a warning would be shown).
+
+
+Enqueing Job Options
+--------------------
+
+* priority: default is 10, the closest it is to 0, the faster it will be
+  executed
+* eta: Estimated Time of Arrival of the job. It will not be executed before this
+  date/time
+* max_retries: default is 5, maximum number of retries before giving up and set
+  the job state to 'failed'. A value of 0 means infinite retries.
+* description: human description of the job. If not set, description is computed
+  from the function doc or method name
+* channel: the complete name of the channel to use to process the function. If
+  specified it overrides the one defined on the function
+* identity_key: key uniquely identifying the job, if specified and a job with
+  the same key has not yet been run, the new job will not be created
+
+
+Caveats
+-------
+
+* TODO
+
+Tips and tricks
+~~~~~~~~~~~~~~~
+
+* **Idempotency** (https://www.restapitutorial.com/lessons/idempotency.html): The queue_job should be idempotent so they can be retried several times without impact on the data.
+* **The job should test at the very beginning its relevance**: the moment the job will be executed is unknown by design. So the first task of a job should be to check if the related work is still relevant at the moment of the execution.
+
+Patterns
+~~~~~~~~
+Through the time, two main patterns emerged:
+
+1. For data exposed to users, a model should store the data and the model should be the creator of the job. The job is kept hidden from the users
+2. For technical data, that are not exposed to the users, it is generally alright to create directly jobs with data passed as arguments to the job, without intermediary models.
