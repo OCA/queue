@@ -46,7 +46,7 @@
                     <group>
                         <field name="uuid" />
                         <field name="graph_uuid" groups="base.group_no_one" />
-                        <field name="func_string" />
+                        <field name="func_string" groups="base.group_no_one" />
                         <field name="job_function_id" />
                         <field name="channel" />
                     </group>
@@ -63,7 +63,7 @@
                         </group>
                         <group>
                             <field name="date_created" />
-                            <field name="date_enqueued" />
+                            <field name="date_enqueued" groups="base.group_no_one"/>
                             <field name="date_started" />
                             <field name="date_done" />
                             <!-- Do not use float_time as it does not work properly -->
