@@ -45,6 +45,7 @@
                     </h1>
                     <group>
                         <field name="uuid" />
+                        <field name="graph_uuid" groups="base.group_no_one" />
                         <field name="func_string" />
                         <field name="job_function_id" />
                         <field name="channel" />
@@ -107,6 +108,7 @@
                       <page
                           name="dependencies"
                           string="Dependencies"
+                          attrs="{'invisible': [('graph_uuid', '=', False)]}"
                       >
                         <field
                             nolabel="1"
@@ -185,6 +187,7 @@
         <field name="arch" type="xml">
             <search string="Jobs">
                 <field name="uuid" />
+                <field name="graph_uuid" />
                 <field name="name" />
                 <field name="func_string" />
                 <field name="channel" />
@@ -256,6 +259,7 @@
                         string="Exception message"
                         context="{'group_by': 'exc_message'}"
                     />
+                    <filter name="group_by_graph" string="Graph" context="{'group_by': 'graph_uuid'}" />
                 </group>
             </search>
         </field>
