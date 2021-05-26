@@ -4,7 +4,6 @@
 
 import itertools
 import logging
-import os
 
 from collections import deque
 
@@ -127,8 +126,11 @@ class DelayableGraph(Graph):
 
     def delay(self):
         graph = self._connect_graphs()
-        for vertex in graph.vertices():
+        vertices = graph.vertices()
+
+        for vertex in vertices:
             vertex._build_job()
+
         for vertex, neighbour in graph.edges():
             neighbour._generated_job.add_depends({vertex._generated_job})
 
@@ -137,7 +139,7 @@ class DelayableGraph(Graph):
         # part of the same graph, but not sure it's really required...
         # Also, maybe we want to check only the root jobs.
         existing_mapping = {}
-        for vertex in graph.vertices():
+        for vertex in vertices:
             if not vertex.identity_key:
                 continue
             existing = vertex._generated_job.job_record_with_same_identity_key()
@@ -155,7 +157,7 @@ class DelayableGraph(Graph):
             vertex._generated_job = existing
             return
 
-        for vertex in graph.vertices():
+        for vertex in vertices:
             vertex._generated_job.store()
 
 
