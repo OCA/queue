@@ -13,7 +13,7 @@ from odoo.osv import expression
 
 from ..delay import Graph
 from ..fields import JobSerialized
-from ..job import CANCELLED, DONE, PENDING, STATES, Job
+from ..job import CANCELLED, DONE, PENDING, STATES, Job, WAIT_DEPENDENCIES
 
 _logger = logging.getLogger(__name__)
 
@@ -271,12 +271,10 @@ class QueueJob(models.Model):
 
     @api.multi
     def requeue(self):
-        # FIXME if leaves are requeued before their done parents
-        # they will be pending instead of wait_dependencies
-        # (in a scenario where we select all the jobs and requeue them)
-        # Requeue them in reverse order of the graph? Or recheck the state
-        # after they are all updated.
-        self._change_job_state(PENDING)
+        jobs_to_requeue = self.filtered(
+            lambda job_: job_.state != WAIT_DEPENDENCIES
+        )
+        jobs_to_requeue._change_job_state(PENDING)
         return True
 
     def _message_post_on_failure(self):
