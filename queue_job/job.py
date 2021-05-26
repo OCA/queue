@@ -108,6 +108,10 @@ class Job(object):
 
         Id (UUID) of the job.
 
+    .. attribute:: graph_uuid
+
+        Shared UUID of the job's graph. Empty if the job is a single job.
+
     .. attribute:: state
 
         State of the job, can pending, enqueued, started, done or failed.
@@ -270,6 +274,7 @@ class Job(object):
             job_.date_cancelled = stored.date_cancelled
 
         job_.state = stored.state
+        job_.graph_uuid = stored.graph_uuid if stored.graph_uuid else None
         job_.result = stored.result if stored.result else None
         job_.exc_info = stored.exc_info if stored.exc_info else None
         job_.retry = stored.retry
@@ -445,6 +450,7 @@ class Job(object):
             self.max_retries = max_retries
 
         self._uuid = job_uuid
+        self.graph_uuid = None
 
         self.args = args
         self.kwargs = kwargs
@@ -498,6 +504,7 @@ class Job(object):
         for parent in jobs:
             parent.__reverse_depends_on_uuids.add(self.uuid)
             parent._reverse_depends_on.add(self)
+        self._initialize_or_propagate_graph_uuid(jobs)
         if any(j.state != DONE for j in jobs):
             self.state = WAIT_DEPENDENCIES
 
@@ -509,6 +516,24 @@ class Job(object):
         for child in jobs:
             child.__depends_on_uuids.add(self.uuid)
             child._depends_on.add(self)
+        self._initialize_or_propagate_graph_uuid(jobs)
+
+    def _initialize_or_propagate_graph_uuid(self, other_jobs):
+        graph_uuids = set(
+            other.graph_uuid for other in other_jobs if other.graph_uuid
+        )
+        if self.graph_uuid:
+            graph_uuids.add(self.graph_uuid)
+
+        if len(graph_uuids) > 1:
+            raise ValueError("Jobs cannot have dependencies on several graphs")
+        elif len(graph_uuids) == 1:
+            graph_uuid = graph_uuids.pop()
+        else:
+            graph_uuid = str(uuid.uuid4())
+        self.graph_uuid = graph_uuid
+        for other_job in other_jobs:
+            other_job.graph_uuid = graph_uuid
 
     def perform(self):
         """Execute the job.
@@ -549,13 +574,15 @@ class Job(object):
                   job.dependencies::json->'reverse_depends_on'
               ) child_deps ON true
             JOIN queue_job child
-            ON child.uuid = child_deps
+            ON child.graph_uuid = job.graph_uuid
+            AND child.uuid = child_deps
             JOIN LATERAL
                 json_array_elements_text(
                   child.dependencies::json->'depends_on'
                 ) parent_deps ON true
             JOIN queue_job parent
-            ON parent.uuid = parent_deps
+            ON parent.graph_uuid = job.graph_uuid
+            AND parent.uuid = parent_deps
             WHERE job.uuid = %s
             GROUP BY child.id
             ) jobs
@@ -602,6 +629,7 @@ class Job(object):
             "eta": False,
             "identity_key": False,
             "worker_pid": self.worker_pid,
+            "graph_uuid": self.graph_uuid,
         }
 
         if self.date_enqueued:
