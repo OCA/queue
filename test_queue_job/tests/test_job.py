@@ -22,6 +22,7 @@ from odoo.addons.queue_job.job import (
     RETRY_INTERVAL,
     STARTED,
     Job,
+    WAIT_DEPENDENCIES,
 )
 
 from .common import JobCommonCase
@@ -536,6 +537,23 @@ class TestJobModel(JobCommonCase):
         stored.write({"state": "failed"})
         stored.requeue()
         self.assertEqual(stored.state, PENDING)
+
+    def test_requeue_wait_dependencies_not_touched(self):
+        job_root = Job(self.env['test.queue.job'].testing_method)
+        job_child = Job(self.env['test.queue.job'].testing_method)
+        job_child.add_depends({job_root})
+        job_root.store()
+        job_child.store()
+
+        record_root = job_root.db_record()
+        record_child = job_child.db_record()
+        self.assertEqual(record_root.state, PENDING)
+        self.assertEqual(record_child.state, WAIT_DEPENDENCIES)
+        record_root.write({'state': 'failed'})
+
+        (record_root + record_child).requeue()
+        self.assertEqual(record_root.state, PENDING)
+        self.assertEqual(record_child.state, WAIT_DEPENDENCIES)
 
     def test_message_when_write_fail(self):
         stored = self._create_job()
