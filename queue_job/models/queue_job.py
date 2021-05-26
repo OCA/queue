@@ -48,6 +48,12 @@ class QueueJob(models.Model):
     )
 
     uuid = fields.Char(string="UUID", readonly=True, index=True, required=True)
+    graph_uuid = fields.Char(
+        string="Graph UUID",
+        readonly=True,
+        index=True,
+        help="Single shared identifier of a Graph. Empty for a single job."
+    )
     user_id = fields.Many2one(comodel_name="res.users", string="User ID")
     company_id = fields.Many2one(
         comodel_name="res.company", string="Company", index=True
@@ -127,43 +133,34 @@ class QueueJob(models.Model):
         for record in self:
             record.record_ids = record.records.ids
 
-    @api.multi
     @api.depends('dependencies')
     def _compute_dependency_graph(self):
         for record in self:
-            # Can we write a clever SQL query
-            # to get that graph?
-            graph = Graph()
-            jobs = [record]
-            seen = set()
-            while jobs:
-                current = jobs.pop()
-                seen.add(current.id)
-                graph.add_vertex(current.id)
+            if not record.graph_uuid:
+                record.dependency_graph = {}
+                continue
 
-                dependencies = current.dependencies
-                depends_on = dependencies.get('depends_on', [])
-                reverse_depends_on = dependencies.get(
-                    'reverse_depends_on', []
-                )
-                parents = self.search([
-                    ('uuid', 'in', depends_on)
-                ])
-                children = self.search([
-                    ('uuid', 'in', reverse_depends_on)
-                ])
-                jobs += [
-                    parent for parent in parents
-                    if parent.id not in seen
-                ]
-                jobs += [
-                    child for child in children
-                    if child.id not in seen
-                ]
-                for parent in parents:
-                    graph.add_edge(parent.id, current.id)
-                for child in children:
-                    graph.add_edge(current.id, child.id)
+            # TODO in 13.0, we could maybe use read_group, apparently, we can
+            # only call this field on one record at a time here
+            graph_jobs = self.search([("graph_uuid", "=", record.graph_uuid)])
+
+            graph_ids = {
+                graph_job.uuid: graph_job.id for graph_job in graph_jobs
+            }
+
+            graph = Graph()
+            for graph_job in graph_jobs:
+                graph.add_vertex(graph_job.id)
+                for parent_uuid in graph_job.dependencies['depends_on']:
+                    parent_id = graph_ids.get(parent_uuid)
+                    if not parent_id:
+                        continue
+                    graph.add_edge(parent_id, graph_job.id)
+                for child_uuid in graph_job.dependencies['reverse_depends_on']:
+                    child_id = graph_ids.get(child_uuid)
+                    if not child_id:
+                        continue
+                    graph.add_edge(graph_job.id, child_id)
 
             # this is the most portable format for json for the graph,
             # as we cannot have integer as dictionary keys
