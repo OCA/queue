@@ -1,6 +1,7 @@
 # Copyright 2016 Camptocamp
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+import functools
 import logging
 import os
 
@@ -97,3 +98,94 @@ class Base(models.AbstractModel):
             channel=channel,
             identity_key=identity_key,
         )
+
+    def _patch_job_auto_delay(self, method_name, context_key=None):
+        """Patch a method to be automatically delayed as job method when called
+
+        This patch method has to be called in ``_register_hook`` (example
+        below).
+
+        When a method is patched, any call to the method will not directly
+        execute the method's body, but will instead enqueue a job.
+
+        When a ``context_key`` is set when calling ``_patch_job_auto_delay``,
+        the patched method is automatically delayed only when this key is
+        ``True`` in the caller's context. It is advised to patch the method
+        with a ``context_key``, because making the automatic delay *in any
+        case* can produce nasty and unexpected side effects (e.g. another
+        module calls the method and expects it to be computed before doing
+        something else, expecting a result, ...).
+
+        A typical use case is when a method in a module we don't control is
+        called synchronously in the middle of another method, and we'd like all
+        the calls to this method become asynchronous.
+
+        The options of the job usually passed to ``with_delay()`` (priority,
+        description, identity_key, ...) can be returned in a dictionary by a
+        method named after the name of the method suffixed by ``_job_options``
+        which takes the same parameters as the initial method.
+
+        It is still possible to force synchronous execution of the method by
+        setting a key ``_job_force_sync`` to True in the environment context.
+
+        Example patching the "foo" method to be automatically delayed as job
+        (the job options method is optional):
+
+        .. code-block:: python
+
+            # original method:
+            def foo(self, arg1):
+                print("hello", arg1)
+
+            def large_method(self):
+                # doing a lot of things
+                self.foo("world)
+                # doing a lot of other things
+
+            def button_x(self):
+                self.with_context(auto_delay_foo=True).large_method()
+
+            # auto delay patch:
+            def foo_job_options(self, arg1):
+                return {
+                  "priority": 100,
+                  "description": "Saying hello to {}".format(arg1)
+                }
+
+            def _register_hook(self):
+                self._patch_method(
+                    "foo",
+                    self._patch_job_auto_delay("foo", context_key="auto_delay_foo")
+                )
+                return super()._register_hook()
+
+        The result when ``button_x`` is called, is that a new job for ``foo``
+        is delayed.
+        """
+
+        def auto_delay_wrapper(self, *args, **kwargs):
+            # when no context_key is set, we delay in any case (warning, can be
+            # dangerous)
+            context_delay = self.env.context.get(context_key) if context_key else True
+            if (
+                self.env.context.get("job_uuid")
+                or not context_delay
+                or self.env.context.get("_job_force_sync")
+                or self.env.context.get("test_queue_job_no_delay")
+            ):
+                # we are in the job execution
+                return auto_delay_wrapper.origin(self, *args, **kwargs)
+            else:
+                # replace the synchronous call by a job on itself
+                method_name = auto_delay_wrapper.origin.__name__
+                job_options_method = getattr(
+                    self, "{}_job_options".format(method_name), None
+                )
+                job_options = {}
+                if job_options_method:
+                    job_options.update(job_options_method(*args, **kwargs))
+                delayed = self.with_delay(**job_options)
+                return getattr(delayed, method_name)(*args, **kwargs)
+
+        origin = getattr(self, method_name)
+        return functools.update_wrapper(auto_delay_wrapper, origin)
