@@ -105,7 +105,7 @@ class TestBaseImportAsync(common.TransactionCase):
         self.assertEqual(len(split_job), 1)
         # job names are important
         self.assertEqual(
-            split_job.name, "Import Journal Entries from file account.move.csv"
+            split_job.name, "Import Journal Entry from file account.move.csv"
         )
         # perform job
         Job.load(self.env, split_job.uuid).perform()
@@ -114,7 +114,7 @@ class TestBaseImportAsync(common.TransactionCase):
         self.assertEqual(len(load_job), 1)
         self.assertEqual(
             load_job.name,
-            "Import Journal Entries from file account.move.csv - " "#0 - lines 2 to 10",
+            "Import Journal Entry from file account.move.csv - " "#0 - lines 2 to 10",
         )
         # perform job
         Job.load(self.env, load_job.uuid).perform()
@@ -134,11 +134,11 @@ class TestBaseImportAsync(common.TransactionCase):
         self.assertEqual(len(load_jobs), 2)
         self.assertEqual(
             load_jobs[0].name,
-            "Import Journal Entries from file account.move.csv - " "#0 - lines 2 to 7",
+            "Import Journal Entry from file account.move.csv - " "#0 - lines 2 to 7",
         )
         self.assertEqual(
             load_jobs[1].name,
-            "Import Journal Entries from file account.move.csv - " "#1 - lines 8 to 10",
+            "Import Journal Entry from file account.move.csv - " "#1 - lines 8 to 10",
         )
         # perform job
         Job.load(self.env, load_jobs[0].uuid).perform()
@@ -159,15 +159,15 @@ class TestBaseImportAsync(common.TransactionCase):
         self.assertEqual(len(load_jobs), 3)
         self.assertEqual(
             load_jobs[0].name,
-            "Import Journal Entries from file account.move.csv - " "#0 - lines 2 to 4",
+            "Import Journal Entry from file account.move.csv - " "#0 - lines 2 to 4",
         )
         self.assertEqual(
             load_jobs[1].name,
-            "Import Journal Entries from file account.move.csv - " "#1 - lines 5 to 7",
+            "Import Journal Entry from file account.move.csv - " "#1 - lines 5 to 7",
         )
         self.assertEqual(
             load_jobs[2].name,
-            "Import Journal Entries from file account.move.csv - " "#2 - lines 8 to 10",
+            "Import Journal Entry from file account.move.csv - " "#2 - lines 8 to 10",
         )
         # perform job
         Job.load(self.env, load_jobs[0].uuid).perform()
@@ -190,15 +190,15 @@ class TestBaseImportAsync(common.TransactionCase):
         self.assertEqual(len(load_jobs), 3)
         self.assertEqual(
             load_jobs[0].name,
-            "Import Journal Entries from file account.move.csv - " "#0 - lines 2 to 4",
+            "Import Journal Entry from file account.move.csv - " "#0 - lines 2 to 4",
         )
         self.assertEqual(
             load_jobs[1].name,
-            "Import Journal Entries from file account.move.csv - " "#1 - lines 5 to 7",
+            "Import Journal Entry from file account.move.csv - " "#1 - lines 5 to 7",
         )
         self.assertEqual(
             load_jobs[2].name,
-            "Import Journal Entries from file account.move.csv - " "#2 - lines 8 to 10",
+            "Import Journal Entry from file account.move.csv - " "#2 - lines 8 to 10",
         )
         # perform job
         Job.load(self.env, load_jobs[0].uuid).perform()
