@@ -2,6 +2,7 @@
 # Copyright 2019 Guewen Baconnier
 # license agpl-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
+import odoo
 
 import odoo.tests.common as common
 
@@ -21,18 +22,9 @@ class TestDelayable(common.TransactionCase):
         self.queue_job = self.env['queue.job']
         self.test_model = self.env['test.queue.job']
         self.method = self.env['test.queue.job'].testing_method
-        self.node = Delayable(self.test_model).testing_method(1)
-        self.node2 = Delayable(self.test_model).testing_method(2)
-        self.node3 = Delayable(self.test_model).testing_method(3)
-        self.node4 = Delayable(self.test_model).testing_method(4)
-        self.node5 = Delayable(self.test_model).testing_method(5)
-        self.node6 = Delayable(self.test_model).testing_method(6)
-        self.node7 = Delayable(self.test_model).testing_method(7)
-        self.node8 = Delayable(self.test_model).testing_method(8)
 
-    def test_delayable_delay_single(self):
-        self.node.delay()
-        self.assert_generated_job(self.node)
+    def job_node(self, id_):
+        return Delayable(self.test_model).testing_method(id_)
 
     def assert_generated_job(self, *nodes):
         for node in nodes:
@@ -61,171 +53,209 @@ class TestDelayable(common.TransactionCase):
         for parent, children in reverse_dependencies.items():
             self.assert_reverse_depends_on(parent, children)
 
+    def test_delayable_delay_single(self):
+        node = self.job_node(1)
+        node.delay()
+        self.assert_generated_job(node)
+
     def test_delayable_delay_done(self):
-        self.node.done(self.node2).delay()
-        self.assert_generated_job(self.node, self.node2)
-        self.assert_dependencies({self.node: {}, self.node2: {self.node}})
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node.done(node2).delay()
+        self.assert_generated_job(node, node2)
+        self.assert_dependencies({node: {}, node2: {node}})
 
     def test_delayable_delay_done_multi(self):
-        self.node.done(self.node2, self.node3).delay()
-        self.assert_generated_job(self.node, self.node2, self.node3)
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node3 = self.job_node(3)
+        node.done(node2, node3).delay()
+        self.assert_generated_job(node, node2, node3)
         self.assert_dependencies({
-            self.node: {}, self.node2: {self.node}, self.node3: {self.node}
+            node: {}, node2: {node}, node3: {node}
         })
 
     def test_delayable_delay_group(self):
-        DelayableGroup(self.node, self.node2, self.node3).delay()
-        self.assert_generated_job(self.node, self.node2, self.node3)
-        self.assert_dependencies(
-            {self.node: {}, self.node2: {}, self.node3: {}}
-        )
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node3 = self.job_node(3)
+        DelayableGroup(node, node2, node3).delay()
+        self.assert_generated_job(node, node2, node3)
+        self.assert_dependencies({node: {}, node2: {}, node3: {}})
 
     def test_group_function(self):
-        group(self.node, self.node2, self.node3).delay()
-        self.assert_generated_job(self.node, self.node2, self.node3)
-        self.assert_dependencies(
-            {self.node: {}, self.node2: {}, self.node3: {}}
-        )
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node3 = self.job_node(3)
+        group(node, node2, node3).delay()
+        self.assert_generated_job(node, node2, node3)
+        self.assert_dependencies({node: {}, node2: {}, node3: {}})
 
     def test_delayable_delay_job_after_group(self):
-        DelayableGroup(self.node, self.node2).done(self.node3).delay()
-        self.assert_generated_job(self.node, self.node2, self.node3)
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node3 = self.job_node(3)
+        DelayableGroup(node, node2).done(node3).delay()
+        self.assert_generated_job(node, node2, node3)
         self.assert_dependencies({
-            self.node: {}, self.node2: {}, self.node3: {self.node, self.node2}
+            node: {}, node2: {}, node3: {node, node2}
         })
 
     def test_delayable_delay_group_after_group(self):
-        g1 = DelayableGroup(self.node, self.node2)
-        g2 = DelayableGroup(self.node3, self.node4)
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node3 = self.job_node(3)
+        node4 = self.job_node(4)
+        g1 = DelayableGroup(node, node2)
+        g2 = DelayableGroup(node3, node4)
         g1.done(g2).delay()
-        self.assert_generated_job(
-            self.node, self.node2, self.node3, self.node4
-        )
+        self.assert_generated_job(node, node2, node3, node4)
         self.assert_dependencies({
-            self.node: {}, self.node2: {},
-            self.node3: {self.node, self.node2},
-            self.node4: {self.node, self.node2},
+            node: {}, node2: {},
+            node3: {node, node2},
+            node4: {node, node2},
         })
 
     def test_delayable_delay_implicit_group_after_group(self):
-        g1 = DelayableGroup(self.node, self.node2).done(self.node3, self.node4)
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node3 = self.job_node(3)
+        node4 = self.job_node(4)
+        g1 = DelayableGroup(node, node2).done(node3, node4)
         g1.delay()
-        self.assert_generated_job(
-            self.node, self.node2, self.node3, self.node4
-        )
+        self.assert_generated_job(node, node2, node3, node4)
         self.assert_dependencies({
-            self.node: {}, self.node2: {},
-            self.node3: {self.node, self.node2},
-            self.node4: {self.node, self.node2},
+            node: {}, node2: {},
+            node3: {node, node2},
+            node4: {node, node2},
         })
 
     def test_delayable_delay_group_after_group_after_group(self):
-        g1 = DelayableGroup(self.node)
-        g2 = DelayableGroup(self.node2)
-        g3 = DelayableGroup(self.node3)
-        g4 = DelayableGroup(self.node4)
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node3 = self.job_node(3)
+        node4 = self.job_node(4)
+        g1 = DelayableGroup(node)
+        g2 = DelayableGroup(node2)
+        g3 = DelayableGroup(node3)
+        g4 = DelayableGroup(node4)
         g1.done(g2.done(g3.done(g4))).delay()
-        self.assert_generated_job(
-            self.node, self.node2, self.node3, self.node4
-        )
+        self.assert_generated_job(node, node2, node3, node4)
         self.assert_dependencies({
-            self.node: {},
-            self.node2: {self.node},
-            self.node3: {self.node2},
-            self.node4: {self.node3},
+            node: {},
+            node2: {node},
+            node3: {node2},
+            node4: {node3},
         })
 
     def test_delayable_diamond(self):
-        g1 = DelayableGroup(self.node2, self.node3)
-        g1.done(self.node4)
-        self.node.done(g1)
-        self.node.delay()
-        self.assert_generated_job(
-            self.node, self.node2, self.node3, self.node4
-        )
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node3 = self.job_node(3)
+        node4 = self.job_node(4)
+        g1 = DelayableGroup(node2, node3)
+        g1.done(node4)
+        node.done(g1)
+        node.delay()
+        self.assert_generated_job(node, node2, node3, node4)
         self.assert_dependencies({
-            self.node: {},
-            self.node2: {self.node},
-            self.node3: {self.node},
-            self.node4: {self.node2, self.node3},
+            node: {},
+            node2: {node},
+            node3: {node},
+            node4: {node2, node3},
         })
 
     def test_delayable_chain(self):
-        c1 = DelayableChain(self.node, self.node2, self.node3)
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node3 = self.job_node(3)
+        c1 = DelayableChain(node, node2, node3)
         c1.delay()
-        self.assert_generated_job(
-            self.node, self.node2, self.node3
-        )
+        self.assert_generated_job(node, node2, node3)
         self.assert_dependencies({
-            self.node: {},
-            self.node2: {self.node},
-            self.node3: {self.node2},
+            node: {},
+            node2: {node},
+            node3: {node2},
         })
 
     def test_chain_function(self):
-        c1 = chain(self.node, self.node2, self.node3)
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node3 = self.job_node(3)
+        c1 = chain(node, node2, node3)
         c1.delay()
-        self.assert_generated_job(
-            self.node, self.node2, self.node3
-        )
+        self.assert_generated_job(node, node2, node3)
         self.assert_dependencies({
-            self.node: {},
-            self.node2: {self.node},
-            self.node3: {self.node2},
+            node: {},
+            node2: {node},
+            node3: {node2},
         })
 
     def test_delayable_chain_after_job(self):
-        c1 = DelayableChain(self.node2, self.node3, self.node4)
-        self.node.done(c1)
-        self.node.delay()
-        self.assert_generated_job(
-            self.node, self.node2, self.node3, self.node4
-        )
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node3 = self.job_node(3)
+        node4 = self.job_node(4)
+        c1 = DelayableChain(node2, node3, node4)
+        node.done(c1)
+        node.delay()
+        self.assert_generated_job(node, node2, node3, node4)
         self.assert_dependencies({
-            self.node: {},
-            self.node2: {self.node},
-            self.node3: {self.node2},
-            self.node4: {self.node3},
+            node: {},
+            node2: {node},
+            node3: {node2},
+            node4: {node3},
         })
 
     def test_delayable_chain_after_chain(self):
-        chain1 = DelayableChain(self.node, self.node2, self.node3)
-        chain2 = DelayableChain(self.node4, self.node5, self.node6)
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node3 = self.job_node(3)
+        node4 = self.job_node(4)
+        node5 = self.job_node(5)
+        node6 = self.job_node(6)
+        chain1 = DelayableChain(node, node2, node3)
+        chain2 = DelayableChain(node4, node5, node6)
         chain1.done(chain2)
         chain1.delay()
-        self.assert_generated_job(
-            self.node, self.node2, self.node3,
-            self.node4, self.node5, self.node6,
-        )
+        self.assert_generated_job(node, node2, node3, node4, node5, node6)
         self.assert_dependencies({
-            self.node: {},
-            self.node2: {self.node},
-            self.node3: {self.node2},
-            self.node4: {self.node3},
-            self.node5: {self.node4},
-            self.node6: {self.node5},
+            node: {},
+            node2: {node},
+            node3: {node2},
+            node4: {node3},
+            node5: {node4},
+            node6: {node5},
         })
 
     def test_delayable_group_of_chain(self):
-        chain1 = DelayableChain(self.node, self.node2)
-        chain2 = DelayableChain(self.node3, self.node4)
-        chain3 = DelayableChain(self.node5, self.node6)
-        chain4 = DelayableChain(self.node7, self.node8)
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node3 = self.job_node(3)
+        node4 = self.job_node(4)
+        node5 = self.job_node(5)
+        node6 = self.job_node(6)
+        node7 = self.job_node(7)
+        node8 = self.job_node(8)
+        chain1 = DelayableChain(node, node2)
+        chain2 = DelayableChain(node3, node4)
+        chain3 = DelayableChain(node5, node6)
+        chain4 = DelayableChain(node7, node8)
         g1 = DelayableGroup(chain1, chain2).done(chain3, chain4)
         g1.delay()
         self.assert_generated_job(
-            self.node, self.node2, self.node3, self.node4,
-            self.node5, self.node6, self.node7, self.node8,
+            node, node2, node3, node4,
+            node5, node6, node7, node8,
         )
         self.assert_dependencies({
-            self.node: {},
-            self.node3: {},
-            self.node2: {self.node},
-            self.node4: {self.node3},
-            self.node5: {self.node4, self.node2},
-            self.node7: {self.node4, self.node2},
-            self.node6: {self.node5},
-            self.node8: {self.node7},
+            node: {},
+            node3: {},
+            node2: {node},
+            node4: {node3},
+            node5: {node4, node2},
+            node7: {node4, node2},
+            node6: {node5},
+            node8: {node7},
         })
 
     def test_log_not_delayed(self):
@@ -236,7 +266,8 @@ class TestDelayable(common.TransactionCase):
             # will be displayed. We cannot test this is a scenario
             # using the GC as it isn't predictable. Call __del__
             # directly
-            self.node.__del__()
+            node = self.job_node(1)
+            node.__del__()
             expected = (
                 'WARNING:odoo.addons.queue_job.delay:Delayable '
                 'Delayable(test.queue.job().testing_method((1,), {}))'
@@ -245,7 +276,9 @@ class TestDelayable(common.TransactionCase):
             self.assertEqual(test.output, [expected])
 
     def test_delay_job_already_exists(self):
-        self.node2.delay()
-        self.node.done(self.node2).delay()
-        self.assert_generated_job(self.node, self.node2)
-        self.assert_dependencies({self.node: {}, self.node2: {self.node}})
+        node = self.job_node(1)
+        node2 = self.job_node(2)
+        node2.delay()
+        node.done(node2).delay()
+        self.assert_generated_job(node, node2)
+        self.assert_dependencies({node: {}, node2: {node}})
