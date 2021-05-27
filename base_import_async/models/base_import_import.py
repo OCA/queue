@@ -111,8 +111,7 @@ class BaseImportImport(models.TransientModel):
 
     @staticmethod
     def _extract_chunks(model_obj, fields, data, chunk_size):
-        """ Split the data on record boundaries,
-        in chunks of minimum chunk_size """
+        """Split the data on record boundaries, in chunks of minimum chunk_size"""
         fields = list(map(fix_import_export_id_paths, fields))
         row_from = 0
         for rows in model_obj._extract_records(fields, data):
