@@ -167,10 +167,37 @@ class TestJobDependencies(common.SavepointCase):
         record_2_root = job_2_root.db_record()
         record_2_child = job_2_child.db_record()
 
-        expected_nodes = sorted(
-            [record_root.id, record_lvl1_a.id,
-             record_lvl1_b.id, record_lvl2_a.id]
-        )
+        expected_nodes = [
+            {
+                'id': record_root.id,
+                'title': '<strong>Method used for tests</strong><br/>'
+                         'test.queue.job().testing_method()',
+                'color': '#D2E5FF',
+                'border': '#2B7CE9',
+                'shadow': True
+            }, {
+                'id': record_lvl1_a.id,
+                'title': '<strong>Method used for tests</strong><br/>'
+                         'test.queue.job().testing_method()',
+                'color': '#D2E5FF',
+                'border': '#2B7CE9',
+                'shadow': True
+            }, {
+                'id': record_lvl1_b.id,
+                'title': '<strong>Method used for tests</strong><br/>'
+                         'test.queue.job().testing_method()',
+                'color': '#D2E5FF',
+                'border': '#2B7CE9',
+                'shadow': True
+            }, {
+                'id': record_lvl2_a.id,
+                'title': '<strong>Method used for tests</strong><br/>'
+                         'test.queue.job().testing_method()',
+                'color': '#D2E5FF',
+                'border': '#2B7CE9',
+                'shadow': True
+            }
+        ]
         expected_edges = sorted(
             [
                 (record_root.id, record_lvl1_a.id),
@@ -180,9 +207,11 @@ class TestJobDependencies(common.SavepointCase):
         )
 
         records = [record_root, record_lvl1_a, record_lvl1_b, record_lvl2_a]
+
         for record in records:
             self.assertEqual(
-                sorted(record.dependency_graph['nodes']),
+                sorted(record.dependency_graph['nodes'],
+                       key=lambda d: d["id"]),
                 expected_nodes
             )
             self.assertEqual(
@@ -190,12 +219,29 @@ class TestJobDependencies(common.SavepointCase):
                 expected_edges
             )
 
-        expected_nodes = sorted([record_2_root.id, record_2_child.id])
+        expected_nodes = [
+            {
+                'id': record_2_root.id,
+                'title': '<strong>Method used for tests</strong><br/>'
+                         'test.queue.job().testing_method()',
+                'color': '#D2E5FF',
+                'border': '#2B7CE9',
+                'shadow': True
+            }, {
+                'id': record_2_child.id,
+                'title': '<strong>Method used for tests</strong><br/>'
+                         'test.queue.job().testing_method()',
+                'color': '#D2E5FF',
+                'border': '#2B7CE9',
+                'shadow': True
+            }
+        ]
         expected_edges = sorted([(record_2_root.id, record_2_child.id)])
 
         for record in [record_2_root, record_2_child]:
             self.assertEqual(
-                sorted(record.dependency_graph['nodes']),
+                sorted(record.dependency_graph['nodes'],
+                       key=lambda d: d["id"]),
                 expected_nodes
             )
             self.assertEqual(
