@@ -142,7 +142,8 @@ class DelayableGraph(Graph):
         for vertex in vertices:
             if not vertex.identity_key:
                 continue
-            existing = vertex._generated_job.job_record_with_same_identity_key()
+            generated_job = vertex._generated_job
+            existing = generated_job.job_record_with_same_identity_key()
             if not existing:
                 # at least one does not exist yet, we'll delay the whole graph
                 existing_mapping.clear()
