@@ -10,7 +10,16 @@ from odoo.osv import expression
 
 from ..delay import Graph
 from ..fields import JobSerialized
-from ..job import CANCELLED, DONE, PENDING, STATES, Job, WAIT_DEPENDENCIES
+from ..job import (
+    CANCELLED,
+    DONE,
+    FAILED,
+    Job,
+    PENDING,
+    STARTED,
+    STATES,
+    WAIT_DEPENDENCIES
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -147,6 +156,9 @@ class QueueJob(models.Model):
             graph_ids = {
                 graph_job.uuid: graph_job.id for graph_job in graph_jobs
             }
+            graph_jobs_by_ids = {
+                graph_job.id: graph_job for graph_job in graph_jobs
+            }
 
             graph = Graph()
             for graph_job in graph_jobs:
@@ -162,11 +174,12 @@ class QueueJob(models.Model):
                         continue
                     graph.add_edge(graph_job.id, child_id)
 
-            # this is the most portable format for json for the graph,
-            # as we cannot have integer as dictionary keys
             record.dependency_graph = {
                 # list of ids
-                'nodes': list(graph.vertices()),
+                'nodes': [
+                    graph_jobs_by_ids[graph_id]._dependency_graph_vis_node()
+                    for graph_id in graph.vertices()
+                ],
                 # list of tuples (from, to)
                 'edges': graph.edges(),
             }
@@ -183,6 +196,25 @@ class QueueJob(models.Model):
             QueueJob,
             self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True),
         ).create(vals_list)
+
+    def _dependency_graph_vis_node(self):
+        """Return the node as expected by the JobDirectedGraph widget"""
+        default = ("#D2E5FF", "#2B7CE9")
+        colors = {
+            DONE: ("#C2FABC", "#4AD63A"),
+            FAILED: ("#FB7E81", "#FA0A10"),
+            STARTED: ("#FFFF00", "#FFA500"),
+        }
+        return {
+            "id": self.id,
+            "title": "<strong>%s</strong><br/>%s" % (
+                self.display_name,
+                self.func_string,
+            ),
+            "color": colors.get(self.state, default)[0],
+            "border": colors.get(self.state, default)[1],
+            "shadow": True,
+        }
 
     def write(self, vals):
         if self.env.context.get("_job_edit_sentinel") is not self.EDIT_SENTINEL:
