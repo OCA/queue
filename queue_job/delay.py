@@ -4,8 +4,9 @@
 
 import itertools
 import logging
+import os
 
-from collections import deque
+from collections import defaultdict, deque
 
 from .job import Job
 
@@ -75,6 +76,28 @@ class Graph:
                 yield list(path)
         yield from search()
 
+    def topological_sort(self):
+        """Yields a proposed order of nodes to respect dependencies
+
+        The order is not unique, the result may vary, but it is guaranteed
+        that a node depending on another is not yielded before.
+        It assumes the graph has no cycle.
+        """
+        depends_per_node = defaultdict(int)
+        for __, tail in self.edges():
+            depends_per_node[tail] += 1
+
+        # the queue contains only elements for which all dependencies
+        # are resolved
+        queue = deque(self.root_vertices())
+        while queue:
+            vertex = queue.popleft()
+            yield vertex
+            for node in self._graph[vertex]:
+                depends_per_node[node] -= 1
+                if not depends_per_node[node]:
+                    queue.append(node)
+
     def root_vertices(self):
         dependency_vertices = set()
         for dependencies in self._graph.values():
@@ -84,7 +107,7 @@ class Graph:
     def __repr__(self):
         paths = [
             path for vertex in self.root_vertices()
-            for path in sorted(self.paths(vertex))
+            for path in self.paths(vertex)
         ]
         lines = []
         for path in paths:
@@ -124,12 +147,33 @@ class DelayableGraph(Graph):
 
         return graph
 
+    def _has_to_execute_directly(self, vertices):
+        if os.getenv('TEST_QUEUE_JOB_NO_DELAY'):
+            _logger.warn(
+                '`TEST_QUEUE_JOB_NO_DELAY` env var found. NO JOB scheduled.'
+            )
+            return True
+        envs = set(vertex.recordset.env for vertex in vertices)
+        for env in envs:
+            if env.context.get('test_queue_job_no_delay'):
+                _logger.warn(
+                    '`test_queue_job_no_delay` ctx key found.'
+                    ' NO JOB scheduled.'
+                )
+                return True
+        return False
+
     def delay(self):
         graph = self._connect_graphs()
+
         vertices = graph.vertices()
 
         for vertex in vertices:
             vertex._build_job()
+
+        if self._has_to_execute_directly(vertices):
+            self._execute_graph_direct(graph)
+            return
 
         for vertex, neighbour in graph.edges():
             neighbour._generated_job.add_depends({vertex._generated_job})
@@ -160,6 +204,10 @@ class DelayableGraph(Graph):
 
         for vertex in vertices:
             vertex._generated_job.store()
+
+    def _execute_graph_direct(self, graph):
+        for delayable in graph.topological_sort():
+            delayable._execute_direct()
 
 
 class DelayableChain:
@@ -328,6 +376,10 @@ class Delayable:
         recordset_method = getattr(self.recordset, name)
         self._job_method = recordset_method
         return self._store_args
+
+    def _execute_direct(self):
+        assert self._generated_job
+        self._generated_job.perform()
 
 
 class DelayableRecordset(object):
