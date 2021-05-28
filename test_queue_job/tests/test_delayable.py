@@ -1,8 +1,6 @@
 # copyright 2019 Camptocamp
 # Copyright 2019 Guewen Baconnier
-# license agpl-3.0 or later (http://www.gnu.org/licenses/agpl.html)
-
-import odoo
+# license lgpl-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import odoo.tests.common as common
 
@@ -15,13 +13,14 @@ from odoo.addons.queue_job.delay import (
 )
 
 
-class TestDelayable(common.TransactionCase):
+class TestDelayable(common.SavepointCase):
 
-    def setUp(self):
-        super().setUp()
-        self.queue_job = self.env['queue.job']
-        self.test_model = self.env['test.queue.job']
-        self.method = self.env['test.queue.job'].testing_method
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.queue_job = cls.env['queue.job']
+        cls.test_model = cls.env['test.queue.job']
+        cls.method = cls.env['test.queue.job'].testing_method
 
     def job_node(self, id_):
         return Delayable(self.test_model).testing_method(id_)
