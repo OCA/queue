@@ -11,6 +11,8 @@ from odoo.addons.queue_job.delay import Delayable
 from odoo.addons.queue_job.job import identity_exact
 from odoo.addons.queue_job.tests.common import mock_with_delay, mock_jobs
 
+from odoo.tools import mute_logger
+
 
 class TestDelayMocks(common.SavepointCase):
 
@@ -145,6 +147,7 @@ class TestDelayMocks(common.SavepointCase):
             self.assertEqual(delay_args, (1,))
             self.assertDictEqual(delay_kwargs, {"foo": 2})
 
+    @mute_logger('odoo.addons.queue_job.models.base')
     @mock.patch.dict(os.environ, {"TEST_QUEUE_JOB_NO_DELAY": "1"})
     def test_delay_graph_direct_exec_env_var(self):
         node = Delayable(self.env["test.queue.job"]).create_ir_logging(
@@ -168,6 +171,7 @@ class TestDelayMocks(common.SavepointCase):
         self.assertEqual(logs[0].message, "test_delay_graph_direct_exec 2")
         self.assertEqual(logs[1].message, "test_delay_graph_direct_exec 1")
 
+    @mute_logger('odoo.addons.queue_job.models.base')
     def test_delay_graph_direct_exec_context_key(self):
         node = Delayable(
             self.env["test.queue.job"].with_context(
@@ -194,6 +198,7 @@ class TestDelayMocks(common.SavepointCase):
         self.assertEqual(logs[0].message, "test_delay_graph_direct_exec 2")
         self.assertEqual(logs[1].message, "test_delay_graph_direct_exec 1")
 
+    @mute_logger('odoo.addons.queue_job.models.base')
     @mock.patch.dict(os.environ, {"TEST_QUEUE_JOB_NO_DELAY": "1"})
     def test_delay_with_delay_direct_exec_env_var(self):
         model = self.env["test.queue.job"]
@@ -209,6 +214,7 @@ class TestDelayMocks(common.SavepointCase):
         self.assertEqual(len(logs), 1)
         self.assertEqual(logs[0].message, "test_delay_graph_direct_exec 1")
 
+    @mute_logger('odoo.addons.queue_job.models.base')
     def test_delay_with_delay_direct_exec_context_key(self):
         model = self.env["test.queue.job"].with_context(
             test_queue_job_no_delay=True
