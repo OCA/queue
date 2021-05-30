@@ -110,11 +110,11 @@ class TestDelayable(unittest.TestCase):
             'e': set()
         })
         actual = repr(graph)
-        expected = (
-            "'a' → 'b' → 'c' → 'e'\n"
+        expected = [
+            "'a' → 'b' → 'c' → 'e'",
             "'a' → 'b' → 'd'"
-        )
-        self.assertEqual(actual, expected)
+        ]
+        self.assertEqual(sorted(actual.split("\n")), expected)
 
     def test_graph_topological_sort(self):
         # the graph is an example from
