@@ -5,6 +5,7 @@
 import itertools
 import logging
 import os
+import uuid
 
 from collections import defaultdict, deque
 
@@ -163,6 +164,30 @@ class DelayableGraph(Graph):
                 return True
         return False
 
+    @staticmethod
+    def _ensure_same_graph_uuid(jobs):
+        jobs_count = len(jobs)
+        if jobs_count == 0:
+            raise ValueError("Expecting jobs")
+        elif jobs_count == 1:
+            if jobs[0].graph_uuid:
+                raise ValueError(
+                    "Job %s is a single job, it should not"
+                    " have a graph uuid" % (jobs[0],)
+                )
+        else:
+            graph_uuids = set(job.graph_uuid for job in jobs if job.graph_uuid)
+            if len(graph_uuids) > 1:
+                raise ValueError(
+                    "Jobs cannot have dependencies between several graphs"
+                )
+            elif len(graph_uuids) == 1:
+                graph_uuid = graph_uuids.pop()
+            else:
+                graph_uuid = str(uuid.uuid4())
+            for job in jobs:
+                job.graph_uuid = graph_uuid
+
     def delay(self):
         graph = self._connect_graphs()
 
@@ -170,6 +195,10 @@ class DelayableGraph(Graph):
 
         for vertex in vertices:
             vertex._build_job()
+
+        self._ensure_same_graph_uuid(
+            [vertex._generated_job for vertex in vertices]
+        )
 
         if self._has_to_execute_directly(vertices):
             self._execute_graph_direct(graph)

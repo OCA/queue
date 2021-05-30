@@ -504,36 +504,8 @@ class Job(object):
         for parent in jobs:
             parent.__reverse_depends_on_uuids.add(self.uuid)
             parent._reverse_depends_on.add(self)
-        self._initialize_or_propagate_graph_uuid(jobs)
         if any(j.state != DONE for j in jobs):
             self.state = WAIT_DEPENDENCIES
-
-    def add_reverse_depends(self, jobs):
-        if self in jobs:
-            raise ValueError('job cannot depend on itself')
-        self.__reverse_depends_on_uuids |= {j.uuid for j in jobs}
-        self._reverse_depends_on.update(jobs)
-        for child in jobs:
-            child.__depends_on_uuids.add(self.uuid)
-            child._depends_on.add(self)
-        self._initialize_or_propagate_graph_uuid(jobs)
-
-    def _initialize_or_propagate_graph_uuid(self, other_jobs):
-        graph_uuids = set(
-            other.graph_uuid for other in other_jobs if other.graph_uuid
-        )
-        if self.graph_uuid:
-            graph_uuids.add(self.graph_uuid)
-
-        if len(graph_uuids) > 1:
-            raise ValueError("Jobs cannot have dependencies on several graphs")
-        elif len(graph_uuids) == 1:
-            graph_uuid = graph_uuids.pop()
-        else:
-            graph_uuid = str(uuid.uuid4())
-        self.graph_uuid = graph_uuid
-        for other_job in other_jobs:
-            other_job.graph_uuid = graph_uuid
 
     def perform(self):
         """Execute the job.
