@@ -387,6 +387,10 @@ Tip: you can do this at test case level like this
 Then all your tests execute the job methods synchronously without delaying any
 jobs.
 
+In tests you'll have to mute the logger like:
+
+    @mute_logger('odoo.addons.queue_job.models.base')
+
 .. NOTE:: in graphs of jobs, the ``test_queue_job_no_delay`` context key must be in at
           least one job's env of the graph for the whole graph to be executed synchronously
 

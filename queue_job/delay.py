@@ -15,14 +15,49 @@ _logger = logging.getLogger(__name__)
 
 
 def group(*delayables):
+    """Return a group of delayable to form a graph
+
+    A group means that jobs can be executed concurrently.
+    A job or a group of jobs depending on a group can be executed only after
+    all the jobs of the group are done.
+
+    Shortcut to :class:`~odoo.addons.queue_job.delay.DelayableGroup`.
+
+    Example::
+
+        g1 = group(delayable1, delayable2)
+        g2 = group(delayable3, delayable4)
+        g1.done(g2)
+        g1.delay()
+    """
     return DelayableGroup(*delayables)
 
 
 def chain(*delayables):
+    """Return a chain of delayable to form a graph
+
+    A chain means that jobs must be executed sequentially.
+    A job or a group of jobs depending on a group can be executed only after
+    the last job of the chain is done.
+
+    Shortcut to :class:`~odoo.addons.queue_job.delay.DelayableChain`.
+
+    Example::
+
+        chain1 = chain(delayable1, delayable2, delayable3)
+        chain2 = chain(delayable4, delayable5, delayable6)
+        chain1.done(chain2)
+        chain1.delay()
+    """
     return DelayableChain(*delayables)
 
 
 class Graph:
+    """Acyclic directed graph holding vertices of any hashable type
+
+    This graph is not specifically designed to hold :class:`~Delayable`
+    instances, although ultimately it is used for this purpose.
+    """
     __slots__ = ('_graph')
 
     def __init__(self, graph=None):
@@ -32,16 +67,26 @@ class Graph:
             self._graph = {}
 
     def add_vertex(self, vertex):
+        """Add a vertex
+
+        Has no effect if called several times with the same vertex
+        """
         self._graph.setdefault(vertex, set())
 
     def add_edge(self, parent, child):
+        """Add an edge between a parent and a child vertex
+
+        Has no effect if called several times with the same pair of vertices
+        """
         self.add_vertex(child)
         self._graph.setdefault(parent, set()).add(child)
 
     def vertices(self):
+        """Return the vertices (nodes) of the graph"""
         return set(self._graph)
 
     def edges(self):
+        """Return the edges (links) of the graph"""
         links = []
         for vertex, neighbours in self._graph.items():
             for neighbour in neighbours:
@@ -58,7 +103,6 @@ class Graph:
         [[1, 2, 3], [1, 2, 4], [1, 3]]
         >>> sorted(self.paths(3))
         [[3, 1, 2, 4]]
-
         """
         path = [vertex]   # path traversed so far
         seen = {vertex}   # set of vertices in path
@@ -100,6 +144,10 @@ class Graph:
                     queue.append(node)
 
     def root_vertices(self):
+        """Returns the root vertices
+
+        meaning they do not depend on any other job.
+        """
         dependency_vertices = set()
         for dependencies in self._graph.values():
             dependency_vertices.update(dependencies)
@@ -117,9 +165,21 @@ class Graph:
 
 
 class DelayableGraph(Graph):
-    """Directed Graph for Delayable dependencies"""
+    """Directed Graph for :class:`~Delayable` dependencies
+
+    It connects together the :class:`~Delayable`, :class:`~DelayableGroup` and
+    :class:`~DelayableChain` graphs, and creates then enqueued the jobs.
+    """
 
     def _merge_graph(self, graph):
+        """Merge a graph in the current graph
+
+        It takes each vertex, which can be :class:`~Delayable`,
+        :class:`~DelayableChain` or :class:`~DelayableGroup`, and updates the
+        current graph with the edges between Delayable objects (connecting
+        heads and tails of the groups and chains), so that at the end, the
+        graph contains only Delayable objects and their links.
+        """
         for vertex, neighbours in graph._graph.items():
             tails = vertex._tail()
             for tail in tails:
@@ -128,6 +188,11 @@ class DelayableGraph(Graph):
                 self._graph.setdefault(tail, set()).update(heads)
 
     def _connect_graphs(self):
+        """Visit the vertices' graphs and connect them, return the whole graph
+
+        Build a new graph, walk the vertices and their related vertices, merge
+        their graph in the new one, until we have visited all the vertices
+        """
         graph = DelayableGraph()
         graph._merge_graph(self)
 
@@ -149,6 +214,11 @@ class DelayableGraph(Graph):
         return graph
 
     def _has_to_execute_directly(self, vertices):
+        """Used for tests to run tests directly instead of storing them
+
+        In tests, prefer to use
+        :func:`odoo.addons.queue_job.tests.common.mock_jobs`.
+        """
         if os.getenv('TEST_QUEUE_JOB_NO_DELAY'):
             _logger.warn(
                 '`TEST_QUEUE_JOB_NO_DELAY` env var found. NO JOB scheduled.'
@@ -166,6 +236,7 @@ class DelayableGraph(Graph):
 
     @staticmethod
     def _ensure_same_graph_uuid(jobs):
+        """Set the same graph uuid on all jobs of the same graph"""
         jobs_count = len(jobs)
         if jobs_count == 0:
             raise ValueError("Expecting jobs")
@@ -189,6 +260,7 @@ class DelayableGraph(Graph):
                 job.graph_uuid = graph_uuid
 
     def delay(self):
+        """Build the whole graph, creates jobs and delay them"""
         graph = self._connect_graphs()
 
         vertices = graph.vertices()
@@ -240,6 +312,23 @@ class DelayableGraph(Graph):
 
 
 class DelayableChain:
+    """Chain of delayables to form a graph
+
+    Delayables can be other :class:`~Delayable`, :class:`~DelayableChain` or
+    :class:`~DelayableGroup` objects.
+
+    A chain means that jobs must be executed sequentially.
+    A job or a group of jobs depending on a group can be executed only after
+    the last job of the chain is done.
+
+    Chains can be connected to other Delayable, DelayableChain or
+    DelayableGroup objects by using :meth:`~done`.
+
+    A Chain is enqueued by calling :meth:`~delay`, which delays the whole
+    graph.
+    Important: :meth:`~delay` must be called on the top-level
+    delayable/chain/group object of the graph.
+    """
     __slots__ = ('_graph', '__head', '__tail')
 
     def __init__(self, *delayables):
@@ -263,15 +352,38 @@ class DelayableChain:
         return 'DelayableChain({})'.format(self._graph)
 
     def done(self, *delayables):
+        """Connects the current chain to other delayables/chains/groups
+
+        The delayables/chains/groups passed in the parameters will be executed
+        when the current Chain is done.
+        """
         for delayable in delayables:
             self._graph.add_edge(self.__tail, delayable)
         return self
 
     def delay(self):
+        """Delay the whole graph"""
         self._graph.delay()
 
 
 class DelayableGroup:
+    """Group of delayables to form a graph
+
+    Delayables can be other :class:`~Delayable`, :class:`~DelayableChain` or
+    :class:`~DelayableGroup` objects.
+
+    A group means that jobs must be executed sequentially.
+    A job or a group of jobs depending on a group can be executed only after
+    the all the jobs of the group are done.
+
+    Groups can be connected to other Delayable, DelayableChain or
+    DelayableGroup objects by using :meth:`~done`.
+
+    A group is enqueued by calling :meth:`~delay`, which delays the whole
+    graph.
+    Important: :meth:`~delay` must be called on the top-level
+    delayable/chain/group object of the graph.
+    """
     __slots__ = ('_graph', '_delayables')
 
     def __init__(self, *delayables):
@@ -294,16 +406,46 @@ class DelayableGroup:
         return 'DelayableGroup({})'.format(self._graph)
 
     def done(self, *delayables):
+        """Connects the current group to other delayables/chains/groups
+
+        The delayables/chains/groups passed in the parameters will be executed
+        when the current Group is done.
+        """
         for parent in self._delayables:
             for child in delayables:
                 self._graph.add_edge(parent, child)
         return self
 
     def delay(self):
+        """Delay the whole graph"""
         self._graph.delay()
 
 
 class Delayable:
+    """Unit of a graph, one Delayable will lead to an enqueued job
+
+    Delayables can have dependencies on each others, as well as dependencies on
+    :class:`~DelayableGroup` or :class:`~DelayableChain` objects.
+
+    This class will generally not be used directly, it is used internally
+    by :meth:`~odoo.addons.queue_job.models.base.Base.delayable`. Look
+    in the base model for more details.
+
+    Delayables can be connected to other Delayable, DelayableChain or
+    DelayableGroup objects by using :meth:`~done`.
+
+    Properties of the future job can be set using the :meth:`~set` method,
+    which always return ``self``::
+
+        delayable.set(priority=15).set({"max_retries": 5, "eta": 15}).delay()
+
+    It can be used for example to set properties dynamically.
+
+    A Delayable is enqueued by calling :meth:`delay()`, which delays the whole
+    graph.
+    Important: :meth:`delay()` must be called on the top-level
+    delayable/chain/group object of the graph.
+    """
     _properties = (
         'priority', 'eta', 'max_retries', 'description',
         'channel', 'identity_key'
@@ -359,6 +501,10 @@ class Delayable:
             setattr(self, key, value)
 
     def set(self, *args, **kwargs):
+        """Set job properties and return self
+
+        The values can be either a dictionary and/or keywork args
+        """
         if args:
             # args must be a dict
             self._set_from_dict(*args)
@@ -366,11 +512,17 @@ class Delayable:
         return self
 
     def done(self, *delayables):
+        """Connects the current Delayable to other delayables/chains/groups
+
+        The delayables/chains/groups passed in the parameters will be executed
+        when the current Delayable is done.
+        """
         for child in delayables:
             self._graph.add_edge(self, child)
         return self
 
     def delay(self):
+        """Delay the whole graph"""
         self._graph.delay()
 
     def _build_job(self):
@@ -418,9 +570,6 @@ class DelayableRecordset(object):
 
         delayable = DelayableRecordset(recordset, priority=20)
         delayable.method(args, kwargs)
-
-    ``method`` must be a method of the recordset's Model, decorated with
-    :func:`~odoo.addons.queue_job.job.job`.
 
     The method call will be processed asynchronously in the job queue, with
     the passed arguments.
