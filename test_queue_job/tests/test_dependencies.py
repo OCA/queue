@@ -8,6 +8,7 @@ from odoo.addons.queue_job.job import (
     WAIT_DEPENDENCIES,
     PENDING,
 )
+from odoo.addons.queue_job.delay import chain, DelayableGraph, group
 
 
 class TestJobDependencies(common.SavepointCase):
@@ -118,6 +119,8 @@ class TestJobDependencies(common.SavepointCase):
         job_a = Job(self.method)
         job_a.add_depends({job_root})
 
+        DelayableGraph._ensure_same_graph_uuid([job_root, job_a])
+
         job_root.store()
         job_a.store()
 
@@ -145,9 +148,15 @@ class TestJobDependencies(common.SavepointCase):
         job_lvl2_a = Job(self.method)
         job_lvl2_a.add_depends({job_lvl1_a})
 
+        DelayableGraph._ensure_same_graph_uuid([
+            job_root, job_lvl1_a, job_lvl1_b, job_lvl2_a,
+        ])
+
         job_2_root = Job(self.method)
         job_2_child = Job(self.method)
         job_2_child.add_depends({job_2_root})
+
+        DelayableGraph._ensure_same_graph_uuid([job_2_root, job_2_child])
 
         # Jobs must be stored after the dependencies are set up.
         # (Or if not, a new store must be called on the parent)
@@ -250,34 +259,43 @@ class TestJobDependencies(common.SavepointCase):
             )
 
     def test_no_dependency_graph_single_job(self):
-        job_root = Job(self.method)
-        job_root.store()
-        self.assertEqual(job_root.db_record().dependency_graph, {})
+        """A single job has no graph"""
+        job = self.env["test.queue.job"].with_delay().testing_method()
+        self.assertEqual(job.db_record().dependency_graph, {})
+        self.assertIsNone(job.graph_uuid)
 
     def test_depends_graph_uuid(self):
-        """All jobs with dependencies share the same graph uuid"""
-        job_root = Job(self.method)
-        job_lvl1_a = Job(self.method)
-        job_lvl1_a.add_depends({job_root})
-        job_lvl1_b = Job(self.method)
-        job_lvl1_b.add_depends({job_root})
-        job_lvl2_a = Job(self.method)
-        job_lvl2_a.add_depends({job_lvl1_a})
+        """All jobs in a graph share the same graph uuid"""
+        model = self.env["test.queue.job"]
+        delayable1 = model.delayable().testing_method(1)
+        delayable2 = model.delayable().testing_method(2)
+        delayable3 = model.delayable().testing_method(3)
+        delayable4 = model.delayable().testing_method(4)
+        group1 = group(delayable1, delayable2)
+        group2 = group(delayable3, delayable4)
+        chain_root = chain(group1, group2)
+        chain_root.delay()
 
-        # Jobs must be stored after the dependencies are set up.
-        # (Or if not, a new store must be called on the parent)
-        job_root.store()
-        job_lvl1_a.store()
-        job_lvl1_b.store()
-        job_lvl2_a.store()
+        jobs = [
+            delayable._generated_job for delayable
+            in [delayable1, delayable2, delayable3, delayable4]
+        ]
 
-        jobs = [job_root, job_lvl1_a, job_lvl1_b, job_lvl2_a]
-        self.assertTrue(job_root.graph_uuid)
+        self.assertTrue(jobs[0].graph_uuid)
         self.assertEqual(len(set(j.graph_uuid for j in jobs)), 1)
-        self.assertEqual(job_root.graph_uuid, job_root.db_record().graph_uuid)
-        self.assertEqual(job_lvl1_a.graph_uuid,
-                         job_lvl1_a.db_record().graph_uuid)
-        self.assertEqual(job_lvl1_b.graph_uuid,
-                         job_lvl1_b.db_record().graph_uuid)
-        self.assertEqual(job_lvl2_a.graph_uuid,
-                         job_lvl2_a.db_record().graph_uuid)
+        for job in jobs:
+            self.assertEqual(job.graph_uuid, job.db_record().graph_uuid)
+
+    def test_depends_graph_uuid_group(self):
+        """All jobs in a group share the same graph uuid"""
+        g = group(
+            self.env['test.queue.job'].delayable().testing_method(),
+            self.env['test.queue.job'].delayable().testing_method(),
+        )
+        g.delay()
+
+        jobs = [delayable._generated_job for delayable in g._delayables]
+
+        self.assertTrue(jobs[0].graph_uuid)
+        self.assertTrue(jobs[1].graph_uuid)
+        self.assertEqual(jobs[0].graph_uuid, jobs[1].graph_uuid)
