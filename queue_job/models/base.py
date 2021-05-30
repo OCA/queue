@@ -72,24 +72,22 @@ class Base(models.AbstractModel):
 
         Usage::
 
-            delayable = self.env['res.users'].browse(10).delayable(priority=20)
-            delayable.do_work({'name': 'test'}).delay()
+            delayable = self.env["res.users"].browse(10).delayable(priority=20)
+            delayable.do_work(name="test"}).delay()
 
-        In the line above, ``do_work`` is allowed to be delayed because the
-        method definition of the fictive method ``do_work`` is decorated by
-        ``@job``. The ``do_work`` method will to be executed directly. It will
-        be executed in an asynchronous job.
+        In this example, the ``do_work`` method will not be executed directly.
+        It will be executed in an asynchronous job.
 
         Method calls on a Delayable generally return themselves, so calls can
         be chained together::
 
-            delayable.set(priority=15).do_work({'name': 'test'}).delay()
+            delayable.set(priority=15).do_work(name="test"}).delay()
 
         The order of the calls that build the job is not relevant, beside
         the call to ``delay()`` that must happen at the very end. This is
-        equivalent to the one before::
+        equivalent to the example above::
 
-            delayable.do_work({'name': 'test'}).set(priority=15).delay()
+            delayable.do_work(name="test"}).set(priority=15).delay()
 
         Very importantly, ``delay()`` must be called on the top-most parent
         of a chain of jobs, so if you have this::
@@ -128,16 +126,6 @@ class Base(models.AbstractModel):
                              the new job will not be added.
         :return: instance of a Delayable
         :rtype: :class:`odoo.addons.queue_job.job.Delayable`
-
-        Note for developers: if you want to run tests or simply disable
-        jobs queueing for debugging purposes, you can:
-
-            a. set the env var `TEST_QUEUE_JOB_NO_DELAY=1`
-            b. pass a ctx key `test_queue_job_no_delay=1`
-
-        In tests you'll have to mute the logger like:
-
-            @mute_logger('odoo.addons.queue_job.models.base')
         """
         return Delayable(self, priority=priority,
                          eta=eta,
