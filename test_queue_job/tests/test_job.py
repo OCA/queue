@@ -13,6 +13,7 @@ from odoo.addons.queue_job.exception import (
     NoSuchJobError,
     RetryableJobError,
 )
+from odoo.addons.queue_job.delay import DelayableGraph
 from odoo.addons.queue_job.job import (
     DONE,
     ENQUEUED,
@@ -500,6 +501,8 @@ class TestJobModel(JobCommonCase):
         job_child.add_depends({job_root})
         job_root.store()
         job_child.store()
+
+        DelayableGraph._ensure_same_graph_uuid([job_root, job_child])
 
         record_root = job_root.db_record()
         record_child = job_child.db_record()
