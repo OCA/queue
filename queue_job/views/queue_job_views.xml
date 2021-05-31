@@ -111,7 +111,7 @@
                 <field name="eta" />
                 <field name="date_created" />
                 <field name="date_done" />
-                <field name="exec_time" widget="float_time" />
+                <field name="exec_time" />
                 <field name="exc_name" />
                 <field name="exc_message" />
                 <field name="uuid" />
