@@ -28,13 +28,16 @@ class IrCron(models.Model):
         comodel_name="queue.job.channel",
         compute="_compute_run_as_queue_job",
         readonly=False,
+        store=True,
         string="Channel",
     )
 
     @api.depends("run_as_queue_job")
     def _compute_run_as_queue_job(self):
         for cron in self:
-            if cron.run_as_queue_job and not cron.channel_id:
+            if cron.channel_id:
+                continue
+            if cron.run_as_queue_job:
                 cron.channel_id = self.env.ref("queue_job_cron.channel_root_ir_cron").id
             else:
                 cron.channel_id = False
