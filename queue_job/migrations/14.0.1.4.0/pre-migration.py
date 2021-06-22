@@ -1,10 +1,12 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
-from odoo.tools.sql import column_exists
+from odoo.tools.sql import column_exists, table_exists
 
 
 def migrate(cr, version):
-    if not column_exists(cr, "queue_job", "exec_time"):
+    if table_exists(cr, "queue_job") and not column_exists(
+        cr, "queue_job", "exec_time"
+    ):
         # Disable trigger otherwise the update takes ages.
         cr.execute(
             """
