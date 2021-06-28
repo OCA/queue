@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2020-11-21 20:36+0000\n"
-"Last-Translator: Yann Papouin <y.papouin@dec-industrie.com>\n"
+"PO-Revision-Date: 2021-06-28 15:48+0000\n"
+"Last-Translator: Guewen Baconnier <guewen.baconnier@camptocamp.com>\n"
 "Language-Team: none\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 3.10\n"
+"X-Generator: Weblate 4.3.2\n"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -55,7 +55,7 @@ msgstr "Compteur de pièce jointe"
 #: model:ir.cron,cron_name:queue_job.ir_cron_autovacuum_queue_jobs
 #: model:ir.cron,name:queue_job.ir_cron_autovacuum_queue_jobs
 msgid "AutoVacuum Job Queue"
-msgstr "Vidange automatique de la file d'attente des travaux"
+msgstr "Vidange automatique de la file d'attente des tâches"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_base
@@ -174,13 +174,13 @@ msgstr "Terminée"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_enqueued
 msgid "Enqueue Time"
-msgstr "Date de mise en file d'attente"
+msgstr "Date de mise en queue"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 #: selection:queue.job,state:0
 msgid "Enqueued"
-msgstr "Mis en file d'attente"
+msgstr "Mis en queue"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_info
@@ -243,8 +243,8 @@ msgstr "Clé d'identité"
 #, python-format
 msgid "If both parameters are 0, ALL jobs will be requeued!"
 msgstr ""
-"Si les deux paramètres sont 0, TOUS les travaux seront mis en file "
-"d'attente !"
+"Si les deux paramètres sont 0, TOUTES les tâches seront remises en file "
+"d'attente !"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_unread
@@ -269,13 +269,13 @@ msgstr "Est abonné"
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job_channel
 msgid "Job Channels"
-msgstr "Canaux de travail"
+msgstr "Canaux de tâches"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__job_function_id
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Job Function"
-msgstr "Fonction de travail"
+msgstr "Fonction de tâche"
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_queue_job_function
@@ -285,29 +285,29 @@ msgstr "Fonction de travail"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_form
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
 msgid "Job Functions"
-msgstr "Fonctions de travail"
+msgstr "Fonctions de tâche"
 
 #. module: queue_job
 #: model:ir.module.category,name:queue_job.module_category_queue_job
 #: model:ir.ui.menu,name:queue_job.menu_queue_job_root
 msgid "Job Queue"
-msgstr "File d'attente des travaux"
+msgstr "File d'attente des tâches"
 
 #. module: queue_job
 #: model:res.groups,name:queue_job.group_queue_job_manager
 msgid "Job Queue Manager"
-msgstr "Gestionnaire de file d'attente des travaux"
+msgstr "Gestionnaire de file d'attente des tâches"
 
 #. module: queue_job
 #: model:mail.message.subtype,name:queue_job.mt_job_failed
 msgid "Job failed"
-msgstr "Travail échoué"
+msgstr "Tâche échouée"
 
 #. module: queue_job
 #: code:addons/queue_job/controllers/main.py:102
 #, python-format
 msgid "Job interrupted and set to Done: nothing to do."
-msgstr "Travail interrompu et défini sur Terminé : rien à faire."
+msgstr "Tâche interrompue et définie sur Terminée : rien à faire."
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_queue_job
@@ -317,14 +317,14 @@ msgstr "Travail interrompu et défini sur Terminé : rien à faire."
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Jobs"
-msgstr "Travaux"
+msgstr "Tâches"
 
 #. module: queue_job
 #: model:ir.actions.server,name:queue_job.ir_cron_queue_job_garbage_collector_ir_actions_server
 #: model:ir.cron,cron_name:queue_job.ir_cron_queue_job_garbage_collector
 #: model:ir.cron,name:queue_job.ir_cron_queue_job_garbage_collector
 msgid "Jobs Garbage Collector"
-msgstr "Ramasse-miettes des travaux"
+msgstr "Ramasse-miettes des tâches"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__kwargs
@@ -363,7 +363,7 @@ msgstr "Pièce jointe principale"
 #: code:addons/queue_job/models/queue_job.py:174
 #, python-format
 msgid "Manually set to done by %s"
-msgstr "Manuellement définit comme terminé par %s"
+msgstr "Manuellement défini comme terminé par %s"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__max_retries
@@ -415,7 +415,7 @@ msgstr "Type de la prochaine activité"
 #: code:addons/queue_job/models/queue_job.py:152
 #, python-format
 msgid "No action available for this job"
-msgstr "Aucune action disponible pour ce travail"
+msgstr "Aucune action disponible pour cette tâche"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_needaction_counter
@@ -450,7 +450,7 @@ msgstr "Dû"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__override_channel
 msgid "Override Channel"
-msgstr "Remplacer le canal"
+msgstr "Forcer un canal"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__parent_id
@@ -467,7 +467,7 @@ msgstr "Canal parent obligatoire."
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 #: selection:queue.job,state:0
 msgid "Pending"
-msgstr "Suspendu"
+msgstr "En attente"
 
 #. module: queue_job
 #: selection:queue.job,activity_state:0
@@ -487,7 +487,7 @@ msgstr "File d'attente"
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job
 msgid "Queue Job"
-msgstr "File d'attente des travaux"
+msgstr "File d'attente des tâches"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__record_ids
@@ -497,7 +497,7 @@ msgstr "Enregistrement"
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Related"
-msgstr "Relatif"
+msgstr "Lien"
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:320
@@ -524,13 +524,13 @@ msgstr "Remise en file d'attente"
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Requeue Job"
-msgstr "Travail remis en file d'attente"
+msgstr "Tâche remise en file d'attente"
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_requeue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
 msgid "Requeue Jobs"
-msgstr "Remettre les travaux en file d'attente"
+msgstr "Remettre les tâches en file d'attente"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_user_id
@@ -546,17 +546,17 @@ msgstr "Résultat"
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
 msgid "Set all selected jobs to done"
-msgstr "Définir tous les travaux sélectionnés comme terminés"
+msgstr "Définir toutes les tâches sélectionnées comme terminées"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Set jobs done"
-msgstr "Définir les travaux effectuées"
+msgstr "Définir les tâches comme terminées"
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_set_jobs_done
 msgid "Set jobs to done"
-msgstr "Définir les travaux comme terminés"
+msgstr "Définir les tâches comme terminées"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -575,7 +575,7 @@ msgid ""
 "Something bad happened during the execution of the job. More details in the "
 "'Exception Information' section."
 msgstr ""
-"Quelque chose de grave s'est produit pendant l'exécution du travail. Plus de "
+"Quelque chose s'est mal passé pendant l'exécution de la tâche. Plus de "
 "détails dans la section \"Information sur l'exception\"."
 
 #. module: queue_job
@@ -587,7 +587,7 @@ msgstr "Date de début"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 #: selection:queue.job,state:0
 msgid "Started"
-msgstr "Démarré"
+msgstr "Commencé"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__state
@@ -619,18 +619,18 @@ msgid ""
 "The job will fail if the number of tries reach the max. retries.\n"
 "Retries are infinite when empty."
 msgstr ""
-"Le travail échouera si le nombre d'essai atteint le max. de tentatives.\n"
-"Les tentatives sont infinies laissé vides."
+"La tâche échouera si le nombre d'essai atteint le max. de tentatives.\n"
+"Quand vide, le nombre de tentatives est illimité."
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
 msgid "The selected jobs will be requeued."
-msgstr "Les travaux sélectionnés seront remis en file d'attente."
+msgstr "Les tâches sélectionnées seront remises en file d'attente."
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "The selected jobs will be set to done."
-msgstr "Les travaux sélectionnés seront définis comme terminés."
+msgstr "Les tâches sélectionnées seront définies comme terminées."
 
 #. module: queue_job
 #: selection:queue.job,activity_state:0
@@ -670,4 +670,4 @@ msgstr "Historique de la communication du site web"
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_requeue_job
 msgid "Wizard to requeue a selection of jobs"
-msgstr "Assistant pour mettre en file d'attente une sélection de travaux"
+msgstr "Assistant pour mettre en file d'attente une sélection de tâches"
