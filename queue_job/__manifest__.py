@@ -2,7 +2,7 @@
 
 
 {'name': 'Job Queue',
- 'version': '12.0.1.5.3',
+ 'version': '12.0.2.3.0',
  'author': 'Camptocamp,ACSONE SA/NV,Odoo Community Association (OCA)',
  'website': 'https://github.com/OCA/queue/tree/12.0/queue_job',
  'license': 'LGPL-3',
@@ -17,7 +17,7 @@
           'security/ir.model.access.csv',
           'views/queue_job_views.xml',
           'data/queue_data.xml',
-          ],
+          "data/queue_job_function_data.xml"],
  'installable': True,
  'development_status': 'Mature',
  'maintainers': ['guewen'],

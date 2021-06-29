@@ -1,4 +1,4 @@
-# Copyright 2013-2016 Camptocamp
+# Copyright 2013-2020 Camptocamp
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import inspect
@@ -6,6 +6,7 @@ import functools
 import hashlib
 import logging
 import uuid
+import os
 import sys
 from datetime import datetime, timedelta
 
@@ -43,9 +44,6 @@ class DelayableRecordset(object):
         delayable = DelayableRecordset(recordset, priority=20)
         delayable.method(args, kwargs)
 
-    ``method`` must be a method of the recordset's Model, decorated with
-    :func:`~odoo.addons.queue_job.job.job`.
-
     The method call will be processed asynchronously in the job queue, with
     the passed arguments.
 
@@ -71,12 +69,6 @@ class DelayableRecordset(object):
                 (name, self.recordset)
             )
         recordset_method = getattr(self.recordset, name)
-        if not getattr(recordset_method, 'delayable', None):
-            raise AttributeError(
-                'method %s on %s is not allowed to be delayed, '
-                'it should be decorated with odoo.addons.queue_job.job.job' %
-                (name, self.recordset)
-            )
 
         def delay(*args, **kwargs):
             return Job.enqueue(recordset_method,
@@ -213,6 +205,14 @@ class Job(object):
 
         A description of the result (for humans).
 
+    .. attribute:: exc_name
+
+        Exception error name when the job failed.
+
+    .. attribute:: exc_message
+
+        Exception error message when the job failed.
+
     .. attribute:: exc_info
 
         Exception information (traceback) when the job failed.
@@ -254,15 +254,12 @@ class Job(object):
     @classmethod
     def _load_from_db_record(cls, job_db_record):
         stored = job_db_record
-        env = job_db_record.env
 
         args = stored.args
         kwargs = stored.kwargs
         method_name = stored.method_name
 
-        model = env[stored.model_name]
-
-        recordset = model.browse(stored.record_ids)
+        recordset = stored.records
         method = getattr(recordset, method_name)
 
         eta = None
@@ -289,13 +286,12 @@ class Job(object):
         job_.state = stored.state
         job_.result = stored.result if stored.result else None
         job_.exc_info = stored.exc_info if stored.exc_info else None
-        job_.user_id = stored.user_id.id if stored.user_id else None
-        job_.model_name = stored.model_name if stored.model_name else None
         job_.retry = stored.retry
         job_.max_retries = stored.max_retries
         if stored.company_id:
             job_.company_id = stored.company_id.id
         job_.identity_key = stored.identity_key
+        job_.worker_pid = stored.worker_pid
         return job_
 
     def job_record_with_same_identity_key(self):
@@ -349,7 +345,7 @@ class Job(object):
     def db_record_from_uuid(env, job_uuid):
         model = env['queue.job'].sudo()
         record = model.search([('uuid', '=', job_uuid)], limit=1)
-        return record.with_env(env)
+        return record.with_env(env).sudo()
 
     def __init__(self, func,
                  args=None, kwargs=None, priority=None,
@@ -396,13 +392,16 @@ class Job(object):
 
         recordset = func.__self__
         env = recordset.env
-        self.model_name = recordset._name
         self.method_name = func.__name__
         self.recordset = recordset
 
         self.env = env
         self.job_model = self.env['queue.job']
         self.job_model_name = 'queue.job'
+
+        self.job_config = (
+            self.env["queue.job.function"].sudo().job_config(self.job_function_name)
+        )
 
         self.state = PENDING
 
@@ -438,9 +437,10 @@ class Job(object):
         self.date_done = None
 
         self.result = None
+        self.exc_name = None
+        self.exc_message = None
         self.exc_info = None
 
-        self.user_id = env.uid
         if 'company_id' in env.context:
             company_id = env.context['company_id']
         else:
@@ -454,6 +454,7 @@ class Job(object):
         self._eta = None
         self.eta = eta
         self.channel = channel
+        self.worker_pid = None
 
     def perform(self):
         """Execute the job.
@@ -483,10 +484,28 @@ class Job(object):
 
     def store(self):
         """Store the Job"""
+        job_model = self.env["queue.job"]
+        # The sentinel is used to prevent edition sensitive fields (such as
+        # method_name) from RPC methods.
+        edit_sentinel = job_model.EDIT_SENTINEL
+
+        db_record = self.db_record()
+        if db_record:
+            db_record.with_context(_job_edit_sentinel=edit_sentinel).write(
+                self._store_values()
+            )
+        else:
+            job_model.with_context(_job_edit_sentinel=edit_sentinel).sudo().create(
+                self._store_values(create=True)
+            )
+
+    def _store_values(self, create=False):
         vals = {'state': self.state,
                 'priority': self.priority,
                 'retry': self.retry,
                 'max_retries': self.max_retries,
+                'exc_name': self.exc_name,
+                'exc_message': self.exc_message,
                 'exc_info': self.exc_info,
                 'user_id': self.user_id or self.env.uid,
                 'company_id': self.company_id,
@@ -494,8 +513,10 @@ class Job(object):
                 'date_enqueued': False,
                 'date_started': False,
                 'date_done': False,
+                'exec_time': False,
                 'eta': False,
                 'identity_key': False,
+                "worker_pid": self.worker_pid,
                 }
 
         if self.date_enqueued:
@@ -504,33 +525,59 @@ class Job(object):
             vals['date_started'] = self.date_started
         if self.date_done:
             vals['date_done'] = self.date_done
+        if self.exec_time:
+            vals["exec_time"] = self.exec_time
         if self.eta:
             vals['eta'] = self.eta
         if self.identity_key:
             vals['identity_key'] = self.identity_key
 
-        db_record = self.db_record()
-        if db_record:
-            db_record.write(vals)
-        else:
-            date_created = self.date_created
-            # The following values must never be modified after the
-            # creation of the job
-            vals.update({'uuid': self.uuid,
-                         'name': self.description,
-                         'date_created': date_created,
-                         'model_name': self.model_name,
-                         'method_name': self.method_name,
-                         'record_ids': self.recordset.ids,
-                         'args': self.args,
-                         'kwargs': self.kwargs,
-                         })
-            # it the channel is not specified, lets the job_model compute
-            # the right one to use
-            if self.channel:
-                vals.update({'channel': self.channel})
+        if create:
+            vals.update(
+                {
+                    "user_id": self.env.uid,
+                    "channel": self.channel,
+                    # The following values must never be modified after the
+                    # creation of the job
+                    "uuid": self.uuid,
+                    "name": self.description,
+                    "func_string": self.func_string,
+                    "date_created": self.date_created,
+                    "model_name": self.recordset._name,
+                    "method_name": self.method_name,
+                    "job_function_id": self.job_config.job_function_id,
+                    "channel_method_name": self.job_function_name,
+                    "records": self.recordset,
+                    "args": self.args,
+                    "kwargs": self.kwargs,
+                }
+            )
 
-            self.env[self.job_model_name].sudo().create(vals)
+        vals_from_model = self._store_values_from_model()
+        # Sanitize values: make sure you cannot screw core values
+        vals_from_model = {k: v for k, v in vals_from_model.items() if k not in vals}
+        vals.update(vals_from_model)
+        return vals
+
+    def _store_values_from_model(self):
+        vals = {}
+        value_handlers_candidates = (
+            "_job_store_values_for_" + self.method_name,
+            "_job_store_values",
+        )
+        for candidate in value_handlers_candidates:
+            handler = getattr(self.recordset, candidate, None)
+            if handler is not None:
+                vals = handler(self)
+        return vals
+
+    @property
+    def func_string(self):
+        model = repr(self.recordset)
+        args = [repr(arg) for arg in self.args]
+        kwargs = ["{}={!r}".format(key, val) for key, val in self.kwargs.items()]
+        all_args = ", ".join(args + kwargs)
+        return "{}.{}({})".format(model, self.method_name, all_args)
 
     def db_record(self):
         return self.db_record_from_uuid(self.env, self.uuid)
@@ -540,6 +587,11 @@ class Job(object):
         recordset = self.recordset.with_context(job_uuid=self.uuid)
         recordset = recordset.sudo(self.user_id)
         return getattr(recordset, self.method_name)
+
+    @property
+    def job_function_name(self):
+        func_model = self.env["queue.job.function"].sudo()
+        return func_model.job_function_name(self.recordset._name, self.method_name)
 
     @property
     def identity_key(self):
@@ -576,6 +628,14 @@ class Job(object):
         return self._uuid
 
     @property
+    def model_name(self):
+        return self.recordset._name
+
+    @property
+    def user_id(self):
+        return self.recordset.env.uid
+
+    @property
     def eta(self):
         return self._eta
 
@@ -590,10 +650,26 @@ class Job(object):
         else:
             self._eta = value
 
+    @property
+    def channel(self):
+        return self._channel or self.job_config.channel
+
+    @channel.setter
+    def channel(self, value):
+        self._channel = value
+
+    @property
+    def exec_time(self):
+        if self.date_done and self.date_started:
+            return (self.date_done - self.date_started).total_seconds()
+        return None
+
     def set_pending(self, result=None, reset_retry=True):
         self.state = PENDING
         self.date_enqueued = None
         self.date_started = None
+        self.date_done = None
+        self.worker_pid = None
         self.date_done = None
         if reset_retry:
             self.retry = 0
@@ -604,28 +680,35 @@ class Job(object):
         self.state = ENQUEUED
         self.date_enqueued = datetime.now()
         self.date_started = None
+        self.worker_pid = None
 
     def set_started(self):
         self.state = STARTED
         self.date_started = datetime.now()
+        self.worker_pid = os.getpid()
 
     def set_done(self, result=None):
         self.state = DONE
+        self.exc_name = None
         self.exc_info = None
         self.date_done = datetime.now()
         if result is not None:
             self.result = result
 
-    def set_failed(self, exc_info=None):
+    def set_failed(self, **kw):
         self.state = FAILED
-        if exc_info is not None:
-            self.exc_info = exc_info
+        for k, v in kw.items():
+            if v is not None:
+                setattr(self, k, v)
 
     def __repr__(self):
         return '<Job %s, priority:%d>' % (self.uuid, self.priority)
 
     def _get_retry_seconds(self, seconds=None):
-        retry_pattern = self.func.retry_pattern
+        retry_pattern = self.job_config.retry_pattern
+        if not retry_pattern:
+            # TODO deprecated by :job-no-decorator:
+            retry_pattern = getattr(self.func, "retry_pattern", None)
         if not seconds and retry_pattern:
             # ordered from higher to lower count of retries
             patt = sorted(retry_pattern.items(), key=lambda t: t[0])
@@ -648,24 +731,34 @@ class Job(object):
         """
         eta_seconds = self._get_retry_seconds(seconds)
         self.eta = timedelta(seconds=eta_seconds)
+        self.exc_name = None
         self.exc_info = None
         if result is not None:
             self.result = result
 
     def related_action(self):
         record = self.db_record()
-        if hasattr(self.func, 'related_action'):
+        if not self.job_config.related_action_enable:
+            return None
+
+        funcname = self.job_config.related_action_func_name
+        if not funcname and hasattr(self.func, 'related_action'):
+            # TODO deprecated by :job-no-decorator:
             funcname = self.func.related_action
             # decorator is set but empty: disable the default one
             if not funcname:
                 return None
-        else:
+
+        if not funcname:
             funcname = record._default_related_action
         if not isinstance(funcname, str):
             raise ValueError('related_action must be the name of the '
                              'method on queue.job as string')
         action = getattr(record, funcname)
-        action_kwargs = getattr(self.func, 'kwargs', {})
+        action_kwargs = self.job_config.related_action_kwargs
+        if not action_kwargs:
+            # TODO deprecated by :job-no-decorator:
+            action_kwargs = getattr(self.func, 'kwargs', {})
         return action(**action_kwargs)
 
 
@@ -674,8 +767,12 @@ def _is_model_method(func):
             isinstance(func.__self__.__class__, odoo.models.MetaModel))
 
 
+# TODO deprecated by :job-no-decorator:
 def job(func=None, default_channel='root', retry_pattern=None):
     """Decorator for job methods.
+
+    Deprecated. Use ``queue.job.function`` XML records (details in
+    ``readme/USAGE.rst``).
 
     It enables the possibility to use a Model's method as a job function.
 
@@ -760,6 +857,31 @@ def job(func=None, default_channel='root', retry_pattern=None):
         return functools.partial(job, default_channel=default_channel,
                                  retry_pattern=retry_pattern)
 
+    xml_fields = [
+        '    <field name="model_id" ref="[insert model xmlid]" />\n'
+        '    <field name="method">_test_job</field>\n'
+    ]
+    if default_channel:
+        xml_fields.append('    <field name="channel_id" ref="[insert channel xmlid]"/>')
+    if retry_pattern:
+        xml_fields.append('    <field name="retry_pattern">{retry_pattern}</field>')
+
+    _logger.info(
+        "@job is deprecated and no longer needed (on %s), it is advised to use an "
+        "XML record (activate DEBUG log for snippet)",
+        func.__name__,
+    )
+    if _logger.isEnabledFor(logging.DEBUG):
+        xml_record = (
+            '<record id="job_function_[insert model]_{method}"'
+            ' model="queue.job.function">\n' + "\n".join(xml_fields) + "\n</record>"
+        ).format(**{"method": func.__name__, "retry_pattern": retry_pattern})
+        _logger.debug(
+            "XML snippet (to complete) for replacing @job on %s:\n%s",
+            func.__name__,
+            xml_record,
+        )
+
     def delay_from_model(*args, **kwargs):
         raise AttributeError(
             "method.delay() can no longer be used, the general form is "
@@ -781,8 +903,12 @@ def job(func=None, default_channel='root', retry_pattern=None):
     return func
 
 
+# TODO deprecated by :job-no-decorator:
 def related_action(action=None, **kwargs):
     """Attach a *Related Action* to a job (decorator)
+
+    Deprecated. Use ``queue.job.function`` XML records (details in
+    ``readme/USAGE.rst``).
 
     A *Related Action* will appear as a button on the Odoo view.
     The button will execute the action, usually it will open the
@@ -801,7 +927,7 @@ def related_action(action=None, **kwargs):
             def related_action_partner(self):
                 self.ensure_one()
                 model = self.model_name
-                partner = self.env[model].browse(self.record_ids)
+                partner = self.records
                 # possibly get the real ID if partner_id is a binding ID
                 action = {
                     'name': _("Partner"),
@@ -846,6 +972,34 @@ def related_action(action=None, **kwargs):
 
     """
     def decorate(func):
+        related_action_dict = {
+            "func_name": action,
+        }
+        if kwargs:
+            related_action_dict["kwargs"] = kwargs
+
+        xml_fields = (
+            '    <field name="model_id" ref="[insert model xmlid]" />\n'
+            '    <field name="method">_test_job</field>\n'
+            '    <field name="related_action">{related_action}</field>'
+        )
+
+        _logger.info(
+            "@related_action is deprecated and no longer needed (on %s),"
+            " it is advised to use an XML record (activate DEBUG log for snippet)",
+            func.__name__,
+        )
+        if _logger.isEnabledFor(logging.DEBUG):
+            xml_record = (
+                '<record id="job_function_[insert model]_{method}"'
+                ' model="queue.job.function">\n' + xml_fields + "\n</record>"
+            ).format(**{"method": func.__name__, "related_action": action})
+            _logger.debug(
+                "XML snippet (to complete) for replacing @related_action on %s:\n%s",
+                func.__name__,
+                xml_record,
+            )
+
         func.related_action = action
         func.kwargs = kwargs
         return func
