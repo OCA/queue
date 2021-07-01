@@ -64,6 +64,11 @@ var JobDirectedGraph = AbstractField.extend({
         this.$el.empty();
 
         var nodes = this.value.nodes || [];
+
+        if (!nodes.length) {
+            return;
+        }
+
         var edges = [];
         _.each(this.value.edges || [], function (edge){
             var edgeFrom = edge[0];
