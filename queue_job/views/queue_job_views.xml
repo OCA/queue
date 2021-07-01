@@ -40,6 +40,16 @@
                     />
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+                            name="open_graph_jobs"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-sitemap"
+                            attrs="{'invisible':[('graph_uuid', '=', False)]}">
+                            <field name="graph_jobs_count" widget="statinfo" string="Graph Jobs"/>
+                        </button>
+                    </div>
                     <h1>
                         <field name="name" class="oe_inline" />
                     </h1>
