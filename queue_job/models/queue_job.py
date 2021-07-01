@@ -84,6 +84,7 @@ class QueueJob(models.Model):
     dependencies = Serialized(readonly=True)
     # dependency graph as expected by the field widget
     dependency_graph = Serialized(compute='_compute_dependency_graph')
+    graph_jobs_count = fields.Integer(compute="_compute_graph_jobs_count")
     args = JobSerialized(readonly=True, base_type=tuple)
     kwargs = JobSerialized(readonly=True, base_type=dict)
     func_string = fields.Char(string="Task", readonly=True)
@@ -212,6 +213,20 @@ class QueueJob(models.Model):
             "shadow": True,
         }
 
+    @api.multi
+    def _compute_graph_jobs_count(self):
+        jobs_groups = self.env["queue.job"].read_group(
+            [("graph_uuid", "in", [uuid for uuid in self.mapped("graph_uuid") if uuid])],
+            ["graph_uuid"],
+            ["graph_uuid"]
+        )
+        count_per_graph_uuid = {
+            group["graph_uuid"]: group["graph_uuid_count"]
+            for group in jobs_groups
+        }
+        for record in self:
+            record.graph_jobs_count = count_per_graph_uuid.get(record.graph_uuid) or 0
+
     @api.model_create_multi
     def create(self, vals_list):
         if self.env.context.get("_job_edit_sentinel") is not self.EDIT_SENTINEL:
@@ -264,6 +279,20 @@ class QueueJob(models.Model):
         action = job.related_action()
         if action is None:
             raise exceptions.UserError(_("No action available for this job"))
+        return action
+
+    def open_graph_jobs(self):
+        """Return action that opens all jobs of the same graph"""
+        self.ensure_one()
+        jobs = self.env["queue.job"].search([("graph_uuid", "=", self.graph_uuid)])
+
+        action_jobs = self.env.ref('queue_job.action_queue_job')
+        action = action_jobs.read()[0]
+        action.update({
+            "name": _("Jobs for graph %s") % (self.graph_uuid),
+            "context": {},
+            "domain": [("id", "in", jobs.ids)]
+        })
         return action
 
     def _change_job_state(self, state, result=None):
