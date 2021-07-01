@@ -146,14 +146,21 @@ class QueueJob(models.Model):
 
     @api.depends('dependencies')
     def _compute_dependency_graph(self):
+        jobs_groups = self.env["queue.job"].read_group(
+            [("graph_uuid", "in", [uuid for uuid in self.mapped("graph_uuid") if uuid])],
+            ["graph_uuid", "ids:array_agg(id)"],
+            ["graph_uuid"]
+        )
+        ids_per_graph_uuid = {group["graph_uuid"]: group["ids"] for group in jobs_groups}
         for record in self:
             if not record.graph_uuid:
                 record.dependency_graph = {}
                 continue
 
-            # TODO in 13.0, we could maybe use read_group, apparently, we can
-            # only call this field on one record at a time here
-            graph_jobs = self.search([("graph_uuid", "=", record.graph_uuid)])
+            graph_jobs = self.browse(ids_per_graph_uuid.get(record.graph_uuid) or [])
+            if not graph_jobs:
+                record.dependency_graph = {}
+                continue
 
             graph_ids = {
                 graph_job.uuid: graph_job.id for graph_job in graph_jobs
@@ -186,19 +193,6 @@ class QueueJob(models.Model):
                 'edges': graph.edges(),
             }
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        if self.env.context.get("_job_edit_sentinel") is not self.EDIT_SENTINEL:
-            # Prevent to create a queue.job record "raw" from RPC.
-            # ``with_delay()`` must be used.
-            raise exceptions.AccessError(
-                _("Queue jobs must be created by calling 'with_delay()'.")
-            )
-        return super(
-            QueueJob,
-            self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True),
-        ).create(vals_list)
-
     def _dependency_graph_vis_node(self):
         """Return the node as expected by the JobDirectedGraph widget"""
         default = ("#D2E5FF", "#2B7CE9")
@@ -217,6 +211,19 @@ class QueueJob(models.Model):
             "border": colors.get(self.state, default)[1],
             "shadow": True,
         }
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        if self.env.context.get("_job_edit_sentinel") is not self.EDIT_SENTINEL:
+            # Prevent to create a queue.job record "raw" from RPC.
+            # ``with_delay()`` must be used.
+            raise exceptions.AccessError(
+                _("Queue jobs must be created by calling 'with_delay()'.")
+            )
+        return super(
+            QueueJob,
+            self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True),
+        ).create(vals_list)
 
     def write(self, vals):
         if self.env.context.get("_job_edit_sentinel") is not self.EDIT_SENTINEL:
