@@ -349,7 +349,8 @@ class DelayableChain:
         return self.__tail._head()
 
     def __repr__(self):
-        return 'DelayableChain({})'.format(self._graph)
+        inner_graph = "\n\t".join(repr(self._graph).split("\n"))
+        return 'DelayableChain(\n\t{}\n)'.format(inner_graph)
 
     def done(self, *delayables):
         """Connects the current chain to other delayables/chains/groups
@@ -403,7 +404,8 @@ class DelayableGroup:
         )
 
     def __repr__(self):
-        return 'DelayableGroup({})'.format(self._graph)
+        inner_graph = "\n\t".join(repr(self._graph).split("\n"))
+        return 'DelayableGroup(\n\t{}\n)'.format(inner_graph)
 
     def done(self, *delayables):
         """Connects the current group to other delayables/chains/groups
