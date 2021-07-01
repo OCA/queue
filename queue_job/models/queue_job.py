@@ -3,6 +3,7 @@
 
 import ast
 import logging
+import random
 import re
 from collections import namedtuple
 from datetime import datetime, timedelta
@@ -12,6 +13,7 @@ from odoo.addons.base_sparse_field.models.fields import Serialized
 from odoo.osv import expression
 
 from ..delay import Graph
+from ..exception import JobError
 from ..fields import JobSerialized
 from ..job import (
     CANCELLED,
@@ -456,8 +458,10 @@ class QueueJob(models.Model):
             })
         return action
 
-    def _test_job(self):
+    def _test_job(self, failure_rate=0):
         _logger.info("Running test job.")
+        if random.random() <= failure_rate:
+            raise JobError("Job failed")
 
 
 class RequeueJob(models.TransientModel):
