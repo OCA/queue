@@ -59,6 +59,11 @@ var JobDirectedGraph = AbstractField.extend({
             this._fitNetwork();
         }.bind(this));
     },
+    htmlTitle: function(html) {
+        const container = document.createElement("div");
+        container.innerHTML = html;
+        return container;
+    },
     _render: function () {
         var self = this;
         this.$el.empty();
@@ -68,6 +73,10 @@ var JobDirectedGraph = AbstractField.extend({
         if (!nodes.length) {
             return;
         }
+        nodes = _.map(nodes, function(node) {
+            node.title = self.htmlTitle(node.title || '');
+            return node;
+        });
 
         var edges = [];
         _.each(this.value.edges || [], function (edge){
