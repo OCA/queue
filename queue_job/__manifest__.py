@@ -7,9 +7,7 @@
  'website': 'https://github.com/OCA/queue/tree/12.0/queue_job',
  'license': 'LGPL-3',
  'category': 'Generic Modules',
- 'depends': ['mail',
-             'base_sparse_field'
-             ],
+ 'depends': ['mail'],
  'external_dependencies': {'python': ['requests'
                                       ],
                            },
