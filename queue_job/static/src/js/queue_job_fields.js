@@ -97,6 +97,13 @@ var JobDirectedGraph = AbstractField.extend({
             // fix the seed to have always the same result for the same graph
             layout: {randomSeed: 1}
         };
+        // Arbitrary threshold, generation becomes very slow at some
+        // point, and disabling the stabilization helps to have a fast result.
+        // Actually, it stabilizes, but is displayed while stabilizing, rather
+        // than showing a blank canvas.
+        if (nodes.length > 100) {
+            options.physics = { stabilization: false };
+        }
         var network = new vis.Network(this.$el[0], data, options);
         network.selectNodes([this.res_id]);
 
