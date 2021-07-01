@@ -116,7 +116,7 @@ class QueueJob(models.Model):
         "Retries are infinite when empty.",
     )
     # FIXME the name of this field is very confusing
-    channel_method_name = fields.Char(string="Method Name", readonly=True)
+    channel_method_name = fields.Char(string="Complete Method Name", readonly=True)
     job_function_id = fields.Many2one(
         comodel_name="queue.job.function",
         string="Job Function",
