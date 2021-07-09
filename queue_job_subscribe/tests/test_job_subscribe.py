@@ -43,9 +43,9 @@ class TestJobSubscribe(common.TransactionCase):
 
     def test_job_subscription(self):
         """
-            When a job is created, all user of group
-            queue_job.group_queue_job_manager are automatically set as
-            follower except if the flag subscribe_job is not set
+        When a job is created, all user of group
+        queue_job.group_queue_job_manager are automatically set as
+        follower except if the flag subscribe_job is not set
         """
 
         #################################
