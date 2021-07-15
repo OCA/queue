@@ -18,6 +18,7 @@ ENQUEUED = "enqueued"
 DONE = "done"
 STARTED = "started"
 FAILED = "failed"
+PAUSED = "paused"
 
 STATES = [
     (PENDING, "Pending"),
@@ -25,6 +26,7 @@ STATES = [
     (STARTED, "Started"),
     (DONE, "Done"),
     (FAILED, "Failed"),
+    (PAUSED, "Paused"),
 ]
 
 DEFAULT_PRIORITY = 10  # used by the PriorityQueue to sort the jobs
@@ -677,6 +679,9 @@ class Job(object):
         self.state = FAILED
         if exc_info is not None:
             self.exc_info = exc_info
+
+    def set_paused(self):
+        self.state = PAUSED
 
     def __repr__(self):
         return "<Job %s, priority:%d>" % (self.uuid, self.priority)

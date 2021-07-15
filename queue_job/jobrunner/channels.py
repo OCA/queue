@@ -7,7 +7,7 @@ from heapq import heappop, heappush
 from weakref import WeakValueDictionary
 
 from ..exception import ChannelNotFound
-from ..job import DONE, ENQUEUED, FAILED, PENDING, STARTED
+from ..job import DONE, ENQUEUED, FAILED, PAUSED, PENDING, STARTED
 
 NOT_DONE = (PENDING, ENQUEUED, STARTED, FAILED)
 
@@ -410,6 +410,7 @@ class Channel(object):
         self._queue = ChannelQueue()
         self._running = SafeSet()
         self._failed = SafeSet()
+        self._paused = SafeSet()
         self._pause_until = 0  # utc seconds since the epoch
         self.capacity = capacity
         self.throttle = throttle  # seconds
@@ -452,12 +453,13 @@ class Channel(object):
 
     def __str__(self):
         capacity = "∞" if self.capacity is None else str(self.capacity)
-        return "%s(C:%s,Q:%d,R:%d,F:%d)" % (
+        return "%s(C:%s,Q:%d,R:%d,F:%d,P:%d)" % (
             self.fullname,
             capacity,
             len(self._queue),
             len(self._running),
             len(self._failed),
+            len(self._paused),
         )
 
     def remove(self, job):
@@ -465,6 +467,7 @@ class Channel(object):
         self._queue.remove(job)
         self._running.remove(job)
         self._failed.remove(job)
+        self._paused.remove(job)
         if self.parent:
             self.parent.remove(job)
 
@@ -486,6 +489,7 @@ class Channel(object):
             self._queue.add(job)
             self._running.remove(job)
             self._failed.remove(job)
+            self._paused.remove(job)
             if self.parent:
                 self.parent.remove(job)
             _logger.debug("job %s marked pending in channel %s", job.uuid, self)
@@ -499,6 +503,7 @@ class Channel(object):
             self._queue.remove(job)
             self._running.add(job)
             self._failed.remove(job)
+            self._paused.remove(job)
             if self.parent:
                 self.parent.set_running(job)
             _logger.debug("job %s marked running in channel %s", job.uuid, self)
@@ -509,9 +514,21 @@ class Channel(object):
             self._queue.remove(job)
             self._running.remove(job)
             self._failed.add(job)
+            self._paused.remove(job)
             if self.parent:
                 self.parent.remove(job)
             _logger.debug("job %s marked failed in channel %s", job.uuid, self)
+
+    def set_paused(self, job):
+        """Mark the job as paused. """
+        if job not in self._failed:
+            self._queue.remove(job)
+            self._running.remove(job)
+            self._failed.remove(job)
+            self._paused.add(job)
+            if self.parent:
+                self.parent.remove(job)
+            _logger.debug("job %s marked paused in channel %s", job.uuid, self)
 
     def has_capacity(self):
         if self.sequential and self._failed:
@@ -1038,6 +1055,8 @@ class ChannelManager(object):
             job.channel.set_running(job)
         elif state == FAILED:
             job.channel.set_failed(job)
+        elif state == PAUSED:
+            job.channel.set_paused(job)
         else:
             _logger.error("unexpected state %s for job %s", state, job)
 

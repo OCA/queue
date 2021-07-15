@@ -8,7 +8,7 @@ from odoo import _, api, exceptions, fields, models
 from odoo.osv import expression
 
 from ..fields import JobSerialized
-from ..job import DONE, PENDING, STATES, Job
+from ..job import DONE, PAUSED, PENDING, STATES, Job
 
 _logger = logging.getLogger(__name__)
 
@@ -222,6 +222,8 @@ class QueueJob(models.Model):
                 job_.set_done(result=result)
             elif state == PENDING:
                 job_.set_pending(result=result)
+            elif state == PAUSED:
+                job_.set_paused()
             else:
                 raise ValueError("State not supported: %s" % state)
             job_.store()
@@ -233,6 +235,10 @@ class QueueJob(models.Model):
 
     def requeue(self):
         self._change_job_state(PENDING)
+        return True
+
+    def pause(self):
+        self._change_job_state(PAUSED)
         return True
 
     def _message_post_on_failure(self):
