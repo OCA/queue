@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from odoo import _, api, exceptions, fields, models, tools
 from odoo.addons.base_sparse_field.models.fields import Serialized
 from odoo.osv import expression
+from odoo.tools import html_escape
 
 from ..delay import Graph
 from ..exception import JobError
@@ -205,8 +206,8 @@ class QueueJob(models.Model):
         return {
             "id": self.id,
             "title": "<strong>%s</strong><br/>%s" % (
-                self.display_name,
-                self.func_string,
+                html_escape(self.display_name),
+                html_escape(self.func_string),
             ),
             "color": colors.get(self.state, default)[0],
             "border": colors.get(self.state, default)[1],
