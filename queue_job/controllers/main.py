@@ -185,7 +185,8 @@ class RunJobController(http.Controller):
 
     @http.route("/queue_job/create_test_job", type="http", auth="user")
     def create_test_job(
-            self, priority=None, max_retries=None, channel=None, description="Test job", size=1, failure_rate=0
+            self, priority=None, max_retries=None, channel=None,
+            description="Test job", size=1, failure_rate=0
     ):
         if not http.request.env.user.has_group("base.group_erp_manager"):
             raise Forbidden(_("Access Denied"))
@@ -269,7 +270,10 @@ class RunJobController(http.Controller):
         tails = []  # we can connect new graph chains/groups to tails
         root_delayable = None
         while current_count < size:
-            jobs_count = min(size - current_count, random.randint(1, self.TEST_GRAPH_MAX_PER_GROUP))
+            jobs_count = min(
+                size - current_count,
+                random.randint(1, self.TEST_GRAPH_MAX_PER_GROUP)
+            )
 
             jobs = []
             for __ in range(jobs_count):
@@ -294,4 +298,6 @@ class RunJobController(http.Controller):
 
         root_delayable.delay()
 
-        return 'graph uuid: %s' % (list(root_delayable._head())[0]._generated_job.graph_uuid,)
+        return 'graph uuid: %s' % (
+            list(root_delayable._head())[0]._generated_job.graph_uuid,
+        )
