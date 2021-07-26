@@ -8,7 +8,7 @@ from odoo import _, api, exceptions, fields, models
 from odoo.osv import expression
 
 from ..fields import JobSerialized
-from ..job import DONE, PENDING, STATES, Job
+from ..job import DONE, PAUSE_CHANNEL, PENDING, STATES, Job
 
 _logger = logging.getLogger(__name__)
 
@@ -384,3 +384,36 @@ class QueueJob(models.Model):
 
     def _test_job(self):
         _logger.info("Running test job.")
+
+    def _change_job_pause_channel(self):
+        """Change the state of the `Job` object
+
+        Changing the channel of the Job will automatically change some fields
+        (date, result, ...).
+        """
+        for record in self:
+            job_ = Job.load(record.env, record.uuid)
+            to_channel = ""
+            if record.channel == PAUSE_CHANNEL:
+                # Get original channel
+                to_channel = record.job_function_id.channel
+                override_channel = False
+                record.override_channel = override_channel
+            else:
+                to_channel = PAUSE_CHANNEL
+                override_channel = to_channel
+                record.override_channel = override_channel
+            job_.change_job_channel(to_channel)
+            job_.store()
+            record._compute_channel()
+            record.override_channel = override_channel
+
+    def _validate_state_jobs(self):
+        if any(job.state in ("done", "started") for job in self):
+            raise exceptions.ValidationError(
+                _("Some selected jobs are in invalid states to pause.")
+            )
+
+    def set_channel_pause(self):
+        self._change_job_pause_channel()
+        return True

@@ -30,6 +30,7 @@ STATES = [
 DEFAULT_PRIORITY = 10  # used by the PriorityQueue to sort the jobs
 DEFAULT_MAX_RETRIES = 5
 RETRY_INTERVAL = 10 * 60  # seconds
+PAUSE_CHANNEL = "root.pause"
 
 _logger = logging.getLogger(__name__)
 
@@ -549,6 +550,8 @@ class Job(object):
             vals["eta"] = self.eta
         if self.identity_key:
             vals["identity_key"] = self.identity_key
+        if self.channel:
+            vals["channel"] = self.channel
 
         job_model = self.env["queue.job"]
         # The sentinel is used to prevent edition sensitive fields (such as
@@ -677,6 +680,9 @@ class Job(object):
         self.state = FAILED
         if exc_info is not None:
             self.exc_info = exc_info
+
+    def change_job_channel(self, to_channel):
+        self.channel = to_channel
 
     def __repr__(self):
         return "<Job %s, priority:%d>" % (self.uuid, self.priority)
