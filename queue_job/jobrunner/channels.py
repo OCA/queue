@@ -7,7 +7,7 @@ from heapq import heappop, heappush
 from weakref import WeakValueDictionary
 
 from ..exception import ChannelNotFound
-from ..job import DONE, ENQUEUED, FAILED, PENDING, STARTED
+from ..job import DONE, ENQUEUED, FAILED, PAUSE_CHANNEL, PENDING, STARTED
 
 NOT_DONE = (PENDING, ENQUEUED, STARTED, FAILED)
 
@@ -451,7 +451,13 @@ class Channel(object):
         return self.children.get(subchannel_name)
 
     def __str__(self):
-        capacity = "∞" if self.capacity is None else str(self.capacity)
+        if not self.capacity:
+            if self.name == PAUSE_CHANNEL:
+                capacity = "0"
+            else:
+                capacity = "∞"
+        else:
+            capacity = str(self.capacity)
         return "%s(C:%s,Q:%d,R:%d,F:%d)" % (
             self.fullname,
             capacity,
@@ -517,7 +523,7 @@ class Channel(object):
         if self.sequential and self._failed:
             # a sequential queue blocks on failed jobs
             return False
-        if not self.capacity:
+        if not self.capacity and self.fullname != PAUSE_CHANNEL:
             # unlimited capacity
             return True
         return len(self._running) < self.capacity
@@ -873,6 +879,10 @@ class ChannelManager(object):
                 capacity = config_items[1]
                 try:
                     config["capacity"] = int(capacity)
+                    if name == PAUSE_CHANNEL and config["capacity"] != 0:
+                        raise Exception(
+                            "Channel 'pause' must be capacity equal to zero"
+                        )
                 except Exception:
                     raise ValueError(
                         "Invalid channel config %s: "
@@ -896,7 +906,10 @@ class ChannelManager(object):
                         )
                     config[k] = v
             else:
-                config["capacity"] = 1
+                if name == PAUSE_CHANNEL:
+                    config["capacity"] = 0
+                else:
+                    config["capacity"] = 1
             res.append(config)
         return res
 

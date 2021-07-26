@@ -33,6 +33,7 @@ STATES = [
 DEFAULT_PRIORITY = 10  # used by the PriorityQueue to sort the jobs
 DEFAULT_MAX_RETRIES = 5
 RETRY_INTERVAL = 10 * 60  # seconds
+PAUSE_CHANNEL = "root.pause"
 
 _logger = logging.getLogger(__name__)
 
@@ -584,6 +585,8 @@ class Job(object):
             vals["eta"] = self.eta
         if self.identity_key:
             vals["identity_key"] = self.identity_key
+        if self.channel:
+            vals["channel"] = self.channel
 
         if create:
             vals.update(
@@ -764,6 +767,9 @@ class Job(object):
         for k, v in kw.items():
             if v is not None:
                 setattr(self, k, v)
+
+    def change_job_channel(self, to_channel):
+        self.channel = to_channel
 
     def __repr__(self):
         return "<Job %s, priority:%d>" % (self.uuid, self.priority)
