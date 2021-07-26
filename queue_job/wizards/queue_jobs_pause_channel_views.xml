@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_set_channel_pause_job" model="ir.ui.view">
+        <field name="name">Pause Jobs</field>
+        <field name="model">queue.channel.pause</field>
+        <field name="arch" type="xml">
+            <form string="Pause/Resume Jobs">
+                <group string="The selected jobs will be paused/resumed.">
+                    <field name="job_ids" nolabel="1" />
+                </group>
+                <footer>
+                    <button
+                        name="set_channel_paused"
+                        string="Pause/Resume"
+                        type="object"
+                        class="oe_highlight"
+                    />
+                    <button string="Cancel" class="oe_link" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_set_channel_pause_job" model="ir.actions.act_window">
+        <field name="name">Pause/Resume Jobs</field>
+        <field name="res_model">queue.channel.pause</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_set_channel_pause_job" />
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="queue_job.model_queue_job" />
+    </record>
+
+</odoo>
