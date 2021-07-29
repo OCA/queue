@@ -60,8 +60,11 @@ class QueueJobFunction(models.Model):
         compute="_compute_edit_retry_pattern",
         inverse="_inverse_edit_retry_pattern",
         help="Pattern expressing from the count of retries on retryable errors,"
-        " the number of of seconds to postpone the next execution.\n"
+        " the number of of seconds to postpone the next execution. Setting the "
+        "number of seconds to a 2-element tuple or list will randomize the "
+        "retry interval between the 2 values.\n"
         "Example: {1: 10, 5: 20, 10: 30, 15: 300}.\n"
+        "Example: {1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}.\n"
         "See the module description for details.",
     )
     related_action = JobSerialized(string="Related Action (serialized)", base_type=dict)
