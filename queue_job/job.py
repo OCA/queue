@@ -628,7 +628,15 @@ class Job(object):
 
     @property
     def func(self):
-        recordset = self.recordset.with_context(job_uuid=self.uuid)
+        user = self.env["res.users"].browse(self.user_id)
+        company_ids = user.company_ids.ids
+        # Insert the current company in top position
+        company_ids.insert(0, self.company_id)
+        # Remove duplicates but keep order
+        company_ids = list(dict.fromkeys(company_ids))
+        recordset = self.recordset.with_context(
+            job_uuid=self.uuid, allowed_company_ids=company_ids
+        )
         return getattr(recordset, self.method_name)
 
     @property
