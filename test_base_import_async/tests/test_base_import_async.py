@@ -16,7 +16,7 @@ from odoo.addons.base_import_async.models.base_import_import import (
 from odoo.addons.queue_job.job import Job
 
 
-class TestBaseImportAsync(common.TransactionCase):
+class TestBaseImportAsync(common.SavepointCase):
 
     FIELDS = [
         "date",
@@ -36,38 +36,40 @@ class TestBaseImportAsync(common.TransactionCase):
         "date_format": "%Y-%m-%d",
     }
 
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
         # add xmlids that will be used in the test CSV file
-        self.env["ir.model.data"]._update_xmlids(
+        cls.env["ir.model.data"]._update_xmlids(
             [
                 {
                     "xml_id": "test_base_import_async.testjournal_xmlid",
-                    "record": self.env["account.journal"].search(
+                    "record": cls.env["account.journal"].search(
                         [("code", "=", "CABA")]
                     ),
                 },
                 {
                     "xml_id": "test_base_import_async.a_recv_xmlid",
-                    "record": self.env["account.account"].search(
+                    "record": cls.env["account.account"].search(
                         [("code", "=", "121000")]
                     ),
                 },
                 {
                     "xml_id": "test_base_import_async.a_sale_xmlid",
-                    "record": self.env["account.account"].search(
+                    "record": cls.env["account.account"].search(
                         [("code", "=", "400000")]
                     ),
                 },
             ]
         )
-        self.import_obj = self.env["base_import.import"]
-        self.move_obj = self.env["account.move"]
-        self.job_obj = self.env["queue.job"]
+        cls.import_obj = cls.env["base_import.import"]
+        cls.move_obj = cls.env["account.move"]
+        cls.job_obj = cls.env["queue.job"]
 
     def _read_test_file(self, file_name):
         file_name = os.path.join(os.path.dirname(__file__), file_name)
-        return open(file_name).read()
+        with open(file_name) as opened:
+            return opened.read()
 
     def _do_import(self, file_name, use_queue, chunk_size=None):
         data = self._read_test_file(file_name)
