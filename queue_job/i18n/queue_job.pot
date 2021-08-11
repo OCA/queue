@@ -448,6 +448,11 @@ msgid "Model {} not found"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__name
 msgid "Name"
@@ -524,8 +529,9 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_retry_pattern
 msgid ""
-"Pattern expressing from the count of retries on retryable errors, the number of of seconds to postpone the next execution.\n"
+"Pattern expressing from the count of retries on retryable errors, the number of of seconds to postpone the next execution. Setting the number of seconds to a 2-element tuple or list will randomize the retry interval between the 2 values.\n"
 "Example: {1: 10, 5: 20, 10: 30, 15: 300}.\n"
+"Example: {1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}.\n"
 "See the module description for details."
 msgstr ""
 
@@ -769,6 +775,16 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__user_id
 msgid "User ID"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__website_message_ids
+msgid "Website Messages"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__website_message_ids
+msgid "Website communication history"
 msgstr ""
 
 #. module: queue_job
