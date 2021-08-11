@@ -457,6 +457,11 @@ msgid "Model {} not found"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__name
 msgid "Name"
@@ -534,8 +539,11 @@ msgstr "Es ist ein übergeordneter Kanal notwendig."
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_retry_pattern
 msgid ""
 "Pattern expressing from the count of retries on retryable errors, the number "
-"of of seconds to postpone the next execution.\n"
+"of of seconds to postpone the next execution. Setting the number of seconds "
+"to a 2-element tuple or list will randomize the retry interval between the 2 "
+"values.\n"
 "Example: {1: 10, 5: 20, 10: 30, 15: 300}.\n"
+"Example: {1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}.\n"
 "See the module description for details."
 msgstr ""
 
@@ -797,6 +805,16 @@ msgid "User ID"
 msgstr "Benutzer"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__website_message_ids
+msgid "Website Messages"
+msgstr "Website Nachrichten"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__website_message_ids
+msgid "Website communication history"
+msgstr "Historie der Website-Kommunikation"
+
+#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_requeue_job
 msgid "Wizard to requeue a selection of jobs"
 msgstr "Assistent zur erneuten Einreihung einer Job-Auswahl"
@@ -805,12 +823,6 @@ msgstr "Assistent zur erneuten Einreihung einer Job-Auswahl"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr ""
-
-#~ msgid "Website Messages"
-#~ msgstr "Website Nachrichten"
-
-#~ msgid "Website communication history"
-#~ msgstr "Historie der Website-Kommunikation"
 
 #~ msgid "If checked new messages require your attention."
 #~ msgstr ""
