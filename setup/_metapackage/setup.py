@@ -8,8 +8,10 @@ setuptools.setup(
     description="Meta package for oca-queue Odoo addons",
     version=version,
     install_requires=[
+        'odoo14-addon-base_import_async',
         'odoo14-addon-queue_job',
         'odoo14-addon-queue_job_cron',
+        'odoo14-addon-test_base_import_async',
         'odoo14-addon-test_queue_job',
     ],
     classifiers=[
