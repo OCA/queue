@@ -19,10 +19,10 @@ Available addons
 ----------------
 addon | version | summary
 --- | --- | ---
-[base_import_async](base_import_async/) | 14.0.1.0.0 | Import CSV files in the background
+[base_import_async](base_import_async/) | 14.0.1.0.1 | Import CSV files in the background
 [queue_job](queue_job/) | 14.0.1.3.1 | Job Queue
 [queue_job_cron](queue_job_cron/) | 14.0.1.0.0 | Scheduled Actions as Queue Jobs
-[test_base_import_async](test_base_import_async/) | 14.0.1.0.0 | Test suite for base_import_async. Normally you don't need to install this.
+[test_base_import_async](test_base_import_async/) | 14.0.1.0.1 | Test suite for base_import_async. Normally you don't need to install this.
 [test_queue_job](test_queue_job/) | 14.0.1.3.0 | Queue Job Tests
 
 
