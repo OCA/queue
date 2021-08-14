@@ -17,21 +17,21 @@ TODO: add repo description.
 
 Available addons
 ----------------
-addon | version | summary
---- | --- | ---
-[base_import_async](base_import_async/) | 14.0.1.0.1 | Import CSV files in the background
-[queue_job](queue_job/) | 14.0.1.3.1 | Job Queue
-[queue_job_cron](queue_job_cron/) | 14.0.1.0.0 | Scheduled Actions as Queue Jobs
-[test_base_import_async](test_base_import_async/) | 14.0.1.0.1 | Test suite for base_import_async. Normally you don't need to install this.
-[test_queue_job](test_queue_job/) | 14.0.1.3.0 | Queue Job Tests
+addon | version | maintainers | summary
+--- | --- | --- | ---
+[base_import_async](base_import_async/) | 14.0.1.0.1 |  | Import CSV files in the background
+[queue_job](queue_job/) | 14.0.1.3.1 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
+[queue_job_cron](queue_job_cron/) | 14.0.1.0.0 |  | Scheduled Actions as Queue Jobs
+[test_base_import_async](test_base_import_async/) | 14.0.1.0.1 |  | Test suite for base_import_async. Normally you don't need to install this.
+[test_queue_job](test_queue_job/) | 14.0.1.3.0 |  | Queue Job Tests
 
 
 Unported addons
 ---------------
-addon | version | summary
---- | --- | ---
-[base_export_async](base_export_async/) | 12.0.1.0.0 (unported) | Asynchronous export with job queue
-[queue_job_subscribe](queue_job_subscribe/) | 13.0.1.0.0 (unported) | Control which users are subscribed to queue job notifications
+addon | version | maintainers | summary
+--- | --- | --- | ---
+[base_export_async](base_export_async/) | 12.0.1.0.0 (unported) |  | Asynchronous export with job queue
+[queue_job_subscribe](queue_job_subscribe/) | 13.0.1.0.0 (unported) |  | Control which users are subscribed to queue job notifications
 
 [//]: # (end addons)
 
