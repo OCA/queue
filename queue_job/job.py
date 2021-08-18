@@ -628,12 +628,13 @@ class Job(object):
 
     @property
     def func(self):
-        user = self.env["res.users"].browse(self.user_id)
-        company_ids = user.company_ids.ids
-        # Insert the current company in top position
-        company_ids.insert(0, self.company_id)
-        # Remove duplicates but keep order
-        company_ids = list(dict.fromkeys(company_ids))
+        # We can fill only one company into allowed_company_ids.
+        # Because if you have many, you can have unexpected records due to ir.rule.
+        # ir.rule use allowed_company_ids to load every records in many companies.
+        # But most of the time, a job should be executed on a single company.
+        company_ids = []
+        if self.company_id:
+            company_ids = [self.company_id]
         recordset = self.recordset.with_context(
             job_uuid=self.uuid, allowed_company_ids=company_ids
         )
