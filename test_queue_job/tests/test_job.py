@@ -241,9 +241,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         job_read = Job.load(self.env, test_job.uuid)
         self.assertEqual(test_job.func, job_read.func)
         result_ctx = test_job.func(*tuple(test_job.args), **test_job.kwargs)
-        self.assertEqual(
-            result_ctx.get("allowed_company_ids"), [company2.id, company1.id]
-        )
+        self.assertEqual(result_ctx.get("allowed_company_ids"), company2.ids)
 
     def test_read(self):
         eta = datetime.now() + timedelta(hours=5)
