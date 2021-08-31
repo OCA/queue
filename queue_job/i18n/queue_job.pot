@@ -68,13 +68,13 @@ msgid "Cancel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:478
+#: code:addons/queue_job/models/queue_job.py:476
 #, python-format
 msgid "Cannot change the root channel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:485
+#: code:addons/queue_job/models/queue_job.py:483
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr ""
@@ -274,7 +274,7 @@ msgid "Identity Key"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:317
+#: code:addons/queue_job/models/queue_job.py:315
 #, python-format
 msgid "If both parameters are 0, ALL jobs will be requeued!"
 msgstr ""
@@ -295,7 +295,7 @@ msgid "If checked, some messages have a delivery error."
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:566
+#: code:addons/queue_job/models/queue_job.py:564
 #, python-format
 msgid "Invalid job function: {}"
 msgstr ""
@@ -406,7 +406,7 @@ msgid "Main Attachment"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:209
+#: code:addons/queue_job/models/queue_job.py:207
 #, python-format
 msgid "Manually set to done by %s"
 msgstr ""
@@ -444,7 +444,7 @@ msgid "Model"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:571
+#: code:addons/queue_job/models/queue_job.py:569
 #, python-format
 msgid "Model {} not found"
 msgstr ""
@@ -471,13 +471,13 @@ msgid "Next Activity Type"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:187
+#: code:addons/queue_job/models/queue_job.py:185
 #, python-format
 msgid "No action available for this job"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:155
+#: code:addons/queue_job/models/queue_job.py:153
 #, python-format
 msgid "Not allowed to change field(s): {}"
 msgstr ""
@@ -518,7 +518,7 @@ msgid "Parent Channel"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:445
+#: code:addons/queue_job/models/queue_job.py:443
 #, python-format
 msgid "Parent channel required."
 msgstr ""
@@ -557,7 +557,7 @@ msgid "Queue Job"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:141
+#: code:addons/queue_job/models/queue_job.py:139
 #, python-format
 msgid "Queue jobs must be created by calling 'with_delay()'."
 msgstr ""
@@ -588,13 +588,13 @@ msgid "Related Action (serialized)"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:347
+#: code:addons/queue_job/models/queue_job.py:345
 #, python-format
 msgid "Related Record"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:357
+#: code:addons/queue_job/models/queue_job.py:355
 #, python-format
 msgid "Related Records"
 msgstr ""
@@ -667,7 +667,7 @@ msgid "Set to done"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:252
+#: code:addons/queue_job/models/queue_job.py:250
 #, python-format
 msgid "Something bad happened during the execution of the job. More details in the 'Exception Information' section."
 msgstr ""
@@ -745,7 +745,7 @@ msgid "UUID"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:693
+#: code:addons/queue_job/models/queue_job.py:691
 #, python-format
 msgid "Unexpected format of Related Action for {}.\n"
 "Example of valid format:\n"
@@ -753,7 +753,7 @@ msgid "Unexpected format of Related Action for {}.\n"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:670
+#: code:addons/queue_job/models/queue_job.py:668
 #, python-format
 msgid "Unexpected format of Retry Pattern for {}.\n"
 "Example of valid format:\n"
