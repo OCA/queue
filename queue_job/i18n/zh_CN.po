@@ -75,13 +75,13 @@ msgid "Cancel"
 msgstr "取消"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:478
+#: code:addons/queue_job/models/queue_job.py:476
 #, python-format
 msgid "Cannot change the root channel"
 msgstr "无法更改root频道"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:485
+#: code:addons/queue_job/models/queue_job.py:483
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr "无法删除root频道"
@@ -281,7 +281,7 @@ msgid "Identity Key"
 msgstr "身份密钥"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:317
+#: code:addons/queue_job/models/queue_job.py:315
 #, fuzzy, python-format
 msgid "If both parameters are 0, ALL jobs will be requeued!"
 msgstr "所选作业将重新排队。"
@@ -302,7 +302,7 @@ msgid "If checked, some messages have a delivery error."
 msgstr "如果勾选此项， 某些消息将会产生传递错误。"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:566
+#: code:addons/queue_job/models/queue_job.py:564
 #, python-format
 msgid "Invalid job function: {}"
 msgstr ""
@@ -413,7 +413,7 @@ msgid "Main Attachment"
 msgstr "附件"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:209
+#: code:addons/queue_job/models/queue_job.py:207
 #, python-format
 msgid "Manually set to done by %s"
 msgstr "由%s手动设置为完成"
@@ -451,7 +451,7 @@ msgid "Model"
 msgstr "模型"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:571
+#: code:addons/queue_job/models/queue_job.py:569
 #, python-format
 msgid "Model {} not found"
 msgstr ""
@@ -478,13 +478,13 @@ msgid "Next Activity Type"
 msgstr "下一活动类型"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:187
+#: code:addons/queue_job/models/queue_job.py:185
 #, python-format
 msgid "No action available for this job"
 msgstr "此作业无法执行任何操作"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:155
+#: code:addons/queue_job/models/queue_job.py:153
 #, python-format
 msgid "Not allowed to change field(s): {}"
 msgstr ""
@@ -525,7 +525,7 @@ msgid "Parent Channel"
 msgstr "父频道"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:445
+#: code:addons/queue_job/models/queue_job.py:443
 #, python-format
 msgid "Parent channel required."
 msgstr "父频道必填。"
@@ -566,7 +566,7 @@ msgid "Queue Job"
 msgstr "队列作业"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:141
+#: code:addons/queue_job/models/queue_job.py:139
 #, python-format
 msgid "Queue jobs must be created by calling 'with_delay()'."
 msgstr ""
@@ -597,13 +597,13 @@ msgid "Related Action (serialized)"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:347
+#: code:addons/queue_job/models/queue_job.py:345
 #, python-format
 msgid "Related Record"
 msgstr "相关记录"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:357
+#: code:addons/queue_job/models/queue_job.py:355
 #, python-format
 msgid "Related Records"
 msgstr "相关记录"
@@ -676,7 +676,7 @@ msgid "Set to done"
 msgstr "设置为完成"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:252
+#: code:addons/queue_job/models/queue_job.py:250
 #, python-format
 msgid ""
 "Something bad happened during the execution of the job. More details in the "
@@ -768,7 +768,7 @@ msgid "UUID"
 msgstr "UUID"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:693
+#: code:addons/queue_job/models/queue_job.py:691
 #, python-format
 msgid ""
 "Unexpected format of Related Action for {}.\n"
@@ -778,7 +778,7 @@ msgid ""
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:670
+#: code:addons/queue_job/models/queue_job.py:668
 #, python-format
 msgid ""
 "Unexpected format of Retry Pattern for {}.\n"
