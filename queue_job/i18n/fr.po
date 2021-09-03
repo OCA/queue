@@ -70,18 +70,46 @@ msgstr "Base"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Cancel"
 msgstr "Annuler"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:476
+#: model:ir.model,name:queue_job.model_queue_jobs_to_cancelled
+msgid "Cancel all selected jobs"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Cancel job"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_set_jobs_cancelled
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
+msgid "Cancel jobs"
+msgstr ""
+
+#. module: queue_job
+#: selection:queue.job,state:0
+msgid "Cancelled"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:216
+#, python-format
+msgid "Cancelled by %s"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:501
 #, python-format
 msgid "Cannot change the root channel"
 msgstr "Impossible de modifier le canal racine"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:483
+#: code:addons/queue_job/models/queue_job.py:508
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr "Impossible d'enlever le canal racine"
@@ -130,6 +158,7 @@ msgstr "Date de création"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_uid
 msgid "Created by"
@@ -137,6 +166,7 @@ msgstr "Créé par"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_date
 msgid "Created on"
@@ -153,6 +183,11 @@ msgid "Current try / max. retries"
 msgstr "Tentative actuelle / tentatives max."
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__date_cancelled
+msgid "Date Cancelled"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_done
 msgid "Date Done"
 msgstr "Date de fin"
@@ -166,6 +201,7 @@ msgstr "Description"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__display_name
 msgid "Display Name"
@@ -270,6 +306,7 @@ msgstr "Regrouper par"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__id
 msgid "ID"
@@ -281,7 +318,7 @@ msgid "Identity Key"
 msgstr "Clé d'identité"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:315
+#: code:addons/queue_job/models/queue_job.py:326
 #, python-format
 msgid "If both parameters are 0, ALL jobs will be requeued!"
 msgstr ""
@@ -304,7 +341,7 @@ msgid "If checked, some messages have a delivery error."
 msgstr "Si coché, des messages n'ont pas pu être livré."
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:564
+#: code:addons/queue_job/models/queue_job.py:589
 #, python-format
 msgid "Invalid job function: {}"
 msgstr ""
@@ -364,6 +401,7 @@ msgstr "Tâche interrompue et définie sur Terminée : rien à faire."
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__job_ids
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__job_ids
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__job_ids
 #: model:ir.ui.menu,name:queue_job.menu_queue_job
@@ -390,6 +428,7 @@ msgstr "Kwargs"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function____last_update
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job____last_update
 msgid "Last Modified on"
@@ -397,6 +436,7 @@ msgstr "Dernière modification le"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_uid
 msgid "Last Updated by"
@@ -404,6 +444,7 @@ msgstr "Dernière mise à jour par"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
 msgid "Last Updated on"
@@ -415,7 +456,7 @@ msgid "Main Attachment"
 msgstr "Pièce jointe principale"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:207
+#: code:addons/queue_job/models/queue_job.py:210
 #, python-format
 msgid "Manually set to done by %s"
 msgstr "Manuellement défini comme terminé par %s"
@@ -453,7 +494,7 @@ msgid "Model"
 msgstr "Modèle"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:569
+#: code:addons/queue_job/models/queue_job.py:594
 #, python-format
 msgid "Model {} not found"
 msgstr ""
@@ -480,13 +521,13 @@ msgid "Next Activity Type"
 msgstr "Type de la prochaine activité"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:185
+#: code:addons/queue_job/models/queue_job.py:186
 #, python-format
 msgid "No action available for this job"
 msgstr "Aucune action disponible pour cette tâche"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:153
+#: code:addons/queue_job/models/queue_job.py:154
 #, python-format
 msgid "Not allowed to change field(s): {}"
 msgstr ""
@@ -527,7 +568,7 @@ msgid "Parent Channel"
 msgstr "Canal parent"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:443
+#: code:addons/queue_job/models/queue_job.py:468
 #, python-format
 msgid "Parent channel required."
 msgstr "Canal parent obligatoire."
@@ -568,7 +609,7 @@ msgid "Queue Job"
 msgstr "File d'attente des tâches"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:139
+#: code:addons/queue_job/models/queue_job.py:140
 #, python-format
 msgid "Queue jobs must be created by calling 'with_delay()'."
 msgstr ""
@@ -599,13 +640,13 @@ msgid "Related Action (serialized)"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:345
+#: code:addons/queue_job/models/queue_job.py:356
 #, python-format
 msgid "Related Record"
 msgstr "Enregistrement lié"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:355
+#: code:addons/queue_job/models/queue_job.py:366
 #, python-format
 msgid "Related Records"
 msgstr "Enregistrements liés"
@@ -678,7 +719,7 @@ msgid "Set to done"
 msgstr "Définir comme terminé"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:250
+#: code:addons/queue_job/models/queue_job.py:259
 #, python-format
 msgid ""
 "Something bad happened during the execution of the job. More details in the "
@@ -741,6 +782,11 @@ msgstr ""
 "Quand vide, le nombre de tentatives est illimité."
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
+msgid "The selected jobs will be cancelled."
+msgstr ""
+
+#. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
 msgid "The selected jobs will be requeued."
 msgstr "Les tâches sélectionnées seront remises en file d'attente."
@@ -771,7 +817,7 @@ msgid "UUID"
 msgstr "UUID"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:691
+#: code:addons/queue_job/models/queue_job.py:716
 #, python-format
 msgid ""
 "Unexpected format of Related Action for {}.\n"
@@ -781,7 +827,7 @@ msgid ""
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:668
+#: code:addons/queue_job/models/queue_job.py:693
 #, python-format
 msgid ""
 "Unexpected format of Retry Pattern for {}.\n"
