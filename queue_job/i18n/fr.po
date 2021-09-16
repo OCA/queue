@@ -942,11 +942,6 @@ msgstr ""
 
 #. module: queue_job
 #: selection:ir.model.fields,ttype:0
-msgid "serialized"
-msgstr ""
-
-#. module: queue_job
-#: selection:ir.model.fields,ttype:0
 msgid "text"
 msgstr ""
 
