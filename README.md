@@ -1,7 +1,7 @@
-[![Runbot Status](https://runbot.odoo-community.org/runbot/badge/flat/230/14.0.svg)](https://runbot.odoo-community.org/runbot/repo/github-com-oca-queue-230)
-[![Build Status](https://travis-ci.com/OCA/queue.svg?branch=14.0)](https://travis-ci.com/OCA/queue)
-[![codecov](https://codecov.io/gh/OCA/queue/branch/14.0/graph/badge.svg)](https://codecov.io/gh/OCA/queue)
-[![Translation Status](https://translation.odoo-community.org/widgets/queue-14-0/-/svg-badge.svg)](https://translation.odoo-community.org/engage/queue-14-0/?utm_source=widget)
+[![Runbot Status](https://runbot.odoo-community.org/runbot/badge/flat/230/15.0.svg)](https://runbot.odoo-community.org/runbot/repo/github-com-oca-queue-230)
+[![Build Status](https://travis-ci.com/OCA/queue.svg?branch=15.0)](https://travis-ci.com/OCA/queue)
+[![codecov](https://codecov.io/gh/OCA/queue/branch/15.0/graph/badge.svg)](https://codecov.io/gh/OCA/queue)
+[![Translation Status](https://translation.odoo-community.org/widgets/queue-15-0/-/svg-badge.svg)](https://translation.odoo-community.org/engage/queue-15-0/?utm_source=widget)
 
 <!-- /!\ do not modify above this line -->
 
@@ -15,23 +15,7 @@ TODO: add repo description.
 
 [//]: # (addons)
 
-Available addons
-----------------
-addon | version | maintainers | summary
---- | --- | --- | ---
-[base_import_async](base_import_async/) | 14.0.1.0.1 |  | Import CSV files in the background
-[queue_job](queue_job/) | 14.0.1.3.1 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
-[queue_job_cron](queue_job_cron/) | 14.0.1.0.0 |  | Scheduled Actions as Queue Jobs
-[queue_job_subscribe](queue_job_subscribe/) | 14.0.1.0.0 |  | Control which users are subscribed to queue job notifications
-[test_base_import_async](test_base_import_async/) | 14.0.1.0.1 |  | Test suite for base_import_async. Normally you don't need to install this.
-[test_queue_job](test_queue_job/) | 14.0.1.3.0 |  | Queue Job Tests
-
-
-Unported addons
----------------
-addon | version | maintainers | summary
---- | --- | --- | ---
-[base_export_async](base_export_async/) | 12.0.1.0.0 (unported) |  | Asynchronous export with job queue
+This part will be replaced when running the oca-gen-addons-table script from OCA/maintainer-tools.
 
 [//]: # (end addons)
 
