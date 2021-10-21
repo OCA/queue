@@ -618,7 +618,7 @@ class Job(object):
 
     @property
     def uuid(self):
-        """Job ID, this is an UUID """
+        """Job ID, this is an UUID"""
         if self._uuid is None:
             self._uuid = str(uuid.uuid4())
         return self._uuid
