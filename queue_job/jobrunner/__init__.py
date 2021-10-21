@@ -48,7 +48,7 @@ class QueueJobRunnerThread(Thread):
 
 
 class WorkerJobRunner(server.Worker):
-    """ Jobrunner workers """
+    """Jobrunner workers"""
 
     def __init__(self, multi):
         super().__init__(multi)
