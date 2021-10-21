@@ -5,7 +5,7 @@ from odoo import exceptions
 from odoo.tests import common
 
 
-class TestJobWriteProtected(common.SavepointCase):
+class TestJobWriteProtected(common.TransactionCase):
     def test_create_error(self):
         with self.assertRaises(exceptions.AccessError):
             self.env["queue.job"].create(

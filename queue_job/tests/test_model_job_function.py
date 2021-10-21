@@ -5,7 +5,7 @@ from odoo import exceptions
 from odoo.tests import common
 
 
-class TestJobFunction(common.SavepointCase):
+class TestJobFunction(common.TransactionCase):
     def test_function_name_compute(self):
         function = self.env["queue.job.function"].create(
             {"model_id": self.env.ref("base.model_res_users").id, "method": "read"}

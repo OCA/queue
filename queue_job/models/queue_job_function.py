@@ -6,7 +6,7 @@ import logging
 import re
 from collections import namedtuple
 
-from odoo import _, api, exceptions, fields, models, tools
+from odoo import SUPERUSER_ID, _, api, exceptions, fields, models, tools
 
 from ..fields import JobSerialized
 
@@ -93,7 +93,11 @@ class QueueJobFunction(models.Model):
             raise exceptions.UserError(_("Invalid job function: {}").format(self.name))
         model_name = groups[1]
         method = groups[2]
-        model = self.env["ir.model"].search([("model", "=", model_name)], limit=1)
+        model = (
+            self.env["ir.model"]
+            .with_user(SUPERUSER_ID)
+            .search([("model", "=", model_name)], limit=1)
+        )
         if not model:
             raise exceptions.UserError(_("Model {} not found").format(model_name))
         self.model_id = model.id
@@ -112,8 +116,10 @@ class QueueJobFunction(models.Model):
                 self.retry_pattern = ast.literal_eval(edited)
             else:
                 self.retry_pattern = {}
-        except (ValueError, TypeError, SyntaxError):
-            raise exceptions.UserError(self._retry_pattern_format_error_message())
+        except (ValueError, TypeError, SyntaxError) as ex:
+            raise exceptions.UserError(
+                self._retry_pattern_format_error_message()
+            ) from ex
 
     @api.depends("related_action")
     def _compute_edit_related_action(self):
@@ -127,8 +133,10 @@ class QueueJobFunction(models.Model):
                 self.related_action = ast.literal_eval(edited)
             else:
                 self.related_action = {}
-        except (ValueError, TypeError, SyntaxError):
-            raise exceptions.UserError(self._related_action_format_error_message())
+        except (ValueError, TypeError, SyntaxError) as ex:
+            raise exceptions.UserError(
+                self._related_action_format_error_message()
+            ) from ex
 
     @staticmethod
     def job_function_name(model_name, method_name):
@@ -193,10 +201,10 @@ class QueueJobFunction(models.Model):
             for value in all_values:
                 try:
                     int(value)
-                except ValueError:
+                except ValueError as ex:
                     raise exceptions.UserError(
                         record._retry_pattern_format_error_message()
-                    )
+                    ) from ex
 
     def _related_action_format_error_message(self):
         return _(
