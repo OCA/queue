@@ -58,7 +58,7 @@ class WorkerJobRunner(server.Worker):
     def sleep(self):
         pass
 
-    def signal_handler(self, sig, frame):
+    def signal_handler(self, sig, frame):  # pylint: disable=W8110
         _logger.debug("WorkerJobRunner (%s) received signal %s", self.pid, sig)
         super().signal_handler(sig, frame)
         self.runner.stop()

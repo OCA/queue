@@ -873,11 +873,11 @@ class ChannelManager(object):
                 capacity = config_items[1]
                 try:
                     config["capacity"] = int(capacity)
-                except Exception:
+                except Exception as ex:
                     raise ValueError(
                         "Invalid channel config %s: "
                         "invalid capacity %s" % (config_string, capacity)
-                    )
+                    ) from ex
                 for config_item in config_items[2:]:
                     kv = split_strip(config_item, "=")
                     if len(kv) == 1:

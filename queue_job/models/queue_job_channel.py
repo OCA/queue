@@ -11,7 +11,7 @@ class QueueJobChannel(models.Model):
 
     name = fields.Char()
     complete_name = fields.Char(
-        compute="_compute_complete_name", store=True, readonly=True
+        compute="_compute_complete_name", store=True, readonly=True, recursive=True
     )
     parent_id = fields.Many2one(
         comodel_name="queue.job.channel", string="Parent Channel", ondelete="restrict"
