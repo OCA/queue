@@ -504,7 +504,7 @@ class Channel(object):
             _logger.debug("job %s marked running in channel %s", job.uuid, self)
 
     def set_failed(self, job):
-        """Mark the job as failed. """
+        """Mark the job as failed."""
         if job not in self._failed:
             self._queue.remove(job)
             self._running.remove(job)
