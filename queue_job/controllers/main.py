@@ -9,8 +9,7 @@ from io import StringIO
 from psycopg2 import OperationalError
 from werkzeug.exceptions import Forbidden
 
-import odoo
-from odoo import _, http, tools
+from odoo import SUPERUSER_ID, _, api, http, registry, tools
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
 from ..exception import FailedJobError, NothingToDoJob, RetryableJobError
@@ -39,17 +38,15 @@ class RunJobController(http.Controller):
     @http.route("/queue_job/runjob", type="http", auth="none", save_session=False)
     def runjob(self, db, job_uuid, **kw):
         http.request.session.db = db
-        env = http.request.env(user=odoo.SUPERUSER_ID)
+        env = http.request.env(user=SUPERUSER_ID)
 
         def retry_postpone(job, message, seconds=None):
             job.env.clear()
-            with odoo.api.Environment.manage():
-                with odoo.registry(job.env.cr.dbname).cursor() as new_cr:
-                    job.env = job.env(cr=new_cr)
-                    job.postpone(result=message, seconds=seconds)
-                    job.set_pending(reset_retry=False)
-                    job.store()
-                    new_cr.commit()
+            with registry(job.env.cr.dbname).cursor() as new_cr:
+                job.env = api.Environment(new_cr, SUPERUSER_ID, {})
+                job.postpone(result=message, seconds=seconds)
+                job.set_pending(reset_retry=False)
+                job.store()
 
         # ensure the job to run is in the correct state and lock the record
         env.cr.execute(
@@ -101,12 +98,10 @@ class RunJobController(http.Controller):
             traceback.print_exc(file=buff)
             _logger.error(buff.getvalue())
             job.env.clear()
-            with odoo.api.Environment.manage():
-                with odoo.registry(job.env.cr.dbname).cursor() as new_cr:
-                    job.env = job.env(cr=new_cr)
-                    job.set_failed(exc_info=buff.getvalue())
-                    job.store()
-                    new_cr.commit()
+            with registry(job.env.cr.dbname).cursor() as new_cr:
+                job.env = api.Environment(new_cr, SUPERUSER_ID, {})
+                job.set_failed(exc_info=buff.getvalue())
+                job.store()
             raise
 
         return ""
