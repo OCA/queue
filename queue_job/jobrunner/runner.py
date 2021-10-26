@@ -401,7 +401,7 @@ class QueueJobRunner(object):
         if config["db_name"]:
             db_names = config["db_name"].split(",")
         else:
-            db_names = odoo.service.db.exp_list(True)
+            db_names = odoo.service.db.list_dbs(True)
         return db_names
 
     def close_databases(self, remove_jobs=True):
