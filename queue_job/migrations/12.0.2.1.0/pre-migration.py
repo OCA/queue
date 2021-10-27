@@ -8,6 +8,12 @@ _logger = logging.getLogger(__name__)
 
 
 def migrate(cr, version):
+    # Disable trigger otherwise the update takes ages.
+    cr.execute(
+        """
+        ALTER TABLE queue_job DISABLE TRIGGER queue_job_notify;
+    """
+    )
     if not column_exists(cr, "queue_job", "records"):
         cr.execute(
             """
@@ -24,5 +30,10 @@ def migrate(cr, version):
     || ', "ids": ' || record_ids
     || '}'
     WHERE records IS NULL;
+    """
+    )
+    cr.execute(
+        """
+        ALTER TABLE queue_job ENABLE TRIGGER queue_job_notify;
     """
     )
