@@ -3,7 +3,6 @@
 # License LGPL-3 or later (https://www.gnu.org/licenses/lgpl).
 
 import odoo
-from odoo.addons.queue_job.hooks.post_init_hook import post_init_hook
 
 
 def migrate(cr, version):
@@ -17,5 +16,3 @@ def migrate(cr, version):
             raise_if_not_found=False)
         if cron_job and cron_job.exists() and cron_job.state != 'code':
             cron_job.state = 'code'
-    # Ensure that the queue_job_notify trigger is in place
-    post_init_hook(cr, None)
