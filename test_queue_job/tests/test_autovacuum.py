@@ -7,9 +7,10 @@ from .common import JobCommonCase
 
 
 class TestQueueJobAutovacuumCronJob(JobCommonCase):
-    def setUp(self):
-        super().setUp()
-        self.cron_job = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.cron_job = cls.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
 
     def test_old_jobs_are_deleted_by_cron_job(self):
         """Old jobs are deleted by the autovacuum cron job."""

@@ -5,7 +5,7 @@ import odoo.tests.common as common
 from odoo import exceptions
 
 
-class TestRelatedAction(common.SavepointCase):
+class TestRelatedAction(common.TransactionCase):
     """Test Related Actions"""
 
     @classmethod
