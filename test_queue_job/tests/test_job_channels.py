@@ -8,12 +8,13 @@ from odoo.addons.queue_job.job import Job
 
 
 class TestJobChannels(common.TransactionCase):
-    def setUp(self):
-        super(TestJobChannels, self).setUp()
-        self.function_model = self.env["queue.job.function"]
-        self.channel_model = self.env["queue.job.channel"]
-        self.test_model = self.env["test.queue.channel"]
-        self.root_channel = self.env.ref("queue_job.channel_root")
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.function_model = cls.env["queue.job.function"]
+        cls.channel_model = cls.env["queue.job.channel"]
+        cls.test_model = cls.env["test.queue.channel"]
+        cls.root_channel = cls.env.ref("queue_job.channel_root")
 
     def test_channel_complete_name(self):
         channel = self.channel_model.create(
