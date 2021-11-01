@@ -29,7 +29,7 @@ from .common import JobCommonCase
 
 
 class TestJobsOnTestingMethod(JobCommonCase):
-    """ Test Job """
+    """Test Job"""
 
     def test_new_job(self):
         """
@@ -39,14 +39,14 @@ class TestJobsOnTestingMethod(JobCommonCase):
         self.assertEqual(test_job.func.__func__, self.method.__func__)
 
     def test_eta(self):
-        """ When an `eta` is datetime, it uses it """
+        """When an `eta` is datetime, it uses it"""
         now = datetime.now()
         method = self.env["res.users"].mapped
         job_a = Job(method, eta=now)
         self.assertEqual(job_a.eta, now)
 
     def test_eta_integer(self):
-        """ When an `eta` is an integer, it adds n seconds up to now """
+        """When an `eta` is an integer, it adds n seconds up to now"""
         datetime_path = "odoo.addons.queue_job.job.datetime"
         with mock.patch(datetime_path, autospec=True) as mock_datetime:
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
@@ -54,7 +54,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
             self.assertEqual(job_a.eta, datetime(2015, 3, 15, 16, 42, 0))
 
     def test_eta_timedelta(self):
-        """ When an `eta` is a timedelta, it adds it up to now """
+        """When an `eta` is a timedelta, it adds it up to now"""
         datetime_path = "odoo.addons.queue_job.job.datetime"
         with mock.patch(datetime_path, autospec=True) as mock_datetime:
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
@@ -324,7 +324,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
 
 
 class TestJobs(JobCommonCase):
-    """ Test jobs on other methods or with different job configuration """
+    """Test jobs on other methods or with different job configuration"""
 
     def test_description(self):
         """If no description is given to the job, it
@@ -343,7 +343,7 @@ class TestJobs(JobCommonCase):
         self.assertEqual(job_a.description, description)
 
     def test_retry_pattern(self):
-        """ When we specify a retry pattern, the eta must follow it"""
+        """When we specify a retry pattern, the eta must follow it"""
         datetime_path = "odoo.addons.queue_job.job.datetime"
         method = self.env["test.queue.job"].job_with_retry_pattern
         with mock.patch(datetime_path, autospec=True) as mock_datetime:
@@ -371,7 +371,7 @@ class TestJobs(JobCommonCase):
             self.assertEqual(test_job.eta, datetime(2015, 6, 1, 15, 15, 0))
 
     def test_retry_pattern_no_zero(self):
-        """ When we specify a retry pattern without 0, uses RETRY_INTERVAL"""
+        """When we specify a retry pattern without 0, uses RETRY_INTERVAL"""
         method = self.env["test.queue.job"].job_with_retry_pattern__no_zero
         test_job = Job(method, max_retries=0)
         test_job.retry += 1
@@ -400,7 +400,7 @@ class TestJobs(JobCommonCase):
         self.assertEqual(["test1", "test2"], job_instance.perform())
 
     def test_job_identity_key_no_duplicate(self):
-        """ If a job with same identity key in queue do not add a new one """
+        """If a job with same identity key in queue do not add a new one"""
         id_key = "e294e8444453b09d59bdb6efbfec1323"
         rec1 = self.env["test.queue.job"].create({"name": "test1"})
         job_1 = rec1.with_delay(identity_key=id_key).mapped("name")
@@ -410,7 +410,7 @@ class TestJobs(JobCommonCase):
         self.assertEqual(job_2.uuid, job_1.uuid)
 
     def test_job_with_mutable_arguments(self):
-        """ Job with mutable arguments do not mutate on perform() """
+        """Job with mutable arguments do not mutate on perform()"""
         delayable = self.env["test.queue.job"].with_delay()
         job_instance = delayable.job_alter_mutable([1], mutable_kwarg={"a": 1})
         self.assertTrue(job_instance)
@@ -531,7 +531,7 @@ class TestJobModel(JobCommonCase):
 
 
 class TestJobStorageMultiCompany(common.TransactionCase):
-    """ Test storage of jobs """
+    """Test storage of jobs"""
 
     def setUp(self):
         super(TestJobStorageMultiCompany, self).setUp()

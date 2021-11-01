@@ -6,7 +6,7 @@ from odoo import exceptions
 
 
 class TestRelatedAction(common.SavepointCase):
-    """ Test Related Actions """
+    """Test Related Actions"""
 
     @classmethod
     def setUpClass(cls):
@@ -16,7 +16,7 @@ class TestRelatedAction(common.SavepointCase):
         cls.records = cls.record + cls.model.create({})
 
     def test_attributes(self):
-        """ Job with related action check if action returns correctly """
+        """Job with related action check if action returns correctly"""
         job_ = self.record.with_delay().testing_related_action__kwargs()
         act_job, act_kwargs = job_.related_action()
         self.assertEqual(act_job, job_.db_record())
