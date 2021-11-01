@@ -1,5 +1,5 @@
 # Do NOT update manually; changes here will be overwritten by Copier
-_commit: v1.3.3
+_commit: v1.3.5
 _src_path: gh:oca/oca-addons-repo-template
 ci: GitHub
 dependency_installation_mode: PIP
@@ -7,8 +7,11 @@ generate_requirements_txt: true
 include_wkhtmltopdf: false
 odoo_version: 15.0
 rebel_module_groups: []
-repo_description: 'TODO: add repo description.'
-repo_name: queue
+repo_description: Asynchronous Job Queue. Delay Model methods in asynchronous jobs,
+  executed in the background as soon as possible or on a schedule. Support Channels
+  to segregates jobs in different queues with different capacities. Unlike scheduled
+  tasks, a job captures arguments for later processing.
+repo_name: Queue Job
 repo_slug: queue
 travis_apt_packages: []
 travis_apt_sources: []
