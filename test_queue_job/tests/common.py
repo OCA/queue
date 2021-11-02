@@ -7,11 +7,12 @@ from odoo.addons.queue_job.job import Job
 
 
 class JobCommonCase(common.TransactionCase):
-    def setUp(self):
-        super().setUp()
-        self.queue_job = self.env["queue.job"]
-        self.user = self.env["res.users"]
-        self.method = self.env["test.queue.job"].testing_method
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.queue_job = cls.env["queue.job"]
+        cls.user = cls.env["res.users"]
+        cls.method = cls.env["test.queue.job"].testing_method
 
     def _create_job(self):
         test_job = Job(self.method)

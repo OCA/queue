@@ -48,7 +48,7 @@ class QueueJobRunnerThread(Thread):
 
 
 class WorkerJobRunner(server.Worker):
-    """ Jobrunner workers """
+    """Jobrunner workers"""
 
     def __init__(self, multi):
         super().__init__(multi)
@@ -58,7 +58,7 @@ class WorkerJobRunner(server.Worker):
     def sleep(self):
         pass
 
-    def signal_handler(self, sig, frame):
+    def signal_handler(self, sig, frame):  # pylint: disable=missing-return
         _logger.debug("WorkerJobRunner (%s) received signal %s", self.pid, sig)
         super().signal_handler(sig, frame)
         self.runner.stop()

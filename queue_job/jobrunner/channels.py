@@ -504,7 +504,7 @@ class Channel(object):
             _logger.debug("job %s marked running in channel %s", job.uuid, self)
 
     def set_failed(self, job):
-        """Mark the job as failed. """
+        """Mark the job as failed."""
         if job not in self._failed:
             self._queue.remove(job)
             self._running.remove(job)
@@ -873,11 +873,11 @@ class ChannelManager(object):
                 capacity = config_items[1]
                 try:
                     config["capacity"] = int(capacity)
-                except Exception:
+                except Exception as ex:
                     raise ValueError(
                         "Invalid channel config %s: "
                         "invalid capacity %s" % (config_string, capacity)
-                    )
+                    ) from ex
                 for config_item in config_items[2:]:
                     kv = split_strip(config_item, "=")
                     if len(kv) == 1:
