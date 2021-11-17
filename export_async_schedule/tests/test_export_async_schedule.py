@@ -2,9 +2,11 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from datetime import datetime
+
 from dateutil.relativedelta import relativedelta
 
 from odoo.tests import common
+
 from odoo.addons.queue_job.tests.common import mock_with_delay
 
 
@@ -60,10 +62,7 @@ class TestExportAsyncSchedule(common.SavepointCase):
             {"label": "Email", "name": "email"},
             {"label": "Phone", "name": "phone"},
             {"label": "Title/Abbreviation", "name": "title/shortcut"},
-            {
-                "label": "Related Company/Is a Customer",
-                "name": "parent_id/customer",
-            },
+            {"label": "Related Company/Is a Customer", "name": "parent_id/customer",},
             {
                 "label": "Related Company/Company/Company Name",
                 "name": "parent_id/company_id/name",
@@ -137,14 +136,12 @@ class TestExportAsyncSchedule(common.SavepointCase):
         assert_next_schedule(
             1,
             "months",
-            start_date
-            + relativedelta(months=1, day=31, hour=23, minute=59, second=59),
+            start_date + relativedelta(months=1, day=31, hour=23, minute=59, second=59),
         )
         assert_next_schedule(
             2,
             "months",
-            start_date
-            + relativedelta(months=2, day=31, hour=23, minute=59, second=59),
+            start_date + relativedelta(months=2, day=31, hour=23, minute=59, second=59),
         )
 
     def test_run_schedule(self):
