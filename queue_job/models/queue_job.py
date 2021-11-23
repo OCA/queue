@@ -72,6 +72,8 @@ class QueueJob(models.Model):
 
     state = fields.Selection(STATES, readonly=True, required=True, index=True)
     priority = fields.Integer()
+    exc_name = fields.Char(string="Exception", readonly=True)
+    exc_message = fields.Char(string="Exception Message", readonly=True)
     exc_info = fields.Text(string="Exception Info", readonly=True)
     result = fields.Text(readonly=True)
 
@@ -252,11 +254,19 @@ class QueueJob(models.Model):
         """
         for channel in self.env["queue.job.channel"].search([]):
             deadline = datetime.now() - timedelta(days=int(channel.removal_interval))
-            jobs = self.search(
-                [("date_done", "<=", deadline), ("channel", "=", channel.complete_name)]
-            )
-            if jobs:
-                jobs.unlink()
+            while True:
+                jobs = self.search(
+                    [
+                        ("date_done", "<=", deadline),
+                        ("channel", "=", channel.complete_name),
+                    ],
+                    limit=1000,
+                )
+                if jobs:
+                    jobs.unlink()
+                    self.env.cr.commit()
+                else:
+                    break
         return True
 
     def requeue_stuck_jobs(self, enqueued_delta=5, started_delta=0):

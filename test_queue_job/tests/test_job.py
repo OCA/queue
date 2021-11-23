@@ -163,9 +163,15 @@ class TestJobsOnTestingMethod(JobCommonCase):
 
     def test_set_failed(self):
         job_a = Job(self.method)
-        job_a.set_failed(exc_info="failed test")
+        job_a.set_failed(
+            exc_info="failed test",
+            exc_name="FailedTest",
+            exc_message="Sadly this job failed",
+        )
         self.assertEquals(job_a.state, FAILED)
         self.assertEquals(job_a.exc_info, "failed test")
+        self.assertEquals(job_a.exc_name, "FailedTest")
+        self.assertEquals(job_a.exc_message, "Sadly this job failed")
 
     def test_postpone(self):
         job_a = Job(self.method)
@@ -183,6 +189,16 @@ class TestJobsOnTestingMethod(JobCommonCase):
         test_job.store()
         stored = self.queue_job.search([("uuid", "=", test_job.uuid)])
         self.assertEqual(len(stored), 1)
+
+    def test_store_extra_data(self):
+        test_job = Job(self.method)
+        test_job.store()
+        stored = self.queue_job.search([("uuid", "=", test_job.uuid)])
+        self.assertEqual(stored.additional_info, "JUST_TESTING")
+        test_job.set_failed(exc_info="failed test", exc_name="FailedTest")
+        test_job.store()
+        stored.invalidate_cache()
+        self.assertEqual(stored.additional_info, "JUST_TESTING_BUT_FAILED")
 
     def test_read(self):
         eta = datetime.now() + timedelta(hours=5)

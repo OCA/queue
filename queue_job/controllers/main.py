@@ -100,20 +100,35 @@ class RunJobController(http.Controller):
             # retries are exhausted
             env.cr.rollback()
 
-        except (FailedJobError, Exception):
+        except (FailedJobError, Exception) as orig_exception:
             buff = StringIO()
             traceback.print_exc(file=buff)
-            _logger.error(buff.getvalue())
+            traceback_txt = buff.getvalue()
+            _logger.error(traceback_txt)
             job.env.clear()
             with odoo.api.Environment.manage():
                 with odoo.registry(job.env.cr.dbname).cursor() as new_cr:
                     job.env = job.env(cr=new_cr)
-                    job.set_failed(exc_info=buff.getvalue())
+                    vals = self._get_failure_values(job, traceback_txt, orig_exception)
+                    job.set_failed(**vals)
                     job.store()
                     new_cr.commit()
+                    buff.close()
             raise
 
         return ""
+
+    def _get_failure_values(self, job, traceback_txt, orig_exception):
+        """Collect relevant data from exception."""
+        exception_name = orig_exception.__class__.__name__
+        if hasattr(orig_exception, "__module__"):
+            exception_name = orig_exception.__module__ + "." + exception_name
+        exc_message = getattr(orig_exception, "name", str(orig_exception))
+        return {
+            "exc_info": traceback_txt,
+            "exc_name": exception_name,
+            "exc_message": exc_message,
+        }
 
     @http.route("/queue_job/create_test_job", type="http", auth="user")
     def create_test_job(
