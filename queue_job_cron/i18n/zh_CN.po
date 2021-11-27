@@ -1,0 +1,37 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* queue_job_cron
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 12.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2019-07-25 17:43+0000\n"
+"Last-Translator: 黎伟杰 <674416404@qq.com>\n"
+"Language-Team: none\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 3.7.1\n"
+
+#. module: queue_job_cron
+#: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__channel_id
+msgid "Channel"
+msgstr "频道"
+
+#. module: queue_job_cron
+#: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__run_as_queue_job
+msgid "Run As Queue Job"
+msgstr "作为队列作业运行"
+
+#. module: queue_job_cron
+#: model:ir.model,name:queue_job_cron.model_ir_cron
+msgid "Scheduled Actions"
+msgstr "安排的动作"
+
+#. module: queue_job_cron
+#: model:ir.model.fields,help:queue_job_cron.field_ir_cron__run_as_queue_job
+msgid "Specify if this cron should be ran as a queue job"
+msgstr "指定此cron是否应作为队列作业运行"
