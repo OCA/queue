@@ -519,6 +519,10 @@ documented below.</p>
 name (and parent for channels), they’ll be merged in the same record, even if
 they have different xmlids. On uninstall, the merged record is deleted when all
 the modules using it are uninstalled.</p>
+<p><strong>Job function: model</strong></p>
+<p>If the function is defined in an abstract model, you can not write
+<tt class="docutils literal">&lt;field <span class="pre">name=&quot;model_id&quot;</span> <span class="pre">ref=&quot;xml_id_of_the_abstract_model&quot;&lt;/field&gt;</span></tt>
+but you have to define a function for each model that inherits from the abstract model.</p>
 <p><strong>Job function: channel</strong></p>
 <p>The channel where the job will be delayed. The default channel is <tt class="docutils literal">root</tt>.</p>
 <p><strong>Job function: related action</strong></p>
