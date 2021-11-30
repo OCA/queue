@@ -6,89 +6,91 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 13.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2021-11-30 13:57+0000\n"
+"Last-Translator: Vincent Hatakeyama <vincent+github@hatakeyama.fr>\n"
 "Language-Team: none\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 4.3.2\n"
 
 #. module: test_queue_job
 #: model:ir.model.fields,field_description:test_queue_job.field_queue_job__additional_info
 msgid "Additional Info"
-msgstr ""
+msgstr "Information additionnelle"
 
 #. module: test_queue_job
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel__create_uid
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__create_uid
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "Créé par"
 
 #. module: test_queue_job
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel__create_date
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__create_date
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action__create_date
 msgid "Created on"
-msgstr ""
+msgstr "Créé le"
 
 #. module: test_queue_job
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel__display_name
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__display_name
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "Nom affiché"
 
 #. module: test_queue_job
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel__id
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__id
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action__id
 msgid "ID"
-msgstr ""
+msgstr "Identifiant"
 
 #. module: test_queue_job
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel____last_update
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job____last_update
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action____last_update
 msgid "Last Modified on"
-msgstr ""
+msgstr "Dernière modification le"
 
 #. module: test_queue_job
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel__write_uid
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__write_uid
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "Dernière mise à jour par"
 
 #. module: test_queue_job
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel__write_date
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__write_date
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "Dernière mise à jour le"
 
 #. module: test_queue_job
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__name
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #. module: test_queue_job
 #: model:ir.model,name:test_queue_job.model_queue_job
 msgid "Queue Job"
-msgstr ""
+msgstr "Tâche en file d’attente"
 
 #. module: test_queue_job
 #: model:ir.model,name:test_queue_job.model_test_queue_channel
 msgid "Test model for queue.channel"
-msgstr ""
+msgstr "Modèle de test pour queue.channel"
 
 #. module: test_queue_job
 #: model:ir.model,name:test_queue_job.model_test_queue_job
 msgid "Test model for queue.job"
-msgstr ""
+msgstr "Modèle de test pour queue.job"
 
 #. module: test_queue_job
 #: model:ir.model,name:test_queue_job.model_test_related_action
 msgid "Test model for related actions"
-msgstr ""
+msgstr "Modèle de test pour les actions rattachées"
