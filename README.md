@@ -20,7 +20,7 @@ Available addons
 addon | version | maintainers | summary
 --- | --- | --- | ---
 [base_import_async](base_import_async/) | 14.0.1.0.1 |  | Import CSV files in the background
-[queue_job](queue_job/) | 14.0.1.3.4 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
+[queue_job](queue_job/) | 14.0.1.4.0 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
 [queue_job_cron](queue_job_cron/) | 14.0.1.1.0 |  | Scheduled Actions as Queue Jobs
 [queue_job_subscribe](queue_job_subscribe/) | 14.0.1.0.0 |  | Control which users are subscribed to queue job notifications
 [test_base_import_async](test_base_import_async/) | 14.0.1.0.1 |  | Test suite for base_import_async. Normally you don't need to install this.
