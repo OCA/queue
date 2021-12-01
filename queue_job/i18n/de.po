@@ -201,6 +201,12 @@ msgid "Enqueued"
 msgstr "Eingereiht"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_name
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Exception"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_info
 msgid "Exception Info"
 msgstr "Exception-Info"
@@ -211,9 +217,29 @@ msgid "Exception Information"
 msgstr "Exception-Information"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_message
+msgid "Exception Message"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Exception message"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Exception:"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__eta
 msgid "Execute only after"
 msgstr "Erst ausführen nach"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__exec_time
+msgid "Execution Time (avg)"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__failed
@@ -367,6 +393,8 @@ msgstr "Job unterbrochen und als Erledigt markiert: Es ist nicht zu tun."
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__job_ids
 #: model:ir.ui.menu,name:queue_job.menu_queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_graph
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_pivot
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Jobs"
 msgstr "Jobs"
@@ -447,6 +475,7 @@ msgstr "Methodenname"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__model_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__model_id
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Model"
 msgstr "Modell"
 
@@ -520,11 +549,6 @@ msgid "Number of unread messages"
 msgstr "Das ist die Anzahl von ungelesenen Nachrichten"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__override_channel
-msgid "Override Channel"
-msgstr "Kanal überschreiben"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__parent_id
 msgid "Parent Channel"
 msgstr "Übergeordneter Kanal"
@@ -571,7 +595,7 @@ msgstr "Job einreihen"
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
-msgid "Queue jobs must created by calling 'with_delay()'."
+msgid "Queue jobs must be created by calling 'with_delay()'."
 msgstr ""
 
 #. module: queue_job
@@ -761,6 +785,16 @@ msgid "The selected jobs will be set to done."
 msgstr "Die ausgewählten Jobs werden als Erledigt markiert."
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Time (s)"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__exec_time
+msgid "Time required to execute this job in seconds. Average when grouped."
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Typ der Ausnahmeaktivität im Datensatz."
@@ -823,6 +857,9 @@ msgstr "Assistent zur erneuten Einreihung einer Job-Auswahl"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr ""
+
+#~ msgid "Override Channel"
+#~ msgstr "Kanal überschreiben"
 
 #~ msgid "If checked new messages require your attention."
 #~ msgstr ""
