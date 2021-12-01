@@ -57,6 +57,8 @@
                             <field name="date_enqueued" />
                             <field name="date_started" />
                             <field name="date_done" />
+                            <!-- Do not use float_time as it does not work properly -->
+                            <field name="exec_time" string="Time (s)" />
                         </group>
                     </group>
                     <group colspan="4">
@@ -70,18 +72,23 @@
                         </div>
                     </group>
                     <group
+                        name="exc_info"
+                        string="Exception Information"
+                        attrs="{'invisible': [('exc_info', '=', False)]}"
+                        colspan="4"
+                    >
+                        <div id="exc_name" colspan="4">
+                            <label for="exc_name" string="Exception:" />
+                            <field name="exc_name" class="oe_inline" />
+                        </div>
+                        <field colspan="4" nolabel="1" name="exc_info" />
+                    </group>
+                    <group
                         name="result"
                         string="Result"
                         attrs="{'invisible': [('result', '=', False)]}"
                     >
                         <field nolabel="1" name="result" />
-                    </group>
-                    <group
-                        name="exc_info"
-                        string="Exception Information"
-                        attrs="{'invisible': [('exc_info', '=', False)]}"
-                    >
-                        <field nolabel="1" name="exc_info" />
                     </group>
                 </sheet>
                 <div class="oe_chatter">
@@ -106,13 +113,39 @@
                 <field name="name" />
                 <field name="model_name" />
                 <field name="state" />
-                <field name="eta" />
                 <field name="date_created" />
+                <field name="eta" />
                 <field name="date_done" />
+                <field name="exec_time" />
+                <field name="exc_name" />
+                <field name="exc_message" />
                 <field name="uuid" />
                 <field name="channel" />
                 <field name="company_id" groups="base.group_multi_company" />
             </tree>
+        </field>
+    </record>
+
+    <record id="view_queue_job_pivot" model="ir.ui.view">
+        <field name="name">queue.job.pivot</field>
+        <field name="model">queue.job</field>
+        <field name="arch" type="xml">
+            <pivot string="Jobs">
+                <field name="exec_time" type="measure" />
+                <field name="job_function_id" type="row" />
+                <field name="date_done" type="col" interval="week" />
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_queue_job_graph" model="ir.ui.view">
+        <field name="name">queue.job.graph</field>
+        <field name="model">queue.job</field>
+        <field name="arch" type="xml">
+            <graph string="Jobs">
+                <field name="job_function_id" type="row" />
+                <field name="exec_time" type="measure" />
+            </graph>
         </field>
     </record>
 
@@ -126,6 +159,11 @@
                 <field name="func_string" />
                 <field name="channel" />
                 <field name="job_function_id" />
+                <field name="model_name" />
+                <field name="exc_name" />
+                <field name="exc_message" />
+                <field name="exc_info" />
+                <field name="result" />
                 <field
                     name="company_id"
                     groups="base.group_multi_company"
@@ -168,6 +206,21 @@
                         string="State"
                         context="{'group_by': 'state'}"
                     />
+                    <filter
+                        name="group_by_model_name"
+                        string="Model"
+                        context="{'group_by': 'model_name'}"
+                    />
+                    <filter
+                        name="group_by_exc_name"
+                        string="Exception"
+                        context="{'group_by': 'exc_name'}"
+                    />
+                    <filter
+                        name="group_by_exc_message"
+                        string="Exception message"
+                        context="{'group_by': 'exc_message'}"
+                    />
                 </group>
             </search>
         </field>
@@ -176,7 +229,7 @@
     <record id="action_queue_job" model="ir.actions.act_window">
         <field name="name">Jobs</field>
         <field name="res_model">queue.job</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
         <field name="context">{'search_default_pending': 1,
                                'search_default_enqueued': 1,
                                'search_default_started': 1,
