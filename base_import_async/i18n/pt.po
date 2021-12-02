@@ -28,13 +28,13 @@ msgid "Base Import"
 msgstr "Importação Base"
 
 #. module: base_import_async
-#: code:addons/base_import_async/models/base_import_import.py:63
+#: code:addons/base_import_async/models/base_import_import.py:64
 #, python-format
 msgid "Import %s from file %s"
 msgstr "Importar %s a partir do ficheiro %s"
 
 #. module: base_import_async
-#: code:addons/base_import_async/models/base_import_import.py:154
+#: code:addons/base_import_async/models/base_import_import.py:157
 #, python-format
 msgid "Import %s from file %s - #%s - lines %s to %s"
 msgstr "Importar %s a partir do ficheiro %s - #%s - linhas %s a %s"
