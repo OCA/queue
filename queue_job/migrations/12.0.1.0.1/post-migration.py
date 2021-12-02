@@ -1,4 +1,5 @@
 # Copyright 2019 Versada UAB
+# Copyright 2021 ACSONE SA/NV
 # License LGPL-3 or later (https://www.gnu.org/licenses/lgpl).
 
 import odoo

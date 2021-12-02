@@ -13,21 +13,28 @@ addons:
   apt:
     packages:
       - expect-dev  # provides unbuffer utility
-      - python-lxml  # because pip installation is slow
-      - python-simplejson
-      - python-serial
-      - python-yaml
+
+stages:
+  - linting
+  - test
+
+jobs:
+  include:
+    - stage: linting
+      env:
+        - LINT_CHECK="1"
+    - stage: test
+      env:
+        - TESTS="1" ODOO_REPO="odoo/odoo" MAKEPOT="1"
+    - stage: test
+      env:
+        - TESTS="1" ODOO_REPO="OCA/OCB"
 
 env:
   global:
-  - VERSION="12.0" TESTS="0" LINT_CHECK="0" MAKEPOT="0"
-
-  matrix:
-  - LINT_CHECK="1"
-
-  - TESTS="1" ODOO_REPO="OCA/OCB"
-
-  - TESTS="1" ODOO_REPO="odoo/odoo" MAKEPOT="1"
+    - VERSION="12.0" TESTS="0" LINT_CHECK="0" MAKEPOT="0" MQT_DEP="PIP"
+    - PHANTOMJS_VERSION="2.1.2"
+    - WEBSITE_REPO="1"
 
 install:
   - git clone --depth=1 https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
