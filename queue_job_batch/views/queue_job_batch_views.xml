@@ -106,7 +106,6 @@
     <record id="action_queue_job_batch" model="ir.actions.act_window">
         <field name="name">Job batches</field>
         <field name="res_model">queue.job.batch</field>
-        <field name="view_type">form</field>
         <field name="context">{'search_default_draft': 1,
                                'search_default_progress': 1,}</field>
         <field name="view_mode">tree,form</field>
@@ -115,7 +114,6 @@
     <record id="action_view_your_queue_job_batch" model="ir.actions.act_window">
         <field name="name">Job batches</field>
         <field name="res_model">queue.job.batch</field>
-        <field name="view_type">form</field>
         <field
             name="domain"
         >[('user_id', '=', uid), '|', ('state', 'in', ['draft', 'progress']), ('is_read', '=', False)]</field>
