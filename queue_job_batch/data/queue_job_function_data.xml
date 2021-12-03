@@ -1,0 +1,7 @@
+<odoo noupdate="1">
+    <record id="job_function_queue_job_check_state" model="queue.job.function">
+        <field name="model_id" ref="queue_job_batch.model_queue_job_batch" />
+        <field name="channel_id" ref="queue_job_batch.channel_queue_job_batch" />
+        <field name="method">check_state</field>
+    </record>
+</odoo>

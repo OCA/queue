@@ -16,7 +16,6 @@ class QueueJob(models.Model):
             vals.update({"job_batch_id": batch.id})
         return super().create(vals)
 
-    @api.multi
     def write(self, vals):
         batches = self.env["queue.job.batch"]
         for record in self:
