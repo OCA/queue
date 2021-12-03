@@ -1,5 +1,4 @@
 .o_job_batch_navbar_item {
-
     .o_notification_counter {
         margin-top: -0.8rem;
         margin-right: 0;
@@ -27,13 +26,13 @@
     }
     .o_progressbar_complete {
         &.o_queue_job_finished_progressbar {
-            background-color:green;
-            float:left;
+            background-color: green;
+            float: left;
         }
 
         &.o_queue_job_failed_progressbar {
-            background-color:red;
-            float:right;
+            background-color: red;
+            float: right;
         }
     }
 }
