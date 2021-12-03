@@ -30,7 +30,6 @@
     <record id="action_queue_job_related" model="ir.actions.act_window">
         <field name="name">Jobs</field>
         <field name="res_model">queue.job</field>
-        <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('job_batch_id', '=', active_id)]</field>
         <field name="view_id" ref="queue_job.view_queue_job_tree" />

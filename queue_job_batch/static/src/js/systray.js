@@ -5,7 +5,7 @@ odoo.define("queue_job_batch.systray", function (require) {
     var session = require("web.session");
     var SystrayMenu = require("web.SystrayMenu");
     var Widget = require("web.Widget");
-    var BusService = require("bus.BusService");
+    require("bus.BusService");
 
     var QWeb = core.qweb;
 
