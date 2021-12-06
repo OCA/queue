@@ -248,12 +248,19 @@ class QueueJob(models.Model):
         for channel in self.env['queue.job.channel'].search([]):
             deadline = datetime.now() - timedelta(
                 days=int(channel.removal_interval))
-            jobs = self.search(
-                [('date_done', '<=', fields.Datetime.to_string(deadline)),
-                 ('channel', '=', channel.complete_name)],
-            )
-            if jobs:
-                jobs.unlink()
+            while True:
+                jobs = self.search(
+                    [
+                        ("date_done", "<=", fields.Datetime.to_string(deadline))
+                        ("channel", "=", channel.complete_name),
+                    ],
+                    limit=1000,
+                )
+                if jobs:
+                    jobs.unlink()
+                    self.env.cr.commit()
+                else:
+                    break
         return True
 
     @api.model
