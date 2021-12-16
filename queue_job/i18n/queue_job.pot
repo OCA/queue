@@ -75,8 +75,36 @@ msgstr ""
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Cancel"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_jobs_to_cancelled
+msgid "Cancel all selected jobs"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Cancel job"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_set_jobs_cancelled
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
+msgid "Cancel jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__cancelled
+msgid "Cancelled"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid "Cancelled by %s"
 msgstr ""
 
 #. module: queue_job
@@ -135,6 +163,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_uid
 msgid "Created by"
@@ -142,6 +171,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_date
 msgid "Created on"
@@ -155,6 +185,11 @@ msgstr ""
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Current try / max. retries"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__date_cancelled
+msgid "Date Cancelled"
 msgstr ""
 
 #. module: queue_job
@@ -172,6 +207,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__display_name
 msgid "Display Name"
@@ -282,6 +318,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__id
 msgid "ID"
@@ -381,6 +418,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__job_ids
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__job_ids
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__job_ids
 #: model:ir.ui.menu,name:queue_job.menu_queue_job
@@ -408,6 +446,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function____last_update
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job____last_update
 msgid "Last Modified on"
@@ -415,6 +454,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_uid
 msgid "Last Updated by"
@@ -422,6 +462,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
 msgid "Last Updated on"
@@ -746,6 +787,11 @@ msgstr ""
 msgid ""
 "The job will fail if the number of tries reach the max. retries.\n"
 "Retries are infinite when empty."
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
+msgid "The selected jobs will be cancelled."
 msgstr ""
 
 #. module: queue_job
