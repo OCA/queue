@@ -105,6 +105,7 @@ class QueueJob(models.Model):
 
     identity_key = fields.Char(readonly=True)
     worker_pid = fields.Integer(readonly=True)
+    parent_id = fields.Many2one("queue.job", string="Parent Job")
 
     def init(self):
         self._cr.execute(

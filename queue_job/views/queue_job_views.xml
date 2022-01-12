@@ -44,6 +44,7 @@
                         <group>
                             <field name="priority" />
                             <field name="eta" />
+                            <field name="parent_id" readonly="1" />
                             <field
                                 name="company_id"
                                 groups="base.group_multi_company"
