@@ -6,7 +6,7 @@
     "summary": """
         Asynchronous export with job queue
         """,
-    "version": "12.0.1.0.0",
+    "version": "13.0.1.0.0",
     "license": "AGPL-3",
     "author": "ACSONE SA/NV, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/queue",
@@ -20,5 +20,5 @@
     ],
     "demo": [],
     "qweb": ["static/src/xml/base.xml"],
-    "installable": False,
+    "installable": True,
 }

@@ -18,38 +18,9 @@ odoo.define('base_export_async.DataExport', function(require) {
             this._super.apply(this, arguments);
             this.async = this.$('#async_export');
         },
-        export_data: function() {
+        _exportData(exportedFields, exportFormat, idsToExport) {
             var self = this;
             if (self.async.is(":checked")) {
-                /*
-                    Checks from the standard method
-                */
-                var exported_fields = this.$(
-                    '.o_fields_list option').map(
-                    function() {
-                        return {
-                            name: (self.records[this.value] ||
-                                this).value,
-                            label: this.textContent ||
-                                this.innerText
-                        };
-                    }).get();
-
-                if (_.isEmpty(exported_fields)) {
-                    Dialog.alert(this, _t(
-                        "Please select fields to export..."
-                    ));
-                    return;
-                }
-                if (!this.isCompatibleMode) {
-                    exported_fields.unshift({
-                        name: 'id',
-                        label: _t('External ID')
-                    });
-                }
-
-                var export_format = this.$export_format_inputs
-                    .filter(':checked').val();
 
                 /*
                     Call the delay export if Async is checked
@@ -60,13 +31,12 @@ odoo.define('base_export_async.DataExport', function(require) {
                     method: 'delay_export',
                     args: [{
                         data: JSON.stringify({
-                            format: export_format,
+                            format: exportFormat,
                             model: this
                                 .record
                                 .model,
-                            fields: exported_fields,
-                            ids: this
-                                .ids_to_export,
+                            fields: exportedFields,
+                            ids: idsToExport,
                             domain: this
                                 .domain,
                             context: pyUtils
@@ -77,13 +47,7 @@ odoo.define('base_export_async.DataExport', function(require) {
                                         .getContext()
                                     ]
                                 ),
-                            import_compat:
-                                !!
-                                this
-                                .$import_compat_radios
-                                .filter(
-                                    ':checked'
-                                ).val(),
+                            import_compat: this.isCompatibleMode,
                         })
                     }],
                 }).then(function(result) {

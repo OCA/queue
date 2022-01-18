@@ -62,7 +62,7 @@ class TestExportAsyncSchedule(common.SavepointCase):
             {"label": "Email", "name": "email"},
             {"label": "Phone", "name": "phone"},
             {"label": "Title/Abbreviation", "name": "title/shortcut"},
-            {"label": "Related Company/Is a Customer", "name": "parent_id/customer",},
+            {"label": "Related Company/Is a Customer", "name": "parent_id/customer", },
             {
                 "label": "Related Company/Company/Company Name",
                 "name": "parent_id/company_id/name",

@@ -34,9 +34,13 @@ class DelayExport(models.Model):
         export_format = params.get("format")
         raw_data = export_format != "csv"
 
-        item_names = ("model", "fields", "ids", "domain", "import_compat", "context")
-        items = operator.itemgetter(item_names)(params)
-        model_name, fields_name, ids, domain, import_compat, context = items
+        model_name = params.get("model")
+        fields_name = params.get("fields")
+        ids = params.get("ids")
+        domain = params.get("domain")
+        import_compat = params.get("import_compat")
+        context = params.get("context")
+
         user = self.env["res.users"].browse([context.get("uid")])
         if not user or not user.email:
             raise UserError(_("The user doesn't have an email address."))
@@ -52,7 +56,8 @@ class DelayExport(models.Model):
             fields_name = [field for field in fields_name if field["name"] != "id"]
 
         field_names = [f["name"] for f in fields_name]
-        import_data = records.export_data(field_names, raw_data).get("datas", [])
+
+        import_data = records.export_data(field_names).get("datas", [])
 
         if import_compat:
             columns_headers = field_names
@@ -83,7 +88,6 @@ class DelayExport(models.Model):
             {
                 "name": name,
                 "datas": base64.b64encode(content),
-                "datas_fname": name,
                 "type": "binary",
                 "res_model": self._name,
                 "res_id": export_record.id,
