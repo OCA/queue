@@ -679,6 +679,11 @@ msgid "Related Records"
 msgstr "Zugehörige Datensätze"
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_tree
+msgid "Remaining days to execute"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__removal_interval
 msgid "Removal Interval"
 msgstr "Entfernungsintervall"
