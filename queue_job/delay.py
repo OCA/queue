@@ -609,7 +609,7 @@ class Delayable:
         self._generated_job.perform()
 
 
-class DelayableRecordset(object):
+class DelayableRecordset:
     """Allow to delay a method for a recordset (shortcut way)
 
     Usage::

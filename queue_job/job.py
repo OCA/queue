@@ -105,7 +105,7 @@ def identity_exact_hasher(job_):
 
 
 @total_ordering
-class Job(object):
+class Job:
     """A Job is a task to execute. It is the in-memory representation of a job.
 
     Jobs are stored in the ``queue.job`` Odoo Model, but they are handled

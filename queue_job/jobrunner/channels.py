@@ -14,7 +14,7 @@ NOT_DONE = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, STARTED, FAILED)
 _logger = logging.getLogger(__name__)
 
 
-class PriorityQueue(object):
+class PriorityQueue:
     """A priority queue that supports removing arbitrary objects.
 
     Adding an object already in the queue is a no op.
@@ -103,7 +103,7 @@ class PriorityQueue(object):
 
 
 @total_ordering
-class ChannelJob(object):
+class ChannelJob:
     """A channel job is attached to a channel and holds the properties of a
     job that are necessary to prioritise them.
 
@@ -205,7 +205,7 @@ class ChannelJob(object):
         return self.sorting_key() < other.sorting_key()
 
 
-class ChannelQueue(object):
+class ChannelQueue:
     """A channel queue is a priority queue for jobs.
 
     Jobs with an eta are set aside until their eta is past due, at
@@ -334,7 +334,7 @@ class ChannelQueue(object):
         return wakeup_time
 
 
-class Channel(object):
+class Channel:
     """A channel for jobs, with a maximum capacity.
 
     When jobs are created by queue_job modules, they may be associated
@@ -581,7 +581,7 @@ def split_strip(s, sep, maxsplit=-1):
     return [x.strip() for x in s.split(sep, maxsplit)]
 
 
-class ChannelManager(object):
+class ChannelManager:
     """High level interface for channels
 
     This class handles:

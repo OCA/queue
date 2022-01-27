@@ -259,7 +259,7 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
     thread.start()
 
 
-class Database(object):
+class Database:
     def __init__(self, db_name):
         self.db_name = db_name
         connection_info = _connection_info_for(db_name)
@@ -344,7 +344,7 @@ class Database(object):
             )
 
 
-class QueueJobRunner(object):
+class QueueJobRunner:
     def __init__(
         self,
         scheme="http",

@@ -89,7 +89,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         self.assertEqual(test_job.retry, 1)
 
     def test_on_instance_method(self):
-        class A(object):
+        class A:
             def method(self):
                 pass
 
