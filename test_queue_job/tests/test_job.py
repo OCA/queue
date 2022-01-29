@@ -9,12 +9,12 @@ import mock
 import odoo.tests.common as common
 
 from odoo.addons.queue_job import identity_exact
+from odoo.addons.queue_job.delay import DelayableGraph
 from odoo.addons.queue_job.exception import (
     FailedJobError,
     NoSuchJobError,
     RetryableJobError,
 )
-from odoo.addons.queue_job.delay import DelayableGraph
 from odoo.addons.queue_job.job import (
     DONE,
     ENQUEUED,
@@ -22,8 +22,8 @@ from odoo.addons.queue_job.job import (
     PENDING,
     RETRY_INTERVAL,
     STARTED,
-    Job,
     WAIT_DEPENDENCIES,
+    Job,
 )
 
 from .common import JobCommonCase
@@ -540,8 +540,8 @@ class TestJobModel(JobCommonCase):
         self.assertEqual(stored.state, PENDING)
 
     def test_requeue_wait_dependencies_not_touched(self):
-        job_root = Job(self.env['test.queue.job'].testing_method)
-        job_child = Job(self.env['test.queue.job'].testing_method)
+        job_root = Job(self.env["test.queue.job"].testing_method)
+        job_child = Job(self.env["test.queue.job"].testing_method)
         job_child.add_depends({job_root})
         job_root.store()
         job_child.store()
@@ -552,7 +552,7 @@ class TestJobModel(JobCommonCase):
         record_child = job_child.db_record()
         self.assertEqual(record_root.state, PENDING)
         self.assertEqual(record_child.state, WAIT_DEPENDENCIES)
-        record_root.write({'state': 'failed'})
+        record_root.write({"state": "failed"})
 
         (record_root + record_child).requeue()
         self.assertEqual(record_root.state, PENDING)

@@ -7,9 +7,8 @@ from heapq import heappop, heappush
 from weakref import WeakValueDictionary
 
 from ..exception import ChannelNotFound
-from ..job import (
-    PENDING, ENQUEUED, STARTED, FAILED, DONE, WAIT_DEPENDENCIES
-)
+from ..job import DONE, ENQUEUED, FAILED, PENDING, STARTED, WAIT_DEPENDENCIES
+
 NOT_DONE = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, STARTED, FAILED)
 
 _logger = logging.getLogger(__name__)

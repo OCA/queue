@@ -2,8 +2,8 @@
 # Copyright 2013-2016 Camptocamp SA
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
-import random
 import logging
+import random
 import time
 import traceback
 from io import StringIO
@@ -53,9 +53,8 @@ class RunJobController(http.Controller):
                     raise
                 if tries >= DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE:
                     _logger.info(
-                        "%s, maximum number of tries reached to"
-                        " update dependencies",
-                        errorcodes.lookup(err.pgcode)
+                        "%s, maximum number of tries reached to update dependencies",
+                        errorcodes.lookup(err.pgcode),
                     )
                     raise
                 wait_time = random.uniform(0.0, 2 ** tries)
@@ -65,7 +64,7 @@ class RunJobController(http.Controller):
                     errorcodes.lookup(err.pgcode),
                     tries,
                     DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE,
-                    wait_time
+                    wait_time,
                 )
                 time.sleep(wait_time)
             else:
@@ -151,9 +150,9 @@ class RunJobController(http.Controller):
                     buff.close()
             raise
 
-        _logger.debug('%s enqueue depends started', job)
+        _logger.debug("%s enqueue depends started", job)
         self._enqueue_dependent_jobs(env, job)
-        _logger.debug('%s enqueue depends done', job)
+        _logger.debug("%s enqueue depends done", job)
 
         return ""
 
@@ -171,8 +170,13 @@ class RunJobController(http.Controller):
 
     @http.route("/queue_job/create_test_job", type="http", auth="user")
     def create_test_job(
-            self, priority=None, max_retries=None, channel=None,
-            description="Test job", size=1, failure_rate=0
+        self,
+        priority=None,
+        max_retries=None,
+        channel=None,
+        description="Test job",
+        size=1,
+        failure_rate=0,
     ):
         if not http.request.env.user.has_group("base.group_erp_manager"):
             raise Forbidden(_("Access Denied"))
@@ -210,7 +214,7 @@ class RunJobController(http.Controller):
                 max_retries=max_retries,
                 channel=channel,
                 description=description,
-                failure_rate=failure_rate
+                failure_rate=failure_rate,
             )
 
         if size > 1:
@@ -220,14 +224,18 @@ class RunJobController(http.Controller):
                 max_retries=max_retries,
                 channel=channel,
                 description=description,
-                failure_rate=failure_rate
+                failure_rate=failure_rate,
             )
-        return ''
+        return ""
 
     def _create_single_test_job(
-            self, priority=None, max_retries=None,
-            channel=None, description="Test job", size=1,
-            failure_rate=0
+        self,
+        priority=None,
+        max_retries=None,
+        channel=None,
+        description="Test job",
+        size=1,
+        failure_rate=0,
     ):
         delayed = (
             http.request.env["queue.job"]
@@ -239,14 +247,19 @@ class RunJobController(http.Controller):
             )
             ._test_job(failure_rate=failure_rate)
         )
-        return 'job uuid: %s' % (delayed.db_record().uuid,)
+        return "job uuid: %s" % (delayed.db_record().uuid,)
 
     TEST_GRAPH_MAX_PER_GROUP = 5
 
+    # flake8: noqa: C901
     def _create_graph_test_jobs(
-            self, size, priority=None, max_retries=None,
-            channel=None, description="Test job",
-            failure_rate=0
+        self,
+        size,
+        priority=None,
+        max_retries=None,
+        channel=None,
+        description="Test job",
+        failure_rate=0,
     ):
         model = http.request.env["queue.job"]
         current_count = 0
@@ -257,8 +270,7 @@ class RunJobController(http.Controller):
         root_delayable = None
         while current_count < size:
             jobs_count = min(
-                size - current_count,
-                random.randint(1, self.TEST_GRAPH_MAX_PER_GROUP)
+                size - current_count, random.randint(1, self.TEST_GRAPH_MAX_PER_GROUP)
             )
 
             jobs = []
@@ -284,6 +296,6 @@ class RunJobController(http.Controller):
 
         root_delayable.delay()
 
-        return 'graph uuid: %s' % (
+        return "graph uuid: %s" % (
             list(root_delayable._head())[0]._generated_job.graph_uuid,
         )
