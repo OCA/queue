@@ -301,6 +301,12 @@ tests), and it makes tests smaller.
 The best way to run such assertions on the enqueued jobs is to use
 ``odoo.addons.queue_job.tests.common.trap_jobs()``.
 
+Inside this context manager, instead of being added in the database's queue,
+jobs are pushed in an in-memory list. The context manager then provides useful
+helpers to verify that jobs have been enqueued with the expected arguments. It
+even can run the jobs of its list synchronously! Details in
+``odoo.addons.queue_job.tests.common.JobsTester``.
+
 A very small example (more details in ``tests/common.py``):
 
 .. code-block:: python
