@@ -92,6 +92,14 @@ jobs of the group [B] are executed. The code would look like:
        self.write({"state": "done"})
        return True
 
+When a failure happens in a graph of jobs, the execution of the jobs that depend on the
+failed job stops. They remain in a state ``wait_dependencies`` until their "parent" job is
+successful. This can happen in two ways: either the parent job retries and is successful
+on a second try, either the parent job is manually "set to done" by a user. In these two
+cases, the dependency is resolved and the graph will continue to be processed. Alternatively,
+the failed job and all its dependent jobs can be canceled by a user. The other jobs of the
+graph that do not depend on the failed job continue their execution in any case.
+
 Note: ``delay()`` must be called on the delayable, chain, or group which is at the top
 of the graph. In the example above, if it was called on ``group_a``, then ``group_b``
 would never be delayed (but a warning would be shown).
