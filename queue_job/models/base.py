@@ -64,7 +64,6 @@ class Base(models.AbstractModel):
             identity_key=identity_key,
         )
 
-    @api.multi
     def delayable(
         self,
         priority=None,
