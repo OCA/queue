@@ -157,10 +157,10 @@ class TestJobsOnTestingMethod(JobCommonCase):
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
             job_a.set_done(result="test")
 
-        self.assertEquals(job_a.state, DONE)
-        self.assertEquals(job_a.result, "test")
-        self.assertEquals(job_a.date_done, datetime(2015, 3, 15, 16, 41, 0))
-        self.assertEquals(job_a.exec_time, 60.0)
+        self.assertEqual(job_a.state, DONE)
+        self.assertEqual(job_a.result, "test")
+        self.assertEqual(job_a.date_done, datetime(2015, 3, 15, 16, 41, 0))
+        self.assertEqual(job_a.exec_time, 60.0)
         self.assertFalse(job_a.exc_info)
 
     def test_set_failed(self):
@@ -170,10 +170,10 @@ class TestJobsOnTestingMethod(JobCommonCase):
             exc_name="FailedTest",
             exc_message="Sadly this job failed",
         )
-        self.assertEquals(job_a.state, FAILED)
-        self.assertEquals(job_a.exc_info, "failed test")
-        self.assertEquals(job_a.exc_name, "FailedTest")
-        self.assertEquals(job_a.exc_message, "Sadly this job failed")
+        self.assertEqual(job_a.state, FAILED)
+        self.assertEqual(job_a.exc_info, "failed test")
+        self.assertEqual(job_a.exc_name, "FailedTest")
+        self.assertEqual(job_a.exc_message, "Sadly this job failed")
 
     def test_postpone(self):
         job_a = Job(self.method)
@@ -201,7 +201,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         test_job.company_id = company.id
         test_job.store()
         job_read = Job.load(self.env, test_job.uuid)
-        self.assertEqual(test_job.func, job_read.func)
+        self.assertEqual(test_job.func.__func__, job_read.func.__func__)
         result_ctx = test_job.func(*tuple(test_job.args), **test_job.kwargs)
         self.assertEqual(result_ctx.get("allowed_company_ids"), company.ids)
 
@@ -225,7 +225,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         test_job.company_id = company2.id
         test_job.store()
         job_read = Job.load(self.env, test_job.uuid)
-        self.assertEqual(test_job.func, job_read.func)
+        self.assertEqual(test_job.func.__func__, job_read.func.__func__)
         result_ctx = test_job.func(*tuple(test_job.args), **test_job.kwargs)
         self.assertEqual(result_ctx.get("allowed_company_ids"), company2.ids)
 

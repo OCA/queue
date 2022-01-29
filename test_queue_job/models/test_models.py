@@ -30,7 +30,7 @@ class QueueJob(models.Model):
         }
 
 
-class TestQueueJob(models.Model):
+class ModelTestQueueJob(models.Model):
 
     _name = "test.queue.job"
     _description = "Test model for queue.job"
@@ -76,7 +76,7 @@ class TestQueueJob(models.Model):
         return
 
     def mapped(self, func):
-        return super(TestQueueJob, self).mapped(func)
+        return super(ModelTestQueueJob, self).mapped(func)
 
     def job_alter_mutable(self, mutable_arg, mutable_kwarg=None):
         mutable_arg.append(2)
@@ -142,7 +142,7 @@ class TestQueueJob(models.Model):
         delayables.delay()
 
 
-class TestQueueChannel(models.Model):
+class ModelTestQueueChannel(models.Model):
 
     _name = "test.queue.channel"
     _description = "Test model for queue.channel"
@@ -157,7 +157,7 @@ class TestQueueChannel(models.Model):
         return
 
 
-class TestRelatedAction(models.Model):
+class ModelTestRelatedAction(models.Model):
 
     _name = "test.related.action"
     _description = "Test model for related actions"

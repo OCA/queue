@@ -215,7 +215,6 @@ class QueueJob(models.Model):
             "shadow": True,
         }
 
-    @api.multi
     def _compute_graph_jobs_count(self):
         graph_uuids = [uuid for uuid in self.mapped("graph_uuid") if uuid]
         jobs_groups = self.env["queue.job"].read_group(
