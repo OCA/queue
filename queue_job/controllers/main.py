@@ -178,6 +178,16 @@ class RunJobController(http.Controller):
         size=1,
         failure_rate=0,
     ):
+        """Create test jobs
+
+        Examples of urls:
+
+        * http://127.0.0.1:8069/queue_job/create_test_job: single job
+        * http://127.0.0.1:8069/queue_job/create_test_job?size=10: a graph of 10 jobs
+        * http://127.0.0.1:8069/queue_job/create_test_job?size=10&failure_rate=0.5:
+          a graph of 10 jobs, half will fail
+
+        """
         if not http.request.env.user.has_group("base.group_erp_manager"):
             raise Forbidden(_("Access Denied"))
 
