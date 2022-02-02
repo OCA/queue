@@ -6,7 +6,6 @@ import sys
 import typing
 
 from contextlib import contextmanager
-from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
 from unittest import mock, TestCase
@@ -101,8 +100,7 @@ def mock_jobs():
             yield jobs_tester
 
 
-@dataclass
-class JobCall:
+class JobCall(typing.NamedTuple):
     method: typing.Callable
     args: tuple
     kwargs: dict
