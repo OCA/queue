@@ -3,8 +3,9 @@
 import doctest
 import logging
 import sys
-from collections import namedtuple
+import typing
 from contextlib import contextmanager
+from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
 from unittest import TestCase, mock
@@ -101,7 +102,22 @@ def mock_jobs():
             yield jobs_tester
 
 
-JobCall = namedtuple("JobCall", "method args kwargs properties")
+@dataclass
+class JobCall:
+    method: typing.Callable
+    args: tuple
+    kwargs: dict
+    properties: dict
+
+    def __eq__(self, other):
+        if not isinstance(other, JobCall):
+            return NotImplemented
+        return (
+            self.method.__func__ == other.method.__func__
+            and self.args == other.args
+            and self.kwargs == other.kwargs
+            and self.properties == other.properties
+        )
 
 
 class JobsTester:
@@ -170,7 +186,7 @@ class JobsTester:
         if kwargs is None:
             kwargs = {}
         expected_call = JobCall(
-            method=method.__func__,
+            method=method,
             args=args,
             kwargs=kwargs,
             properties=properties,
@@ -186,7 +202,7 @@ class JobsTester:
             # check
             actual_calls.append(
                 JobCall(
-                    method=call.method.__func__,
+                    method=call.method,
                     args=call.args,
                     kwargs=call.kwargs,
                     properties=checked_properties,
