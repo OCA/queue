@@ -73,8 +73,8 @@ class TestDelayMocks(common.SavepointCase):
             node = Delayable(model).create_ir_logging("test_trap_jobs_perform graph 1")
             node2 = Delayable(model).create_ir_logging("test_trap_jobs_perform graph 2")
             node3 = Delayable(model).create_ir_logging("test_trap_jobs_perform graph 3")
-            node2.done(node3)
-            node3.done(node)
+            node2.on_done(node3)
+            node3.on_done(node)
             node2.delay()
 
             # jobs are not executed
@@ -142,7 +142,7 @@ class TestDelayMocks(common.SavepointCase):
         node2 = Delayable(self.env["test.queue.job"]).create_ir_logging(
             "test_delay_graph_direct_exec 2"
         )
-        node2.done(node)
+        node2.on_done(node)
         node2.delay()
         # jobs are executed directly
         logs = self.env["ir.logging"].search(
@@ -165,7 +165,7 @@ class TestDelayMocks(common.SavepointCase):
         node2 = Delayable(self.env["test.queue.job"]).create_ir_logging(
             "test_delay_graph_direct_exec 2"
         )
-        node2.done(node)
+        node2.on_done(node)
         node2.delay()
         # jobs are executed directly
         logs = self.env["ir.logging"].search(

@@ -56,10 +56,10 @@ class TestDelayable(common.SavepointCase):
         node.delay()
         self.assert_generated_job(node)
 
-    def test_delayable_delay_done(self):
+    def test_delayable_delay_on_done(self):
         node = self.job_node(1)
         node2 = self.job_node(2)
-        node.done(node2).delay()
+        node.on_done(node2).delay()
         self.assert_generated_job(node, node2)
         self.assert_dependencies({node: {}, node2: {node}})
 
@@ -67,7 +67,7 @@ class TestDelayable(common.SavepointCase):
         node = self.job_node(1)
         node2 = self.job_node(2)
         node3 = self.job_node(3)
-        node.done(node2, node3).delay()
+        node.on_done(node2, node3).delay()
         self.assert_generated_job(node, node2, node3)
         self.assert_dependencies({node: {}, node2: {node}, node3: {node}})
 
@@ -91,7 +91,7 @@ class TestDelayable(common.SavepointCase):
         node = self.job_node(1)
         node2 = self.job_node(2)
         node3 = self.job_node(3)
-        DelayableGroup(node, node2).done(node3).delay()
+        DelayableGroup(node, node2).on_done(node3).delay()
         self.assert_generated_job(node, node2, node3)
         self.assert_dependencies({node: {}, node2: {}, node3: {node, node2}})
 
@@ -102,7 +102,7 @@ class TestDelayable(common.SavepointCase):
         node4 = self.job_node(4)
         g1 = DelayableGroup(node, node2)
         g2 = DelayableGroup(node3, node4)
-        g1.done(g2).delay()
+        g1.on_done(g2).delay()
         self.assert_generated_job(node, node2, node3, node4)
         self.assert_dependencies(
             {
@@ -118,7 +118,7 @@ class TestDelayable(common.SavepointCase):
         node2 = self.job_node(2)
         node3 = self.job_node(3)
         node4 = self.job_node(4)
-        g1 = DelayableGroup(node, node2).done(node3, node4)
+        g1 = DelayableGroup(node, node2).on_done(node3, node4)
         g1.delay()
         self.assert_generated_job(node, node2, node3, node4)
         self.assert_dependencies(
@@ -139,7 +139,7 @@ class TestDelayable(common.SavepointCase):
         g2 = DelayableGroup(node2)
         g3 = DelayableGroup(node3)
         g4 = DelayableGroup(node4)
-        g1.done(g2.done(g3.done(g4))).delay()
+        g1.on_done(g2.on_done(g3.on_done(g4))).delay()
         self.assert_generated_job(node, node2, node3, node4)
         self.assert_dependencies(
             {
@@ -156,8 +156,8 @@ class TestDelayable(common.SavepointCase):
         node3 = self.job_node(3)
         node4 = self.job_node(4)
         g1 = DelayableGroup(node2, node3)
-        g1.done(node4)
-        node.done(g1)
+        g1.on_done(node4)
+        node.on_done(g1)
         node.delay()
         self.assert_generated_job(node, node2, node3, node4)
         self.assert_dependencies(
@@ -205,7 +205,7 @@ class TestDelayable(common.SavepointCase):
         node3 = self.job_node(3)
         node4 = self.job_node(4)
         c1 = DelayableChain(node2, node3, node4)
-        node.done(c1)
+        node.on_done(c1)
         node.delay()
         self.assert_generated_job(node, node2, node3, node4)
         self.assert_dependencies(
@@ -226,7 +226,7 @@ class TestDelayable(common.SavepointCase):
         node6 = self.job_node(6)
         chain1 = DelayableChain(node, node2, node3)
         chain2 = DelayableChain(node4, node5, node6)
-        chain1.done(chain2)
+        chain1.on_done(chain2)
         chain1.delay()
         self.assert_generated_job(node, node2, node3, node4, node5, node6)
         self.assert_dependencies(
@@ -253,7 +253,7 @@ class TestDelayable(common.SavepointCase):
         chain2 = DelayableChain(node3, node4)
         chain3 = DelayableChain(node5, node6)
         chain4 = DelayableChain(node7, node8)
-        g1 = DelayableGroup(chain1, chain2).done(chain3, chain4)
+        g1 = DelayableGroup(chain1, chain2).on_done(chain3, chain4)
         g1.delay()
         self.assert_generated_job(
             node,
@@ -299,6 +299,6 @@ class TestDelayable(common.SavepointCase):
         node = self.job_node(1)
         node2 = self.job_node(2)
         node2.delay()
-        node.done(node2).delay()
+        node.on_done(node2).delay()
         self.assert_generated_job(node, node2)
         self.assert_dependencies({node: {}, node2: {node}})
