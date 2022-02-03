@@ -94,7 +94,7 @@ class Base(models.AbstractModel):
 
             job1 = record1.delayable().do_work()
             job2 = record2.delayable().do_work()
-            job1.done(job2)
+            job1.on_done(job2)
 
         The ``delay()`` call must be made on ``job1``, otherwise ``job2`` will
         be delayed, but ``job1`` will never be. When done on ``job1``, the
