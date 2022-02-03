@@ -27,7 +27,7 @@ def group(*delayables):
 
         g1 = group(delayable1, delayable2)
         g2 = group(delayable3, delayable4)
-        g1.done(g2)
+        g1.on_done(g2)
         g1.delay()
     """
     return DelayableGroup(*delayables)
@@ -46,7 +46,7 @@ def chain(*delayables):
 
         chain1 = chain(delayable1, delayable2, delayable3)
         chain2 = chain(delayable4, delayable5, delayable6)
-        chain1.done(chain2)
+        chain1.on_done(chain2)
         chain1.delay()
     """
     return DelayableChain(*delayables)
@@ -351,7 +351,7 @@ class DelayableChain:
         inner_graph = "\n\t".join(repr(self._graph).split("\n"))
         return 'DelayableChain(\n\t{}\n)'.format(inner_graph)
 
-    def done(self, *delayables):
+    def on_done(self, *delayables):
         """Connects the current chain to other delayables/chains/groups
 
         The delayables/chains/groups passed in the parameters will be executed
@@ -406,7 +406,7 @@ class DelayableGroup:
         inner_graph = "\n\t".join(repr(self._graph).split("\n"))
         return 'DelayableGroup(\n\t{}\n)'.format(inner_graph)
 
-    def done(self, *delayables):
+    def on_done(self, *delayables):
         """Connects the current group to other delayables/chains/groups
 
         The delayables/chains/groups passed in the parameters will be executed
@@ -512,7 +512,7 @@ class Delayable:
         self._set_from_dict(kwargs)
         return self
 
-    def done(self, *delayables):
+    def on_done(self, *delayables):
         """Connects the current Delayable to other delayables/chains/groups
 
         The delayables/chains/groups passed in the parameters will be executed
