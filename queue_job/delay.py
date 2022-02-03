@@ -217,7 +217,7 @@ class DelayableGraph(Graph):
         """Used for tests to run tests directly instead of storing them
 
         In tests, prefer to use
-        :func:`odoo.addons.queue_job.tests.common.mock_jobs`.
+        :func:`odoo.addons.queue_job.tests.common.trap_jobs`.
         """
         if os.getenv("TEST_QUEUE_JOB_NO_DELAY"):
             _logger.warning(
