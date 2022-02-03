@@ -60,7 +60,7 @@ which in some cases allow to build the jobs dynamically:
             .delay()
         )
 
-The simplest way to define a dependency is to use ``.done(job)`` on a Delayable:
+The simplest way to define a dependency is to use ``.on_done(job)`` on a Delayable:
 
 .. code-block:: python
 
@@ -70,13 +70,13 @@ The simplest way to define a dependency is to use ``.done(job)`` on a Delayable:
         job2 = self.browse(1).delayable().generate_thumbnail((50, 50))
         job3 = self.browse(1).delayable().generate_thumbnail((50, 50))
         # job 3 is executed when job 2 is done which is executed when job 1 is done
-        job1.done(job2.done(job3)).delay()
+        job1.on_done(job2.on_done(job3)).delay()
 
 Delayables can be chained to form more complex graphs using the ``chain()`` and
 ``group()`` primitives.
 A chain represents a sequence of jobs to execute in order, a group represents
 jobs which can be executed in parallel. Using ``chain()`` has the same effect as
-using several nested ``done()`` but is more readable. Both can be combined to
+using several nested ``on_done()`` but is more readable. Both can be combined to
 form a graph, for instance we can group [A] of jobs, which blocks another group
 [B] of jobs. When and only when all the jobs of the group [A] are executed, the
 jobs of the group [B] are executed. The code would look like:

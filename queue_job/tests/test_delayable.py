@@ -62,9 +62,9 @@ class TestDelayable(unittest.TestCase):
         node_tail2 = Delayable(self.recordset)
         node_middle = Delayable(self.recordset)
         node_top = Delayable(self.recordset)
-        node_middle.done(node_tail)
-        node_middle.done(node_tail2)
-        node_top.done(node_middle)
+        node_middle.on_done(node_tail)
+        node_middle.on_done(node_tail2)
+        node_top.on_done(node_middle)
         collected = node_top._graph._connect_graphs()
         self.assertEqual(
             collected._graph,
