@@ -16,22 +16,22 @@ from odoo.addons.queue_job.delay import Graph
 
 
 @contextmanager
-def mock_jobs():
+def trap_jobs():
     """Context Manager used to test enqueuing of jobs
 
-    Mocking jobs allows to split the tests in:
+    Trapping jobs allows to split the tests in:
 
     * the part that delays the job with the expected arguments in one test
     * the execution of the job itself in a second test
 
-    When the jobs are mocked, they are not executed at all, however, we
+    When the jobs are trapped, they are not executed at all, however, we
     can verify they have been enqueued with the correct arguments and
     properties.
 
     Then in a second test, we can call the job method directly with the
     arguments to test.
 
-    The context manager yields a instance of ``JobsTester``, which provides
+    The context manager yields a instance of ``JobsTrap``, which provides
     utilities and assert methods.
 
     Example of method to test::
@@ -53,19 +53,19 @@ def mock_jobs():
 
     Example of usage in a test::
 
-        with mock_jobs() as jobs_tester:
+        with trap_jobs() as trap:
             self.env['test.queue.job'].button_that_uses_delayable_chain()
 
-            jobs_tester.assert_jobs_count(3)
-            jobs_tester.assert_jobs_count(
+            trap.assert_jobs_count(3)
+            trap.assert_jobs_count(
                 2, only=self.env['test.queue.job'].testing_method
 
             )
-            jobs_tester.assert_jobs_count(
+            trap.assert_jobs_count(
                 1, only=self.env['test.queue.job'].no_description
             )
 
-            jobs_tester.assert_enqueued_job(
+            trap.assert_enqueued_job(
                 self.env['test.queue.job'].testing_method,
                 args=(1,),
                 kwargs={"foo": 2},
@@ -78,12 +78,12 @@ def mock_jobs():
                     priority=15,
                 )
             )
-            jobs_tester.assert_enqueued_job(
+            trap.assert_enqueued_job(
                 self.env['test.queue.job'].testing_method,
                 args=("x",),
                 kwargs={"foo": "y"},
             )
-            jobs_tester.assert_enqueued_job(
+            trap.assert_enqueued_job(
                 self.env['test.queue.job'].no_description,
             )
 
@@ -96,8 +96,8 @@ def mock_jobs():
         name="Job Class",
         auto_spec=True,
     ) as job_cls_mock:
-        with JobsTester(job_cls_mock) as jobs_tester:
-            yield jobs_tester
+        with JobsTrap(job_cls_mock) as trap:
+            yield trap
 
 
 class JobCall(typing.NamedTuple):
@@ -117,10 +117,10 @@ class JobCall(typing.NamedTuple):
         )
 
 
-class JobsTester():
-    """Used by ``mock_jobs()``, provide assert methods on the mocked jobs
+class JobsTrap:
+    """Used by ``trap_jobs()``, provide assert methods on the trapped jobs
 
-    Look the documentation of ``mock_jobs()`` for a usage example.
+    Look the documentation of ``trap_jobs()`` for a usage example.
 
     The ``store`` method of the Job instances is mocked so they are never
     saved in database.
@@ -329,16 +329,16 @@ class JobMixin:
             Job.load(self.env, job.uuid).perform()
 
     @contextmanager
-    def mock_jobs(self):
-        with mock_jobs() as enqueued_jobs:
-            yield enqueued_jobs
+    def trap_jobs(self):
+        with trap_jobs() as trap:
+            yield trap
 
 
 @contextmanager
 def mock_with_delay():
     """Context Manager mocking ``with_delay()``
 
-    DEPRECATED: use ``mock_jobs()'``.
+    DEPRECATED: use ``trap_jobs()'``.
 
     Mocking this method means we can decorrelate the tests in:
 

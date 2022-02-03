@@ -9,23 +9,18 @@ import odoo.tests.common as common
 
 from odoo.addons.queue_job.delay import Delayable
 from odoo.addons.queue_job.job import identity_exact
-from odoo.addons.queue_job.tests.common import mock_with_delay, mock_jobs
-
-from odoo.tools import mute_logger
+from odoo.addons.queue_job.tests.common import mock_with_delay, trap_jobs
 
 
-class TestDelayMocks(common.SavepointCase):
+class TestDelayMocks(common.TransactionCase):
+    def test_trap_jobs_on_with_delay(self):
+        with trap_jobs() as trap:
+            self.env["test.queue.job"].button_that_uses_with_delay()
+            trap.assert_jobs_count(1)
+            trap.assert_jobs_count(1, only=self.env["test.queue.job"].testing_method)
 
-    def test_mock_jobs_on_with_delay(self):
-        with mock_jobs() as enqueued_jobs:
-            self.env['test.queue.job'].button_that_uses_with_delay()
-            enqueued_jobs.assert_jobs_count(1)
-            enqueued_jobs.assert_jobs_count(
-                1, only=self.env['test.queue.job'].testing_method
-            )
-
-            enqueued_jobs.assert_enqueued_job(
-                self.env['test.queue.job'].testing_method,
+            trap.assert_enqueued_job(
+                self.env["test.queue.job"].testing_method,
                 args=(1,),
                 kwargs={"foo": 2},
                 properties=dict(
@@ -38,19 +33,15 @@ class TestDelayMocks(common.SavepointCase):
                 )
             )
 
-    def test_mock_jobs_on_graph(self):
-        with mock_jobs() as jobs_tester:
-            self.env['test.queue.job'].button_that_uses_delayable_chain()
-            jobs_tester.assert_jobs_count(3)
-            jobs_tester.assert_jobs_count(
-                2, only=self.env['test.queue.job'].testing_method
-            )
-            jobs_tester.assert_jobs_count(
-                1, only=self.env['test.queue.job'].no_description
-            )
+    def test_trap_jobs_on_graph(self):
+        with trap_jobs() as trap:
+            self.env["test.queue.job"].button_that_uses_delayable_chain()
+            trap.assert_jobs_count(3)
+            trap.assert_jobs_count(2, only=self.env["test.queue.job"].testing_method)
+            trap.assert_jobs_count(1, only=self.env["test.queue.job"].no_description)
 
-            jobs_tester.assert_enqueued_job(
-                self.env['test.queue.job'].testing_method,
+            trap.assert_enqueued_job(
+                self.env["test.queue.job"].testing_method,
                 args=(1,),
                 kwargs={"foo": 2},
                 properties=dict(
@@ -62,32 +53,26 @@ class TestDelayMocks(common.SavepointCase):
                     priority=15,
                 )
             )
-            jobs_tester.assert_enqueued_job(
-                self.env['test.queue.job'].testing_method,
+            trap.assert_enqueued_job(
+                self.env["test.queue.job"].testing_method,
                 args=("x",),
                 kwargs={"foo": "y"},
             )
-            jobs_tester.assert_enqueued_job(
-                self.env['test.queue.job'].no_description,
+            trap.assert_enqueued_job(
+                self.env["test.queue.job"].no_description,
             )
 
-            jobs_tester.perform_enqueued_jobs()
+            trap.perform_enqueued_jobs()
 
-    def test_mock_jobs_perform(self):
-        with mock_jobs() as jobs_tester:
+    def test_trap_jobs_perform(self):
+        with trap_jobs() as trap:
             model = self.env["test.queue.job"]
             model.with_delay(priority=1).create_ir_logging(
-                "test_mock_jobs_perform single"
+                "test_trap_jobs_perform single"
             )
-            node = Delayable(model).create_ir_logging(
-                "test_mock_jobs_perform graph 1"
-            )
-            node2 = Delayable(model).create_ir_logging(
-                "test_mock_jobs_perform graph 2"
-            )
-            node3 = Delayable(model).create_ir_logging(
-                "test_mock_jobs_perform graph 3"
-            )
+            node = Delayable(model).create_ir_logging("test_trap_jobs_perform graph 1")
+            node2 = Delayable(model).create_ir_logging("test_trap_jobs_perform graph 2")
+            node3 = Delayable(model).create_ir_logging("test_trap_jobs_perform graph 3")
             node2.done(node3)
             node3.done(node)
             node2.delay()
@@ -102,10 +87,10 @@ class TestDelayMocks(common.SavepointCase):
             )
             self.assertEqual(len(logs), 0)
 
-            jobs_tester.assert_jobs_count(4)
+            trap.assert_jobs_count(4)
 
             # perform the jobs
-            jobs_tester.perform_enqueued_jobs()
+            trap.perform_enqueued_jobs()
 
             logs = self.env["ir.logging"].search(
                 [
@@ -117,10 +102,10 @@ class TestDelayMocks(common.SavepointCase):
             self.assertEqual(len(logs), 4)
 
             # check if they are executed in order
-            self.assertEqual(logs[0].message, "test_mock_jobs_perform single")
-            self.assertEqual(logs[1].message, "test_mock_jobs_perform graph 2")
-            self.assertEqual(logs[2].message, "test_mock_jobs_perform graph 3")
-            self.assertEqual(logs[3].message, "test_mock_jobs_perform graph 1")
+            self.assertEqual(logs[0].message, "test_trap_jobs_perform single")
+            self.assertEqual(logs[1].message, "test_trap_jobs_perform graph 2")
+            self.assertEqual(logs[2].message, "test_trap_jobs_perform graph 3")
+            self.assertEqual(logs[3].message, "test_trap_jobs_perform graph 1")
 
     def test_mock_with_delay(self):
         with mock_with_delay() as (delayable_cls, delayable):
