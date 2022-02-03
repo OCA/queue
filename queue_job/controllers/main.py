@@ -270,7 +270,7 @@ class RunJobController(http.Controller):
                 root_delayable = delayable
             else:
                 tail_delayable = random.choice(tails)
-                tail_delayable.done(delayable)
+                tail_delayable.on_done(delayable)
             tails.append(delayable)
 
         root_delayable.delay()
