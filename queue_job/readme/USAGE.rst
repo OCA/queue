@@ -285,8 +285,8 @@ Testing
 The recommended way to test jobs, rather than running them directly and synchronously is to
 split the tests in two parts:
 
- * one test where the job is mocked and the test only verifies that
-   the job has been delayed with the expected arguments
+ * one test where the job is mocked (trap jobs with ``trap_jobs()`` and the test
+   only verifies that the job has been delayed with the expected arguments
  * one test that only calls the method of the job synchronously, to validate the
    proper behavior of this method only
 
@@ -299,7 +299,7 @@ calling the job's method (synchronously, this time, in the second type of
 tests), and it makes tests smaller.
 
 The best way to run such assertions on the enqueued jobs is to use
-``odoo.addons.queue_job.tests.common.mock_jobs()``.
+``odoo.addons.queue_job.tests.common.trap_jobs()``.
 
 A very small example (more details in ``tests/common.py``):
 
@@ -315,17 +315,17 @@ A very small example (more details in ``tests/common.py``):
         return count
 
     # tests
-    from odoo.addons.queue_job.tests.common import mock_jobs
+    from odoo.addons.queue_job.tests.common import trap_jobs
 
     # first test only check the expected behavior of the method and the proper
     # enqueuing of jobs
     def test_method_to_test(self):
-        with mock_jobs() as jobs_tester:
+        with trap_jobs() as trap:
             result = self.env["model"].method_to_test()
             expected_count = 12
 
-            jobs_tester.assert_jobs_count(1, only=self.env["model"].my_job_method)
-            jobs_tester.assert_enqueued_job(
+            trap.assert_jobs_count(1, only=self.env["model"].my_job_method)
+            trap.assert_enqueued_job(
                 self.env["model"].my_job_method,
                 args=("Hi!",),
                 kwargs=dict(count=expected_count),
@@ -346,12 +346,12 @@ If you prefer, you can still test the whole thing in a single test, by calling
 .. code-block:: python
 
     def test_method_to_test(self):
-        with mock_jobs() as jobs_tester:
+        with trap_jobs() as trap:
             result = self.env["model"].method_to_test()
             expected_count = 12
 
-            jobs_tester.assert_jobs_count(1, only=self.env["model"].my_job_method)
-            jobs_tester.assert_enqueued_job(
+            trap.assert_jobs_count(1, only=self.env["model"].my_job_method)
+            trap.assert_enqueued_job(
                 self.env["model"].my_job_method,
                 args=("Hi!",),
                 kwargs=dict(count=expected_count),
@@ -359,7 +359,7 @@ If you prefer, you can still test the whole thing in a single test, by calling
             )
             self.assertEqual(result, expected_count)
 
-            jobs_tester.perform_enqueued_jobs()
+            trap.perform_enqueued_jobs()
 
             record = self.env["model"].browse(1)
             record.my_job_method("Hi!", count=12)
@@ -376,7 +376,7 @@ To do so you can set ``TEST_QUEUE_JOB_NO_DELAY=1`` in your environment.
 
 **Execute jobs synchronously in tests**
 
-You should use ``mock_jobs``, really, but if for any reason you could not use it,
+You should use ``trap_jobs``, really, but if for any reason you could not use it,
 and still need to have job methods executed synchronously in your tests, you can
 do so by setting ``test_queue_job_no_delay=True`` in the context.
 
