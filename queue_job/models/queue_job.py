@@ -57,6 +57,12 @@ class QueueJob(models.Model):
         comodel_name="res.company", string="Company", index=True
     )
     name = fields.Char(string="Description", readonly=True)
+    context = fields.Char(
+        string="Context Value",
+        default="{}",
+        help="Context dictionary as Python expression, empty by default (Default: {})",
+        readonly=True,
+    )
 
     model_name = fields.Char(string="Model", readonly=True)
     method_name = fields.Char(readonly=True)

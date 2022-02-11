@@ -579,6 +579,56 @@ class TestJobModel(JobCommonCase):
         self.assertTrue(key_present)
         self.assertEqual(result["job_uuid"], test_job._uuid)
 
+    def test_context_custom_keep_context_default(self):
+        """
+        Use with_delay without specify 'keep_context' key.
+        So ensure the default False value to this params.
+        So the context shouldn't be restored with the recordset.
+        """
+        delayable = (
+            self.env["test.queue.job"].with_context(world_origin=42).with_delay()
+        )
+        test_job = delayable.testing_method()
+        self.assertEqual(test_job.db_record().context, "{}")
+        expected_ctx = {
+            "job_uuid": test_job.uuid,
+            "allowed_company_ids": [test_job.company_id],
+        }
+        self.assertEqual(test_job._get_record_context(), expected_ctx)
+
+    def test_context_custom_keep_context_false(self):
+        """
+        Use with_delay without specify by specifying keep_context to False.
+        So the context shouldn't be restored with the recordset.
+        """
+        delayable = (
+            self.env["test.queue.job"]
+            .with_context(world_origin=42)
+            .with_delay(keep_context=False)
+        )
+        test_job = delayable.testing_method()
+        self.assertEqual(test_job.db_record().context, "{}")
+        expected_ctx = {
+            "job_uuid": test_job.uuid,
+            "allowed_company_ids": [test_job.company_id],
+        }
+        self.assertEqual(test_job._get_record_context(), expected_ctx)
+
+    def test_context_custom_keep_context_true(self):
+        """
+        Use with_delay without specify by specifying keep_context to True.
+        So the context should be restored with the recordset.
+        """
+        recordset = self.env["test.queue.job"].with_context(world_origin=42)
+        delayable = recordset.with_delay(keep_context=True)
+        test_job = delayable.testing_method()
+        self.assertEqual(test_job.db_record().context, str(recordset.env.context))
+        expected_ctx = recordset.env.context.copy()
+        expected_ctx.update(
+            {"job_uuid": test_job.uuid, "allowed_company_ids": [test_job.company_id]}
+        )
+        self.assertEqual(test_job._get_record_context(), expected_ctx)
+
     def test_override_channel(self):
         delayable = self.env["test.queue.job"].with_delay(channel="root.sub.sub")
         test_job = delayable.testing_method(return_context=True)

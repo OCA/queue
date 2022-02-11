@@ -60,6 +60,9 @@
                             <field name="exec_time" string="Time (s)" />
                         </group>
                     </group>
+                    <group name="context_grp">
+                        <field name="context" />
+                    </group>
                     <group colspan="4">
                         <div>
                             <label for="retry" string="Current try / max. retries" />

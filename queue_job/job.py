@@ -11,6 +11,7 @@ import uuid
 from datetime import datetime, timedelta
 
 import odoo
+from odoo.tools.safe_eval import safe_eval
 
 from .exception import FailedJobError, NoSuchJobError, RetryableJobError
 
@@ -59,6 +60,7 @@ class DelayableRecordset(object):
         description=None,
         channel=None,
         identity_key=None,
+        keep_context=False,
     ):
         self.recordset = recordset
         self.priority = priority
@@ -67,6 +69,7 @@ class DelayableRecordset(object):
         self.description = description
         self.channel = channel
         self.identity_key = identity_key
+        self.keep_context = keep_context
 
     def __getattr__(self, name):
         if name in self.recordset:
@@ -88,6 +91,7 @@ class DelayableRecordset(object):
                 description=self.description,
                 channel=self.channel,
                 identity_key=self.identity_key,
+                keep_context=self.keep_context,
             )
 
         return delay
@@ -339,6 +343,7 @@ class Job(object):
         description=None,
         channel=None,
         identity_key=None,
+        keep_context=False,
     ):
         """Create a Job and enqueue it in the queue. Return the job uuid.
 
@@ -359,6 +364,7 @@ class Job(object):
             description=description,
             channel=channel,
             identity_key=identity_key,
+            keep_context=keep_context,
         )
         if new_job.identity_key:
             existing = new_job.job_record_with_same_identity_key()
@@ -399,6 +405,7 @@ class Job(object):
         description=None,
         channel=None,
         identity_key=None,
+        keep_context=False,
     ):
         """ Create a Job
 
@@ -423,8 +430,8 @@ class Job(object):
         :param identity_key: A hash to uniquely identify a job, or a function
                              that returns this hash (the function takes the job
                              as argument)
-        :param env: Odoo Environment
-        :type env: :class:`odoo.api.Environment`
+        :param keep_context: Determine if the current context should be restored
+        :type keep_context: :bool
         """
         if args is None:
             args = ()
@@ -445,6 +452,7 @@ class Job(object):
         self.recordset = recordset
 
         self.env = env
+        self.keep_context = keep_context
         self.job_model = self.env["queue.job"]
         self.job_model_name = "queue.job"
 
@@ -594,8 +602,11 @@ class Job(object):
                     "records": self.recordset,
                     "args": self.args,
                     "kwargs": self.kwargs,
+                    "context": "{}",
                 }
             )
+            if self.keep_context:
+                vals.update({"context": str(self.env.context.copy())})
 
         vals_from_model = self._store_values_from_model()
         # Sanitize values: make sure you cannot screw core values
@@ -615,6 +626,22 @@ class Job(object):
                 vals = handler(self)
         return vals
 
+    def _get_record_context(self):
+        """
+        Get the context to execute the job
+        """
+        # return {}
+        company_ids = []
+        if self.company_id:
+            company_ids = [self.company_id]
+        context_txt = self.db_record().context or {}
+        if isinstance(context_txt, str):
+            context = safe_eval(context_txt)
+        else:
+            context = context_txt
+        context.update({"job_uuid": self.uuid, "allowed_company_ids": company_ids})
+        return context
+
     @property
     def func_string(self):
         model = repr(self.recordset)
@@ -628,16 +655,8 @@ class Job(object):
 
     @property
     def func(self):
-        # We can fill only one company into allowed_company_ids.
-        # Because if you have many, you can have unexpected records due to ir.rule.
-        # ir.rule use allowed_company_ids to load every records in many companies.
-        # But most of the time, a job should be executed on a single company.
-        company_ids = []
-        if self.company_id:
-            company_ids = [self.company_id]
-        recordset = self.recordset.with_context(
-            job_uuid=self.uuid, allowed_company_ids=company_ids
-        )
+        context = self._get_record_context()
+        recordset = self.recordset.with_context(**context)
         return getattr(recordset, self.method_name)
 
     @property
