@@ -69,14 +69,20 @@ class JobSerialized(fields.Field):
 class JobEncoder(json.JSONEncoder):
     """Encode Odoo recordsets so that we can later recompose them"""
 
+    def _get_record_context(self, obj):
+        context = obj.env.context.copy()
+        return context
+
     def default(self, obj):
         if isinstance(obj, models.BaseModel):
+            context = self._get_record_context(obj)
             return {
                 "_type": "odoo_recordset",
                 "model": obj._name,
                 "ids": obj.ids,
                 "uid": obj.env.uid,
                 "su": obj.env.su,
+                "context": context,
             }
         elif isinstance(obj, datetime):
             return {"_type": "datetime_isoformat", "value": obj.isoformat()}
@@ -107,6 +113,8 @@ class JobDecoder(json.JSONDecoder):
         type_ = obj["_type"]
         if type_ == "odoo_recordset":
             model = self.env(user=obj.get("uid"), su=obj.get("su"))[obj["model"]]
+            if obj.get("context"):
+                model = model.with_context(**obj.get("context"))
 
             return model.browse(obj["ids"])
         elif type_ == "datetime_isoformat":

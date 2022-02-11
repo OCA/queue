@@ -2,6 +2,7 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import hashlib
+import json
 from datetime import datetime, timedelta
 
 import mock
@@ -13,6 +14,7 @@ from odoo.addons.queue_job.exception import (
     NoSuchJobError,
     RetryableJobError,
 )
+from odoo.addons.queue_job.fields import JobEncoder
 from odoo.addons.queue_job.job import (
     DONE,
     ENQUEUED,
@@ -578,6 +580,57 @@ class TestJobModel(JobCommonCase):
         key_present = "job_uuid" in result
         self.assertTrue(key_present)
         self.assertEqual(result["job_uuid"], test_job._uuid)
+
+    def test_context_custom_keep_context_default(self):
+        """
+        Use with_delay without specify 'keep_context' key.
+        So ensure the default False value to this params.
+        So the context shouldn't be restored with the recordset.
+        """
+        delayable = (
+            self.env["test.queue.job"].with_context(world_origin=42).with_delay()
+        )
+        test_job = delayable.testing_method()
+        expected_ctx = {
+            "job_uuid": test_job.uuid,
+            "allowed_company_ids": [test_job.company_id],
+        }
+        self.assertEqual(test_job._get_record_context(), expected_ctx)
+
+    def test_context_custom_keep_context_false(self):
+        """
+        Use with_delay without specify by specifying keep_context to False.
+        So the context shouldn't be restored with the recordset.
+        """
+        delayable = (
+            self.env["test.queue.job"]
+            .with_context(world_origin=42)
+            .with_delay(keep_context=False)
+        )
+        test_job = delayable.testing_method()
+        expected_ctx = {
+            "job_uuid": test_job.uuid,
+            "allowed_company_ids": [test_job.company_id],
+        }
+        self.assertEqual(test_job._get_record_context(), expected_ctx)
+
+    def test_context_custom_keep_context_true(self):
+        """
+        Use with_delay without specify by specifying keep_context to True.
+        So the context should be restored with the recordset.
+        """
+        recordset = self.env["test.queue.job"].with_context(world_origin=42)
+        expected_ctx = recordset.env.context.copy()
+        value_json = json.dumps(recordset, cls=JobEncoder)
+        expected = {
+            "uid": recordset.env.uid,
+            "_type": "odoo_recordset",
+            "model": recordset._name,
+            "ids": recordset.ids,
+            "su": recordset.env.su,
+            "context": expected_ctx,
+        }
+        self.assertEqual(json.loads(value_json), expected)
 
     def test_override_channel(self):
         delayable = self.env["test.queue.job"].with_delay(channel="root.sub.sub")
