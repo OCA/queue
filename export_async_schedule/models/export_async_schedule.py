@@ -34,7 +34,7 @@ class ExportAsyncSchedule(models.Model):
         ondelete="restrict",
     )
     export_format = fields.Selection(
-        selection=[("csv", "CSV"), ("excel", "Excel")], default="csv", required=True,
+        selection=[("csv", "CSV"), ("xls", "Excel")], default="csv", required=True,
     )
     import_compat = fields.Boolean(string="Import-compatible Export")
     lang = fields.Selection(

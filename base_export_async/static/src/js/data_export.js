@@ -31,12 +31,13 @@ odoo.define('base_export_async.DataExport', function(require) {
                     method: 'delay_export',
                     args: [{
                         data: JSON.stringify({
-                            format: exportFormat,
+                            format: export_format,
                             model: this
                                 .record
                                 .model,
-                            fields: exportedFields,
-                            ids: idsToExport,
+                            fields: exported_fields,
+                            ids: this
+                                .ids_to_export,
                             domain: this
                                 .domain,
                             context: pyUtils
@@ -47,7 +48,14 @@ odoo.define('base_export_async.DataExport', function(require) {
                                         .getContext()
                                     ]
                                 ),
-                            import_compat: this.isCompatibleMode,
+                            import_compat:
+                                !!
+                                this
+                                .$import_compat_radios
+                                .filter(
+                                    ':checked'
+                                ).val(),
+                            user_ids: [this.record.context.uid],
                         })
                     }],
                 }).then(function(result) {

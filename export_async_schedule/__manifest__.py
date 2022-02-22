@@ -9,7 +9,7 @@
     "license": "AGPL-3",
     "website": "https://github.com/OCA/queue",
     "category": "Generic Modules",
-    "depends": ["base_export_async", "queue_job",] ,
+    "depends": ["base_export_async", "queue_job",],
     "data": [
         "data/ir_cron.xml",
         "views/export_async_schedule_views.xml",
