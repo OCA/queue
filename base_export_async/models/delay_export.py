@@ -95,7 +95,6 @@ class DelayExport(models.Model):
         attachment = self.env['ir.attachment'].create({
             'name': name,
             'datas': base64.b64encode(content),
-            'datas_fname': name,
             'type': 'binary',
             'res_model': self._name,
             'res_id': export_record.id,
