@@ -33,7 +33,6 @@ class DelayExport(models.Model):
     @api.model
     def _get_file_content(self, params):
         export_format = params.get('format')
-        raw_data = export_format != 'csv'
 
         items = operator.itemgetter(
             'model', 'fields', 'ids', 'domain',
@@ -53,7 +52,7 @@ class DelayExport(models.Model):
 
         field_names = [f['name'] for f in fields_name]
         import_data = records.export_data(
-            field_names, raw_data).get('datas', [])
+            field_names).get('datas', [])
 
         if import_compat:
             columns_headers = field_names
