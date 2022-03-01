@@ -10,5 +10,5 @@
     "category": "Generic Modules",
     "depends": ["queue_job"],
     "data": ["data/data.xml", "views/ir_cron_view.xml"],
-    "installable": False,
+    "installable": True,
 }
