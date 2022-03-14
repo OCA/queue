@@ -942,7 +942,9 @@ class ChannelManager(object):
         _logger.info("Configured channel: %s", channel)
         return channel
 
-    def get_channel_by_name(self, channel_name, autocreate=False):
+    def get_channel_by_name(
+        self, channel_name, autocreate=False, parent_fallback=False
+    ):
         """Return a Channel object by its name.
 
         If it does not exist and autocreate is True, it is created
@@ -980,6 +982,9 @@ class ChannelManager(object):
         >>> c = cm.get_channel_by_name('sub')
         >>> c.fullname
         'root.sub'
+        >>> c = cm.get_channel_by_name('root.sub.not.configured', parent_fallback=True)
+        >>> c.fullname
+        'root.sub.sub.not.configured'
         """
         if not channel_name or channel_name == self._root_channel.name:
             return self._root_channel
@@ -987,9 +992,26 @@ class ChannelManager(object):
             channel_name = self._root_channel.name + "." + channel_name
         if channel_name in self._channels_by_name:
             return self._channels_by_name[channel_name]
-        if not autocreate:
+        if not autocreate and not parent_fallback:
             raise ChannelNotFound("Channel %s not found" % channel_name)
         parent = self._root_channel
+        if parent_fallback:
+            # Look for first direct parent w/ config.
+            # Eg: `root.edi.foo.baz` will falback on `root.edi.foo`
+            # or `root.edi` or `root` in sequence
+            parent_name = channel_name
+            while True:
+                parent_name = parent_name.rsplit(".", 1)[:-1][0]
+                if parent_name == self._root_channel.name:
+                    break
+                if parent_name in self._channels_by_name:
+                    parent = self._channels_by_name[parent_name]
+                    _logger.debug(
+                        "%s has no specific configuration: using %s",
+                        channel_name,
+                        parent_name,
+                    )
+                    break
         for subchannel_name in channel_name.split(".")[1:]:
             subchannel = parent.get_subchannel_by_name(subchannel_name)
             if not subchannel:
@@ -1001,13 +1023,7 @@ class ChannelManager(object):
     def notify(
         self, db_name, channel_name, uuid, seq, date_created, priority, eta, state
     ):
-        try:
-            channel = self.get_channel_by_name(channel_name)
-        except ChannelNotFound:
-            _logger.warning(
-                "unknown channel %s, using root channel for job %s", channel_name, uuid
-            )
-            channel = self._root_channel
+        channel = self.get_channel_by_name(channel_name, parent_fallback=True)
         job = self._jobs_by_uuid.get(uuid)
         if job:
             # db_name is invariant
