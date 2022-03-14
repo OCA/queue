@@ -128,7 +128,7 @@
                     widget="remaining_days"
                     string="Remaining days to execute"
                     optional="hide"
-                />
+                /> <!-- pylint: disable=duplicate-xml-fields -->
                 <field name="date_done" />
                 <field name="exec_time" />
                 <field name="exc_name" />
