@@ -20,7 +20,7 @@ odoo.define('base_export_async.DataExport', function(require) {
         },
         _exportData(exportedFields, exportFormat, idsToExport) {
             var self = this;
-            if (self.async.is(":checked")) {
+            if ('async' in self && self.async.is(":checked")) {
 
                 /*
                     Call the delay export if Async is checked
