@@ -244,10 +244,16 @@ class QueueJob(models.Model):
                 days=int(channel.removal_interval))
             jobs = self.search(
                 [('date_done', '<=', deadline),
-                 ('channel', '=', channel.complete_name)],
+                 ('channel', '=', channel.complete_name)], limit=1000
             )
-            if jobs:
+            while jobs:
                 jobs.unlink()
+                self._cr.commit()
+                jobs = self.search(
+                    [('date_done', '<=', deadline),
+                     ('channel', '=', channel.complete_name)], limit=1000
+                )
+                _logger.info('Unlink %s' % jobs.__len__())
         return True
 
     @api.model
