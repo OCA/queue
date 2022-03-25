@@ -34,7 +34,7 @@ class IrCron(models.Model):
             return self.sudo(user=self.user_id.id).with_delay(
                 priority=self.priority,
                 description=self.name,
-                channel=self.channel_id.name)._run_job_as_queue_job(
+                channel=self.channel_id.complete_name)._run_job_as_queue_job(
                 server_action=self.ir_actions_server_id.sudo(self.user_id.id))
         else:
             return super(IrCron, self).method_direct_trigger()
@@ -48,7 +48,7 @@ class IrCron(models.Model):
             return self.with_delay(
                 priority=cron.priority,
                 description=cron.name,
-                channel=cron.channel_id.name)._run_job_as_queue_job(
+                channel=cron.channel_id.complete_name)._run_job_as_queue_job(
                     server_action=server_action)
         else:
             return super(IrCron, self)._callback(

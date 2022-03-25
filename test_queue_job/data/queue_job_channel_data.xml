@@ -1,0 +1,10 @@
+<odoo noupdate="1">
+    <record model="queue.job.channel" id="channel_sub">
+        <field name="name">sub</field>
+        <field name="parent_id" ref="queue_job.channel_root" />
+    </record>
+    <record model="queue.job.channel" id="channel_subsub">
+        <field name="name">subsub</field>
+        <field name="parent_id" ref="channel_sub" />
+    </record>
+</odoo>
