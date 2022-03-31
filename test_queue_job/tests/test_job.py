@@ -246,19 +246,19 @@ class TestJobsOnTestingMethod(JobCommonCase):
     def test_unicode(self):
         test_job = Job(
             self.method,
-            args=(u"öô¿‽", u"ñě"),
-            kwargs={"c": u"ßø"},
+            args=("öô¿‽", "ñě"),
+            kwargs={"c": "ßø"},
             priority=15,
-            description=u"My dé^Wdescription",
+            description="My dé^Wdescription",
         )
         test_job.store()
         job_read = Job.load(self.env, test_job.uuid)
         self.assertEqual(test_job.args, job_read.args)
-        self.assertEqual(job_read.args, (u"öô¿‽", u"ñě"))
+        self.assertEqual(job_read.args, ("öô¿‽", "ñě"))
         self.assertEqual(test_job.kwargs, job_read.kwargs)
-        self.assertEqual(job_read.kwargs, {"c": u"ßø"})
+        self.assertEqual(job_read.kwargs, {"c": "ßø"})
         self.assertEqual(test_job.description, job_read.description)
-        self.assertEqual(job_read.description, u"My dé^Wdescription")
+        self.assertEqual(job_read.description, "My dé^Wdescription")
 
     def test_accented_bytestring(self):
         test_job = Job(
