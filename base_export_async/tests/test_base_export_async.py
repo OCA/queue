@@ -3,8 +3,9 @@
 
 import json
 
-import odoo.tests.common as common
 from dateutil.relativedelta import relativedelta
+
+import odoo.tests.common as common
 from odoo import fields
 
 data_csv = {
