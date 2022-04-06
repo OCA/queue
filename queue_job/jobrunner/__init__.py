@@ -54,6 +54,7 @@ class WorkerJobRunner(server.Worker):
         super().__init__(multi)
         self.watchdog_timeout = None
         self.runner = QueueJobRunner.from_environ_or_config()
+        self._recover = False
 
     def sleep(self):
         pass
@@ -64,9 +65,22 @@ class WorkerJobRunner(server.Worker):
         self.runner.stop()
 
     def process_work(self):
+        if self._recover:
+            _logger.info("WorkerJobRunner (%s) runner is reinitialized", self.pid)
+            self.runner = QueueJobRunner.from_environ_or_config()
+            self._recover = False
         _logger.debug("WorkerJobRunner (%s) starting up", self.pid)
         time.sleep(START_DELAY)
         self.runner.run()
+
+    def signal_time_expired_handler(self, n, stack):
+        _logger.info(
+            "Worker (%d) CPU time limit (%s) reached.Stop gracefully and recover",
+            self.pid,
+            config["limit_time_cpu"],
+        )
+        self._recover = True
+        self.runner.stop()
 
 
 runner_thread = None
