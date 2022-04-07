@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="queue_job_lang_inherit_form_view" model="ir.ui.view">
+            <field name="name">queue.job.lang.inherit.form.view</field>
+            <field name="model">queue.job</field>
+            <field name="inherit_id" ref="queue_job.view_queue_job_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='uuid']" position="after">
+                    <field name="lang_id" readonly='1' />
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
