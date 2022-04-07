@@ -7,10 +7,12 @@ import logging
 import operator
 
 from dateutil.relativedelta import relativedelta
+
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
+
 from odoo.addons.queue_job.job import job
 from odoo.addons.web.controllers.main import CSVExport, ExcelExport
-from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 

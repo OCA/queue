@@ -264,7 +264,7 @@ class QueueJob(models.Model):
                 )
                 if jobs:
                     jobs.unlink()
-                    self.env.cr.commit()
+                    self.env.cr.commit()  # pylint: disable=E8102
                 else:
                     break
         return True
