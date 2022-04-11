@@ -253,6 +253,14 @@ class Job(object):
         return cls._load_from_db_record(stored)
 
     @classmethod
+    def lock_jobs_by_uuids(cls, env, job_uuid_list):
+        query = "SELECT state FROM queue_job WHERE uuid in %s FOR UPDATE;"
+        env.cr.execute(query, (tuple(job_uuid_list),))
+
+    def lock(self):
+        self.lock_jobs_by_uuids(self.env, [self.uuid])
+
+    @classmethod
     def _load_from_db_record(cls, job_db_record):
         stored = job_db_record
         env = job_db_record.env
