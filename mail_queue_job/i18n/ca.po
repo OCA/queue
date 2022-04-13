@@ -9,19 +9,20 @@ msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-06-07 06:42+0000\n"
-"PO-Revision-Date: 2018-06-07 06:42+0000\n"
-"Last-Translator: OCA Transbot <transbot@odoo-community.org>, 2018\n"
+"PO-Revision-Date: 2022-04-13 14:05+0000\n"
+"Last-Translator: Noel estudillo <noelestudilloviera@gmail.com>\n"
 "Language-Team: Catalan (https://www.transifex.com/oca/teams/23907/ca/)\n"
 "Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.3.2\n"
 
 #. module: mail_queue_job
 #: model:ir.model.fields,field_description:mail_queue_job.field_mail_mail_mail_job_priority
 msgid "Mail Job Priority"
-msgstr ""
+msgstr "Prioritat de treball de correu"
 
 #. module: mail_queue_job
 #: model:ir.model,name:mail_queue_job.model_mail_mail
@@ -34,3 +35,5 @@ msgid ""
 "Send the email with a priority level.\n"
 "0 being the higher priority. Default is 10"
 msgstr ""
+"Envieu el correu electrònic amb un nivell de prioritat.\n"
+"0 és la prioritat més alta. El valor per defecte és 10"
