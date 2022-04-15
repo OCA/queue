@@ -1,6 +1,8 @@
 #  Copyright (c) Akretion 2020
 #  License AGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+import traceback
+
 from psycopg2 import OperationalError
 
 from odoo import api, fields, models
@@ -52,6 +54,7 @@ class QueueJobChunk(models.Model):
         store=True,
     )
     company_id = fields.Many2one("res.company", compute=_compute_reference, store=True)
+    stack_trace = fields.Text("Stack trace")
 
     @api.model_create_multi
     def create(self, vals):
@@ -99,6 +102,7 @@ class QueueJobChunk(models.Model):
                         raise
                     self.state = "fail"
                     self.state_info = type(e).__name__ + str(e.args)
+                    self.stack_trace = traceback.format_exc()
                     return False
                 self.state_info = ""
                 self.state = "done"

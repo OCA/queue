@@ -23,6 +23,11 @@
                             <field name="reference" attrs="{'readonly': 1}" />
                             <field name="state" attrs="{'readonly': 1}" />
                             <field name="state_info" attrs="{'readonly': 1}" />
+                            <field
+                                name="stack_trace"
+                                groups="base.group_system"
+                                attrs="{'readonly': 1}"
+                            />
                         </group>
                         <group name="component">
                             <field name="usage" />
