@@ -23,4 +23,5 @@
         'views/queue_job_batch_views.xml',
         'views/assets_backend.xml',
     ],
+    'development_status': 'Production/Stable',
 }
