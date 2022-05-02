@@ -1,9 +1,9 @@
 
-[![Runboat](https://img.shields.io/badge/runboat-Try%20me-875A7B.png)](https://runboat.odoo-community.org/builds?repo=OCA/queue&target_branch=11.0)
-[![Pre-commit Status](https://github.com/OCA/queue/actions/workflows/pre-commit.yml/badge.svg?branch=11.0)](https://github.com/OCA/queue/actions/workflows/pre-commit.yml?query=branch%3A11.0)
-[![Build Status](https://github.com/OCA/queue/actions/workflows/test.yml/badge.svg?branch=11.0)](https://github.com/OCA/queue/actions/workflows/test.yml?query=branch%3A11.0)
-[![codecov](https://codecov.io/gh/OCA/queue/branch/11.0/graph/badge.svg)](https://codecov.io/gh/OCA/queue)
-[![Translation Status](https://translation.odoo-community.org/widgets/queue-11-0/-/svg-badge.svg)](https://translation.odoo-community.org/engage/queue-11-0/?utm_source=widget)
+[![Runboat](https://img.shields.io/badge/runboat-Try%20me-875A7B.png)](https://runboat.odoo-community.org/builds?repo=OCA/queue&target_branch=12.0)
+[![Pre-commit Status](https://github.com/OCA/queue/actions/workflows/pre-commit.yml/badge.svg?branch=12.0)](https://github.com/OCA/queue/actions/workflows/pre-commit.yml?query=branch%3A12.0)
+[![Build Status](https://github.com/OCA/queue/actions/workflows/test.yml/badge.svg?branch=12.0)](https://github.com/OCA/queue/actions/workflows/test.yml?query=branch%3A12.0)
+[![codecov](https://codecov.io/gh/OCA/queue/branch/12.0/graph/badge.svg)](https://codecov.io/gh/OCA/queue)
+[![Translation Status](https://translation.odoo-community.org/widgets/queue-12-0/-/svg-badge.svg)](https://translation.odoo-community.org/engage/queue-12-0/?utm_source=widget)
 
 <!-- /!\ do not modify above this line -->
 
