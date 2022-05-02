@@ -5,7 +5,7 @@ ci: GitHub
 dependency_installation_mode: PIP
 generate_requirements_txt: true
 include_wkhtmltopdf: false
-odoo_version: 11.0
+odoo_version: 12.0
 org_name: Odoo Community Association (OCA)
 org_slug: OCA
 rebel_module_groups: []
