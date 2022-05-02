@@ -4,7 +4,7 @@
  'version': '12.0.1.0.0',
  'author': 'Acsone SA/NV,'
            'Odoo Community Association (OCA)',
- 'website': 'https://github.com/OCA/queue_job',
+ 'website': 'https://github.com/OCA/queue',
  'summary': 'Control which users are subscribed to queue job notifications',
  'license': 'AGPL-3',
  'category': 'Generic Modules',

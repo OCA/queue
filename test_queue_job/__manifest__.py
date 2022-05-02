@@ -8,7 +8,7 @@
  'category': 'Generic Modules',
  'depends': ['queue_job',
              ],
- 'website': 'http://www.camptocamp.com',
+ 'website': 'https://github.com/OCA/queue',
  'data': [
      'data/queue_job_channel_data.xml',
      'data/queue_job_function_data.xml',
