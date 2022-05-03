@@ -26,7 +26,7 @@ msgstr ""
 "alors le nombre de tentative est infini.</span>"
 
 #. module: queue_job
-#: code:addons/queue_job/controllers/main.py:152
+#: code:addons/queue_job/controllers/main.py:192
 #, python-format
 msgid "Access Denied"
 msgstr ""
@@ -97,19 +97,19 @@ msgid "Cancelled"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:216
+#: code:addons/queue_job/models/queue_job.py:344
 #, python-format
 msgid "Cancelled by %s"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:501
+#: code:addons/queue_job/models/queue_job.py:634
 #, python-format
 msgid "Cannot change the root channel"
 msgstr "Impossible de modifier le canal racine"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:508
+#: code:addons/queue_job/models/queue_job.py:641
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr "Impossible d'enlever le canal racine"
@@ -121,11 +121,6 @@ msgstr "Impossible d'enlever le canal racine"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Channel"
 msgstr "Canal"
-
-#. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__channel_method_name
-msgid "Channel Method Name"
-msgstr "Nom de la méthode du canal"
 
 #. module: queue_job
 #: sql_constraint:queue.job.channel:0
@@ -144,6 +139,11 @@ msgstr "Canaux"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__company_id
 msgid "Company"
 msgstr "Société"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__channel_method_name
+msgid "Complete Method Name"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__complete_name
@@ -191,6 +191,17 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_done
 msgid "Date Done"
 msgstr "Date de fin"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependencies
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Dependencies"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependency_graph
+msgid "Dependency Graph"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__name
@@ -297,6 +308,26 @@ msgid "Followers (Partners)"
 msgstr "Abonnés (Partenaires)"
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Graph"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Graph Jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_jobs_count
+msgid "Graph Jobs Count"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_uuid
+msgid "Graph UUID"
+msgstr ""
+
+#. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Group By"
@@ -318,7 +349,7 @@ msgid "Identity Key"
 msgstr "Clé d'identité"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:326
+#: code:addons/queue_job/models/queue_job.py:457
 #, python-format
 msgid "If both parameters are 0, ALL jobs will be requeued!"
 msgstr ""
@@ -341,7 +372,7 @@ msgid "If checked, some messages have a delivery error."
 msgstr "Si coché, des messages n'ont pas pu être livré."
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:589
+#: code:addons/queue_job/models/queue_job.py:722
 #, python-format
 msgid "Invalid job function: {}"
 msgstr ""
@@ -394,7 +425,7 @@ msgid "Job failed"
 msgstr "Tâche échouée"
 
 #. module: queue_job
-#: code:addons/queue_job/controllers/main.py:103
+#: code:addons/queue_job/controllers/main.py:138
 #, python-format
 msgid "Job interrupted and set to Done: nothing to do."
 msgstr "Tâche interrompue et définie sur Terminée : rien à faire."
@@ -418,6 +449,12 @@ msgstr "Tâches"
 #: model:ir.cron,name:queue_job.ir_cron_queue_job_garbage_collector
 msgid "Jobs Garbage Collector"
 msgstr "Ramasse-miettes des tâches"
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:308
+#, python-format
+msgid "Jobs for graph %s"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__kwargs
@@ -456,7 +493,7 @@ msgid "Main Attachment"
 msgstr "Pièce jointe principale"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:210
+#: code:addons/queue_job/models/queue_job.py:338
 #, python-format
 msgid "Manually set to done by %s"
 msgstr "Manuellement défini comme terminé par %s"
@@ -494,7 +531,7 @@ msgid "Model"
 msgstr "Modèle"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:594
+#: code:addons/queue_job/models/queue_job.py:727
 #, python-format
 msgid "Model {} not found"
 msgstr ""
@@ -521,13 +558,13 @@ msgid "Next Activity Type"
 msgstr "Type de la prochaine activité"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:186
+#: code:addons/queue_job/models/queue_job.py:296
 #, python-format
 msgid "No action available for this job"
 msgstr "Aucune action disponible pour cette tâche"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:154
+#: code:addons/queue_job/models/queue_job.py:264
 #, python-format
 msgid "Not allowed to change field(s): {}"
 msgstr ""
@@ -568,7 +605,7 @@ msgid "Parent Channel"
 msgstr "Canal parent"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:468
+#: code:addons/queue_job/models/queue_job.py:601
 #, python-format
 msgid "Parent channel required."
 msgstr "Canal parent obligatoire."
@@ -609,7 +646,7 @@ msgid "Queue Job"
 msgstr "File d'attente des tâches"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:140
+#: code:addons/queue_job/models/queue_job.py:250
 #, python-format
 msgid "Queue jobs must be created by calling 'with_delay()'."
 msgstr ""
@@ -640,13 +677,13 @@ msgid "Related Action (serialized)"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:356
+#: code:addons/queue_job/models/queue_job.py:487
 #, python-format
 msgid "Related Record"
 msgstr "Enregistrement lié"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:366
+#: code:addons/queue_job/models/queue_job.py:497
 #, python-format
 msgid "Related Records"
 msgstr "Enregistrements liés"
@@ -684,6 +721,11 @@ msgid "Result"
 msgstr "Résultat"
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Results"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_retry_pattern
 msgid "Retry Pattern"
 msgstr ""
@@ -719,7 +761,12 @@ msgid "Set to done"
 msgstr "Définir comme terminé"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:259
+#: model:ir.model.fields,help:queue_job.field_queue_job__graph_uuid
+msgid "Single shared identifier of a Graph. Empty for a single job."
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:390
 #, python-format
 msgid ""
 "Something bad happened during the execution of the job. More details in the "
@@ -817,7 +864,7 @@ msgid "UUID"
 msgstr "UUID"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:716
+#: code:addons/queue_job/models/queue_job.py:849
 #, python-format
 msgid ""
 "Unexpected format of Related Action for {}.\n"
@@ -827,7 +874,7 @@ msgid ""
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:693
+#: code:addons/queue_job/models/queue_job.py:826
 #, python-format
 msgid ""
 "Unexpected format of Retry Pattern for {}.\n"
@@ -849,6 +896,12 @@ msgstr "Compteur de messages non-lus"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__user_id
 msgid "User ID"
 msgstr "ID utilisateur"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+#: selection:queue.job,state:0
+msgid "Wait Dependencies"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__website_message_ids
@@ -944,6 +997,9 @@ msgstr ""
 #: selection:ir.model.fields,ttype:0
 msgid "text"
 msgstr ""
+
+#~ msgid "Channel Method Name"
+#~ msgstr "Nom de la méthode du canal"
 
 #~ msgid "Override Channel"
 #~ msgstr "Forcer un canal"

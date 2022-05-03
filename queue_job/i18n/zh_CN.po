@@ -26,7 +26,7 @@ msgstr ""
 "span>"
 
 #. module: queue_job
-#: code:addons/queue_job/controllers/main.py:152
+#: code:addons/queue_job/controllers/main.py:192
 #, python-format
 msgid "Access Denied"
 msgstr ""
@@ -97,19 +97,19 @@ msgid "Cancelled"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:216
+#: code:addons/queue_job/models/queue_job.py:344
 #, python-format
 msgid "Cancelled by %s"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:501
+#: code:addons/queue_job/models/queue_job.py:634
 #, python-format
 msgid "Cannot change the root channel"
 msgstr "无法更改root频道"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:508
+#: code:addons/queue_job/models/queue_job.py:641
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr "无法删除root频道"
@@ -121,11 +121,6 @@ msgstr "无法删除root频道"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Channel"
 msgstr "频道"
-
-#. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__channel_method_name
-msgid "Channel Method Name"
-msgstr "频道方法名称"
 
 #. module: queue_job
 #: sql_constraint:queue.job.channel:0
@@ -144,6 +139,11 @@ msgstr "频道"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__company_id
 msgid "Company"
 msgstr "公司"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__channel_method_name
+msgid "Complete Method Name"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__complete_name
@@ -191,6 +191,17 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_done
 msgid "Date Done"
 msgstr "完成日期"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependencies
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Dependencies"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependency_graph
+msgid "Dependency Graph"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__name
@@ -297,6 +308,26 @@ msgid "Followers (Partners)"
 msgstr "关注者(业务伙伴)"
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Graph"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Graph Jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_jobs_count
+msgid "Graph Jobs Count"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_uuid
+msgid "Graph UUID"
+msgstr ""
+
+#. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Group By"
@@ -318,7 +349,7 @@ msgid "Identity Key"
 msgstr "身份密钥"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:326
+#: code:addons/queue_job/models/queue_job.py:457
 #, fuzzy, python-format
 msgid "If both parameters are 0, ALL jobs will be requeued!"
 msgstr "所选作业将重新排队。"
@@ -339,7 +370,7 @@ msgid "If checked, some messages have a delivery error."
 msgstr "如果勾选此项， 某些消息将会产生传递错误。"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:589
+#: code:addons/queue_job/models/queue_job.py:722
 #, python-format
 msgid "Invalid job function: {}"
 msgstr ""
@@ -392,7 +423,7 @@ msgid "Job failed"
 msgstr "作业失败"
 
 #. module: queue_job
-#: code:addons/queue_job/controllers/main.py:103
+#: code:addons/queue_job/controllers/main.py:138
 #, python-format
 msgid "Job interrupted and set to Done: nothing to do."
 msgstr "作业中断并设置为已完成：无需执行任何操作。"
@@ -415,6 +446,12 @@ msgstr "作业"
 #: model:ir.cron,cron_name:queue_job.ir_cron_queue_job_garbage_collector
 #: model:ir.cron,name:queue_job.ir_cron_queue_job_garbage_collector
 msgid "Jobs Garbage Collector"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:308
+#, python-format
+msgid "Jobs for graph %s"
 msgstr ""
 
 #. module: queue_job
@@ -454,7 +491,7 @@ msgid "Main Attachment"
 msgstr "附件"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:210
+#: code:addons/queue_job/models/queue_job.py:338
 #, python-format
 msgid "Manually set to done by %s"
 msgstr "由%s手动设置为完成"
@@ -492,7 +529,7 @@ msgid "Model"
 msgstr "模型"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:594
+#: code:addons/queue_job/models/queue_job.py:727
 #, python-format
 msgid "Model {} not found"
 msgstr ""
@@ -519,13 +556,13 @@ msgid "Next Activity Type"
 msgstr "下一活动类型"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:186
+#: code:addons/queue_job/models/queue_job.py:296
 #, python-format
 msgid "No action available for this job"
 msgstr "此作业无法执行任何操作"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:154
+#: code:addons/queue_job/models/queue_job.py:264
 #, python-format
 msgid "Not allowed to change field(s): {}"
 msgstr ""
@@ -566,7 +603,7 @@ msgid "Parent Channel"
 msgstr "父频道"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:468
+#: code:addons/queue_job/models/queue_job.py:601
 #, python-format
 msgid "Parent channel required."
 msgstr "父频道必填。"
@@ -607,7 +644,7 @@ msgid "Queue Job"
 msgstr "队列作业"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:140
+#: code:addons/queue_job/models/queue_job.py:250
 #, python-format
 msgid "Queue jobs must be created by calling 'with_delay()'."
 msgstr ""
@@ -638,13 +675,13 @@ msgid "Related Action (serialized)"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:356
+#: code:addons/queue_job/models/queue_job.py:487
 #, python-format
 msgid "Related Record"
 msgstr "相关记录"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:366
+#: code:addons/queue_job/models/queue_job.py:497
 #, python-format
 msgid "Related Records"
 msgstr "相关记录"
@@ -682,6 +719,11 @@ msgid "Result"
 msgstr "结果"
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Results"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_retry_pattern
 msgid "Retry Pattern"
 msgstr ""
@@ -717,7 +759,12 @@ msgid "Set to done"
 msgstr "设置为完成"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:259
+#: model:ir.model.fields,help:queue_job.field_queue_job__graph_uuid
+msgid "Single shared identifier of a Graph. Empty for a single job."
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:390
 #, python-format
 msgid ""
 "Something bad happened during the execution of the job. More details in the "
@@ -814,7 +861,7 @@ msgid "UUID"
 msgstr "UUID"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:716
+#: code:addons/queue_job/models/queue_job.py:849
 #, python-format
 msgid ""
 "Unexpected format of Related Action for {}.\n"
@@ -824,7 +871,7 @@ msgid ""
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:693
+#: code:addons/queue_job/models/queue_job.py:826
 #, python-format
 msgid ""
 "Unexpected format of Retry Pattern for {}.\n"
@@ -846,6 +893,12 @@ msgstr "未读消息计数器"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__user_id
 msgid "User ID"
 msgstr "用户"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+#: selection:queue.job,state:0
+msgid "Wait Dependencies"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__website_message_ids
@@ -942,6 +995,9 @@ msgstr ""
 #: selection:ir.model.fields,ttype:0
 msgid "text"
 msgstr ""
+
+#~ msgid "Channel Method Name"
+#~ msgstr "频道方法名称"
 
 #~ msgid "Override Channel"
 #~ msgstr "覆盖频道"
