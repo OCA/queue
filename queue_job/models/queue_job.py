@@ -3,15 +3,29 @@
 
 import ast
 import logging
+import random
 import re
 from collections import namedtuple
 from datetime import datetime, timedelta
 
 from odoo import _, api, exceptions, fields, models, tools
+from odoo.addons.base_sparse_field.models.fields import Serialized
 from odoo.osv import expression
+from odoo.tools import html_escape
 
+from ..delay import Graph
+from ..exception import JobError
 from ..fields import JobSerialized
-from ..job import CANCELLED, DONE, PENDING, STATES, Job
+from ..job import (
+    CANCELLED,
+    DONE,
+    FAILED,
+    Job,
+    PENDING,
+    STARTED,
+    STATES,
+    WAIT_DEPENDENCIES
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -54,6 +68,12 @@ class QueueJob(models.Model):
                        readonly=True,
                        index=True,
                        required=True)
+    graph_uuid = fields.Char(
+        string='Graph UUID',
+        readonly=True,
+        index=True,
+        help="Single shared identifier of a Graph. Empty for a single job."
+    )
     user_id = fields.Many2one(comodel_name='res.users',
                               string='User ID')
     company_id = fields.Many2one(comodel_name='res.company',
@@ -68,6 +88,10 @@ class QueueJob(models.Model):
     records = JobSerialized(
         string="Record(s)", readonly=True, base_type=models.BaseModel,
     )
+    dependencies = Serialized(readonly=True)
+    # dependency graph as expected by the field widget
+    dependency_graph = Serialized(compute='_compute_dependency_graph')
+    graph_jobs_count = fields.Integer(compute="_compute_graph_jobs_count")
     args = JobSerialized(readonly=True, base_type=tuple)
     kwargs = JobSerialized(readonly=True, base_type=dict)
     func_string = fields.Char(string="Task", readonly=True)
@@ -103,7 +127,7 @@ class QueueJob(models.Model):
     )
 
     # FIXME the name of this field is very confusing
-    channel_method_name = fields.Char(readonly=True)
+    channel_method_name = fields.Char(string="Complete Method Name", readonly=True)
     job_function_id = fields.Many2one(comodel_name='queue.job.function',
                                       string='Job Function',
                                       readonly=True)
@@ -130,6 +154,92 @@ class QueueJob(models.Model):
     def _compute_record_ids(self):
         for record in self:
             record.record_ids = record.records.ids
+
+    @api.depends('dependencies')
+    def _compute_dependency_graph(self):
+        graph_uuids = [uuid for uuid in self.mapped("graph_uuid") if uuid]
+        jobs_groups = self.env["queue.job"].read_group(
+            [("graph_uuid", "in", graph_uuids)],
+            ["graph_uuid", "ids:array_agg(id)"],
+            ["graph_uuid"]
+        )
+        ids_per_graph_uuid = {
+            group["graph_uuid"]: group["ids"] for group in jobs_groups
+        }
+        for record in self:
+            if not record.graph_uuid:
+                record.dependency_graph = {}
+                continue
+
+            graph_jobs = self.browse(ids_per_graph_uuid.get(record.graph_uuid) or [])
+            if not graph_jobs:
+                record.dependency_graph = {}
+                continue
+
+            graph_ids = {
+                graph_job.uuid: graph_job.id for graph_job in graph_jobs
+            }
+            graph_jobs_by_ids = {
+                graph_job.id: graph_job for graph_job in graph_jobs
+            }
+
+            graph = Graph()
+            for graph_job in graph_jobs:
+                graph.add_vertex(graph_job.id)
+                for parent_uuid in graph_job.dependencies['depends_on']:
+                    parent_id = graph_ids.get(parent_uuid)
+                    if not parent_id:
+                        continue
+                    graph.add_edge(parent_id, graph_job.id)
+                for child_uuid in graph_job.dependencies['reverse_depends_on']:
+                    child_id = graph_ids.get(child_uuid)
+                    if not child_id:
+                        continue
+                    graph.add_edge(graph_job.id, child_id)
+
+            record.dependency_graph = {
+                # list of ids
+                'nodes': [
+                    graph_jobs_by_ids[graph_id]._dependency_graph_vis_node()
+                    for graph_id in graph.vertices()
+                ],
+                # list of tuples (from, to)
+                'edges': graph.edges(),
+            }
+
+    def _dependency_graph_vis_node(self):
+        """Return the node as expected by the JobDirectedGraph widget"""
+        default = ("#D2E5FF", "#2B7CE9")
+        colors = {
+            DONE: ("#C2FABC", "#4AD63A"),
+            FAILED: ("#FB7E81", "#FA0A10"),
+            STARTED: ("#FFFF00", "#FFA500"),
+        }
+        return {
+            "id": self.id,
+            "title": "<strong>%s</strong><br/>%s" % (
+                html_escape(self.display_name),
+                html_escape(self.func_string),
+            ),
+            "color": colors.get(self.state, default)[0],
+            "border": colors.get(self.state, default)[1],
+            "shadow": True,
+        }
+
+    @api.multi
+    def _compute_graph_jobs_count(self):
+        graph_uuids = [uuid for uuid in self.mapped("graph_uuid") if uuid]
+        jobs_groups = self.env["queue.job"].read_group(
+            [("graph_uuid", "in", graph_uuids)],
+            ["graph_uuid"],
+            ["graph_uuid"]
+        )
+        count_per_graph_uuid = {
+            group["graph_uuid"]: group["graph_uuid_count"]
+            for group in jobs_groups
+        }
+        for record in self:
+            record.graph_jobs_count = count_per_graph_uuid.get(record.graph_uuid) or 0
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -187,6 +297,21 @@ class QueueJob(models.Model):
         return action
 
     @api.multi
+    def open_graph_jobs(self):
+        """Return action that opens all jobs of the same graph"""
+        self.ensure_one()
+        jobs = self.env["queue.job"].search([("graph_uuid", "=", self.graph_uuid)])
+
+        action_jobs = self.env.ref('queue_job.action_queue_job')
+        action = action_jobs.read()[0]
+        action.update({
+            "name": _("Jobs for graph %s") % (self.graph_uuid),
+            "context": {},
+            "domain": [("id", "in", jobs.ids)]
+        })
+        return action
+
+    @api.multi
     def _change_job_state(self, state, result=None):
         """Change the state of the `Job` object
 
@@ -197,13 +322,16 @@ class QueueJob(models.Model):
             job_ = Job.load(record.env, record.uuid)
             if state == DONE:
                 job_.set_done(result=result)
+                job_.store()
+                job_.enqueue_waiting()
             elif state == PENDING:
                 job_.set_pending(result=result)
+                job_.store()
             elif state == CANCELLED:
                 job_.set_cancelled(result=result)
+                job_.store()
             else:
                 raise ValueError('State not supported: %s' % state)
-            job_.store()
 
     @api.multi
     def button_done(self):
@@ -219,7 +347,10 @@ class QueueJob(models.Model):
 
     @api.multi
     def requeue(self):
-        self._change_job_state(PENDING)
+        jobs_to_requeue = self.filtered(
+            lambda job_: job_.state != WAIT_DEPENDENCIES
+        )
+        jobs_to_requeue._change_job_state(PENDING)
         return True
 
     def _message_post_on_failure(self):
@@ -369,8 +500,10 @@ class QueueJob(models.Model):
             })
         return action
 
-    def _test_job(self):
+    def _test_job(self, failure_rate=0):
         _logger.info("Running test job.")
+        if random.random() <= failure_rate:
+            raise JobError("Job failed")
 
 
 class RequeueJob(models.TransientModel):
