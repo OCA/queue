@@ -10,10 +10,12 @@ setuptools.setup(
     install_requires=[
         'odoo14-addon-base_import_async',
         'odoo14-addon-queue_job',
+        'odoo14-addon-queue_job_batch',
         'odoo14-addon-queue_job_cron',
         'odoo14-addon-queue_job_subscribe',
         'odoo14-addon-test_base_import_async',
         'odoo14-addon-test_queue_job',
+        'odoo14-addon-test_queue_job_batch',
     ],
     classifiers=[
         'Programming Language :: Python',
