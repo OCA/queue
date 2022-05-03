@@ -57,7 +57,7 @@ class RunJobController(http.Controller):
                         errorcodes.lookup(err.pgcode),
                     )
                     raise
-                wait_time = random.uniform(0.0, 2 ** tries)
+                wait_time = random.uniform(0.0, 2**tries)
                 tries += 1
                 _logger.info(
                     "%s, retry %d/%d in %.04f sec...",
