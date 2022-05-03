@@ -23,7 +23,7 @@ Job Queue Batch
     :target: https://runbot.odoo-community.org/runbot/230/14.0
     :alt: Try me on Runbot
 
-|badge1| |badge2| |badge3| |badge4| |badge5|
+|badge1| |badge2| |badge3| |badge4| |badge5| 
 
 This addon adds an a grouper for queue jobs.
 
@@ -35,10 +35,13 @@ Example:
 .. code-block:: python
 
   from odoo import models, fields, api
+  from odoo.addons.queue_job.job import job
 
   class MyModel(models.Model):
      _name = 'my.model'
 
+     @api.multi
+     @job
      def my_method(self, a, k=None):
          _logger.info('executed with a: %s and k: %s', a, k)
 
@@ -46,6 +49,7 @@ Example:
   class MyOtherModel(models.Model):
       _name = 'my.other.model'
 
+      @api.multi
       def button_do_stuff(self):
           batch = self.env['queue.job.batch'].get_new_batch('Group')
           for i in range(1, 100):
