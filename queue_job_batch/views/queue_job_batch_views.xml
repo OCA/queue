@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_queue_job_batch_tree" model="ir.ui.view">
+        <field name="name">queue.job.batch.tree</field>
+        <field name="model">queue.job.batch</field>
+        <field name="arch" type="xml">
+            <tree string="Job Batches" create="false" delete="false">
+                <field name="name" />
+                <field name="job_count" invisible="1" />
+                <field
+                    name="finished_job_count"
+                    widget="progressbar"
+                    string="Completeness"
+                    options="{'current_value': 'finished_job_count', 'max_value': 'job_count'}"
+                />
+                <field name="state" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_queue_job_batch_form" model="ir.ui.view">
+        <field name="name">queue.job.batch.form</field>
+        <field name="model">queue.job.batch</field>
+        <field name="arch" type="xml">
+            <form string="Job Batch" create="false" delete="false" edit="false">
+                <header>
+                    <field name="state" widget="statusbar" />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+                            type="action"
+                            name="%(queue_job_batch.action_queue_job_related)s"
+                            icon="fa-list"
+                        >
+                            <field string="Jobs" name="job_count" widget="statinfo" />
+                        </button>
+                    </div>
+                    <h1>
+                        <field name="name" class="oe_inline" />
+                    </h1>
+                    <group>
+                        <field name="user_id" />
+                        <field
+                            name="finished_job_count"
+                            widget="progressbar"
+                            string="Completeness"
+                            options="{'current_value': 'finished_job_count', 'max_value': 'job_count'}"
+                        />
+                        <field name="company_id" groups="base.group_multi_company" />
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" />
+                    <field name="activity_ids" widget="mail_activity" />
+                    <field name="message_ids" widget="mail_thread" />
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_queue_job_batch_search" model="ir.ui.view">
+        <field name="name">queue.job.batch.search</field>
+        <field name="model">queue.job.batch</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="state" />
+                <field name="user_id" />
+                <field
+                    name="company_id"
+                    groups="base.group_multi_company"
+                    widget="selection"
+                />
+                <filter
+                    name="draft"
+                    string="Draft"
+                    domain="[('state', '=', 'draft')]"
+                />
+                <filter
+                    name="progress"
+                    string="In progress"
+                    domain="[('state', '=', 'progress')]"
+                />
+                <filter
+                    name="finished"
+                    string="Finished"
+                    domain="[('state', '=', 'finished')]"
+                />
+                <group expand="0" string="Group By">
+                    <filter
+                        name="group_by_state"
+                        string="State"
+                        context="{'group_by': 'state'}"
+                    />
+                    <filter
+                        name="group_by_user"
+                        string="User"
+                        context="{'group_by': 'user_id'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_queue_job_batch" model="ir.actions.act_window">
+        <field name="name">Job batches</field>
+        <field name="res_model">queue.job.batch</field>
+        <field name="context">{'search_default_draft': 1,
+                               'search_default_progress': 1,}</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_view_your_queue_job_batch" model="ir.actions.act_window">
+        <field name="name">Job batches</field>
+        <field name="res_model">queue.job.batch</field>
+        <field
+            name="domain"
+        >[('user_id', '=', uid), '|', ('state', 'in', ['draft', 'progress']), ('is_read', '=', False)]</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_queue_job_batch"
+        action="action_queue_job_batch"
+        sequence="11"
+        parent="queue_job.menu_queue"
+    />
+</odoo>

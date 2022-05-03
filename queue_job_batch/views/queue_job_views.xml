@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_queue_job_form" model="ir.ui.view">
+        <field name="name">queue.job.form</field>
+        <field name="model">queue.job</field>
+        <field name="inherit_id" ref="queue_job.view_queue_job_form" />
+        <field name="arch" type="xml">
+            <field name="channel" position="after">
+                <field
+                    name="job_batch_id"
+                    attrs="{'invisible': [('job_batch_id', '=', False)]}"
+                />
+            </field>
+        </field>
+    </record>
+
+    <record id="view_queue_job_search" model="ir.ui.view">
+        <field name="name">queue.job.search</field>
+        <field name="model">queue.job</field>
+        <field name="inherit_id" ref="queue_job.view_queue_job_search" />
+        <field name="arch" type="xml">
+            <field name="channel" position="after">
+                <field name="job_batch_id" />
+            </field>
+        </field>
+    </record>
+
+
+    <record id="action_queue_job_related" model="ir.actions.act_window">
+        <field name="name">Jobs</field>
+        <field name="res_model">queue.job</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('job_batch_id', '=', active_id)]</field>
+        <field name="view_id" ref="queue_job.view_queue_job_tree" />
+        <field name="search_view_id" ref="queue_job.view_queue_job_search" />
+    </record>
+</odoo>

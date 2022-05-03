@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+
+        <record id="group_queue_job_batch_user" model="res.groups">
+            <field name="name">Job Queue Batch User</field>
+            <field name="category_id" ref="queue_job.module_category_queue_job" />
+        </record>
+        <record id="queue_job.group_queue_job_manager" model="res.groups">
+            <field
+                name="implied_ids"
+                eval="[(4, ref('queue_job_batch.group_queue_job_batch_user'))]"
+            />
+        </record>
+    </data>
+
+    <data noupdate="1">
+
+        <record id="queue_job_batch_comp_rule" model="ir.rule">
+            <field name="name">Job Queue batch multi-company</field>
+            <field name="model_id" ref="model_queue_job_batch" />
+            <field name="global" eval="True" />
+            <field
+                name="domain_force"
+            >['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
+        </record>
+
+        <record id="queue_job_batch_user_rule" model="ir.rule">
+            <field name="name">Job Queue batch user filter</field>
+            <field name="model_id" ref="model_queue_job_batch" />
+            <field
+                name="groups"
+                eval="[(4, ref('queue_job_batch.group_queue_job_batch_user'))]"
+            />
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+        </record>
+
+        <record id="queue_job_batch_manager_rule" model="ir.rule">
+            <field name="name">Job Queue batch manager</field>
+            <field name="model_id" ref="model_queue_job_batch" />
+            <field
+                name="groups"
+                eval="[(4, ref('queue_job.group_queue_job_manager'))]"
+            />
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+
+    </data>
+</odoo>
