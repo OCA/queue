@@ -69,6 +69,9 @@ class JobSerialized(fields.Field):
 class JobEncoder(json.JSONEncoder):
     """Encode Odoo recordsets so that we can later recompose them"""
 
+    def _get_record_context(self, obj):
+        return obj._job_prepare_context_before_enqueue()
+
     def default(self, obj):
         if isinstance(obj, models.BaseModel):
             return {
@@ -77,6 +80,7 @@ class JobEncoder(json.JSONEncoder):
                 "ids": obj.ids,
                 "uid": obj.env.uid,
                 "su": obj.env.su,
+                "context": self._get_record_context(obj),
             }
         elif isinstance(obj, datetime):
             return {"_type": "datetime_isoformat", "value": obj.isoformat()}
