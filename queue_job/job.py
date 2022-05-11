@@ -415,8 +415,6 @@ class Job(object):
         :param identity_key: A hash to uniquely identify a job, or a function
                              that returns this hash (the function takes the job
                              as argument)
-        :param env: Odoo Environment
-        :type env: :class:`odoo.api.Environment`
         """
         if args is None:
             args = ()
