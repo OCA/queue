@@ -5,7 +5,7 @@ import functools
 import logging
 import os
 
-from odoo import models
+from odoo import api, models
 
 from ..job import DelayableRecordset
 
@@ -189,3 +189,38 @@ class Base(models.AbstractModel):
 
         origin = getattr(self, method_name)
         return functools.update_wrapper(auto_delay_wrapper, origin)
+
+    @api.model
+    def _job_store_values(self, job):
+        """Hook for manipulating job stored values.
+
+        You can define a more specific hook for a job function
+        by defining a method name with this pattern:
+
+            `_queue_job_store_values_${func_name}`
+
+        NOTE: values will be stored only if they match stored fields on `queue.job`.
+
+        :param job: current queue_job.job.Job instance.
+        :return: dictionary for setting job values.
+        """
+        return {}
+
+    @api.model
+    def _job_prepare_context_before_enqueue_keys(self):
+        """Keys to keep in context of stored jobs
+        Empty by default for backward compatibility.
+        """
+        # TODO: when migrating to 16.0, active the base context keys:
+        # return ("tz", "lang", "allowed_company_ids", "force_company", "active_test")
+        return ()
+
+    def _job_prepare_context_before_enqueue(self):
+        """Return the context to store in the jobs
+        Can be used to keep only safe keys.
+        """
+        return {
+            key: value
+            for key, value in self.env.context.items()
+            if key in self._job_prepare_context_before_enqueue_keys()
+        }
