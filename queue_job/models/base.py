@@ -251,3 +251,22 @@ class Base(models.AbstractModel):
         :return: dictionary for setting job values.
         """
         return {}
+
+    @api.model
+    def _job_prepare_context_before_enqueue_keys(self):
+        """Keys to keep in context of stored jobs
+        Empty by default for backward compatibility.
+        """
+        # TODO: when migrating to 16.0, active the base context keys:
+        # return ("tz", "lang", "allowed_company_ids", "force_company", "active_test")
+        return ()
+
+    def _job_prepare_context_before_enqueue(self):
+        """Return the context to store in the jobs
+        Can be used to keep only safe keys.
+        """
+        return {
+            key: value
+            for key, value in self.env.context.items()
+            if key in self._job_prepare_context_before_enqueue_keys()
+        }
