@@ -20,6 +20,6 @@
             'base_import_async/static/src/xml/import.xml',
         ],
     },
-    "installable": False,
+    "installable": True,
     "development_status": "Production/Stable",
 }
