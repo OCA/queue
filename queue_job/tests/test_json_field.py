@@ -26,7 +26,8 @@ class TestJson(common.TransactionCase):
             "model": "res.partner",
             "ids": [partner.id],
             "su": False,
-            "context": context,
+            # no allowed context by default, must be changed in 16.0
+            "context": {},
         }
         self.assertEqual(json.loads(value_json), expected)
 
@@ -45,7 +46,8 @@ class TestJson(common.TransactionCase):
                 "model": "res.partner",
                 "ids": [partner.id],
                 "su": False,
-                "context": context,
+                # no allowed context by default, must be changed in 16.0
+                "context": {},
             },
         ]
         self.assertEqual(json.loads(value_json), expected)
