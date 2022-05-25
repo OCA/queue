@@ -32,10 +32,10 @@ DEFAULT_CHUNK_SIZE = 100
 class BaseImportImport(models.TransientModel):
     _inherit = "base_import.import"
 
-    def do(self, fields, columns, options, dryrun=False):
+    def execute_import(self, fields, columns, options, dryrun=False):
         if dryrun or not options.get(OPT_USE_QUEUE):
             # normal import
-            return super().do(fields, columns, options, dryrun=dryrun)
+            return super().execute_import(fields, columns, options, dryrun=dryrun)
 
         # asynchronous import
         try:
@@ -52,19 +52,23 @@ class BaseImportImport(models.TransientModel):
             translated_model_name = search_result[0][1]
         else:
             translated_model_name = self._description
-        description = _("Import %s from file %s") % (
-            translated_model_name,
-            self.file_name,
+        description = _(
+            "Import %(translated_model_name)s from file %(file_name)s",
+            translated_model_name=translated_model_name,
+            file_name=self.file_name,
         )
+        file_name = self.file_name
+        if not file_name.endswith(".csv"):
+            file_name += ".csv"
         attachment = self._create_csv_attachment(
-            import_fields, data, options, self.file_name
+            import_fields, data, options, file_name
         )
         delayed_job = self.with_delay(description=description)._split_file(
             model_name=self.res_model,
             translated_model_name=translated_model_name,
             attachment=attachment,
             options=options,
-            file_name=self.file_name,
+            file_name=file_name,
         )
         self._link_attachment_to_job(delayed_job, attachment)
         return []
@@ -91,7 +95,12 @@ class BaseImportImport(models.TransientModel):
         # create attachment
         datas = base64.encodebytes(f.getvalue().encode(encoding))
         attachment = self.env["ir.attachment"].create(
-            {"name": file_name, "datas": datas}
+            {
+                "name": file_name,
+                "datas": datas,
+                "type": "binary",
+                "mimetype": "text/csv",
+            }
         )
         return attachment
 
@@ -130,7 +139,7 @@ class BaseImportImport(models.TransientModel):
         options,
         file_name="file.csv",
     ):
-        """ Split a CSV attachment in smaller import jobs """
+        """Split a CSV attachment in smaller import jobs"""
         model_obj = self.env[model_name]
         fields, data = self._read_csv_attachment(attachment, options)
         padding = len(str(len(data)))
@@ -144,13 +153,14 @@ class BaseImportImport(models.TransientModel):
             model_obj, fields, data, chunk_size
         ):
             chunk = str(priority - INIT_PRIORITY).zfill(padding)
-            description = _("Import %s from file %s - #%s - lines %s to %s")
-            description = description % (
-                translated_model_name,
-                file_name,
-                chunk,
-                row_from + 1 + header_offset,
-                row_to + 1 + header_offset,
+            description = _(
+                "Import %(translated_model_name)s from file %(file_name)s"
+                " - #%(chunk)s - lines %(row_from)s to %(row_to)s",
+                translated_model_name=translated_model_name,
+                file_name=file_name,
+                chunk=chunk,
+                row_from=row_from + 1 + header_offset,
+                row_to=row_to + 1 + header_offset,
             )
             # create a CSV attachment and enqueue the job
             root, ext = splitext(file_name)
