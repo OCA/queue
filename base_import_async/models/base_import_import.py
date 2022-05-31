@@ -179,9 +179,22 @@ class BaseImportImport(models.TransientModel):
             priority += 1
 
     def _import_one_chunk(self, model_name, attachment, options):
-        model_obj = self.env[model_name]
         fields, data = self._read_csv_attachment(attachment, options)
-        result = model_obj.load(fields, data)
+        import_fields, merged_data = self._handle_multi_mapping(fields, data)
+        if options.get("fallback_values"):
+            merged_data = self._handle_fallback_values(
+                import_fields, merged_data, options["fallback_values"]
+            )
+        name_create_enabled_fields = options.pop("name_create_enabled_fields", {})
+        import_limit = options.pop("limit", None)
+        model = self.env[model_name].with_context(
+            import_file=True,
+            name_create_enabled_fields=name_create_enabled_fields,
+            import_set_empty_fields=options.get("import_set_empty_fields", []),
+            import_skip_records=options.get("import_skip_records", []),
+            _import_limit=import_limit,
+        )
+        result = model.load(import_fields, merged_data)
         error_message = [
             message["message"]
             for message in result["messages"]
