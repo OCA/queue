@@ -20,23 +20,23 @@ class TestJobChannel(common.TransactionCase):
 
     def test_channel_create(self):
         channel = self.Channel.create(
-            {"name": "sub", "parent_id": self.root_channel.id}
+            {"name": "test", "parent_id": self.root_channel.id}
         )
-        self.assertEqual(channel.name, "sub")
-        self.assertEqual(channel.complete_name, "root.sub")
-        channel2 = self.Channel.create({"name": "sub", "parent_id": channel.id})
-        self.assertEqual(channel2.name, "sub")
-        self.assertEqual(channel2.complete_name, "root.sub.sub")
+        self.assertEqual(channel.name, "test")
+        self.assertEqual(channel.complete_name, "root.test")
+        channel2 = self.Channel.create({"name": "test", "parent_id": channel.id})
+        self.assertEqual(channel2.name, "test")
+        self.assertEqual(channel2.complete_name, "root.test.test")
 
     @odoo.tools.mute_logger("odoo.sql_db")
     def test_channel_complete_name_uniq(self):
         channel = self.Channel.create(
-            {"name": "sub", "parent_id": self.root_channel.id}
+            {"name": "test", "parent_id": self.root_channel.id}
         )
-        self.assertEqual(channel.name, "sub")
-        self.assertEqual(channel.complete_name, "root.sub")
+        self.assertEqual(channel.name, "test")
+        self.assertEqual(channel.complete_name, "root.test")
 
-        self.Channel.create({"name": "sub", "parent_id": self.root_channel.id})
+        self.Channel.create({"name": "test", "parent_id": self.root_channel.id})
         with self.assertRaises(IntegrityError):
             # Flush process all the pending recomputations (or at least the
             # given field and flush the pending updates to the database.
@@ -45,6 +45,6 @@ class TestJobChannel(common.TransactionCase):
 
     def test_channel_name_get(self):
         channel = self.Channel.create(
-            {"name": "sub", "parent_id": self.root_channel.id}
+            {"name": "test", "parent_id": self.root_channel.id}
         )
-        self.assertEqual(channel.name_get(), [(channel.id, "root.sub")])
+        self.assertEqual(channel.name_get(), [(channel.id, "root.test")])

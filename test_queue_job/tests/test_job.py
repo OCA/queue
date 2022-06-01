@@ -9,6 +9,7 @@ import mock
 import odoo.tests.common as common
 
 from odoo.addons.queue_job import identity_exact
+from odoo.addons.queue_job.delay import DelayableGraph
 from odoo.addons.queue_job.exception import (
     FailedJobError,
     NoSuchJobError,
@@ -21,6 +22,7 @@ from odoo.addons.queue_job.job import (
     PENDING,
     RETRY_INTERVAL,
     STARTED,
+    WAIT_DEPENDENCIES,
     Job,
 )
 
@@ -155,10 +157,10 @@ class TestJobsOnTestingMethod(JobCommonCase):
             mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
             job_a.set_done(result="test")
 
-        self.assertEquals(job_a.state, DONE)
-        self.assertEquals(job_a.result, "test")
-        self.assertEquals(job_a.date_done, datetime(2015, 3, 15, 16, 41, 0))
-        self.assertEquals(job_a.exec_time, 60.0)
+        self.assertEqual(job_a.state, DONE)
+        self.assertEqual(job_a.result, "test")
+        self.assertEqual(job_a.date_done, datetime(2015, 3, 15, 16, 41, 0))
+        self.assertEqual(job_a.exec_time, 60.0)
         self.assertFalse(job_a.exc_info)
 
     def test_set_failed(self):
@@ -168,10 +170,10 @@ class TestJobsOnTestingMethod(JobCommonCase):
             exc_name="FailedTest",
             exc_message="Sadly this job failed",
         )
-        self.assertEquals(job_a.state, FAILED)
-        self.assertEquals(job_a.exc_info, "failed test")
-        self.assertEquals(job_a.exc_name, "FailedTest")
-        self.assertEquals(job_a.exc_message, "Sadly this job failed")
+        self.assertEqual(job_a.state, FAILED)
+        self.assertEqual(job_a.exc_info, "failed test")
+        self.assertEqual(job_a.exc_name, "FailedTest")
+        self.assertEqual(job_a.exc_message, "Sadly this job failed")
 
     def test_postpone(self):
         job_a = Job(self.method)
@@ -199,7 +201,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         test_job.company_id = company.id
         test_job.store()
         job_read = Job.load(self.env, test_job.uuid)
-        self.assertEqual(test_job.func, job_read.func)
+        self.assertEqual(test_job.func.__func__, job_read.func.__func__)
         result_ctx = test_job.func(*tuple(test_job.args), **test_job.kwargs)
         self.assertEqual(result_ctx.get("allowed_company_ids"), company.ids)
 
@@ -223,7 +225,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         test_job.company_id = company2.id
         test_job.store()
         job_read = Job.load(self.env, test_job.uuid)
-        self.assertEqual(test_job.func, job_read.func)
+        self.assertEqual(test_job.func.__func__, job_read.func.__func__)
         result_ctx = test_job.func(*tuple(test_job.args), **test_job.kwargs)
         self.assertEqual(result_ctx.get("allowed_company_ids"), company2.ids)
 
@@ -536,6 +538,25 @@ class TestJobModel(JobCommonCase):
         stored.write({"state": "failed"})
         stored.requeue()
         self.assertEqual(stored.state, PENDING)
+
+    def test_requeue_wait_dependencies_not_touched(self):
+        job_root = Job(self.env["test.queue.job"].testing_method)
+        job_child = Job(self.env["test.queue.job"].testing_method)
+        job_child.add_depends({job_root})
+        job_root.store()
+        job_child.store()
+
+        DelayableGraph._ensure_same_graph_uuid([job_root, job_child])
+
+        record_root = job_root.db_record()
+        record_child = job_child.db_record()
+        self.assertEqual(record_root.state, PENDING)
+        self.assertEqual(record_child.state, WAIT_DEPENDENCIES)
+        record_root.write({"state": "failed"})
+
+        (record_root + record_child).requeue()
+        self.assertEqual(record_root.state, PENDING)
+        self.assertEqual(record_child.state, WAIT_DEPENDENCIES)
 
     def test_message_when_write_fail(self):
         stored = self._create_job()

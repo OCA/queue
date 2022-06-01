@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+  <template
+        id="queue_job_assets"
+        name="queue.job.assets"
+        inherit_id="web.assets_backend"
+    >
+    <xpath expr="." position="inside">
+      <link rel="stylesheet" href="/queue_job/static/lib/vis/vis-network.min.css" />
+      <link
+                rel="stylesheet"
+                type="text/scss"
+                href="/queue_job/static/src/scss/queue_job_fields.scss"
+            />
+
+      <script
+                type="text/javascript"
+                src="/queue_job/static/lib/vis/vis-network.min.js"
+            />
+      <script
+                type="text/javascript"
+                src="/queue_job/static/src/js/queue_job_fields.js"
+            />
+    </xpath>
+  </template>
+
+</odoo>
