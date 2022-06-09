@@ -286,12 +286,7 @@ class QueueJob(models.Model):
             while jobs:
                 jobs.unlink()
                 self._cr.commit()
-                jobs = self.search(
-                    ['|',
-                     ('date_done', '<=', deadline),
-                     ('date_cancelled', '<=', deadline),
-                     ('channel', '=', channel.complete_name)], limit=1000
-                )
+                jobs = self.search(domain, limit=1000)
                 _logger.info('Unlink %s' % jobs.__len__())
         return True
 
