@@ -287,7 +287,6 @@ class QueueJob(models.Model):
                 jobs.unlink()
                 self._cr.commit()
                 jobs = self.search(domain, limit=1000)
-                _logger.info('Unlink %s' % jobs.__len__())
         return True
 
     @api.model
