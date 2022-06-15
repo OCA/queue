@@ -225,6 +225,14 @@ class Job(object):
         return cls._load_from_db_record(stored)
 
     @classmethod
+    def lock_jobs_by_uuids(cls, env, job_uuid_list):
+        query = "SELECT state FROM queue_job WHERE uuid in %s FOR UPDATE;"
+        env.cr.execute(query, (tuple(job_uuid_list),))
+
+    def lock(self):
+        self.lock_jobs_by_uuids(self.env, [self.uuid])
+
+    @classmethod
     def load_many(cls, env, job_uuids):
         """Read jobs in batch from the Database
 
