@@ -492,8 +492,11 @@ class Delayable:
         return [self]
 
     def __repr__(self):
+        job_method = ""
+        if self._job_method:
+            job_method = self._job_method.__name__
         return "Delayable({}.{}({}, {}))".format(
-            self.recordset, self._job_method.__name__, self._job_args, self._job_kwargs
+            self.recordset, job_method, self._job_args, self._job_kwargs
         )
 
     def __del__(self):
