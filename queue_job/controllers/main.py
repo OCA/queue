@@ -130,6 +130,7 @@ class RunJobController(http.Controller):
             # traceback in the logs we should have the traceback when all
             # retries are exhausted
             env.cr.rollback()
+            return ""
 
         except (FailedJobError, Exception) as orig_exception:
             buff = StringIO()
