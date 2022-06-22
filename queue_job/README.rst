@@ -105,7 +105,7 @@ Configuration
   [options]
   (...)
   workers = 6
-  server_wide_modules = web,queue_job
+  server_wide_modules = web,queue_job,base_sparse_field
 
   (...)
   [queue_job]
