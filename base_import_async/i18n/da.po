@@ -6,48 +6,50 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2022-07-06 19:28+0000\n"
+"Last-Translator: Hans Henrik Gabelgaard <hhg@gabelgaard.org>\n"
 "Language-Team: none\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.3.2\n"
 
 #. module: base_import_async
 #: code:addons/base_import_async/models/queue_job.py:15
 #, python-format
 msgid "Attachment"
-msgstr ""
+msgstr "Vedhæftning"
 
 #. module: base_import_async
 #: model:ir.model,name:base_import_async.model_base_import_import
 msgid "Base Import"
-msgstr ""
+msgstr "Base Import"
 
 #. module: base_import_async
 #: code:addons/base_import_async/models/base_import_import.py:64
 #, python-format
 msgid "Import %s from file %s"
-msgstr ""
+msgstr "Import %s fra fil %s"
 
 #. module: base_import_async
 #: code:addons/base_import_async/models/base_import_import.py:157
 #, python-format
 msgid "Import %s from file %s - #%s - lines %s to %s"
-msgstr ""
+msgstr "Import %s fra fil %s - #%s - linier %s til %s"
 
 #. module: base_import_async
 #. openerp-web
 #: code:addons/base_import_async/static/src/xml/import.xml:10
 #, python-format
 msgid "Import in the background"
-msgstr ""
+msgstr "Importér i baggrund"
 
 #. module: base_import_async
 #: model:ir.model,name:base_import_async.model_queue_job
 msgid "Queue Job"
-msgstr ""
+msgstr "Queue Job"
 
 #. module: base_import_async
 #. openerp-web
@@ -55,17 +57,20 @@ msgstr ""
 #, python-format
 msgid "When checked, the import will be executed as a background job,  after splitting your file in small chunks that will be processed independently.  Use this to import very large files."
 msgstr ""
+"Når det er markeret, vil importen blive udført som et baggrundsjob, efter at "
+"din fil er opdelt i små bidder, der vil blive behandlet uafhængigt. Brug "
+"dette til at importere meget store filer."
 
 #. module: base_import_async
 #. openerp-web
 #: code:addons/base_import_async/static/src/js/import.js:20
 #, python-format
 msgid "You can check the status of this job in menu 'Queue / Jobs'."
-msgstr ""
+msgstr "Du kan tjekke status for dette job i menuen 'Kø / Jobs'."
 
 #. module: base_import_async
 #. openerp-web
 #: code:addons/base_import_async/static/src/js/import.js:19
 #, python-format
 msgid "Your request is being processed"
-msgstr ""
+msgstr "Din anmodning behandles"
