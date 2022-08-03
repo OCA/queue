@@ -516,7 +516,7 @@ class Job(object):
         The job is executed with the user which has initiated it.
         """
         self.retry += 1
-        if self.retry > self.max_retries:
+        if self.max_retries and self.retry > self.max_retries:
             type_, value, traceback = sys.exc_info()
             # change the exception type but keep the original
             # traceback and message:
