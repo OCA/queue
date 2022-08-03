@@ -516,6 +516,15 @@ class Job(object):
         The job is executed with the user which has initiated it.
         """
         self.retry += 1
+        if self.retry > self.max_retries:
+            type_, value, traceback = sys.exc_info()
+            # change the exception type but keep the original
+            # traceback and message:
+            # http://blog.ianbicking.org/2007/09/12/re-raising-exceptions/
+            new_exc = FailedJobError(
+                "Max. retries (%d) reached: %s" % (self.max_retries, value or type_)
+            )
+            raise new_exc
         try:
             self.result = self.func(*tuple(self.args), **self.kwargs)
         except RetryableJobError as err:
@@ -524,17 +533,7 @@ class Job(object):
                 raise
             elif not self.max_retries:  # infinite retries
                 raise
-            elif self.retry >= self.max_retries:
-                type_, value, traceback = sys.exc_info()
-                # change the exception type but keep the original
-                # traceback and message:
-                # http://blog.ianbicking.org/2007/09/12/re-raising-exceptions/
-                new_exc = FailedJobError(
-                    "Max. retries (%d) reached: %s" % (self.max_retries, value or type_)
-                )
-                raise new_exc from err
             raise
-
         return self.result
 
     def enqueue_waiting(self):
