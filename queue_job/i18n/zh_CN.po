@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2020-03-23 06:13+0000\n"
-"Last-Translator: 黎伟杰 <674416404@qq.com>\n"
+"PO-Revision-Date: 2022-08-13 08:07+0000\n"
+"Last-Translator: Dong <dong@freshoo.cn>\n"
 "Language-Team: none\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 3.10\n"
+"X-Generator: Weblate 4.3.2\n"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -29,7 +29,7 @@ msgstr ""
 #: code:addons/queue_job/controllers/main.py:0
 #, python-format
 msgid "Access Denied"
-msgstr ""
+msgstr "拒绝访问"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_needaction
