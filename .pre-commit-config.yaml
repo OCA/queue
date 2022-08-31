@@ -3,7 +3,6 @@ exclude: |
   # NOT INSTALLABLE ADDONS
   ^base_export_async/|
   ^base_import_async/|
-  ^queue_job_cron/|
   ^queue_job_cron_jobrunner/|
   ^queue_job_subscribe/|
   ^test_base_import_async/|
