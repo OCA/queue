@@ -3,7 +3,7 @@
 
 {
     "name": "Job Queue",
-    "version": "15.0.1.0.2",
+    "version": "16.0.1.0.0",
     "author": "Camptocamp,ACSONE SA/NV,Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/queue",
     "license": "LGPL-3",
@@ -22,7 +22,7 @@
         "data/queue_data.xml",
         "data/queue_job_function_data.xml",
     ],
-    "installable": False,
+    "installable": True,
     "development_status": "Mature",
     "maintainers": ["guewen"],
     "post_init_hook": "post_init_hook",

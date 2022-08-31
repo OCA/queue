@@ -43,10 +43,10 @@ class TestJobChannel(common.TransactionCase):
         # It is normally called on commit.
 
         # The context manager 'with self.assertRaises(IntegrityError)' purposefully
-        # not uses here due to its 'flush()' method inside it and exception raises
-        # before the line 'self.env["base"].flush()'. So, we are expecting an IntegrityError.
+        # not uses here due to its 'flush_all()' method inside it and exception raises
+        # before the line 'self.env.flush_all()'. So, we are expecting an IntegrityError.
         try:
-            self.env["base"].flush()
+            self.env.flush_all()
         except IntegrityError as ex:
             self.assertIn("queue_job_channel_name_uniq", ex.pgerror)
         else:
