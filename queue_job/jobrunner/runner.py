@@ -147,7 +147,7 @@ import requests
 
 import odoo
 from odoo.tools import config
-
+from . import queue_job_config
 from .channels import ChannelManager, PENDING, ENQUEUED, NOT_DONE
 
 SELECT_TIMEOUT = 60
@@ -170,8 +170,7 @@ session = requests.Session()
 def _channels():
     return (
         os.environ.get('ODOO_QUEUE_JOB_CHANNELS') or
-        config.misc.get("queue_job", {}).get("channels") or
-        "root:1"
+        queue_job_config.get("channels") or "root:1"
     )
 
 
@@ -191,8 +190,7 @@ def _connection_info_for(db_name):
 
     for p in ('host', 'port'):
         cfg = (os.environ.get('ODOO_QUEUE_JOB_JOBRUNNER_DB_%s' % p.upper()) or
-               config.misc
-               .get("queue_job", {}).get('jobrunner_db_' + p))
+               queue_job_config.get("jobrunner_db_" + p))
 
         if cfg:
             connection_info[p] = cfg
@@ -361,9 +359,39 @@ class QueueJobRunner(object):
         self._stop = False
         self._stop_pipe = os.pipe()
 
+    @classmethod
+    def from_environ_or_config(cls):
+        scheme = os.environ.get("ODOO_QUEUE_JOB_SCHEME") or queue_job_config.get(
+            "scheme"
+        )
+        host = (
+            os.environ.get("ODOO_QUEUE_JOB_HOST")
+            or queue_job_config.get("host")
+            or config["http_interface"]
+        )
+        port = (
+            os.environ.get("ODOO_QUEUE_JOB_PORT")
+            or queue_job_config.get("port")
+            or config["http_port"]
+        )
+        user = os.environ.get("ODOO_QUEUE_JOB_HTTP_AUTH_USER") or queue_job_config.get(
+            "http_auth_user"
+        )
+        password = os.environ.get(
+            "ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD"
+        ) or queue_job_config.get("http_auth_password")
+        runner = cls(
+            scheme=scheme or "http",
+            host=host or "localhost",
+            port=port or 8069,
+            user=user,
+            password=password,
+        )
+        return runner
+
     def get_db_names(self):
-        if odoo.tools.config['db_name']:
-            db_names = odoo.tools.config['db_name'].split(',')
+        if config['db_name']:
+            db_names = config['db_name'].split(',')
         else:
             db_names = odoo.service.db.exp_list(True)
         return db_names

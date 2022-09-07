@@ -3,12 +3,20 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import logging
-import os
 from threading import Thread
 import time
 
 from odoo.service import server
 from odoo.tools import config
+try:
+    from odoo.addons.server_environment import serv_config
+    if serv_config.has_section('queue_job'):
+        queue_job_config = serv_config['queue_job']
+    else:
+        queue_job_config = {}
+except ImportError:
+    queue_job_config = config.misc.get('queue_job', {})
+
 
 from .runner import QueueJobRunner, _channels
 
@@ -27,23 +35,7 @@ class QueueJobRunnerThread(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.daemon = True
-        scheme = (os.environ.get('ODOO_QUEUE_JOB_SCHEME') or
-                  config.misc.get("queue_job", {}).get('scheme'))
-        host = (os.environ.get('ODOO_QUEUE_JOB_HOST') or
-                config.misc.get("queue_job", {}).get('host') or
-                config['http_interface'])
-        port = (os.environ.get('ODOO_QUEUE_JOB_PORT') or
-                config.misc.get("queue_job", {}).get('port') or
-                config['http_port'])
-        user = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_USER') or
-                config.misc.get("queue_job", {}).get('http_auth_user'))
-        password = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD') or
-                    config.misc.get("queue_job", {}).get('http_auth_password'))
-        self.runner = QueueJobRunner(scheme or 'http',
-                                     host or 'localhost',
-                                     port or 8069,
-                                     user,
-                                     password)
+        self.runner = QueueJobRunner.from_environ_or_config()
 
     def run(self):
         # sleep a bit to let the workers start at ease
