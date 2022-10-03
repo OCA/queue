@@ -17,24 +17,18 @@ Asynchronous Job Queue. Delay Model methods in asynchronous jobs, executed in th
 
 [//]: # (addons)
 
-Available addons
-----------------
-addon | version | maintainers | summary
---- | --- | --- | ---
-[queue_job](queue_job/) | 15.0.1.0.2 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
-[queue_job_cron](queue_job_cron/) | 15.0.1.0.0 |  | Scheduled Actions as Queue Jobs
-[queue_job_cron_jobrunner](queue_job_cron_jobrunner/) | 15.0.1.0.0 | [![ivantodorovich](https://github.com/ivantodorovich.png?size=30px)](https://github.com/ivantodorovich) | Run jobs without a dedicated JobRunner
-[queue_job_subscribe](queue_job_subscribe/) | 15.0.1.0.0 |  | Control which users are subscribed to queue job notifications
-[test_queue_job](test_queue_job/) | 15.0.1.0.0 |  | Queue Job Tests
-
-
 Unported addons
 ---------------
 addon | version | maintainers | summary
 --- | --- | --- | ---
 [base_export_async](base_export_async/) | 12.0.1.0.0 (unported) |  | Asynchronous export with job queue
 [base_import_async](base_import_async/) | 14.0.1.0.1 (unported) |  | Import CSV files in the background
+[queue_job](queue_job/) | 15.0.1.0.2 (unported) | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
+[queue_job_cron](queue_job_cron/) | 15.0.1.0.0 (unported) |  | Scheduled Actions as Queue Jobs
+[queue_job_cron_jobrunner](queue_job_cron_jobrunner/) | 15.0.1.0.0 (unported) | [![ivantodorovich](https://github.com/ivantodorovich.png?size=30px)](https://github.com/ivantodorovich) | Run jobs without a dedicated JobRunner
+[queue_job_subscribe](queue_job_subscribe/) | 15.0.1.0.0 (unported) |  | Control which users are subscribed to queue job notifications
 [test_base_import_async](test_base_import_async/) | 14.0.1.0.1 (unported) |  | Test suite for base_import_async. Normally you don't need to install this.
+[test_queue_job](test_queue_job/) | 15.0.1.0.0 (unported) |  | Queue Job Tests
 
 [//]: # (end addons)
 
