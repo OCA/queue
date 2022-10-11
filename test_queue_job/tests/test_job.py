@@ -3,8 +3,7 @@
 
 import hashlib
 from datetime import datetime, timedelta
-
-import mock
+from unittest import mock
 
 import odoo.tests.common as common
 from odoo import SUPERUSER_ID

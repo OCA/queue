@@ -4,8 +4,7 @@ import doctest
 import logging
 import sys
 from contextlib import contextmanager
-
-import mock
+from unittest import mock
 
 from ..job import Job
 
