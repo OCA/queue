@@ -23,7 +23,7 @@ Job Queue
     :target: https://runbot.odoo-community.org/runbot/230/16.0
     :alt: Try me on Runbot
 
-|badge1| |badge2| |badge3| |badge4| |badge5|
+|badge1| |badge2| |badge3| |badge4| |badge5| 
 
 This addon adds an integrated Job Queue to Odoo.
 
@@ -377,7 +377,7 @@ promote its widespread use.
 
 Current `maintainer <https://odoo-community.org/page/maintainer-role>`__:
 
-|maintainer-guewen|
+|maintainer-guewen| 
 
 This module is part of the `OCA/queue <https://github.com/OCA/queue/tree/16.0/queue_job>`_ project on GitHub.
 
