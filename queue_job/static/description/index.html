@@ -505,7 +505,7 @@ and <tt class="docutils literal">queue.job.channel</tt> XML records.</p>
 <p>Example of job function:</p>
 <pre class="code XML literal-block">
 <span class="nt">&lt;record</span> <span class="na">id=</span><span class="s">&quot;job_function_sale_order_action_done&quot;</span> <span class="na">model=</span><span class="s">&quot;queue.job.function&quot;</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;field</span> <span class="na">name=</span><span class="s">&quot;model_id&quot;</span> <span class="na">ref=</span><span class="s">&quot;sale.model_sale_order&quot;</span><span class="err">&lt;/field</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;field</span> <span class="na">name=</span><span class="s">&quot;model_id&quot;</span> <span class="na">ref=</span><span class="s">&quot;sale.model_sale_order&quot;</span> <span class="nt">/&gt;</span>
     <span class="nt">&lt;field</span> <span class="na">name=</span><span class="s">&quot;method&quot;</span><span class="nt">&gt;</span>action_done<span class="nt">&lt;/field&gt;</span>
     <span class="nt">&lt;field</span> <span class="na">name=</span><span class="s">&quot;channel_id&quot;</span> <span class="na">ref=</span><span class="s">&quot;channel_sale&quot;</span> <span class="nt">/&gt;</span>
     <span class="nt">&lt;field</span> <span class="na">name=</span><span class="s">&quot;related_action&quot;</span> <span class="na">eval=</span><span class="s">'{&quot;func_name&quot;: &quot;custom_related_action&quot;}'</span> <span class="nt">/&gt;</span>
