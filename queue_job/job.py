@@ -696,13 +696,7 @@ class Job:
 
     @property
     def func(self):
-        # We can fill only one company into allowed_company_ids.
-        # Because if you have many, you can have unexpected records due to ir.rule.
-        # ir.rule use allowed_company_ids to load every records in many companies.
-        # But most of the time, a job should be executed on a single company.
         recordset = self.recordset.with_context(job_uuid=self.uuid)
-        if self.company_id:
-            recordset = recordset.with_company(self.company_id)
         return getattr(recordset, self.method_name)
 
     @property
