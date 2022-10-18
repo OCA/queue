@@ -173,7 +173,6 @@ msgid "Description"
 msgstr "说明"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
@@ -236,11 +235,6 @@ msgid "Followers"
 msgstr "关注者"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_channel_ids
-msgid "Followers (Channels)"
-msgstr "关注者(频道)"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_partner_ids
 msgid "Followers (Partners)"
 msgstr "关注者(业务伙伴)"
@@ -257,7 +251,11 @@ msgid "Group By"
 msgstr "分组"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__has_message
+msgid "Has Message"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
@@ -289,7 +287,6 @@ msgstr "所选作业将重新排队。"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_unread
 msgid "If checked, new messages require your attention."
 msgstr "确认后, 出现提示消息。"
 
@@ -382,7 +379,6 @@ msgid "Kwargs"
 msgstr "关键字参数"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function____last_update
@@ -511,11 +507,6 @@ msgstr "需要操作消息数量"
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr "递送错误消息数量"
-
-#. module: queue_job
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_unread_counter
-msgid "Number of unread messages"
-msgstr "未读消息数量"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__override_channel
@@ -785,29 +776,9 @@ msgid ""
 msgstr ""
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_unread
-msgid "Unread Messages"
-msgstr "未读消息"
-
-#. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_unread_counter
-msgid "Unread Messages Counter"
-msgstr "未读消息计数器"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__user_id
 msgid "User ID"
 msgstr "用户"
-
-#. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__website_message_ids
-msgid "Website Messages"
-msgstr "网站消息"
-
-#. module: queue_job
-#: model:ir.model.fields,help:queue_job.field_queue_job__website_message_ids
-msgid "Website communication history"
-msgstr "网站交流历史"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_requeue_job
@@ -818,6 +789,24 @@ msgstr "重新排队向导所选的作业"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr ""
+
+#~ msgid "Followers (Channels)"
+#~ msgstr "关注者(频道)"
+
+#~ msgid "Number of unread messages"
+#~ msgstr "未读消息数量"
+
+#~ msgid "Unread Messages"
+#~ msgstr "未读消息"
+
+#~ msgid "Unread Messages Counter"
+#~ msgstr "未读消息计数器"
+
+#~ msgid "Website Messages"
+#~ msgstr "网站消息"
+
+#~ msgid "Website communication history"
+#~ msgstr "网站交流历史"
 
 #~ msgid "If checked new messages require your attention."
 #~ msgstr "查看是否有需要留意的新消息。"

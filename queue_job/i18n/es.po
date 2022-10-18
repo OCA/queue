@@ -289,7 +289,6 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_unread
 msgid "If checked, new messages require your attention."
 msgstr ""
 "Si se encuentra seleccionado, hay nuevos mensajes que requieren tu atención."
@@ -511,11 +510,6 @@ msgid "Number of messages with delivery error"
 msgstr "Número de mensajes con error de envío"
 
 #. module: queue_job
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_unread_counter
-msgid "Number of unread messages"
-msgstr "Número de mensajes no leidos"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__override_channel
 msgid "Override Channel"
 msgstr "Sobreescribir canal"
@@ -534,7 +528,10 @@ msgstr "Se requiere un canal padre."
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_retry_pattern
 msgid ""
-"Pattern expressing from the count of retries on retryable errors, the number of of seconds to postpone the next execution. Setting the number of seconds to a 2-element tuple or list will randomize the retry interval between the 2 values.\n"
+"Pattern expressing from the count of retries on retryable errors, the number "
+"of of seconds to postpone the next execution. Setting the number of seconds "
+"to a 2-element tuple or list will randomize the retry interval between the 2 "
+"values.\n"
 "Example: {1: 10, 5: 20, 10: 30, 15: 300}.\n"
 "Example: {1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}.\n"
 "See the module description for details."
@@ -731,7 +728,9 @@ msgstr "Tarea"
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_related_action
 msgid ""
-"The action when the button *Related Action* is used on a job. The default action is to open the view of the record related to the job. Configured as a dictionary with optional keys: enable, func_name, kwargs.\n"
+"The action when the button *Related Action* is used on a job. The default "
+"action is to open the view of the record related to the job. Configured as a "
+"dictionary with optional keys: enable, func_name, kwargs.\n"
 "See the module description for details."
 msgstr ""
 "Acción cuando se usa el botón *Acción relacionada* en un trabajo. La acción "
@@ -775,12 +774,13 @@ msgstr "UUID"
 msgid ""
 "Unexpected format of Related Action for {}.\n"
 "Example of valid format:\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" {{\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs"
+"\" {{\"limit\": 10}}}}"
 msgstr ""
 "Formato inesperado en la acción relacionada con {}.\n"
 "Ejemplo de un formato válido:\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" {{"
-"\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs"
+"\" {{\"limit\": 10}}}}"
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job_function.py:0
@@ -793,16 +793,6 @@ msgstr ""
 "Formato inesperado en el patrón de reintentos de {}.\n"
 "Ejemplo de un formato válido:\n"
 "{{1: 300, 5: 600, 10: 1200, 15: 3000}}"
-
-#. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_unread
-msgid "Unread Messages"
-msgstr "Mensajes sin leer"
-
-#. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_unread_counter
-msgid "Unread Messages Counter"
-msgstr "Nº de mensajes sin leer"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__user_id
@@ -818,3 +808,12 @@ msgstr "Asistente para volver a poner en cola una selección de trabajos"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr "Pid del trabajador"
+
+#~ msgid "Number of unread messages"
+#~ msgstr "Número de mensajes no leidos"
+
+#~ msgid "Unread Messages"
+#~ msgstr "Mensajes sin leer"
+
+#~ msgid "Unread Messages Counter"
+#~ msgstr "Nº de mensajes sin leer"
