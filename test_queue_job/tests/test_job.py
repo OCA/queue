@@ -189,7 +189,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         company = self.env.ref("base.main_company")
         eta = datetime.now() + timedelta(hours=5)
         test_job = Job(
-            self.method,
+            self.env["test.queue.job"].with_company(company).testing_method,
             args=("o", "k"),
             kwargs={"return_context": 1},
             priority=15,
@@ -197,11 +197,10 @@ class TestJobsOnTestingMethod(JobCommonCase):
             description="My description",
         )
         test_job.worker_pid = 99999  # normally set on "set_start"
-        test_job.company_id = company.id
         test_job.store()
         job_read = Job.load(self.env, test_job.uuid)
-        self.assertEqual(test_job.func, job_read.func)
-        result_ctx = test_job.func(*tuple(test_job.args), **test_job.kwargs)
+        self.assertEqual(test_job.func.__func__, job_read.func.__func__)
+        result_ctx = job_read.func(*tuple(test_job.args), **test_job.kwargs)
         self.assertEqual(result_ctx.get("allowed_company_ids"), company.ids)
 
     def test_company_complex(self):
@@ -213,7 +212,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         self.assertEqual(self.env.user.company_id, company1)
         eta = datetime.now() + timedelta(hours=5)
         test_job = Job(
-            self.method,
+            self.env["test.queue.job"].with_company(company2).testing_method,
             args=("o", "k"),
             kwargs={"return_context": 1},
             priority=15,
@@ -221,11 +220,10 @@ class TestJobsOnTestingMethod(JobCommonCase):
             description="My description",
         )
         test_job.worker_pid = 99999  # normally set on "set_start"
-        test_job.company_id = company2.id
         test_job.store()
         job_read = Job.load(self.env, test_job.uuid)
-        self.assertEqual(test_job.func, job_read.func)
-        result_ctx = test_job.func(*tuple(test_job.args), **test_job.kwargs)
+        self.assertEqual(test_job.func.__func__, job_read.func.__func__)
+        result_ctx = job_read.func(*tuple(test_job.args), **test_job.kwargs)
         self.assertEqual(result_ctx.get("allowed_company_ids"), company2.ids)
 
     def test_store(self):

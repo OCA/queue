@@ -38,7 +38,7 @@ class ModelTestQueueJob(models.Model):
     # to test the context is serialized/deserialized properly
     @api.model
     def _job_prepare_context_before_enqueue_keys(self):
-        return ("tz", "lang")
+        return ("tz", "lang", "allowed_company_ids")
 
     def testing_method(self, *args, **kwargs):
         """Method used for tests
