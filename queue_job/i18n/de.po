@@ -174,7 +174,6 @@ msgid "Description"
 msgstr "Beschreibung"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
@@ -237,11 +236,6 @@ msgid "Followers"
 msgstr "Abonnenten"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_channel_ids
-msgid "Followers (Channels)"
-msgstr "Abonnenten (Kanäle)"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_partner_ids
 msgid "Followers (Partners)"
 msgstr "Abonnenten (Partner)"
@@ -258,7 +252,11 @@ msgid "Group By"
 msgstr "Gruppieren nach"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__has_message
+msgid "Has Message"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
@@ -290,7 +288,6 @@ msgstr "Die ausgewählten Jobs werden erneut eingereiht."
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_unread
 msgid "If checked, new messages require your attention."
 msgstr "Wenn es gesetzt ist, erfordern neue Nachrichten Ihre Aufmerksamkeit."
 
@@ -384,7 +381,6 @@ msgid "Kwargs"
 msgstr "Kwargs"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function____last_update
@@ -513,11 +509,6 @@ msgstr "Das ist die Anzahl von Nachrichten, die eine Aktion benötigen"
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr "Das ist die Anzahl von Nachrichten mit Übermittlungsfehler"
-
-#. module: queue_job
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_unread_counter
-msgid "Number of unread messages"
-msgstr "Das ist die Anzahl von ungelesenen Nachrichten"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__override_channel
@@ -790,29 +781,9 @@ msgid ""
 msgstr ""
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_unread
-msgid "Unread Messages"
-msgstr "Ungelesene Nachrichten"
-
-#. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_unread_counter
-msgid "Unread Messages Counter"
-msgstr "Zähler für ungelesene Nachrichten"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__user_id
 msgid "User ID"
 msgstr "Benutzer"
-
-#. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__website_message_ids
-msgid "Website Messages"
-msgstr "Website Nachrichten"
-
-#. module: queue_job
-#: model:ir.model.fields,help:queue_job.field_queue_job__website_message_ids
-msgid "Website communication history"
-msgstr "Historie der Website-Kommunikation"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_requeue_job
@@ -823,6 +794,24 @@ msgstr "Assistent zur erneuten Einreihung einer Job-Auswahl"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr ""
+
+#~ msgid "Followers (Channels)"
+#~ msgstr "Abonnenten (Kanäle)"
+
+#~ msgid "Number of unread messages"
+#~ msgstr "Das ist die Anzahl von ungelesenen Nachrichten"
+
+#~ msgid "Unread Messages"
+#~ msgstr "Ungelesene Nachrichten"
+
+#~ msgid "Unread Messages Counter"
+#~ msgstr "Zähler für ungelesene Nachrichten"
+
+#~ msgid "Website Messages"
+#~ msgstr "Website Nachrichten"
+
+#~ msgid "Website communication history"
+#~ msgstr "Historie der Website-Kommunikation"
 
 #~ msgid "If checked new messages require your attention."
 #~ msgstr ""
