@@ -1,13 +1,12 @@
 # Copyright 2022 ForgeFlow S.L.
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import api, models
+from odoo import models
 
 
 class QueueJob(models.Model):
     _inherit = "queue.job"
 
-    @api.multi
     def _activities_users_domain(self):
         group = self.env.ref("queue_job.group_queue_job_manager")
         if not group:

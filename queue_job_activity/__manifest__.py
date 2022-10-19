@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 {
     "name": "Queue Job Activity",
-    "version": "11.0.1.0.0",
+    "version": "15.0.1.0.0",
     "author": "ForgeFlow S.L.," "Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/queue",
     "summary": "Create activities on faield jobs",
@@ -13,4 +13,6 @@
         "views/res_users_view.xml",
     ],
     "installable": True,
+    "maintainers": ["AaronHForgeFlow"],
+    "development_status": "Beta",
 }
