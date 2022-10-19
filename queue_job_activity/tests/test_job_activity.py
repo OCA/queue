@@ -44,9 +44,7 @@ class TestJobActivity(common.TransactionCase):
         method = self.env["res.users"].mapped
         test_job = Job(method)
         test_job.store()
-        test_job_record = self.env["queue.job"].search(
-            [("uuid", "=", test_job.uuid)]
-        )
+        test_job_record = self.env["queue.job"].search([("uuid", "=", test_job.uuid)])
         test_job_record.write({"state": "failed"})
         return test_job_record
 
@@ -71,9 +69,7 @@ class TestJobActivity(common.TransactionCase):
             {
                 "name": "Hard worker",
                 "login": "hardhard",
-                "groups_id": [
-                    (4, self.ref("queue_job.group_queue_job_manager"))
-                ],
+                "groups_id": [(4, self.ref("queue_job.group_queue_job_manager"))],
                 "job_activity": True,
             }
         )
@@ -89,4 +85,4 @@ class TestJobActivity(common.TransactionCase):
             ]
         )
         self.assertFalse(activity.user_id.id in users.ids)
-        self.assertEquals(activity.user_id.id, responsible.id)
+        self.assertEqual(activity.user_id.id, responsible.id)

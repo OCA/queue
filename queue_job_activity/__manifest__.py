@@ -4,7 +4,7 @@
     "name": "Queue Job Activity",
     "version": "11.0.1.0.0",
     "author": "ForgeFlow S.L.," "Odoo Community Association (OCA)",
-    "website": "https://github.com/OCA/queue_job",
+    "website": "https://github.com/OCA/queue",
     "summary": "Create activities on faield jobs",
     "license": "AGPL-3",
     "category": "Generic Modules",
