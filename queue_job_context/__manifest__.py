@@ -9,7 +9,7 @@
     "license": "LGPL-3",
     "website": "https://github.com/OCA/queue",
     "category": "Tools",
-    "version": "14.0.1.0.0",
+    "version": "14.0.1.0.1",
     "depends": ["queue_job"],
     "installable": True,
 }
