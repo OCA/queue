@@ -123,25 +123,8 @@ Based on this configuration, we can tell that:
 The context of the recordset of the job, or any recordset passed in arguments of
 a job, is transferred to the job according to an allow-list.
 
-The default allow-list is empty for backward compatibility. The allow-list can
+The default allow-list is `("tz", "lang", "allowed_company_ids", "force_company", "active_test")`. It can
 be customized in ``Base._job_prepare_context_before_enqueue_keys``.
-
-Example:
-
-.. code-block:: python
-
-   class Base(models.AbstractModel):
-
-       _inherit = "base"
-
-       @api.model
-       def _job_prepare_context_before_enqueue_keys(self):
-           """Keys to keep in context of stored jobs
-
-           Empty by default for backward compatibility.
-           """
-           return ("tz", "lang", "allowed_company_ids", "force_company", "active_test")
-
 **Bypass jobs on running Odoo**
 
 When you are developing (ie: connector modules) you might want
