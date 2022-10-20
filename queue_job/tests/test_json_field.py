@@ -20,14 +20,15 @@ class TestJson(common.TransactionCase):
         partner = self.env(user=demo_user, context=context).ref("base.main_partner")
         value = partner
         value_json = json.dumps(value, cls=JobEncoder)
+        expected_context = context.copy()
+        expected_context.pop("uid")
         expected = {
             "uid": demo_user.id,
             "_type": "odoo_recordset",
             "model": "res.partner",
             "ids": [partner.id],
             "su": False,
-            # no allowed context by default, must be changed in 16.0
-            "context": {},
+            "context": expected_context,
         }
         self.assertEqual(json.loads(value_json), expected)
 
@@ -37,6 +38,8 @@ class TestJson(common.TransactionCase):
         partner = self.env(user=demo_user, context=context).ref("base.main_partner")
         value = ["a", 1, partner]
         value_json = json.dumps(value, cls=JobEncoder)
+        expected_context = context.copy()
+        expected_context.pop("uid")
         expected = [
             "a",
             1,
@@ -46,8 +49,7 @@ class TestJson(common.TransactionCase):
                 "model": "res.partner",
                 "ids": [partner.id],
                 "su": False,
-                # no allowed context by default, must be changed in 16.0
-                "context": {},
+                "context": expected_context,
             },
         ]
         self.assertEqual(json.loads(value_json), expected)
