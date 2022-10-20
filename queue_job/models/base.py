@@ -211,9 +211,7 @@ class Base(models.AbstractModel):
         """Keys to keep in context of stored jobs
         Empty by default for backward compatibility.
         """
-        # TODO: when migrating to 16.0, active the base context keys:
-        # return ("tz", "lang", "allowed_company_ids", "force_company", "active_test")
-        return ()
+        return ("tz", "lang", "allowed_company_ids", "force_company", "active_test")
 
     def _job_prepare_context_before_enqueue(self):
         """Return the context to store in the jobs
