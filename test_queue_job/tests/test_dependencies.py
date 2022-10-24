@@ -3,21 +3,16 @@
 
 import odoo.tests.common as common
 
-from odoo.addons.queue_job.job import (
-    Job,
-    WAIT_DEPENDENCIES,
-    PENDING,
-)
-from odoo.addons.queue_job.delay import chain, DelayableGraph, group
+from odoo.addons.queue_job.delay import DelayableGraph, chain, group
+from odoo.addons.queue_job.job import PENDING, WAIT_DEPENDENCIES, Job
 
 
 class TestJobDependencies(common.SavepointCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.queue_job = cls.env['queue.job']
-        cls.method = cls.env['test.queue.job'].testing_method
+        cls.queue_job = cls.env["queue.job"]
+        cls.method = cls.env["test.queue.job"].testing_method
 
     def test_depends_store(self):
         job_root = Job(self.method)
@@ -51,34 +46,28 @@ class TestJobDependencies(common.SavepointCase):
         self.assertFalse(job_lvl2_a.reverse_depends_on)
 
         # test DB state
-        self.assertEqual(job_root.db_record().dependencies['depends_on'], [])
+        self.assertEqual(job_root.db_record().dependencies["depends_on"], [])
         self.assertEqual(
-            sorted(job_root.db_record().dependencies['reverse_depends_on']),
-            sorted([job_lvl1_a.uuid, job_lvl1_b.uuid])
+            sorted(job_root.db_record().dependencies["reverse_depends_on"]),
+            sorted([job_lvl1_a.uuid, job_lvl1_b.uuid]),
         )
 
         self.assertEqual(
-            job_lvl1_a.db_record().dependencies['depends_on'], [job_root.uuid]
+            job_lvl1_a.db_record().dependencies["depends_on"], [job_root.uuid]
         )
         self.assertEqual(
-            job_lvl1_a.db_record().dependencies['reverse_depends_on'],
-            [job_lvl2_a.uuid]
+            job_lvl1_a.db_record().dependencies["reverse_depends_on"], [job_lvl2_a.uuid]
         )
 
         self.assertEqual(
-            job_lvl1_b.db_record().dependencies['depends_on'], [job_root.uuid]
+            job_lvl1_b.db_record().dependencies["depends_on"], [job_root.uuid]
         )
-        self.assertEqual(
-            job_lvl1_b.db_record().dependencies['reverse_depends_on'], []
-        )
+        self.assertEqual(job_lvl1_b.db_record().dependencies["reverse_depends_on"], [])
 
         self.assertEqual(
-            job_lvl2_a.db_record().dependencies['depends_on'],
-            [job_lvl1_a.uuid]
+            job_lvl2_a.db_record().dependencies["depends_on"], [job_lvl1_a.uuid]
         )
-        self.assertEqual(
-            job_lvl2_a.db_record().dependencies['reverse_depends_on'], []
-        )
+        self.assertEqual(job_lvl2_a.db_record().dependencies["reverse_depends_on"], [])
 
     def test_depends_store_after(self):
         job_root = Job(self.method)
@@ -89,15 +78,12 @@ class TestJobDependencies(common.SavepointCase):
 
         # as the reverse dependency has been added after the root job has been
         # stored, it is not reflected in DB
-        self.assertEqual(
-            job_root.db_record().dependencies['reverse_depends_on'], []
-        )
+        self.assertEqual(job_root.db_record().dependencies["reverse_depends_on"], [])
 
         # a new store will write it
         job_root.store()
         self.assertEqual(
-            job_root.db_record().dependencies['reverse_depends_on'],
-            [job_a.uuid]
+            job_root.db_record().dependencies["reverse_depends_on"], [job_a.uuid]
         )
 
     def test_depends_load(self):
@@ -149,9 +135,14 @@ class TestJobDependencies(common.SavepointCase):
         job_lvl2_a = Job(self.method)
         job_lvl2_a.add_depends({job_lvl1_a})
 
-        DelayableGraph._ensure_same_graph_uuid([
-            job_root, job_lvl1_a, job_lvl1_b, job_lvl2_a,
-        ])
+        DelayableGraph._ensure_same_graph_uuid(
+            [
+                job_root,
+                job_lvl1_a,
+                job_lvl1_b,
+                job_lvl2_a,
+            ]
+        )
 
         job_2_root = Job(self.method)
         job_2_child = Job(self.method)
@@ -179,34 +170,37 @@ class TestJobDependencies(common.SavepointCase):
 
         expected_nodes = [
             {
-                'id': record_root.id,
-                'title': '<strong>Method used for tests</strong><br/>'
-                         'test.queue.job().testing_method()',
-                'color': '#D2E5FF',
-                'border': '#2B7CE9',
-                'shadow': True
-            }, {
-                'id': record_lvl1_a.id,
-                'title': '<strong>Method used for tests</strong><br/>'
-                         'test.queue.job().testing_method()',
-                'color': '#D2E5FF',
-                'border': '#2B7CE9',
-                'shadow': True
-            }, {
-                'id': record_lvl1_b.id,
-                'title': '<strong>Method used for tests</strong><br/>'
-                         'test.queue.job().testing_method()',
-                'color': '#D2E5FF',
-                'border': '#2B7CE9',
-                'shadow': True
-            }, {
-                'id': record_lvl2_a.id,
-                'title': '<strong>Method used for tests</strong><br/>'
-                         'test.queue.job().testing_method()',
-                'color': '#D2E5FF',
-                'border': '#2B7CE9',
-                'shadow': True
-            }
+                "id": record_root.id,
+                "title": "<strong>Method used for tests</strong><br/>"
+                "test.queue.job().testing_method()",
+                "color": "#D2E5FF",
+                "border": "#2B7CE9",
+                "shadow": True,
+            },
+            {
+                "id": record_lvl1_a.id,
+                "title": "<strong>Method used for tests</strong><br/>"
+                "test.queue.job().testing_method()",
+                "color": "#D2E5FF",
+                "border": "#2B7CE9",
+                "shadow": True,
+            },
+            {
+                "id": record_lvl1_b.id,
+                "title": "<strong>Method used for tests</strong><br/>"
+                "test.queue.job().testing_method()",
+                "color": "#D2E5FF",
+                "border": "#2B7CE9",
+                "shadow": True,
+            },
+            {
+                "id": record_lvl2_a.id,
+                "title": "<strong>Method used for tests</strong><br/>"
+                "test.queue.job().testing_method()",
+                "color": "#D2E5FF",
+                "border": "#2B7CE9",
+                "shadow": True,
+            },
         ]
         expected_edges = sorted(
             [
@@ -220,44 +214,37 @@ class TestJobDependencies(common.SavepointCase):
 
         for record in records:
             self.assertEqual(
-                sorted(record.dependency_graph['nodes'],
-                       key=lambda d: d["id"]),
-                expected_nodes
+                sorted(record.dependency_graph["nodes"], key=lambda d: d["id"]),
+                expected_nodes,
             )
-            self.assertEqual(
-                sorted(record.dependency_graph['edges']),
-                expected_edges
-            )
+            self.assertEqual(sorted(record.dependency_graph["edges"]), expected_edges)
 
         expected_nodes = [
             {
-                'id': record_2_root.id,
-                'title': '<strong>Method used for tests</strong><br/>'
-                         'test.queue.job().testing_method()',
-                'color': '#D2E5FF',
-                'border': '#2B7CE9',
-                'shadow': True
-            }, {
-                'id': record_2_child.id,
-                'title': '<strong>Method used for tests</strong><br/>'
-                         'test.queue.job().testing_method()',
-                'color': '#D2E5FF',
-                'border': '#2B7CE9',
-                'shadow': True
-            }
+                "id": record_2_root.id,
+                "title": "<strong>Method used for tests</strong><br/>"
+                "test.queue.job().testing_method()",
+                "color": "#D2E5FF",
+                "border": "#2B7CE9",
+                "shadow": True,
+            },
+            {
+                "id": record_2_child.id,
+                "title": "<strong>Method used for tests</strong><br/>"
+                "test.queue.job().testing_method()",
+                "color": "#D2E5FF",
+                "border": "#2B7CE9",
+                "shadow": True,
+            },
         ]
         expected_edges = sorted([[record_2_root.id, record_2_child.id]])
 
         for record in [record_2_root, record_2_child]:
             self.assertEqual(
-                sorted(record.dependency_graph['nodes'],
-                       key=lambda d: d["id"]),
-                expected_nodes
+                sorted(record.dependency_graph["nodes"], key=lambda d: d["id"]),
+                expected_nodes,
             )
-            self.assertEqual(
-                sorted(record.dependency_graph['edges']),
-                expected_edges
-            )
+            self.assertEqual(sorted(record.dependency_graph["edges"]), expected_edges)
 
     def test_no_dependency_graph_single_job(self):
         """A single job has no graph"""
@@ -278,20 +265,20 @@ class TestJobDependencies(common.SavepointCase):
         chain_root.delay()
 
         jobs = [
-            delayable._generated_job for delayable
-            in [delayable1, delayable2, delayable3, delayable4]
+            delayable._generated_job
+            for delayable in [delayable1, delayable2, delayable3, delayable4]
         ]
 
         self.assertTrue(jobs[0].graph_uuid)
-        self.assertEqual(len(set(j.graph_uuid for j in jobs)), 1)
+        self.assertEqual(len({j.graph_uuid for j in jobs}), 1)
         for job in jobs:
             self.assertEqual(job.graph_uuid, job.db_record().graph_uuid)
 
     def test_depends_graph_uuid_group(self):
         """All jobs in a group share the same graph uuid"""
         g = group(
-            self.env['test.queue.job'].delayable().testing_method(),
-            self.env['test.queue.job'].delayable().testing_method(),
+            self.env["test.queue.job"].delayable().testing_method(),
+            self.env["test.queue.job"].delayable().testing_method(),
         )
         g.delay()
 

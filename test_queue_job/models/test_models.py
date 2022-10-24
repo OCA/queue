@@ -2,10 +2,10 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 from odoo import fields, models
-from odoo.addons.queue_job.delay import chain
-from odoo.addons.queue_job.job import identity_exact
 
+from odoo.addons.queue_job.delay import chain
 from odoo.addons.queue_job.exception import RetryableJobError
+from odoo.addons.queue_job.job import identity_exact
 
 
 class QueueJob(models.Model):
@@ -49,15 +49,17 @@ class ModelTestQueueJob(models.Model):
         return args, kwargs
 
     def create_ir_logging(self, message, level="info"):
-        return self.env["ir.logging"].create({
-            "name": "test_queue_job",
-            "type": "server",
-            "dbname": self.env.cr.dbname,
-            "message": message,
-            "path": "job",
-            "func": "create_ir_logging",
-            "line": 1,
-        })
+        return self.env["ir.logging"].create(
+            {
+                "name": "test_queue_job",
+                "type": "server",
+                "dbname": self.env.cr.dbname,
+                "message": message,
+                "path": "job",
+                "func": "create_ir_logging",
+                "line": 1,
+            }
+        )
 
     def no_description(self):
         return
@@ -129,7 +131,7 @@ class ModelTestQueueJob(models.Model):
                 max_retries=1,
                 priority=15,
             ).testing_method(1, foo=2),
-            self.delayable().testing_method('x', foo='y'),
+            self.delayable().testing_method("x", foo="y"),
             self.delayable().no_description(),
         )
         delayables.delay()
