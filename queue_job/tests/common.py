@@ -4,15 +4,15 @@ import doctest
 import logging
 import sys
 import typing
-
 from contextlib import contextmanager
 from itertools import groupby
 from operator import attrgetter
-from unittest import mock, TestCase
+from unittest import TestCase, mock
+
+from odoo.addons.queue_job.delay import Graph
 
 # pylint: disable=odoo-addons-relative-import
 from odoo.addons.queue_job.job import Job
-from odoo.addons.queue_job.delay import Graph
 
 
 @contextmanager
@@ -135,6 +135,7 @@ class JobsTrap:
     You can also access the list of calls that were made to enqueue the jobs in
     the ``calls`` attribute, and the generated jobs in the ``enqueued_jobs``.
     """
+
     def __init__(self, job_mock):
         self.job_mock = job_mock
         self.job_mock.side_effect = self._add_job
@@ -160,8 +161,7 @@ class JobsTrap:
         """
         self._test_case.assertEqual(self.jobs_count(only=only), expected)
 
-    def assert_enqueued_job(self, method, args=None, kwargs=None,
-                            properties=None):
+    def assert_enqueued_job(self, method, args=None, kwargs=None, properties=None):
         """Raise an assertion error if the expected method has not been enqueued
 
         * ``method`` is the method (as method object) delayed as job
@@ -191,7 +191,8 @@ class JobsTrap:
         actual_calls = []
         for call in self.calls:
             checked_properties = {
-                key: value for key, value in call.properties.items()
+                key: value
+                for key, value in call.properties.items()
                 if key in properties
             }
             # build copy of calls with only the properties that we want to
@@ -201,24 +202,29 @@ class JobsTrap:
                     method=call.method,
                     args=call.args,
                     kwargs=call.kwargs,
-                    properties=checked_properties
+                    properties=checked_properties,
                 )
             )
 
         if expected_call not in actual_calls:
             raise AssertionError(
                 "Job %s was not enqueued.\n"
-                "Actual enqueued jobs:\n%s" % (
+                "Actual enqueued jobs:\n%s"
+                % (
                     self._format_job_call(expected_call),
-                    "\n".join(" * %s" % (self._format_job_call(call),)
-                              for call in actual_calls)
+                    "\n".join(
+                        " * %s" % (self._format_job_call(call),)
+                        for call in actual_calls
+                    ),
                 )
             )
 
     def perform_enqueued_jobs(self):
         """Perform the enqueued jobs synchronously"""
+
         def by_graph(job):
             return job.graph_uuid or ""
+
         sorted_jobs = sorted(self.enqueued_jobs, key=by_graph)
         for graph_uuid, jobs in groupby(sorted_jobs, key=by_graph):
             if graph_uuid:
@@ -246,18 +252,20 @@ class JobsTrap:
         job = Job(*args, **kwargs)
         self.enqueued_jobs.append(job)
 
-        patcher = mock.patch.object(job, 'store')
+        patcher = mock.patch.object(job, "store")
         self._store_patchers.append(patcher)
         patcher.start()
 
         job_args = kwargs.pop("args", None) or ()
         job_kwargs = kwargs.pop("kwargs", None) or {}
-        self.calls.append(JobCall(
-            method=args[0],
-            args=job_args,
-            kwargs=job_kwargs,
-            properties=kwargs,
-        ))
+        self.calls.append(
+            JobCall(
+                method=args[0],
+                args=job_args,
+                kwargs=job_kwargs,
+                properties=kwargs,
+            )
+        )
         return job
 
     def __enter__(self):
@@ -278,20 +286,16 @@ class JobsTrap:
     def _format_job_call(self, call):
         method_all_args = []
         if call.args:
-            method_all_args.append(
-                ", ".join("%s" % (arg,) for arg in call.args)
-            )
+            method_all_args.append(", ".join("%s" % (arg,) for arg in call.args))
         if call.kwargs:
             method_all_args.append(
-                ", ".join("%s=%s" % (key, value) for key, value
-                          in call.kwargs.items())
+                ", ".join("%s=%s" % (key, value) for key, value in call.kwargs.items())
             )
         return "<%s>.%s(%s) with properties (%s)" % (
             call.method.__self__.__class__._name,
             call.method.__name__,
             ", ".join(method_all_args),
-            ", ".join("%s=%s" % (key, value) for key, value
-                      in call.properties.items()),
+            ", ".join("%s=%s" % (key, value) for key, value in call.properties.items()),
         )
 
     def __repr__(self):
