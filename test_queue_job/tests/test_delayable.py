@@ -13,7 +13,7 @@ from odoo.addons.queue_job.delay import (
 )
 
 
-class TestDelayable(common.SavepointCase):
+class TestDelayable(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
