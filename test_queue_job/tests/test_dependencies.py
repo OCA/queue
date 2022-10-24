@@ -7,7 +7,7 @@ from odoo.addons.queue_job.delay import DelayableGraph, chain, group
 from odoo.addons.queue_job.job import PENDING, WAIT_DEPENDENCIES, Job
 
 
-class TestJobDependencies(common.SavepointCase):
+class TestJobDependencies(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
