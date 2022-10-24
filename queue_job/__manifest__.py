@@ -12,7 +12,6 @@
     "data": [
         "security/security.xml",
         "security/ir.model.access.csv",
-        "views/queue_job_assets.xml",
         "views/queue_job_views.xml",
         "views/queue_job_channel_views.xml",
         "views/queue_job_function_views.xml",
@@ -23,6 +22,14 @@
         "data/queue_data.xml",
         "data/queue_job_function_data.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "/queue_job/static/lib/vis/vis-network.min.css",
+            "/queue_job/static/src/scss/queue_job_fields.scss",
+            "/queue_job/static/lib/vis/vis-network.min.js",
+            "/queue_job/static/src/js/queue_job_fields.js",
+        ],
+    },
     "installable": True,
     "development_status": "Mature",
     "maintainers": ["guewen"],
