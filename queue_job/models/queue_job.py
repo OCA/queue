@@ -5,10 +5,11 @@ import logging
 import random
 from datetime import datetime, timedelta
 
-from odoo import _, api, exceptions, fields, models, tools
-from odoo.addons.base_sparse_field.models.fields import Serialized
+from odoo import _, api, exceptions, fields, models
 from odoo.osv import expression
 from odoo.tools import html_escape
+
+from odoo.addons.base_sparse_field.models.fields import Serialized
 
 from ..delay import Graph
 from ..exception import JobError
@@ -17,11 +18,11 @@ from ..job import (
     CANCELLED,
     DONE,
     FAILED,
-    Job,
     PENDING,
     STARTED,
     STATES,
-    WAIT_DEPENDENCIES
+    WAIT_DEPENDENCIES,
+    Job,
 )
 
 _logger = logging.getLogger(__name__)
@@ -64,7 +65,7 @@ class QueueJob(models.Model):
         string="Graph UUID",
         readonly=True,
         index=True,
-        help="Single shared identifier of a Graph. Empty for a single job."
+        help="Single shared identifier of a Graph. Empty for a single job.",
     )
     user_id = fields.Many2one(comodel_name="res.users", string="User ID")
     company_id = fields.Many2one(
@@ -84,7 +85,7 @@ class QueueJob(models.Model):
     )
     dependencies = Serialized(readonly=True)
     # dependency graph as expected by the field widget
-    dependency_graph = Serialized(compute='_compute_dependency_graph')
+    dependency_graph = Serialized(compute="_compute_dependency_graph")
     graph_jobs_count = fields.Integer(compute="_compute_graph_jobs_count")
     args = JobSerialized(readonly=True, base_type=tuple)
     kwargs = JobSerialized(readonly=True, base_type=dict)
@@ -146,14 +147,22 @@ class QueueJob(models.Model):
         for record in self:
             record.record_ids = record.records.ids
 
-    @api.depends('dependencies')
+    @api.depends("dependencies")
     def _compute_dependency_graph(self):
         jobs_groups = self.env["queue.job"].read_group(
-            [("graph_uuid", "in", [uuid for uuid in self.mapped("graph_uuid") if uuid])],
+            [
+                (
+                    "graph_uuid",
+                    "in",
+                    [uuid for uuid in self.mapped("graph_uuid") if uuid],
+                )
+            ],
             ["graph_uuid", "ids:array_agg(id)"],
-            ["graph_uuid"]
+            ["graph_uuid"],
         )
-        ids_per_graph_uuid = {group["graph_uuid"]: group["ids"] for group in jobs_groups}
+        ids_per_graph_uuid = {
+            group["graph_uuid"]: group["ids"] for group in jobs_groups
+        }
         for record in self:
             if not record.graph_uuid:
                 record.dependency_graph = {}
@@ -164,22 +173,18 @@ class QueueJob(models.Model):
                 record.dependency_graph = {}
                 continue
 
-            graph_ids = {
-                graph_job.uuid: graph_job.id for graph_job in graph_jobs
-            }
-            graph_jobs_by_ids = {
-                graph_job.id: graph_job for graph_job in graph_jobs
-            }
+            graph_ids = {graph_job.uuid: graph_job.id for graph_job in graph_jobs}
+            graph_jobs_by_ids = {graph_job.id: graph_job for graph_job in graph_jobs}
 
             graph = Graph()
             for graph_job in graph_jobs:
                 graph.add_vertex(graph_job.id)
-                for parent_uuid in graph_job.dependencies['depends_on']:
+                for parent_uuid in graph_job.dependencies["depends_on"]:
                     parent_id = graph_ids.get(parent_uuid)
                     if not parent_id:
                         continue
                     graph.add_edge(parent_id, graph_job.id)
-                for child_uuid in graph_job.dependencies['reverse_depends_on']:
+                for child_uuid in graph_job.dependencies["reverse_depends_on"]:
                     child_id = graph_ids.get(child_uuid)
                     if not child_id:
                         continue
@@ -187,12 +192,12 @@ class QueueJob(models.Model):
 
             record.dependency_graph = {
                 # list of ids
-                'nodes': [
+                "nodes": [
                     graph_jobs_by_ids[graph_id]._dependency_graph_vis_node()
                     for graph_id in graph.vertices()
                 ],
                 # list of tuples (from, to)
-                'edges': graph.edges(),
+                "edges": graph.edges(),
             }
 
     def _dependency_graph_vis_node(self):
@@ -205,7 +210,8 @@ class QueueJob(models.Model):
         }
         return {
             "id": self.id,
-            "title": "<strong>%s</strong><br/>%s" % (
+            "title": "<strong>%s</strong><br/>%s"
+            % (
                 html_escape(self.display_name),
                 html_escape(self.func_string),
             ),
@@ -214,16 +220,20 @@ class QueueJob(models.Model):
             "shadow": True,
         }
 
-    @api.multi
     def _compute_graph_jobs_count(self):
         jobs_groups = self.env["queue.job"].read_group(
-            [("graph_uuid", "in", [uuid for uuid in self.mapped("graph_uuid") if uuid])],
+            [
+                (
+                    "graph_uuid",
+                    "in",
+                    [uuid for uuid in self.mapped("graph_uuid") if uuid],
+                )
+            ],
             ["graph_uuid"],
-            ["graph_uuid"]
+            ["graph_uuid"],
         )
         count_per_graph_uuid = {
-            group["graph_uuid"]: group["graph_uuid_count"]
-            for group in jobs_groups
+            group["graph_uuid"]: group["graph_uuid_count"] for group in jobs_groups
         }
         for record in self:
             record.graph_jobs_count = count_per_graph_uuid.get(record.graph_uuid) or 0
@@ -287,13 +297,15 @@ class QueueJob(models.Model):
         self.ensure_one()
         jobs = self.env["queue.job"].search([("graph_uuid", "=", self.graph_uuid)])
 
-        action_jobs = self.env.ref('queue_job.action_queue_job')
+        action_jobs = self.env.ref("queue_job.action_queue_job")
         action = action_jobs.read()[0]
-        action.update({
-            "name": _("Jobs for graph %s") % (self.graph_uuid),
-            "context": {},
-            "domain": [("id", "in", jobs.ids)]
-        })
+        action.update(
+            {
+                "name": _("Jobs for graph %s") % (self.graph_uuid),
+                "context": {},
+                "domain": [("id", "in", jobs.ids)],
+            }
+        )
         return action
 
     def _change_job_state(self, state, result=None):
@@ -307,6 +319,7 @@ class QueueJob(models.Model):
             if state == DONE:
                 job_.set_done(result=result)
                 job_.store()
+                record.env["queue.job"].flush()
                 job_.enqueue_waiting()
             elif state == PENDING:
                 job_.set_pending(result=result)
@@ -328,9 +341,7 @@ class QueueJob(models.Model):
         return True
 
     def requeue(self):
-        jobs_to_requeue = self.filtered(
-            lambda job_: job_.state != WAIT_DEPENDENCIES
-        )
+        jobs_to_requeue = self.filtered(lambda job_: job_.state != WAIT_DEPENDENCIES)
         jobs_to_requeue._change_job_state(PENDING)
         return True
 
