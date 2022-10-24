@@ -6,8 +6,8 @@ import logging
 
 from odoo import api, models
 
-from ..job import DelayableRecordset
 from ..delay import Delayable
+from ..job import DelayableRecordset
 
 _logger = logging.getLogger(__name__)
 
@@ -54,17 +54,25 @@ class Base(models.AbstractModel):
         :return: instance of a DelayableRecordset
         :rtype: :class:`odoo.addons.queue_job.job.DelayableRecordset`
         """
-        return DelayableRecordset(self, priority=priority,
-                                  eta=eta,
-                                  max_retries=max_retries,
-                                  description=description,
-                                  channel=channel,
-                                  identity_key=identity_key)
+        return DelayableRecordset(
+            self,
+            priority=priority,
+            eta=eta,
+            max_retries=max_retries,
+            description=description,
+            channel=channel,
+            identity_key=identity_key,
+        )
 
-    @api.multi
-    def delayable(self, priority=None, eta=None,
-                  max_retries=None, description=None,
-                  channel=None, identity_key=None):
+    def delayable(
+        self,
+        priority=None,
+        eta=None,
+        max_retries=None,
+        description=None,
+        channel=None,
+        identity_key=None,
+    ):
         """Return a ``Delayable``
 
         The returned instance allows to enqueue any method of the recordset's
@@ -127,12 +135,15 @@ class Base(models.AbstractModel):
         :return: instance of a Delayable
         :rtype: :class:`odoo.addons.queue_job.job.Delayable`
         """
-        return Delayable(self, priority=priority,
-                         eta=eta,
-                         max_retries=max_retries,
-                         description=description,
-                         channel=channel,
-                         identity_key=identity_key)
+        return Delayable(
+            self,
+            priority=priority,
+            eta=eta,
+            max_retries=max_retries,
+            description=description,
+            channel=channel,
+            identity_key=identity_key,
+        )
 
     def _patch_job_auto_delay(self, method_name, context_key=None):
         """Patch a method to be automatically delayed as job method when called
