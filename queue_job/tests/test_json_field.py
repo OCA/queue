@@ -16,23 +16,30 @@ from odoo.addons.queue_job.fields import JobDecoder, JobEncoder
 class TestJson(common.TransactionCase):
     def test_encoder_recordset(self):
         demo_user = self.env.ref("base.user_demo")
-        partner = self.env(user=demo_user).ref("base.main_partner")
+        context = demo_user.context_get()
+        partner = self.env(user=demo_user, context=context).ref("base.main_partner")
         value = partner
         value_json = json.dumps(value, cls=JobEncoder)
+        expected_context = context.copy()
+        expected_context.pop("uid")
         expected = {
             "uid": demo_user.id,
             "_type": "odoo_recordset",
             "model": "res.partner",
             "ids": [partner.id],
             "su": False,
+            "context": expected_context,
         }
         self.assertEqual(json.loads(value_json), expected)
 
     def test_encoder_recordset_list(self):
         demo_user = self.env.ref("base.user_demo")
-        partner = self.env(user=demo_user).ref("base.main_partner")
+        context = demo_user.context_get()
+        partner = self.env(user=demo_user, context=context).ref("base.main_partner")
         value = ["a", 1, partner]
         value_json = json.dumps(value, cls=JobEncoder)
+        expected_context = context.copy()
+        expected_context.pop("uid")
         expected = [
             "a",
             1,
@@ -42,18 +49,22 @@ class TestJson(common.TransactionCase):
                 "model": "res.partner",
                 "ids": [partner.id],
                 "su": False,
+                "context": expected_context,
             },
         ]
         self.assertEqual(json.loads(value_json), expected)
 
     def test_decoder_recordset(self):
         demo_user = self.env.ref("base.user_demo")
+        context = demo_user.context_get()
         partner = self.env(user=demo_user).ref("base.main_partner")
         value_json = (
             '{"_type": "odoo_recordset",'
             '"model": "res.partner",'
             '"su": false,'
-            '"ids": [%s],"uid": %s}' % (partner.id, demo_user.id)
+            '"ids": [%s],"uid": %s, '
+            '"context": {"tz": "%s", "lang": "%s"}}'
+            % (partner.id, demo_user.id, context["tz"], context["lang"])
         )
         expected = partner
         value = json.loads(value_json, cls=JobDecoder, env=self.env)
@@ -62,13 +73,16 @@ class TestJson(common.TransactionCase):
 
     def test_decoder_recordset_list(self):
         demo_user = self.env.ref("base.user_demo")
+        context = demo_user.context_get()
         partner = self.env(user=demo_user).ref("base.main_partner")
         value_json = (
             '["a", 1, '
             '{"_type": "odoo_recordset",'
             '"model": "res.partner",'
             '"su": false,'
-            '"ids": [%s],"uid": %s}]' % (partner.id, demo_user.id)
+            '"ids": [%s],"uid": %s, '
+            '"context": {"tz": "%s", "lang": "%s"}}]'
+            % (partner.id, demo_user.id, context["tz"], context["lang"])
         )
         expected = ["a", 1, partner]
         value = json.loads(value_json, cls=JobDecoder, env=self.env)
