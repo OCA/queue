@@ -252,6 +252,13 @@ Based on this configuration, we can tell that:
 * retries 10 to 15 postponed 30 seconds later
 * all subsequent retries postponed 5 minutes later
 
+**Job Context**
+
+The context of the recordset of the job, or any recordset passed in arguments of
+a job, is transferred to the job according to an allow-list.
+
+The default allow-list is `("tz", "lang", "allowed_company_ids", "force_company", "active_test")`. It can
+be customized in ``Base._job_prepare_context_before_enqueue_keys``.
 **Bypass jobs on running Odoo**
 
 When you are developing (ie: connector modules) you might want

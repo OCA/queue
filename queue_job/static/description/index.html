@@ -581,7 +581,12 @@ keys are tries and values are seconds to postpone as integers:</p>
 <li>retries 10 to 15 postponed 30 seconds later</li>
 <li>all subsequent retries postponed 5 minutes later</li>
 </ul>
-<p><strong>Bypass jobs on running Odoo</strong></p>
+<p><strong>Job Context</strong></p>
+<p>The context of the recordset of the job, or any recordset passed in arguments of
+a job, is transferred to the job according to an allow-list.</p>
+<p>The default allow-list is <cite>(“tz”, “lang”, “allowed_company_ids”, “force_company”, “active_test”)</cite>. It can
+be customized in <tt class="docutils literal">Base._job_prepare_context_before_enqueue_keys</tt>.
+<strong>Bypass jobs on running Odoo</strong></p>
 <p>When you are developing (ie: connector modules) you might want
 to bypass the queue job and run your code immediately.</p>
 <p>To do so you can set <cite>TEST_QUEUE_JOB_NO_DELAY=1</cite> in your enviroment.</p>
