@@ -130,6 +130,7 @@ class TestJobDependencies(common.SavepointCase):
         job_root.perform()
         job_root.set_done()
         job_root.store()
+        self.env["base"].flush()
 
         job_root.enqueue_waiting()
 
@@ -209,9 +210,9 @@ class TestJobDependencies(common.SavepointCase):
         ]
         expected_edges = sorted(
             [
-                (record_root.id, record_lvl1_a.id),
-                (record_lvl1_a.id, record_lvl2_a.id),
-                (record_root.id, record_lvl1_b.id),
+                [record_root.id, record_lvl1_a.id],
+                [record_lvl1_a.id, record_lvl2_a.id],
+                [record_root.id, record_lvl1_b.id],
             ]
         )
 
@@ -245,7 +246,7 @@ class TestJobDependencies(common.SavepointCase):
                 'shadow': True
             }
         ]
-        expected_edges = sorted([(record_2_root.id, record_2_child.id)])
+        expected_edges = sorted([[record_2_root.id, record_2_child.id]])
 
         for record in [record_2_root, record_2_child]:
             self.assertEqual(
