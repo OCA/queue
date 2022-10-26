@@ -564,6 +564,7 @@ class Job(object):
             AND state = %s;
         """
         self.env.cr.execute(sql, (PENDING, self.uuid, DONE, WAIT_DEPENDENCIES))
+        self.env["queue.job"].invalidate_cache(["state"])
 
     def store(self):
         """Store the Job"""
