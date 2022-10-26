@@ -219,17 +219,16 @@ class DelayableGraph(Graph):
         In tests, prefer to use
         :func:`odoo.addons.queue_job.tests.common.mock_jobs`.
         """
-        if os.getenv('TEST_QUEUE_JOB_NO_DELAY'):
-            _logger.warn(
-                '`TEST_QUEUE_JOB_NO_DELAY` env var found. NO JOB scheduled.'
+        if os.getenv("TEST_QUEUE_JOB_NO_DELAY"):
+            _logger.warning(
+                "`TEST_QUEUE_JOB_NO_DELAY` env var found. NO JOB scheduled."
             )
             return True
         envs = set(vertex.recordset.env for vertex in vertices)
         for env in envs:
-            if env.context.get('test_queue_job_no_delay'):
-                _logger.warn(
-                    '`test_queue_job_no_delay` ctx key found.'
-                    ' NO JOB scheduled.'
+            if env.context.get("test_queue_job_no_delay"):
+                _logger.warning(
+                    "`test_queue_job_no_delay` ctx key found. NO JOB scheduled."
                 )
                 return True
         return False
