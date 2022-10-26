@@ -21,8 +21,8 @@ Available addons
 ----------------
 addon | version | maintainers | summary
 --- | --- | --- | ---
-[queue_job](queue_job/) | 16.0.1.0.0 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
-[test_queue_job](test_queue_job/) | 16.0.1.0.0 |  | Queue Job Tests
+[queue_job](queue_job/) | 16.0.1.0.1 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
+[test_queue_job](test_queue_job/) | 16.0.1.0.1 |  | Queue Job Tests
 
 
 Unported addons
