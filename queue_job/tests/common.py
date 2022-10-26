@@ -171,7 +171,7 @@ class JobsTester():
         if kwargs is None:
             kwargs = {}
         expected_call = JobCall(
-            method=method,
+            method=method.__func__,
             args=args,
             kwargs=kwargs,
             properties=properties,
@@ -186,7 +186,7 @@ class JobsTester():
             # check
             actual_calls.append(
                 JobCall(
-                    method=call.method,
+                    method=call.method.__func__,
                     args=call.args,
                     kwargs=call.kwargs,
                     properties=checked_properties
@@ -257,7 +257,9 @@ class JobsTester():
 
     def _filtered_enqueued_jobs(self, job_method):
         enqueued_jobs = [
-            job for job in self.enqueued_jobs if job.func == job_method
+            job
+            for job in self.enqueued_jobs
+            if job.func.__func__ == job_method.__func__
         ]
         return enqueued_jobs
 
