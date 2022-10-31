@@ -16,6 +16,7 @@ from .exception import FailedJobError, NoSuchJobError, RetryableJobError
 
 PENDING = "pending"
 ENQUEUED = "enqueued"
+CANCELLED = "cancelled"
 DONE = "done"
 STARTED = "started"
 FAILED = "failed"
@@ -25,6 +26,7 @@ STATES = [
     (ENQUEUED, "Enqueued"),
     (STARTED, "Started"),
     (DONE, "Done"),
+    (CANCELLED, "Cancelled"),
     (FAILED, "Failed"),
 ]
 
@@ -214,6 +216,14 @@ class Job(object):
 
         A description of the result (for humans).
 
+    .. attribute:: exc_name
+
+        Exception error name when the job failed.
+
+    .. attribute:: exc_message
+
+        Exception error message when the job failed.
+
     .. attribute:: exc_info
 
         Exception information (traceback) when the job failed.
@@ -292,6 +302,9 @@ class Job(object):
 
         if stored.date_done:
             job_.date_done = stored.date_done
+
+        if stored.date_cancelled:
+            job_.date_cancelled = stored.date_cancelled
 
         job_.state = stored.state
         job_.result = stored.result if stored.result else None
@@ -441,13 +454,7 @@ class Job(object):
         self.job_model_name = "queue.job"
 
         self.job_config = (
-            self.env["queue.job.function"]
-            .sudo()
-            .job_config(
-                self.env["queue.job.function"].job_function_name(
-                    self.model_name, self.method_name
-                )
-            )
+            self.env["queue.job.function"].sudo().job_config(self.job_function_name)
         )
 
         self.state = PENDING
@@ -482,8 +489,11 @@ class Job(object):
         self.date_enqueued = None
         self.date_started = None
         self.date_done = None
+        self.date_cancelled = None
 
         self.result = None
+        self.exc_name = None
+        self.exc_message = None
         self.exc_info = None
 
         if "company_id" in env.context:
@@ -524,17 +534,37 @@ class Job(object):
 
     def store(self):
         """Store the Job"""
+        job_model = self.env["queue.job"]
+        # The sentinel is used to prevent edition sensitive fields (such as
+        # method_name) from RPC methods.
+        edit_sentinel = job_model.EDIT_SENTINEL
+
+        db_record = self.db_record()
+        if db_record:
+            db_record.with_context(_job_edit_sentinel=edit_sentinel).write(
+                self._store_values()
+            )
+        else:
+            job_model.with_context(_job_edit_sentinel=edit_sentinel).sudo().create(
+                self._store_values(create=True)
+            )
+
+    def _store_values(self, create=False):
         vals = {
             "state": self.state,
             "priority": self.priority,
             "retry": self.retry,
             "max_retries": self.max_retries,
+            "exc_name": self.exc_name,
+            "exc_message": self.exc_message,
             "exc_info": self.exc_info,
             "company_id": self.company_id,
             "result": str(self.result) if self.result else False,
             "date_enqueued": False,
             "date_started": False,
             "date_done": False,
+            "exec_time": False,
+            "date_cancelled": False,
             "eta": False,
             "identity_key": False,
             "worker_pid": self.worker_pid,
@@ -546,40 +576,61 @@ class Job(object):
             vals["date_started"] = self.date_started
         if self.date_done:
             vals["date_done"] = self.date_done
+        if self.exec_time:
+            vals["exec_time"] = self.exec_time
+        if self.date_cancelled:
+            vals["date_cancelled"] = self.date_cancelled
         if self.eta:
             vals["eta"] = self.eta
         if self.identity_key:
             vals["identity_key"] = self.identity_key
 
-        job_model = self.env["queue.job"]
-        # The sentinel is used to prevent edition sensitive fields (such as
-        # method_name) from RPC methods.
-        edit_sentinel = job_model.EDIT_SENTINEL
-
-        db_record = self.db_record()
-        if db_record:
-            db_record.with_context(_job_edit_sentinel=edit_sentinel).write(vals)
-        else:
-            date_created = self.date_created
-            # The following values must never be modified after the
-            # creation of the job
+        if create:
             vals.update(
                 {
+                    "user_id": self.env.uid,
+                    "channel": self.channel,
+                    # The following values must never be modified after the
+                    # creation of the job
                     "uuid": self.uuid,
                     "name": self.description,
-                    "date_created": date_created,
+                    "func_string": self.func_string,
+                    "date_created": self.date_created,
+                    "model_name": self.recordset._name,
                     "method_name": self.method_name,
+                    "job_function_id": self.job_config.job_function_id,
+                    "channel_method_name": self.job_function_name,
                     "records": self.recordset,
                     "args": self.args,
                     "kwargs": self.kwargs,
                 }
             )
-            # it the channel is not specified, lets the job_model compute
-            # the right one to use
-            if self.channel:
-                vals.update({"channel": self.channel})
 
-            job_model.with_context(_job_edit_sentinel=edit_sentinel).sudo().create(vals)
+        vals_from_model = self._store_values_from_model()
+        # Sanitize values: make sure you cannot screw core values
+        vals_from_model = {k: v for k, v in vals_from_model.items() if k not in vals}
+        vals.update(vals_from_model)
+        return vals
+
+    def _store_values_from_model(self):
+        vals = {}
+        value_handlers_candidates = (
+            "_job_store_values_for_" + self.method_name,
+            "_job_store_values",
+        )
+        for candidate in value_handlers_candidates:
+            handler = getattr(self.recordset, candidate, None)
+            if handler is not None:
+                vals = handler(self)
+        return vals
+
+    @property
+    def func_string(self):
+        model = repr(self.recordset)
+        args = [repr(arg) for arg in self.args]
+        kwargs = ["{}={!r}".format(key, val) for key, val in self.kwargs.items()]
+        all_args = ", ".join(args + kwargs)
+        return "{}.{}({})".format(model, self.method_name, all_args)
 
     def db_record(self):
         return self.db_record_from_uuid(self.env, self.uuid)
@@ -588,6 +639,11 @@ class Job(object):
     def func(self):
         recordset = self.recordset.with_context(job_uuid=self.uuid)
         return getattr(recordset, self.method_name)
+
+    @property
+    def job_function_name(self):
+        func_model = self.env["queue.job.function"].sudo()
+        return func_model.job_function_name(self.recordset._name, self.method_name)
 
     @property
     def identity_key(self):
@@ -646,11 +702,27 @@ class Job(object):
         else:
             self._eta = value
 
+    @property
+    def channel(self):
+        return self._channel or self.job_config.channel
+
+    @channel.setter
+    def channel(self, value):
+        self._channel = value
+
+    @property
+    def exec_time(self):
+        if self.date_done and self.date_started:
+            return (self.date_done - self.date_started).total_seconds()
+        return None
+
     def set_pending(self, result=None, reset_retry=True):
         self.state = PENDING
         self.date_enqueued = None
         self.date_started = None
+        self.date_done = None
         self.worker_pid = None
+        self.date_cancelled = None
         if reset_retry:
             self.retry = 0
         if result is not None:
@@ -669,15 +741,23 @@ class Job(object):
 
     def set_done(self, result=None):
         self.state = DONE
+        self.exc_name = None
         self.exc_info = None
         self.date_done = datetime.now()
         if result is not None:
             self.result = result
 
-    def set_failed(self, exc_info=None):
+    def set_cancelled(self, result=None):
+        self.state = CANCELLED
+        self.date_cancelled = datetime.now()
+        if result is not None:
+            self.result = result
+
+    def set_failed(self, **kw):
         self.state = FAILED
-        if exc_info is not None:
-            self.exc_info = exc_info
+        for k, v in kw.items():
+            if v is not None:
+                setattr(self, k, v)
 
     def __repr__(self):
         return "<Job %s, priority:%d>" % (self.uuid, self.priority)
@@ -708,6 +788,7 @@ class Job(object):
         """
         eta_seconds = self._get_retry_seconds(seconds)
         self.eta = timedelta(seconds=eta_seconds)
+        self.exc_name = None
         self.exc_info = None
         if result is not None:
             self.result = result
