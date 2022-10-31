@@ -177,6 +177,13 @@ they have different xmlids. On uninstall, the merged record is deleted when all
 the modules using it are uninstalled.
 
 
+**Job function: model**
+
+If the function is defined in an abstract model, you can not write
+``<field name="model_id" ref="xml_id_of_the_abstract_model"</field>``
+but you have to define a function for each model that inherits from the abstract model.
+
+
 **Job function: channel**
 
 The channel where the job will be delayed. The default channel is ``root``.
@@ -364,6 +371,7 @@ Contributors
 * Tatiana Deribina <tatiana.deribina@avoin.systems>
 * Souheil Bejaoui <souheil.bejaoui@acsone.eu>
 * Eric Antones <eantones@nuobit.com>
+* Simone Orsi <simone.orsi@camptocamp.com>
 
 Maintainers
 ~~~~~~~~~~~
