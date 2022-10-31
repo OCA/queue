@@ -17,6 +17,11 @@ msgstr ""
 "X-Generator: Weblate 3.8\n"
 
 #. module: test_queue_job
+#: model:ir.model.fields,field_description:test_queue_job.field_queue_job__additional_info
+msgid "Additional Info"
+msgstr ""
+
+#. module: test_queue_job
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel__create_uid
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__create_uid
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action__create_uid
