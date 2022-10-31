@@ -17,6 +17,11 @@ msgstr ""
 "X-Generator: Weblate 3.8\n"
 
 #. module: test_queue_job
+#: model:ir.model.fields,field_description:test_queue_job.field_queue_job__additional_info
+msgid "Additional Info"
+msgstr ""
+
+#. module: test_queue_job
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel__create_uid
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__create_uid
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action__create_uid
@@ -31,7 +36,6 @@ msgid "Created on"
 msgstr "创建时间"
 
 #. module: test_queue_job
-#: model:ir.model.fields,field_description:test_queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel__display_name
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__display_name
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action__display_name
@@ -39,7 +43,6 @@ msgid "Display Name"
 msgstr "显示名称"
 
 #. module: test_queue_job
-#: model:ir.model.fields,field_description:test_queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel__id
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__id
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action__id
@@ -47,7 +50,6 @@ msgid "ID"
 msgstr "ID"
 
 #. module: test_queue_job
-#: model:ir.model.fields,field_description:test_queue_job.field_queue_job____last_update
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel____last_update
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job____last_update
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action____last_update
