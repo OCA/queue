@@ -80,9 +80,37 @@ msgstr "基础"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Cancel"
 msgstr "取消"
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_jobs_to_cancelled
+msgid "Cancel all selected jobs"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Cancel job"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_set_jobs_cancelled
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
+msgid "Cancel jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__cancelled
+msgid "Cancelled"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid "Cancelled by %s"
+msgstr ""
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job_channel.py:0
@@ -140,6 +168,7 @@ msgstr "创建日期"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_uid
 msgid "Created by"
@@ -147,6 +176,7 @@ msgstr "创建者"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_date
 msgid "Created on"
@@ -163,6 +193,11 @@ msgid "Current try / max. retries"
 msgstr "当前尝试/最大重试次数"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__date_cancelled
+msgid "Date Cancelled"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_done
 msgid "Date Done"
 msgstr "完成日期"
@@ -176,6 +211,7 @@ msgstr "说明"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__display_name
 msgid "Display Name"
@@ -199,6 +235,12 @@ msgid "Enqueued"
 msgstr "排队"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_name
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Exception"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_info
 msgid "Exception Info"
 msgstr "异常信息"
@@ -209,9 +251,29 @@ msgid "Exception Information"
 msgstr "异常信息"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_message
+msgid "Exception Message"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Exception message"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Exception:"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__eta
 msgid "Execute only after"
 msgstr "仅在此之后执行"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__exec_time
+msgid "Execution Time (avg)"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__failed
@@ -259,6 +321,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__id
 msgid "ID"
@@ -358,10 +421,13 @@ msgstr "作业中断并设置为已完成：无需执行任何操作。"
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__job_ids
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__job_ids
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__job_ids
 #: model:ir.ui.menu,name:queue_job.menu_queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_graph
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_pivot
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Jobs"
 msgstr "作业"
@@ -382,6 +448,7 @@ msgstr "关键字参数"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function____last_update
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job____last_update
 msgid "Last Modified on"
@@ -389,6 +456,7 @@ msgstr "最后修改日"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_uid
 msgid "Last Updated by"
@@ -396,6 +464,7 @@ msgstr "最后更新者"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
 msgid "Last Updated on"
@@ -441,6 +510,7 @@ msgstr "方法名称"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__model_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__model_id
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Model"
 msgstr "模型"
 
@@ -513,6 +583,10 @@ msgstr "递送错误消息数量"
 msgid "Override Channel"
 msgstr "覆盖频道"
 
+#: model:ir.model.fields,help:queue_job.field_queue_job__message_unread_counter
+msgid "Number of unread messages"
+msgstr "未读消息数量"
+
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__parent_id
 msgid "Parent Channel"
@@ -560,7 +634,7 @@ msgstr "队列作业"
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
-msgid "Queue jobs must created by calling 'with_delay()'."
+msgid "Queue jobs must be created by calling 'with_delay()'."
 msgstr ""
 
 #. module: queue_job
@@ -601,6 +675,11 @@ msgstr "相关记录"
 #, python-format
 msgid "Related Records"
 msgstr "相关记录"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_tree
+msgid "Remaining days to execute"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__removal_interval
@@ -737,6 +816,11 @@ msgstr ""
 "空的时候重试是无限的。"
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
+msgid "The selected jobs will be cancelled."
+msgstr ""
+
+#. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
 msgid "The selected jobs will be requeued."
 msgstr "所选作业将重新排队。"
@@ -745,6 +829,16 @@ msgstr "所选作业将重新排队。"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "The selected jobs will be set to done."
 msgstr "所选作业将设置为完成。"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Time (s)"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__exec_time
+msgid "Time required to execute this job in seconds. Average when grouped."
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_decoration
@@ -801,6 +895,9 @@ msgstr ""
 
 #~ msgid "Unread Messages Counter"
 #~ msgstr "未读消息计数器"
+
+#~ msgid "Override Channel"
+#~ msgstr "覆盖频道"
 
 #~ msgid "Website Messages"
 #~ msgstr "网站消息"
