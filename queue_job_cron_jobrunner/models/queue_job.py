@@ -4,11 +4,12 @@
 
 import logging
 import traceback
+from datetime import datetime
 from io import StringIO
 
 from psycopg2 import OperationalError
 
-from odoo import _, api, models, tools
+from odoo import _, api, fields, models, tools
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
 from odoo.addons.queue_job.controllers.main import PG_RETRY
@@ -135,9 +136,21 @@ class QueueJob(models.Model):
 
         All crons should be triggered at the same time.
         """
+        if at is not None:
+            if isinstance(at, list) and not all([isinstance(x, datetime) for x in at]):
+                raise TypeError(f"Invalid parameter 'at': {str(at)}")
+            elif not isinstance(at, list) and not isinstance(at, datetime):
+                raise TypeError(f"Invalid parameter 'at': {str(at)}")
         crons = self.env["ir.cron"].sudo().search([("queue_job_runner", "=", True)])
+        nextcall = fields.Datetime.now()
+        if at is not None:
+            if isinstance(at, list) and len(at):
+                nextcall = sorted(at).pop()
+            elif isinstance(at, datetime):
+                nextcall = at
         for cron in crons:
-            cron._trigger(at=at)
+            if nextcall < cron.nextcall:
+                cron.nextcall = nextcall
 
     def _ensure_cron_trigger(self):
         """Create cron triggers for these jobs"""

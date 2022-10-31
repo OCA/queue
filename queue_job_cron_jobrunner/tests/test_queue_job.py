@@ -2,39 +2,17 @@
 # @author Iván Todorovich <ivan.todorovich@camptocamp.com>
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from datetime import timedelta
-
 from freezegun import freeze_time
 
-from odoo import fields
 from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger
 
 
 class TestQueueJob(TransactionCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.env = cls.env(context=dict(cls.env.context, tracking_disable=True))
-        cls.cron = cls.env.ref("queue_job_cron_jobrunner.queue_job_cron")
-        # Cleanup triggers just in case
-        cls.env["ir.cron.trigger"].search([]).unlink()
-
-    def assertTriggerAt(self, at, message=None):
-        """Ensures a cron trigger is created at the given time"""
-        return self.assertTrue(
-            self.env["ir.cron.trigger"].search([("call_at", "=", at)]),
-            message,
-        )
-
-    @freeze_time("2022-02-22 22:22:22")
-    def test_queue_job_cron_trigger(self):
-        """Test that ir.cron triggers are created for every queue.job"""
-        job = self.env["res.partner"].with_delay().create({"name": "test"})
-        job_record = job.db_record()
-        self.assertTriggerAt(fields.Datetime.now(), "Trigger should've been created")
-        job_record.eta = fields.Datetime.now() + timedelta(hours=1)
-        self.assertTriggerAt(job_record.eta, "A new trigger should've been created")
+    def setUp(self):
+        super().setUp()
+        self.env = self.env(context=dict(self.env.context, tracking_disable=True))
+        self.cron = self.env.ref("queue_job_cron_jobrunner.queue_job_cron")
 
     @mute_logger("odoo.addons.queue_job_cron_jobrunner.models.queue_job")
     def test_queue_job_process(self):
