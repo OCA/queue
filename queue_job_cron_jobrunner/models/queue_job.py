@@ -105,6 +105,10 @@ class QueueJob(models.Model):
             self.env["base"].flush()
             self.env.cr.commit()  # pylint: disable=invalid-commit
 
+        _logger.debug("%s enqueue depends started", job)
+        job.enqueue_waiting()
+        _logger.debug("%s enqueue depends done", job)
+
     @api.model
     def _job_runner(self, commit=True):
         """Short-lived job runner, triggered by async crons"""
