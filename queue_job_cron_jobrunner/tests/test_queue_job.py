@@ -52,3 +52,20 @@ class TestQueueJob(TransactionCase):
         self.assertEqual(job1_record.state, "done", "Processed OK")
         self.assertEqual(job2_record.state, "failed", "Has errors")
         self.assertEqual(job3_record.state, "pending", "Still pending, because of eta")
+
+    @freeze_time("2022-02-22 22:22:22")
+    def test_queue_job_cron_trigger_enqueue_dependencies(self):
+        """Test that ir.cron execution enqueue waiting dependencies"""
+        delayable = self.env["res.partner"].delayable().create({"name": "test"})
+        delayable2 = self.env["res.partner"].delayable().create({"name": "test2"})
+        delayable.on_done(delayable2)
+        delayable.delay()
+        job_record = delayable._generated_job.db_record()
+        job_record_depends = delayable2._generated_job.db_record()
+
+        self.env["queue.job"]._job_runner(commit=False)
+
+        self.assertEqual(job_record.state, "done", "Processed OK")
+        # if the state is "waiting_dependencies", it means the "enqueue_waiting()"
+        # step has not been doen when the parent job has been done
+        self.assertEqual(job_record_depends.state, "done", "Processed OK")
