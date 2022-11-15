@@ -134,11 +134,6 @@ msgid "Channel"
 msgstr "Canal"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__channel_method_name
-msgid "Channel Method Name"
-msgstr "Nombre del método del canal"
-
-#. module: queue_job
 #: model:ir.model.constraint,message:queue_job.constraint_queue_job_channel_name_uniq
 msgid "Channel complete name must be unique"
 msgstr "El nombre completo del canal debe ser único"
@@ -155,6 +150,11 @@ msgstr "Canales"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__company_id
 msgid "Company"
 msgstr "Empresa"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__channel_method_name
+msgid "Complete Method Name"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__complete_name
@@ -202,6 +202,17 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_done
 msgid "Date Done"
 msgstr "Fecha de realización"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependencies
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Dependencies"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependency_graph
+msgid "Dependency Graph"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__name
@@ -306,6 +317,26 @@ msgstr "Seguidores (Partners)"
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
 msgstr "Icono de Font Awesome ej. fa-tasks"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Graph"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Graph Jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_jobs_count
+msgid "Graph Jobs Count"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_uuid
+msgid "Graph UUID"
+msgstr ""
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
@@ -441,6 +472,12 @@ msgstr "Trabajos"
 #: model:ir.cron,name:queue_job.ir_cron_queue_job_garbage_collector
 msgid "Jobs Garbage Collector"
 msgstr "Recolector de basura de trabajos"
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid "Jobs for graph %s"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__kwargs
@@ -721,6 +758,11 @@ msgid "Result"
 msgstr "Resultado"
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Results"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_retry_pattern
 msgid "Retry Pattern"
 msgstr "Patrón de reintentos"
@@ -759,6 +801,11 @@ msgstr "Marcar como 'Hecho'"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Set to done"
 msgstr "Marcar como hecho"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__graph_uuid
+msgid "Single shared identifier of a Graph. Empty for a single job."
+msgstr ""
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:0
@@ -895,6 +942,12 @@ msgid "User ID"
 msgstr "ID de usuario"
 
 #. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__wait_dependencies
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Wait Dependencies"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_requeue_job
 msgid "Wizard to requeue a selection of jobs"
 msgstr "Asistente para volver a poner en cola una selección de trabajos"
@@ -913,6 +966,9 @@ msgstr "Pid del trabajador"
 
 #~ msgid "Unread Messages Counter"
 #~ msgstr "Nº de mensajes sin leer"
+
+#~ msgid "Channel Method Name"
+#~ msgstr "Nombre del método del canal"
 
 #~ msgid "Override Channel"
 #~ msgstr "Sobreescribir canal"
