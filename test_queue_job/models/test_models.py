@@ -3,7 +3,9 @@
 
 from odoo import fields, models
 
+from odoo.addons.queue_job.delay import chain
 from odoo.addons.queue_job.exception import RetryableJobError
+from odoo.addons.queue_job.job import identity_exact
 
 
 class QueueJob(models.Model):
@@ -28,7 +30,7 @@ class QueueJob(models.Model):
         }
 
 
-class TestQueueJob(models.Model):
+class ModelTestQueueJob(models.Model):
 
     _name = "test.queue.job"
     _description = "Test model for queue.job"
@@ -46,6 +48,19 @@ class TestQueueJob(models.Model):
             return self.env.context
         return args, kwargs
 
+    def create_ir_logging(self, message, level="info"):
+        return self.env["ir.logging"].create(
+            {
+                "name": "test_queue_job",
+                "type": "server",
+                "dbname": self.env.cr.dbname,
+                "message": message,
+                "path": "job",
+                "func": "create_ir_logging",
+                "line": 1,
+            }
+        )
+
     def no_description(self):
         return
 
@@ -56,7 +71,7 @@ class TestQueueJob(models.Model):
         return
 
     def mapped(self, func):
-        return super(TestQueueJob, self).mapped(func)
+        return super(ModelTestQueueJob, self).mapped(func)
 
     def job_alter_mutable(self, mutable_arg, mutable_kwarg=None):
         mutable_arg.append(2)
@@ -96,8 +111,33 @@ class TestQueueJob(models.Model):
             value += "_BUT_FAILED"
         return {"additional_info": value}
 
+    def button_that_uses_with_delay(self):
+        self.with_delay(
+            channel="root.test",
+            description="Test",
+            eta=15,
+            identity_key=identity_exact,
+            max_retries=1,
+            priority=15,
+        ).testing_method(1, foo=2)
 
-class TestQueueChannel(models.Model):
+    def button_that_uses_delayable_chain(self):
+        delayables = chain(
+            self.delayable(
+                channel="root.test",
+                description="Test",
+                eta=15,
+                identity_key=identity_exact,
+                max_retries=1,
+                priority=15,
+            ).testing_method(1, foo=2),
+            self.delayable().testing_method("x", foo="y"),
+            self.delayable().no_description(),
+        )
+        delayables.delay()
+
+
+class ModelTestQueueChannel(models.Model):
 
     _name = "test.queue.channel"
     _description = "Test model for queue.channel"
@@ -112,7 +152,7 @@ class TestQueueChannel(models.Model):
         return
 
 
-class TestRelatedAction(models.Model):
+class ModelTestRelatedAction(models.Model):
 
     _name = "test.related.action"
     _description = "Test model for related actions"
