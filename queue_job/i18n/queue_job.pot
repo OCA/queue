@@ -128,11 +128,6 @@ msgid "Channel"
 msgstr ""
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__channel_method_name
-msgid "Channel Method Name"
-msgstr ""
-
-#. module: queue_job
 #: model:ir.model.constraint,message:queue_job.constraint_queue_job_channel_name_uniq
 msgid "Channel complete name must be unique"
 msgstr ""
@@ -148,6 +143,11 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__company_id
 msgid "Company"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__channel_method_name
+msgid "Complete Method Name"
 msgstr ""
 
 #. module: queue_job
@@ -195,6 +195,17 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_done
 msgid "Date Done"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependencies
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Dependencies"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependency_graph
+msgid "Dependency Graph"
 msgstr ""
 
 #. module: queue_job
@@ -299,6 +310,26 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Graph"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Graph Jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_jobs_count
+msgid "Graph Jobs Count"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_uuid
+msgid "Graph UUID"
 msgstr ""
 
 #. module: queue_job
@@ -431,6 +462,12 @@ msgstr ""
 #: model:ir.cron,cron_name:queue_job.ir_cron_queue_job_garbage_collector
 #: model:ir.cron,name:queue_job.ir_cron_queue_job_garbage_collector
 msgid "Jobs Garbage Collector"
+msgstr ""
+
+#. module: queue_job
+#: code:addons/queue_job/models/queue_job.py:0
+#, python-format
+msgid "Jobs for graph %s"
 msgstr ""
 
 #. module: queue_job
@@ -702,6 +739,11 @@ msgid "Result"
 msgstr ""
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Results"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_retry_pattern
 msgid "Retry Pattern"
 msgstr ""
@@ -739,6 +781,11 @@ msgstr ""
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Set to done"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__graph_uuid
+msgid "Single shared identifier of a Graph. Empty for a single job."
 msgstr ""
 
 #. module: queue_job
@@ -850,6 +897,12 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__user_id
 msgid "User ID"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__wait_dependencies
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Wait Dependencies"
 msgstr ""
 
 #. module: queue_job
