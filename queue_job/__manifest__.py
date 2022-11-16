@@ -7,7 +7,7 @@
     "website": "https://github.com/OCA/queue",
     "license": "LGPL-3",
     "category": "Generic Modules",
-    "depends": ["mail", "base_sparse_field"],
+    "depends": ["mail", "base_sparse_field", "web"],
     "external_dependencies": {"python": ["requests"]},
     "data": [
         "security/security.xml",
@@ -24,10 +24,7 @@
     ],
     "assets": {
         "web.assets_backend": [
-            "/queue_job/static/lib/vis/vis-network.min.css",
-            "/queue_job/static/src/scss/queue_job_fields.scss",
-            "/queue_job/static/lib/vis/vis-network.min.js",
-            "/queue_job/static/src/js/queue_job_fields.js",
+            "/queue_job/static/src/views/**/*",
         ],
     },
     "installable": True,

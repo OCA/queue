@@ -319,7 +319,7 @@ class QueueJob(models.Model):
             if state == DONE:
                 job_.set_done(result=result)
                 job_.store()
-                record.env["queue.job"].flush()
+                record.env["queue.job"].flush_model()
                 job_.enqueue_waiting()
             elif state == PENDING:
                 job_.set_pending(result=result)
