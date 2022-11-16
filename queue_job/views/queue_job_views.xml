@@ -60,7 +60,7 @@
                     </h1>
                     <group>
                         <field name="uuid" />
-                        <field name="graph_uuid" groups="base.group_no_one" />
+                        <field name="graph_uuid" />
                         <field name="func_string" groups="base.group_no_one" />
                         <field name="job_function_id" />
                         <field name="channel" />

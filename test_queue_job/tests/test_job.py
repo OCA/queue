@@ -198,7 +198,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         self.assertEqual(stored.additional_info, "JUST_TESTING")
         test_job.set_failed(exc_info="failed test", exc_name="FailedTest")
         test_job.store()
-        stored.invalidate_cache()
+        stored.invalidate_recordset()
         self.assertEqual(stored.additional_info, "JUST_TESTING_BUT_FAILED")
 
     def test_read(self):

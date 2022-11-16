@@ -613,6 +613,7 @@ msgstr ""
 msgid "Override Channel"
 msgstr ""
 
+#. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_unread_counter
 msgid "Number of unread messages"
 msgstr ""
