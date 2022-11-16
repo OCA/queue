@@ -116,7 +116,7 @@ class TestJobDependencies(common.TransactionCase):
         job_root.perform()
         job_root.set_done()
         job_root.store()
-        self.env["base"].flush()
+        self.env.flush_all()
 
         job_root.enqueue_waiting()
 

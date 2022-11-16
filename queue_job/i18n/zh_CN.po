@@ -620,6 +620,7 @@ msgstr "递送错误消息数量"
 msgid "Override Channel"
 msgstr "覆盖频道"
 
+#. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_unread_counter
 msgid "Number of unread messages"
 msgstr "未读消息数量"
