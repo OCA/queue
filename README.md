@@ -26,6 +26,7 @@ addon | version | maintainers | summary
 [queue_job_batch](queue_job_batch/) | 14.0.1.0.0 |  | Job Queue Batch
 [queue_job_context](queue_job_context/) | 14.0.1.0.1 | [![AshishHirapara](https://github.com/AshishHirapara.png?size=30px)](https://github.com/AshishHirapara) | Queue Job, prepare context before enqueue keys
 [queue_job_cron](queue_job_cron/) | 14.0.1.1.0 |  | Scheduled Actions as Queue Jobs
+[queue_job_cron_jobrunner](queue_job_cron_jobrunner/) | 14.0.1.0.0 |  | Run jobs without a dedicated JobRunner
 [queue_job_subscribe](queue_job_subscribe/) | 14.0.1.0.0 |  | Control which users are subscribed to queue job notifications
 [test_base_import_async](test_base_import_async/) | 14.0.1.0.1 |  | Test suite for base_import_async. Normally you don't need to install this.
 [test_queue_job](test_queue_job/) | 14.0.3.0.1 |  | Queue Job Tests
