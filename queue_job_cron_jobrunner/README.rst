@@ -23,7 +23,7 @@ Queue Job Cron Jobrunner
     :target: https://runbot.odoo-community.org/runbot/230/14.0
     :alt: Try me on Runbot
 
-|badge1| |badge2| |badge3| |badge4| |badge5|
+|badge1| |badge2| |badge3| |badge4| |badge5| 
 
 This module implements a simple ``queue.job`` runner using ``ir.cron`` triggers.
 
@@ -88,7 +88,7 @@ Bug Tracker
 Bugs are tracked on `GitHub Issues <https://github.com/OCA/queue/issues>`_.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us smashing it by providing a detailed and welcomed
-`feedback <https://github.com/OCA/queue/issues/new?body=module:%20queue_job_cron_jobrunner%0Aversion:%2015.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
+`feedback <https://github.com/OCA/queue/issues/new?body=module:%20queue_job_cron_jobrunner%0Aversion:%2014.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
 
 Do not contact contributors directly about support or help with technical issues.
 
@@ -106,10 +106,6 @@ Contributors
 * `Camptocamp <https://www.camptocamp.com>`_
 
     * Iván Todorovich <ivan.todorovich@camptocamp.com>
-
-* `codeforward B.V. <https://codeforward.nl>`_
-
-    * Chris Bergman <chris.bergman@codeforward.nl>
 
 Maintainers
 ~~~~~~~~~~~
@@ -130,7 +126,7 @@ promote its widespread use.
 
 Current `maintainer <https://odoo-community.org/page/maintainer-role>`__:
 
-|maintainer-ivantodorovich|
+|maintainer-ivantodorovich| 
 
 This module is part of the `OCA/queue <https://github.com/OCA/queue/tree/14.0/queue_job_cron_jobrunner>`_ project on GitHub.
 
