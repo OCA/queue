@@ -23,7 +23,7 @@ Scheduled Actions as Queue Jobs
     :target: https://runbot.odoo-community.org/runbot/230/16.0
     :alt: Try me on Runbot
 
-|badge1| |badge2| |badge3| |badge4| |badge5|
+|badge1| |badge2| |badge3| |badge4| |badge5| 
 
 This module extends the functionality of queue_job and allows to run an Odoo
 cron as a queue job.
