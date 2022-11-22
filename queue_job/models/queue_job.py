@@ -2,13 +2,28 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import logging
+import random
 from datetime import datetime, timedelta
 
 from odoo import _, api, exceptions, fields, models
 from odoo.osv import expression
+from odoo.tools import html_escape
 
+from odoo.addons.base_sparse_field.models.fields import Serialized
+
+from ..delay import Graph
+from ..exception import JobError
 from ..fields import JobSerialized
-from ..job import DONE, PENDING, STATES, Job
+from ..job import (
+    CANCELLED,
+    DONE,
+    FAILED,
+    PENDING,
+    STARTED,
+    STATES,
+    WAIT_DEPENDENCIES,
+    Job,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -37,27 +52,28 @@ class QueueJob(models.Model):
         "date_created",
         "model_name",
         "method_name",
+        "func_string",
+        "channel_method_name",
+        "job_function_id",
         "records",
         "args",
         "kwargs",
     )
 
     uuid = fields.Char(string="UUID", readonly=True, index=True, required=True)
-    user_id = fields.Many2one(
-        comodel_name="res.users",
-        string="User ID",
-        compute="_compute_user_id",
-        inverse="_inverse_user_id",
-        store=True,
+    graph_uuid = fields.Char(
+        string="Graph UUID",
+        readonly=True,
+        index=True,
+        help="Single shared identifier of a Graph. Empty for a single job.",
     )
+    user_id = fields.Many2one(comodel_name="res.users", string="User ID")
     company_id = fields.Many2one(
         comodel_name="res.company", string="Company", index=True
     )
     name = fields.Char(string="Description", readonly=True)
 
-    model_name = fields.Char(
-        string="Model", compute="_compute_model_name", store=True, readonly=True
-    )
+    model_name = fields.Char(string="Model", readonly=True)
     method_name = fields.Char(readonly=True)
     # record_ids field is only for backward compatibility (e.g. used in related
     # actions), can be removed (replaced by "records") in 14.0
@@ -67,14 +83,18 @@ class QueueJob(models.Model):
         readonly=True,
         base_type=models.BaseModel,
     )
+    dependencies = Serialized(readonly=True)
+    # dependency graph as expected by the field widget
+    dependency_graph = Serialized(compute="_compute_dependency_graph")
+    graph_jobs_count = fields.Integer(compute="_compute_graph_jobs_count")
     args = JobSerialized(readonly=True, base_type=tuple)
     kwargs = JobSerialized(readonly=True, base_type=dict)
-    func_string = fields.Char(
-        string="Task", compute="_compute_func_string", readonly=True, store=True
-    )
+    func_string = fields.Char(string="Task", readonly=True)
 
     state = fields.Selection(STATES, readonly=True, required=True, index=True)
     priority = fields.Integer()
+    exc_name = fields.Char(string="Exception", readonly=True)
+    exc_message = fields.Char(string="Exception Message", readonly=True)
     exc_info = fields.Text(string="Exception Info", readonly=True)
     result = fields.Text(readonly=True)
 
@@ -82,6 +102,12 @@ class QueueJob(models.Model):
     date_started = fields.Datetime(string="Start Date", readonly=True)
     date_enqueued = fields.Datetime(string="Enqueue Time", readonly=True)
     date_done = fields.Datetime(readonly=True)
+    exec_time = fields.Float(
+        string="Execution Time (avg)",
+        group_operator="avg",
+        help="Time required to execute this job in seconds. Average when grouped.",
+    )
+    date_cancelled = fields.Datetime(readonly=True)
 
     eta = fields.Datetime(string="Execute only after")
     retry = fields.Integer(string="Current try")
@@ -91,24 +117,18 @@ class QueueJob(models.Model):
         "max. retries.\n"
         "Retries are infinite when empty.",
     )
-    channel_method_name = fields.Char(
-        readonly=True, compute="_compute_job_function", store=True
-    )
+    # FIXME the name of this field is very confusing
+    channel_method_name = fields.Char(string="Complete Method Name", readonly=True)
     job_function_id = fields.Many2one(
         comodel_name="queue.job.function",
-        compute="_compute_job_function",
         string="Job Function",
         readonly=True,
-        store=True,
     )
 
-    override_channel = fields.Char()
-    channel = fields.Char(
-        compute="_compute_channel", inverse="_inverse_channel", store=True, index=True
-    )
+    channel = fields.Char(index=True)
 
-    identity_key = fields.Char()
-    worker_pid = fields.Integer()
+    identity_key = fields.Char(readonly=True)
+    worker_pid = fields.Integer(readonly=True)
 
     def init(self):
         self._cr.execute(
@@ -123,56 +143,100 @@ class QueueJob(models.Model):
             )
 
     @api.depends("records")
-    def _compute_user_id(self):
-        for record in self:
-            record.user_id = record.records.env.uid
-
-    def _inverse_user_id(self):
-        for record in self.with_context(_job_edit_sentinel=self.EDIT_SENTINEL):
-            record.records = record.records.with_user(record.user_id.id)
-
-    @api.depends("records")
-    def _compute_model_name(self):
-        for record in self:
-            record.model_name = record.records._name
-
-    @api.depends("records")
     def _compute_record_ids(self):
         for record in self:
             record.record_ids = record.records.ids
 
-    def _inverse_channel(self):
+    @api.depends("dependencies")
+    def _compute_dependency_graph(self):
+        jobs_groups = self.env["queue.job"].read_group(
+            [
+                (
+                    "graph_uuid",
+                    "in",
+                    [uuid for uuid in self.mapped("graph_uuid") if uuid],
+                )
+            ],
+            ["graph_uuid", "ids:array_agg(id)"],
+            ["graph_uuid"],
+        )
+        ids_per_graph_uuid = {
+            group["graph_uuid"]: group["ids"] for group in jobs_groups
+        }
         for record in self:
-            record.override_channel = record.channel
+            if not record.graph_uuid:
+                record.dependency_graph = {}
+                continue
 
-    @api.depends("job_function_id.channel_id")
-    def _compute_channel(self):
-        for record in self:
-            channel = (
-                record.override_channel or record.job_function_id.channel or "root"
-            )
-            if record.channel != channel:
-                record.channel = channel
+            graph_jobs = self.browse(ids_per_graph_uuid.get(record.graph_uuid) or [])
+            if not graph_jobs:
+                record.dependency_graph = {}
+                continue
 
-    @api.depends("model_name", "method_name", "job_function_id.channel_id")
-    def _compute_job_function(self):
-        for record in self:
-            func_model = self.env["queue.job.function"]
-            channel_method_name = func_model.job_function_name(
-                record.model_name, record.method_name
-            )
-            function = func_model.search([("name", "=", channel_method_name)], limit=1)
-            record.channel_method_name = channel_method_name
-            record.job_function_id = function
+            graph_ids = {graph_job.uuid: graph_job.id for graph_job in graph_jobs}
+            graph_jobs_by_ids = {graph_job.id: graph_job for graph_job in graph_jobs}
 
-    @api.depends("model_name", "method_name", "records", "args", "kwargs")
-    def _compute_func_string(self):
+            graph = Graph()
+            for graph_job in graph_jobs:
+                graph.add_vertex(graph_job.id)
+                for parent_uuid in graph_job.dependencies["depends_on"]:
+                    parent_id = graph_ids.get(parent_uuid)
+                    if not parent_id:
+                        continue
+                    graph.add_edge(parent_id, graph_job.id)
+                for child_uuid in graph_job.dependencies["reverse_depends_on"]:
+                    child_id = graph_ids.get(child_uuid)
+                    if not child_id:
+                        continue
+                    graph.add_edge(graph_job.id, child_id)
+
+            record.dependency_graph = {
+                # list of ids
+                "nodes": [
+                    graph_jobs_by_ids[graph_id]._dependency_graph_vis_node()
+                    for graph_id in graph.vertices()
+                ],
+                # list of tuples (from, to)
+                "edges": graph.edges(),
+            }
+
+    def _dependency_graph_vis_node(self):
+        """Return the node as expected by the JobDirectedGraph widget"""
+        default = ("#D2E5FF", "#2B7CE9")
+        colors = {
+            DONE: ("#C2FABC", "#4AD63A"),
+            FAILED: ("#FB7E81", "#FA0A10"),
+            STARTED: ("#FFFF00", "#FFA500"),
+        }
+        return {
+            "id": self.id,
+            "title": "<strong>%s</strong><br/>%s"
+            % (
+                html_escape(self.display_name),
+                html_escape(self.func_string),
+            ),
+            "color": colors.get(self.state, default)[0],
+            "border": colors.get(self.state, default)[1],
+            "shadow": True,
+        }
+
+    def _compute_graph_jobs_count(self):
+        jobs_groups = self.env["queue.job"].read_group(
+            [
+                (
+                    "graph_uuid",
+                    "in",
+                    [uuid for uuid in self.mapped("graph_uuid") if uuid],
+                )
+            ],
+            ["graph_uuid"],
+            ["graph_uuid"],
+        )
+        count_per_graph_uuid = {
+            group["graph_uuid"]: group["graph_uuid_count"] for group in jobs_groups
+        }
         for record in self:
-            model = repr(record.records)
-            args = [repr(arg) for arg in record.args]
-            kwargs = ["{}={!r}".format(key, val) for key, val in record.kwargs.items()]
-            all_args = ", ".join(args + kwargs)
-            record.func_string = "{}.{}({})".format(model, record.method_name, all_args)
+            record.graph_jobs_count = count_per_graph_uuid.get(record.graph_uuid) or 0
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -180,9 +244,12 @@ class QueueJob(models.Model):
             # Prevent to create a queue.job record "raw" from RPC.
             # ``with_delay()`` must be used.
             raise exceptions.AccessError(
-                _("Queue jobs must created by calling 'with_delay()'.")
+                _("Queue jobs must be created by calling 'with_delay()'.")
             )
-        return super().create(vals_list)
+        return super(
+            QueueJob,
+            self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True),
+        ).create(vals_list)
 
     def write(self, vals):
         if self.env.context.get("_job_edit_sentinel") is not self.EDIT_SENTINEL:
@@ -196,10 +263,25 @@ class QueueJob(models.Model):
                     )
                 )
 
+        different_user_jobs = self.browse()
+        if vals.get("user_id"):
+            different_user_jobs = self.filtered(
+                lambda records: records.env.user.id != vals["user_id"]
+            )
+
         if vals.get("state") == "failed":
             self._message_post_on_failure()
 
-        return super().write(vals)
+        result = super().write(vals)
+
+        for record in different_user_jobs:
+            # the user is stored in the env of the record, but we still want to
+            # have a stored user_id field to be able to search/groupby, so
+            # synchronize the env of records with user_id
+            super(QueueJob, record).write(
+                {"records": record.records.with_user(vals["user_id"])}
+            )
+        return result
 
     def open_related_action(self):
         """Open the related action associated to the job"""
@@ -208,6 +290,22 @@ class QueueJob(models.Model):
         action = job.related_action()
         if action is None:
             raise exceptions.UserError(_("No action available for this job"))
+        return action
+
+    def open_graph_jobs(self):
+        """Return action that opens all jobs of the same graph"""
+        self.ensure_one()
+        jobs = self.env["queue.job"].search([("graph_uuid", "=", self.graph_uuid)])
+
+        action_jobs = self.env.ref("queue_job.action_queue_job")
+        action = action_jobs.read()[0]
+        action.update(
+            {
+                "name": _("Jobs for graph %s") % (self.graph_uuid),
+                "context": {},
+                "domain": [("id", "in", jobs.ids)],
+            }
+        )
         return action
 
     def _change_job_state(self, state, result=None):
@@ -220,28 +318,41 @@ class QueueJob(models.Model):
             job_ = Job.load(record.env, record.uuid)
             if state == DONE:
                 job_.set_done(result=result)
+                job_.store()
+                record.env["queue.job"].flush_model()
+                job_.enqueue_waiting()
             elif state == PENDING:
                 job_.set_pending(result=result)
+                job_.store()
+            elif state == CANCELLED:
+                job_.set_cancelled(result=result)
+                job_.store()
             else:
                 raise ValueError("State not supported: %s" % state)
-            job_.store()
 
     def button_done(self):
         result = _("Manually set to done by %s") % self.env.user.name
         self._change_job_state(DONE, result=result)
         return True
 
+    def button_cancelled(self):
+        result = _("Cancelled by %s") % self.env.user.name
+        self._change_job_state(CANCELLED, result=result)
+        return True
+
     def requeue(self):
-        self._change_job_state(PENDING)
+        jobs_to_requeue = self.filtered(lambda job_: job_.state != WAIT_DEPENDENCIES)
+        jobs_to_requeue._change_job_state(PENDING)
         return True
 
     def _message_post_on_failure(self):
         # subscribe the users now to avoid to subscribe them
         # at every job creation
         domain = self._subscribe_users_domain()
-        users = self.env["res.users"].search(domain)
-        self.message_subscribe(partner_ids=users.mapped("partner_id").ids)
+        base_users = self.env["res.users"].search(domain)
         for record in self:
+            users = base_users | record.user_id
+            record.message_subscribe(partner_ids=users.mapped("partner_id").ids)
             msg = record._message_failed_job()
             if msg:
                 record.message_post(body=msg, subtype_xmlid="queue_job.mt_job_failed")
@@ -289,7 +400,9 @@ class QueueJob(models.Model):
             while True:
                 jobs = self.search(
                     [
+                        "|",
                         ("date_done", "<=", deadline),
+                        ("date_cancelled", "<=", deadline),
                         ("channel", "=", channel.complete_name),
                     ],
                     limit=1000,
@@ -382,5 +495,7 @@ class QueueJob(models.Model):
             )
         return action
 
-    def _test_job(self):
+    def _test_job(self, failure_rate=0):
         _logger.info("Running test job.")
+        if random.random() <= failure_rate:
+            raise JobError("Job failed")

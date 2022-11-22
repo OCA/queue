@@ -7,24 +7,30 @@ import logging
 import os
 import sys
 import uuid
+import weakref
 from datetime import datetime, timedelta
+from functools import total_ordering
 from random import randint
 
 import odoo
 
 from .exception import FailedJobError, NoSuchJobError, RetryableJobError
 
+WAIT_DEPENDENCIES = "wait_dependencies"
 PENDING = "pending"
 ENQUEUED = "enqueued"
+CANCELLED = "cancelled"
 DONE = "done"
 STARTED = "started"
 FAILED = "failed"
 
 STATES = [
+    (WAIT_DEPENDENCIES, "Wait Dependencies"),
     (PENDING, "Pending"),
     (ENQUEUED, "Enqueued"),
     (STARTED, "Started"),
     (DONE, "Done"),
+    (CANCELLED, "Cancelled"),
     (FAILED, "Failed"),
 ]
 
@@ -35,69 +41,17 @@ RETRY_INTERVAL = 10 * 60  # seconds
 _logger = logging.getLogger(__name__)
 
 
-class DelayableRecordset(object):
-    """Allow to delay a method for a recordset
+# TODO remove in 15.0 or 16.0, used to keep compatibility as the
+# class has been moved in 'delay'.
+def DelayableRecordset(*args, **kwargs):
+    # prevent circular import
+    from .delay import DelayableRecordset as dr
 
-    Usage::
-
-        delayable = DelayableRecordset(recordset, priority=20)
-        delayable.method(args, kwargs)
-
-    The method call will be processed asynchronously in the job queue, with
-    the passed arguments.
-
-    This class will generally not be used directly, it is used internally
-    by :meth:`~odoo.addons.queue_job.models.base.Base.with_delay`
-    """
-
-    def __init__(
-        self,
-        recordset,
-        priority=None,
-        eta=None,
-        max_retries=None,
-        description=None,
-        channel=None,
-        identity_key=None,
-    ):
-        self.recordset = recordset
-        self.priority = priority
-        self.eta = eta
-        self.max_retries = max_retries
-        self.description = description
-        self.channel = channel
-        self.identity_key = identity_key
-
-    def __getattr__(self, name):
-        if name in self.recordset:
-            raise AttributeError(
-                "only methods can be delayed ({} called on {})".format(
-                    name, self.recordset
-                )
-            )
-        recordset_method = getattr(self.recordset, name)
-
-        def delay(*args, **kwargs):
-            return Job.enqueue(
-                recordset_method,
-                args=args,
-                kwargs=kwargs,
-                priority=self.priority,
-                max_retries=self.max_retries,
-                eta=self.eta,
-                description=self.description,
-                channel=self.channel,
-                identity_key=self.identity_key,
-            )
-
-        return delay
-
-    def __str__(self):
-        return "DelayableRecordset({}{})".format(
-            self.recordset._name, getattr(self.recordset, "_ids", "")
-        )
-
-    __repr__ = __str__
+    _logger.debug(
+        "DelayableRecordset moved from the queue_job.job"
+        " to the queue_job.delay python module"
+    )
+    return dr(*args, **kwargs)
 
 
 def identity_exact(job_):
@@ -145,6 +99,7 @@ def identity_exact(job_):
     return hasher.hexdigest()
 
 
+@total_ordering
 class Job(object):
     """A Job is a task to execute. It is the in-memory representation of a job.
 
@@ -154,6 +109,10 @@ class Job(object):
     .. attribute:: uuid
 
         Id (UUID) of the job.
+
+    .. attribute:: graph_uuid
+
+        Shared UUID of the job's graph. Empty if the job is a single job.
 
     .. attribute:: state
 
@@ -214,6 +173,14 @@ class Job(object):
 
         A description of the result (for humans).
 
+    .. attribute:: exc_name
+
+        Exception error name when the job failed.
+
+    .. attribute:: exc_message
+
+        Exception error message when the job failed.
+
     .. attribute:: exc_info
 
         Exception information (traceback) when the job failed.
@@ -246,13 +213,25 @@ class Job(object):
 
     @classmethod
     def load(cls, env, job_uuid):
-        """Read a job from the Database"""
-        stored = cls.db_record_from_uuid(env, job_uuid)
+        """Read a single job from the Database
+
+        Raise an error if the job is not found.
+        """
+        stored = cls.db_records_from_uuids(env, [job_uuid])
         if not stored:
             raise NoSuchJobError(
                 "Job %s does no longer exist in the storage." % job_uuid
             )
         return cls._load_from_db_record(stored)
+
+    @classmethod
+    def load_many(cls, env, job_uuids):
+        """Read jobs in batch from the Database
+
+        Jobs not found are ignored.
+        """
+        recordset = cls.db_records_from_uuids(env, job_uuids)
+        return {cls._load_from_db_record(record) for record in recordset}
 
     @classmethod
     def _load_from_db_record(cls, job_db_record):
@@ -293,7 +272,11 @@ class Job(object):
         if stored.date_done:
             job_.date_done = stored.date_done
 
+        if stored.date_cancelled:
+            job_.date_cancelled = stored.date_cancelled
+
         job_.state = stored.state
+        job_.graph_uuid = stored.graph_uuid if stored.graph_uuid else None
         job_.result = stored.result if stored.result else None
         job_.exc_info = stored.exc_info if stored.exc_info else None
         job_.retry = stored.retry
@@ -302,6 +285,11 @@ class Job(object):
             job_.company_id = stored.company_id.id
         job_.identity_key = stored.identity_key
         job_.worker_pid = stored.worker_pid
+
+        job_.__depends_on_uuids.update(stored.dependencies.get("depends_on", []))
+        job_.__reverse_depends_on_uuids.update(
+            stored.dependencies.get("reverse_depends_on", [])
+        )
         return job_
 
     def job_record_with_same_identity_key(self):
@@ -319,6 +307,7 @@ class Job(object):
         )
         return existing
 
+    # TODO to deprecate (not called anymore)
     @classmethod
     def enqueue(
         cls,
@@ -352,31 +341,41 @@ class Job(object):
             channel=channel,
             identity_key=identity_key,
         )
-        if new_job.identity_key:
-            existing = new_job.job_record_with_same_identity_key()
+        return new_job._enqueue_job()
+
+    # TODO to deprecate (not called anymore)
+    def _enqueue_job(self):
+        if self.identity_key:
+            existing = self.job_record_with_same_identity_key()
             if existing:
                 _logger.debug(
                     "a job has not been enqueued due to having "
                     "the same identity key (%s) than job %s",
-                    new_job.identity_key,
+                    self.identity_key,
                     existing.uuid,
                 )
                 return Job._load_from_db_record(existing)
-        new_job.store()
+        self.store()
         _logger.debug(
             "enqueued %s:%s(*%r, **%r) with uuid: %s",
-            new_job.recordset,
-            new_job.method_name,
-            new_job.args,
-            new_job.kwargs,
-            new_job.uuid,
+            self.recordset,
+            self.method_name,
+            self.args,
+            self.kwargs,
+            self.uuid,
         )
-        return new_job
+        return self
 
     @staticmethod
     def db_record_from_uuid(env, job_uuid):
+        # TODO remove in 15.0 or 16.0
+        _logger.debug("deprecated, use 'db_records_from_uuids")
+        return Job.db_records_from_uuids(env, [job_uuid])
+
+    @staticmethod
+    def db_records_from_uuids(env, job_uuids):
         model = env["queue.job"].sudo()
-        record = model.search([("uuid", "=", job_uuid)], limit=1)
+        record = model.search([("uuid", "in", tuple(job_uuids))])
         return record.with_env(env).sudo()
 
     def __init__(
@@ -439,13 +438,7 @@ class Job(object):
         self.job_model_name = "queue.job"
 
         self.job_config = (
-            self.env["queue.job.function"]
-            .sudo()
-            .job_config(
-                self.env["queue.job.function"].job_function_name(
-                    self.model_name, self.method_name
-                )
-            )
+            self.env["queue.job.function"].sudo().job_config(self.job_function_name)
         )
 
         self.state = PENDING
@@ -457,9 +450,15 @@ class Job(object):
             self.max_retries = max_retries
 
         self._uuid = job_uuid
+        self.graph_uuid = None
 
         self.args = args
         self.kwargs = kwargs
+
+        self.__depends_on_uuids = set()
+        self.__reverse_depends_on_uuids = set()
+        self._depends_on = set()
+        self._reverse_depends_on = weakref.WeakSet()
 
         self.priority = priority
         if self.priority is None:
@@ -480,8 +479,11 @@ class Job(object):
         self.date_enqueued = None
         self.date_started = None
         self.date_done = None
+        self.date_cancelled = None
 
         self.result = None
+        self.exc_name = None
+        self.exc_message = None
         self.exc_info = None
 
         if "company_id" in env.context:
@@ -493,6 +495,17 @@ class Job(object):
         self.eta = eta
         self.channel = channel
         self.worker_pid = None
+
+    def add_depends(self, jobs):
+        if self in jobs:
+            raise ValueError("job cannot depend on itself")
+        self.__depends_on_uuids |= {j.uuid for j in jobs}
+        self._depends_on.update(jobs)
+        for parent in jobs:
+            parent.__reverse_depends_on_uuids.add(self.uuid)
+            parent._reverse_depends_on.add(self)
+        if any(j.state != DONE for j in jobs):
+            self.state = WAIT_DEPENDENCIES
 
     def perform(self):
         """Execute the job.
@@ -518,24 +531,78 @@ class Job(object):
                 )
                 raise new_exc from err
             raise
+
         return self.result
+
+    def enqueue_waiting(self):
+        sql = """
+            UPDATE queue_job
+            SET state = %s
+            FROM (
+            SELECT child.id, array_agg(parent.state) as parent_states
+            FROM queue_job job
+            JOIN LATERAL
+              json_array_elements_text(
+                  job.dependencies::json->'reverse_depends_on'
+              ) child_deps ON true
+            JOIN queue_job child
+            ON child.graph_uuid = job.graph_uuid
+            AND child.uuid = child_deps
+            JOIN LATERAL
+                json_array_elements_text(
+                  child.dependencies::json->'depends_on'
+                ) parent_deps ON true
+            JOIN queue_job parent
+            ON parent.graph_uuid = job.graph_uuid
+            AND parent.uuid = parent_deps
+            WHERE job.uuid = %s
+            GROUP BY child.id
+            ) jobs
+            WHERE
+            queue_job.id = jobs.id
+            AND %s = ALL(jobs.parent_states)
+            AND state = %s;
+        """
+        self.env.cr.execute(sql, (PENDING, self.uuid, DONE, WAIT_DEPENDENCIES))
+        self.env["queue.job"].invalidate_model(["state"])
 
     def store(self):
         """Store the Job"""
+        job_model = self.env["queue.job"]
+        # The sentinel is used to prevent edition sensitive fields (such as
+        # method_name) from RPC methods.
+        edit_sentinel = job_model.EDIT_SENTINEL
+
+        db_record = self.db_record()
+        if db_record:
+            db_record.with_context(_job_edit_sentinel=edit_sentinel).write(
+                self._store_values()
+            )
+        else:
+            job_model.with_context(_job_edit_sentinel=edit_sentinel).sudo().create(
+                self._store_values(create=True)
+            )
+
+    def _store_values(self, create=False):
         vals = {
             "state": self.state,
             "priority": self.priority,
             "retry": self.retry,
             "max_retries": self.max_retries,
+            "exc_name": self.exc_name,
+            "exc_message": self.exc_message,
             "exc_info": self.exc_info,
             "company_id": self.company_id,
             "result": str(self.result) if self.result else False,
             "date_enqueued": False,
             "date_started": False,
             "date_done": False,
+            "exec_time": False,
+            "date_cancelled": False,
             "eta": False,
             "identity_key": False,
             "worker_pid": self.worker_pid,
+            "graph_uuid": self.graph_uuid,
         }
 
         if self.date_enqueued:
@@ -544,48 +611,98 @@ class Job(object):
             vals["date_started"] = self.date_started
         if self.date_done:
             vals["date_done"] = self.date_done
+        if self.exec_time:
+            vals["exec_time"] = self.exec_time
+        if self.date_cancelled:
+            vals["date_cancelled"] = self.date_cancelled
         if self.eta:
             vals["eta"] = self.eta
         if self.identity_key:
             vals["identity_key"] = self.identity_key
 
-        job_model = self.env["queue.job"]
-        # The sentinel is used to prevent edition sensitive fields (such as
-        # method_name) from RPC methods.
-        edit_sentinel = job_model.EDIT_SENTINEL
+        dependencies = {
+            "depends_on": [parent.uuid for parent in self.depends_on],
+            "reverse_depends_on": [
+                children.uuid for children in self.reverse_depends_on
+            ],
+        }
+        vals["dependencies"] = dependencies
 
-        db_record = self.db_record()
-        if db_record:
-            db_record.with_context(_job_edit_sentinel=edit_sentinel).write(vals)
-        else:
-            date_created = self.date_created
-            # The following values must never be modified after the
-            # creation of the job
+        if create:
             vals.update(
                 {
+                    "user_id": self.env.uid,
+                    "channel": self.channel,
+                    # The following values must never be modified after the
+                    # creation of the job
                     "uuid": self.uuid,
                     "name": self.description,
-                    "date_created": date_created,
+                    "func_string": self.func_string,
+                    "date_created": self.date_created,
+                    "model_name": self.recordset._name,
                     "method_name": self.method_name,
+                    "job_function_id": self.job_config.job_function_id,
+                    "channel_method_name": self.job_function_name,
                     "records": self.recordset,
                     "args": self.args,
                     "kwargs": self.kwargs,
                 }
             )
-            # it the channel is not specified, lets the job_model compute
-            # the right one to use
-            if self.channel:
-                vals.update({"channel": self.channel})
 
-            job_model.with_context(_job_edit_sentinel=edit_sentinel).sudo().create(vals)
+        vals_from_model = self._store_values_from_model()
+        # Sanitize values: make sure you cannot screw core values
+        vals_from_model = {k: v for k, v in vals_from_model.items() if k not in vals}
+        vals.update(vals_from_model)
+        return vals
+
+    def _store_values_from_model(self):
+        vals = {}
+        value_handlers_candidates = (
+            "_job_store_values_for_" + self.method_name,
+            "_job_store_values",
+        )
+        for candidate in value_handlers_candidates:
+            handler = getattr(self.recordset, candidate, None)
+            if handler is not None:
+                vals = handler(self)
+        return vals
+
+    @property
+    def func_string(self):
+        model = repr(self.recordset)
+        args = [repr(arg) for arg in self.args]
+        kwargs = ["{}={!r}".format(key, val) for key, val in self.kwargs.items()]
+        all_args = ", ".join(args + kwargs)
+        return "{}.{}({})".format(model, self.method_name, all_args)
+
+    def __eq__(self, other):
+        return self.uuid == other.uuid
+
+    def __hash__(self):
+        return self.uuid.__hash__()
+
+    def sorting_key(self):
+        return self.eta, self.priority, self.date_created, self.seq
+
+    def __lt__(self, other):
+        if self.eta and not other.eta:
+            return True
+        elif not self.eta and other.eta:
+            return False
+        return self.sorting_key() < other.sorting_key()
 
     def db_record(self):
-        return self.db_record_from_uuid(self.env, self.uuid)
+        return self.db_records_from_uuids(self.env, [self.uuid])
 
     @property
     def func(self):
         recordset = self.recordset.with_context(job_uuid=self.uuid)
         return getattr(recordset, self.method_name)
+
+    @property
+    def job_function_name(self):
+        func_model = self.env["queue.job.function"].sudo()
+        return func_model.job_function_name(self.recordset._name, self.method_name)
 
     @property
     def identity_key(self):
@@ -604,6 +721,20 @@ class Job(object):
             # from the function
             self._identity_key = None
             self._identity_key_func = value
+
+    @property
+    def depends_on(self):
+        if not self._depends_on:
+            self._depends_on = Job.load_many(self.env, self.__depends_on_uuids)
+        return self._depends_on
+
+    @property
+    def reverse_depends_on(self):
+        if not self._reverse_depends_on:
+            self._reverse_depends_on = Job.load_many(
+                self.env, self.__reverse_depends_on_uuids
+            )
+        return set(self._reverse_depends_on)
 
     @property
     def description(self):
@@ -644,11 +775,30 @@ class Job(object):
         else:
             self._eta = value
 
+    @property
+    def channel(self):
+        return self._channel or self.job_config.channel
+
+    @channel.setter
+    def channel(self, value):
+        self._channel = value
+
+    @property
+    def exec_time(self):
+        if self.date_done and self.date_started:
+            return (self.date_done - self.date_started).total_seconds()
+        return None
+
     def set_pending(self, result=None, reset_retry=True):
-        self.state = PENDING
+        if any(j.state != DONE for j in self.depends_on):
+            self.state = WAIT_DEPENDENCIES
+        else:
+            self.state = PENDING
         self.date_enqueued = None
         self.date_started = None
+        self.date_done = None
         self.worker_pid = None
+        self.date_cancelled = None
         if reset_retry:
             self.retry = 0
         if result is not None:
@@ -667,15 +817,23 @@ class Job(object):
 
     def set_done(self, result=None):
         self.state = DONE
+        self.exc_name = None
         self.exc_info = None
         self.date_done = datetime.now()
         if result is not None:
             self.result = result
 
-    def set_failed(self, exc_info=None):
+    def set_cancelled(self, result=None):
+        self.state = CANCELLED
+        self.date_cancelled = datetime.now()
+        if result is not None:
+            self.result = result
+
+    def set_failed(self, **kw):
         self.state = FAILED
-        if exc_info is not None:
-            self.exc_info = exc_info
+        for k, v in kw.items():
+            if v is not None:
+                setattr(self, k, v)
 
     def __repr__(self):
         return "<Job %s, priority:%d>" % (self.uuid, self.priority)
@@ -706,6 +864,7 @@ class Job(object):
         """
         eta_seconds = self._get_retry_seconds(seconds)
         self.eta = timedelta(seconds=eta_seconds)
+        self.exc_name = None
         self.exc_info = None
         if result is not None:
             self.result = result
