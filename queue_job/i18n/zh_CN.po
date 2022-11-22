@@ -26,6 +26,7 @@ msgstr ""
 "span>"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/controllers/main.py:0
 #, python-format
 msgid "Access Denied"
@@ -107,18 +108,21 @@ msgid "Cancelled"
 msgstr ""
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Cancelled by %s"
 msgstr ""
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_channel.py:0
 #, python-format
 msgid "Cannot change the root channel"
 msgstr "无法更改root频道"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_channel.py:0
 #, python-format
 msgid "Cannot remove the root channel"
@@ -374,6 +378,7 @@ msgid "Identity Key"
 msgstr "身份密钥"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, fuzzy, python-format
 msgid "If both parameters are 0, ALL jobs will be requeued!"
@@ -391,6 +396,7 @@ msgid "If checked, some messages have a delivery error."
 msgstr "如果勾选此项， 某些消息将会产生传递错误。"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 #, python-format
 msgid "Invalid job function: {}"
@@ -445,6 +451,7 @@ msgid "Job failed"
 msgstr "作业失败"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/controllers/main.py:0
 #, python-format
 msgid "Job interrupted and set to Done: nothing to do."
@@ -471,6 +478,7 @@ msgid "Jobs Garbage Collector"
 msgstr ""
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Jobs for graph %s"
@@ -513,6 +521,7 @@ msgid "Main Attachment"
 msgstr "附件"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Manually set to done by %s"
@@ -552,6 +561,7 @@ msgid "Model"
 msgstr "模型"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 #, python-format
 msgid "Model {} not found"
@@ -584,12 +594,14 @@ msgid "Next Activity Type"
 msgstr "下一活动类型"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "No action available for this job"
 msgstr "此作业无法执行任何操作"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Not allowed to change field(s): {}"
@@ -616,21 +628,12 @@ msgid "Number of messages with delivery error"
 msgstr "递送错误消息数量"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__override_channel
-msgid "Override Channel"
-msgstr "覆盖频道"
-
-#. module: queue_job
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_unread_counter
-msgid "Number of unread messages"
-msgstr "未读消息数量"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__parent_id
 msgid "Parent Channel"
 msgstr "父频道"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_channel.py:0
 #, python-format
 msgid "Parent channel required."
@@ -670,6 +673,7 @@ msgid "Queue Job"
 msgstr "队列作业"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Queue jobs must be created by calling 'with_delay()'."
@@ -703,12 +707,14 @@ msgid "Related Action (serialized)"
 msgstr ""
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Related Record"
 msgstr "相关记录"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Related Records"
@@ -802,6 +808,7 @@ msgid "Single shared identifier of a Graph. Empty for a single job."
 msgstr ""
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid ""
@@ -899,6 +906,7 @@ msgid "UUID"
 msgstr "UUID"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 #, python-format
 msgid ""
@@ -909,6 +917,7 @@ msgid ""
 msgstr ""
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 #, python-format
 msgid ""
@@ -938,3 +947,8 @@ msgstr "重新排队向导所选的作业"
 msgid "Worker Pid"
 msgstr ""
 
+#~ msgid "Override Channel"
+#~ msgstr "覆盖频道"
+
+#~ msgid "Number of unread messages"
+#~ msgstr "未读消息数量"

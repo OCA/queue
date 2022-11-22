@@ -26,6 +26,7 @@ msgstr ""
 "número de reintentos es infinito.</span>"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/controllers/main.py:0
 #, python-format
 msgid "Access Denied"
@@ -107,18 +108,21 @@ msgid "Cancelled"
 msgstr ""
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Cancelled by %s"
 msgstr ""
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_channel.py:0
 #, python-format
 msgid "Cannot change the root channel"
 msgstr "No se puede cambiar el canal raíz"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_channel.py:0
 #, python-format
 msgid "Cannot remove the root channel"
@@ -374,6 +378,7 @@ msgid "Identity Key"
 msgstr "Clave identificadora"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "If both parameters are 0, ALL jobs will be requeued!"
@@ -394,6 +399,7 @@ msgid "If checked, some messages have a delivery error."
 msgstr "Si se encuentra seleccionado, algunos mensajes tienen error de envío."
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 #, python-format
 msgid "Invalid job function: {}"
@@ -447,6 +453,7 @@ msgid "Job failed"
 msgstr "Trabajo fallido"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/controllers/main.py:0
 #, python-format
 msgid "Job interrupted and set to Done: nothing to do."
@@ -473,6 +480,7 @@ msgid "Jobs Garbage Collector"
 msgstr "Recolector de basura de trabajos"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Jobs for graph %s"
@@ -515,6 +523,7 @@ msgid "Main Attachment"
 msgstr "Adjuntos principales"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Manually set to done by %s"
@@ -553,6 +562,7 @@ msgid "Model"
 msgstr "Modelo"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 #, python-format
 msgid "Model {} not found"
@@ -585,12 +595,14 @@ msgid "Next Activity Type"
 msgstr "Siguiente tipo de actividad"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "No action available for this job"
 msgstr "No hay ninguna acción disponible para este trabajo"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Not allowed to change field(s): {}"
@@ -617,21 +629,12 @@ msgid "Number of messages with delivery error"
 msgstr "Número de mensajes con error de envío"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__override_channel
-msgid "Override Channel"
-msgstr "Sobreescribir canal"
-
-#. module: queue_job
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_unread_counter
-msgid "Number of unread messages"
-msgstr "Número de mensajes no leidos"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__parent_id
 msgid "Parent Channel"
 msgstr "Canal padre"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_channel.py:0
 #, python-format
 msgid "Parent channel required."
@@ -678,6 +681,7 @@ msgid "Queue Job"
 msgstr "Cola de trabajos"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Queue jobs must be created by calling 'with_delay()'."
@@ -709,12 +713,14 @@ msgid "Related Action (serialized)"
 msgstr "Acción relacionada (en serie)"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Related Record"
 msgstr "Registro relacionado"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Related Records"
@@ -808,6 +814,7 @@ msgid "Single shared identifier of a Graph. Empty for a single job."
 msgstr ""
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid ""
@@ -911,6 +918,7 @@ msgid "UUID"
 msgstr "UUID"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 #, python-format
 msgid ""
@@ -925,6 +933,7 @@ msgstr ""
 "\" {{\"limit\": 10}}}}"
 
 #. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 #, python-format
 msgid ""
@@ -957,3 +966,8 @@ msgstr "Asistente para volver a poner en cola una selección de trabajos"
 msgid "Worker Pid"
 msgstr "Pid del trabajador"
 
+#~ msgid "Override Channel"
+#~ msgstr "Sobreescribir canal"
+
+#~ msgid "Number of unread messages"
+#~ msgstr "Número de mensajes no leidos"
