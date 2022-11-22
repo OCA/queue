@@ -957,23 +957,3 @@ msgstr "Asistente para volver a poner en cola una selección de trabajos"
 msgid "Worker Pid"
 msgstr "Pid del trabajador"
 
-
-#~ msgid "Number of unread messages"
-#~ msgstr "Número de mensajes no leidos"
-
-#~ msgid "Unread Messages"
-#~ msgstr "Mensajes sin leer"
-
-#~ msgid "Unread Messages Counter"
-#~ msgstr "Nº de mensajes sin leer"
-
-#~ msgid "Channel Method Name"
-#~ msgstr "Nombre del método del canal"
-
-#~ msgid "Override Channel"
-#~ msgstr "Sobreescribir canal"
-
-#, python-format
-#~ msgid "Queue jobs must created by calling 'with_delay()'."
-#~ msgstr "Los trabajos de la cola se deben crear llamando a `with_delay()`"
-

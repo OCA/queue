@@ -942,39 +942,3 @@ msgstr "Assistent zur erneuten Einreihung einer Job-Auswahl"
 msgid "Worker Pid"
 msgstr ""
 
-#~ msgid "Channel Method Name"
-#~ msgstr "Kanal-Methodenname"
-
-#~ msgid "Followers (Channels)"
-#~ msgstr "Abonnenten (Kanäle)"
-
-#~ msgid "Number of unread messages"
-#~ msgstr "Das ist die Anzahl von ungelesenen Nachrichten"
-
-#~ msgid "Unread Messages"
-#~ msgstr "Ungelesene Nachrichten"
-
-#~ msgid "Unread Messages Counter"
-#~ msgstr "Zähler für ungelesene Nachrichten"
-
-#~ msgid "Override Channel"
-#~ msgstr "Kanal überschreiben"
-
-#~ msgid "Website Messages"
-#~ msgstr "Website Nachrichten"
-
-#~ msgid "Website communication history"
-#~ msgstr "Historie der Website-Kommunikation"
-
-#~ msgid "If checked new messages require your attention."
-#~ msgstr ""
-#~ "Wenn es gesetzt ist, erfordern neue Nachrichten Ihre Aufmerksamkeit."
-
-#~ msgid "Overdue"
-#~ msgstr "Überfällig"
-
-#~ msgid "Planned"
-#~ msgstr "Geplant"
-
-#~ msgid "Today"
-#~ msgstr "Heute"
