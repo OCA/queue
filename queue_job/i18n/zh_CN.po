@@ -938,38 +938,3 @@ msgstr "重新排队向导所选的作业"
 msgid "Worker Pid"
 msgstr ""
 
-#~ msgid "Channel Method Name"
-#~ msgstr "频道方法名称"
-
-#~ msgid "Followers (Channels)"
-#~ msgstr "关注者(频道)"
-
-#~ msgid "Number of unread messages"
-#~ msgstr "未读消息数量"
-
-#~ msgid "Unread Messages"
-#~ msgstr "未读消息"
-
-#~ msgid "Unread Messages Counter"
-#~ msgstr "未读消息计数器"
-
-#~ msgid "Override Channel"
-#~ msgstr "覆盖频道"
-
-#~ msgid "Website Messages"
-#~ msgstr "网站消息"
-
-#~ msgid "Website communication history"
-#~ msgstr "网站交流历史"
-
-#~ msgid "If checked new messages require your attention."
-#~ msgstr "查看是否有需要留意的新消息。"
-
-#~ msgid "Overdue"
-#~ msgstr "逾期"
-
-#~ msgid "Planned"
-#~ msgstr "计划"
-
-#~ msgid "Today"
-#~ msgstr "今天"
