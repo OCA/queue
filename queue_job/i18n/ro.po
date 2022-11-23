@@ -6,7 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2022-11-23 09:45+0000\n"
+"Last-Translator: Dorin Hongu <dhongu@gmail.com>\n"
 "Language-Team: none\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
@@ -14,6 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
+"X-Generator: Weblate 4.14.1\n"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -21,22 +23,24 @@ msgid ""
 "<span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number of "
 "retries is infinite.</span>"
 msgstr ""
+"<span class=\"oe_grey oe_inline\"> Dacă numărul max. de reîncercări este 0, "
+"numărul de reîncercări este infinit.</span>"
 
 #. module: queue_job
 #: code:addons/queue_job/controllers/main.py:0
 #, python-format
 msgid "Access Denied"
-msgstr ""
+msgstr "Acces interzis"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_needaction
 msgid "Action Needed"
-msgstr ""
+msgstr "Acțiune necesară"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_ids
 msgid "Activities"
-msgstr ""
+msgstr "Activități"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_exception_decoration
@@ -46,7 +50,7 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_state
 msgid "Activity State"
-msgstr ""
+msgstr "Status activitate"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_type_icon
@@ -80,7 +84,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Cancel"
-msgstr ""
+msgstr "Anulează"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_cancelled
