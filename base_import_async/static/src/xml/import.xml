@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <templates>
-    <t t-extend="ImportView">
+    <t t-extend="ImportView.side_panel">
         <t t-jquery="#oe_import_has_header" t-operation="before">
             <div
                 title="When checked, the import will be executed as a background job,
