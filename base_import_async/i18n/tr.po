@@ -4,69 +4,53 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 14.0\n"
+"Project-Id-Version: Odoo Server 15.0-20221029\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
-"Language: ro\n"
+"POT-Creation-Date: 2022-11-24 07:21+0000\n"
+"PO-Revision-Date: 2022-11-24 10:25+0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
-"20)) ? 1 : 2;\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: tr_TR\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #. module: base_import_async
 #: code:addons/base_import_async/models/queue_job.py:0
 #, python-format
 msgid "Attachment"
-msgstr ""
+msgstr "Ek"
 
 #. module: base_import_async
 #: model:ir.model,name:base_import_async.model_base_import_import
 msgid "Base Import"
-msgstr ""
-
-#. module: base_import_async
-#: model:ir.model.fields,field_description:base_import_async.field_base_import_import__display_name
-#: model:ir.model.fields,field_description:base_import_async.field_queue_job__display_name
-msgid "Display Name"
-msgstr ""
-
-#. module: base_import_async
-#: model:ir.model.fields,field_description:base_import_async.field_base_import_import__id
-#: model:ir.model.fields,field_description:base_import_async.field_queue_job__id
-msgid "ID"
-msgstr ""
+msgstr "İçe aktarım"
 
 #. module: base_import_async
 #: code:addons/base_import_async/models/base_import_import.py:0
 #, python-format
 msgid "Import %s from file %s"
-msgstr ""
+msgstr "%s dosyasından %s içe aktar"
 
 #. module: base_import_async
 #: code:addons/base_import_async/models/base_import_import.py:0
 #, python-format
 msgid "Import %s from file %s - #%s - lines %s to %s"
-msgstr ""
+msgstr "%s dosyasından %s - #%s - %s - %s satırlarını içe aktar"
 
 #. module: base_import_async
 #. openerp-web
 #: code:addons/base_import_async/static/src/xml/import.xml:0
 #, python-format
 msgid "Import in the background"
-msgstr ""
-
-#. module: base_import_async
-#: model:ir.model.fields,field_description:base_import_async.field_base_import_import____last_update
-#: model:ir.model.fields,field_description:base_import_async.field_queue_job____last_update
-msgid "Last Modified on"
-msgstr ""
+msgstr "Arka planda içe aktarım"
 
 #. module: base_import_async
 #: model:ir.model,name:base_import_async.model_queue_job
 msgid "Queue Job"
-msgstr ""
+msgstr "İş Kuyruğu"
 
 #. module: base_import_async
 #. openerp-web
@@ -77,17 +61,20 @@ msgid ""
 "splitting your file in small chunks that will be processed independently. "
 "Use this to import very large files."
 msgstr ""
+"İşaretlendiğinde, içe aktarım işlemi, dosyanızı bağımsız olarak işlenecek "
+"küçük parçalara ayırdıktan sonra bir arka plan işi olarak yürütülür. Çok "
+"büyük dosyaları içe aktarmak için bunu kullanın."
 
 #. module: base_import_async
 #. openerp-web
 #: code:addons/base_import_async/static/src/js/import.js:0
 #, python-format
 msgid "You can check the status of this job in menu 'Queue / Jobs'."
-msgstr ""
+msgstr "Bu işin durumunu 'Kuyruk / İşler' menüsünden kontrol edebilirsiniz."
 
 #. module: base_import_async
 #. openerp-web
 #: code:addons/base_import_async/static/src/js/import.js:0
 #, python-format
 msgid "Your request is being processed"
-msgstr ""
+msgstr "İsteğiniz işleniyor"
