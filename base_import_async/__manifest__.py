@@ -5,14 +5,26 @@
 {
     "name": "Asynchronous Import",
     "summary": "Import CSV files in the background",
-    "version": "14.0.1.0.2",
+    "version": "15.0.1.0.1",
     "author": "Akretion, ACSONE SA/NV, Odoo Community Association (OCA)",
     "license": "AGPL-3",
     "website": "https://github.com/OCA/queue",
     "category": "Generic Modules",
-    "depends": ["base_import", "queue_job"],
-    "data": ["data/queue_job_function_data.xml", "views/base_import_async.xml"],
-    "qweb": ["static/src/xml/import.xml"],
-    "installable": False,
+    "depends": [
+        "base_import",
+        "queue_job"
+    ],
+    "data": [
+        "data/queue_job_function_data.xml",
+    ],
+    'assets': {
+        'web.assets_qweb': [
+            'base_import_async/static/src/xml/import.xml',
+        ],
+        'web.assets_backend': [
+            '/base_import_async/static/src/js/import.js',
+        ],
+    },
+    "installable": True,
     "development_status": "Production/Stable",
 }
