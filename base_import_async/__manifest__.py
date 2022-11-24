@@ -10,19 +10,16 @@
     "license": "AGPL-3",
     "website": "https://github.com/OCA/queue",
     "category": "Generic Modules",
-    "depends": [
-        "base_import",
-        "queue_job"
-    ],
+    "depends": ["base_import", "queue_job"],
     "data": [
         "data/queue_job_function_data.xml",
     ],
-    'assets': {
-        'web.assets_qweb': [
-            'base_import_async/static/src/xml/import.xml',
+    "assets": {
+        "web.assets_qweb": [
+            "base_import_async/static/src/xml/import.xml",
         ],
-        'web.assets_backend': [
-            '/base_import_async/static/src/js/import.js',
+        "web.assets_backend": [
+            "/base_import_async/static/src/js/import.js",
         ],
     },
     "installable": True,
