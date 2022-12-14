@@ -86,10 +86,11 @@
                         </group>
                     </group>
                     <group colspan="4">
-                        <div>
+                        <div colspan="2">
                             <label for="retry" string="Current try / max. retries" />
                             <field name="retry" class="oe_inline" /> /
                             <field name="max_retries" class="oe_inline" />
+                            <br />
                             <span
                                 class="oe_grey oe_inline"
                             > If the max. retries is 0, the number of retries is infinite.</span>
