@@ -33,7 +33,7 @@ class QueueJob(models.Model):
         """
         # TODO: This method should respect channel priority and capacity,
         #       rather than just fetching them by creation date.
-        self.flush()
+        self.env.flush_all()
         self.env.cr.execute(
             """
             SELECT id
@@ -102,7 +102,7 @@ class QueueJob(models.Model):
                 job.store()
 
         if commit:  # pragma: no cover
-            self.env["base"].flush()
+            self.env.flush_all()
             self.env.cr.commit()  # pylint: disable=invalid-commit
 
         _logger.debug("%s enqueue depends started", job)
