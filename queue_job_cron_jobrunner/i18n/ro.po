@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: 2022-11-23 09:45+0000\n"
 "Last-Translator: Dorin Hongu <dhongu@gmail.com>\n"
@@ -23,6 +23,7 @@ msgid "If checked, the cron is considered to be a queue.job runner."
 msgstr "Dacă este bifat, cron-ul este considerat a fi un runner queue.job."
 
 #. module: queue_job_cron_jobrunner
+#. odoo-python
 #: code:addons/queue_job_cron_jobrunner/models/queue_job.py:0
 #, python-format
 msgid "Job interrupted and set to Done: nothing to do."
@@ -36,7 +37,6 @@ msgstr "Coadă sarcini"
 #. module: queue_job_cron_jobrunner
 #: model:ir.actions.server,name:queue_job_cron_jobrunner.queue_job_cron_ir_actions_server
 #: model:ir.cron,cron_name:queue_job_cron_jobrunner.queue_job_cron
-#: model:ir.cron,name:queue_job_cron_jobrunner.queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron_jobrunner.field_ir_cron__queue_job_runner
 msgid "Queue Job Runner"
 msgstr ""
