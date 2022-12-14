@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <form>
                 <group string="The selected jobs will be cancelled.">
-                    <field name="job_ids" nolabel="1" />
+                    <field name="job_ids" nolabel="1" colspan="2" />
                 </group>
                 <footer>
                     <button
