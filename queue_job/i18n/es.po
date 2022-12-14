@@ -19,11 +19,10 @@ msgstr ""
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid ""
-"<span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number of "
-"retries is infinite.</span>"
+"<br/>\n"
+"                            <span class=\"oe_grey oe_inline\"> If the max. "
+"retries is 0, the number of retries is infinite.</span>"
 msgstr ""
-"<span class=\"oe_grey oe_inline\"> Si los reintentos máximos son 0, el "
-"número de reintentos es infinito.</span>"
 
 #. module: queue_job
 #. odoo-python
@@ -70,7 +69,6 @@ msgstr "Nº de archivos adjuntos"
 #. module: queue_job
 #: model:ir.actions.server,name:queue_job.ir_cron_autovacuum_queue_jobs_ir_actions_server
 #: model:ir.cron,cron_name:queue_job.ir_cron_autovacuum_queue_jobs
-#: model:ir.cron,name:queue_job.ir_cron_autovacuum_queue_jobs
 msgid "AutoVacuum Job Queue"
 msgstr "Vaciado automático de la cola de trabajos"
 
@@ -475,7 +473,6 @@ msgstr "Trabajos"
 #. module: queue_job
 #: model:ir.actions.server,name:queue_job.ir_cron_queue_job_garbage_collector_ir_actions_server
 #: model:ir.cron,cron_name:queue_job.ir_cron_queue_job_garbage_collector
-#: model:ir.cron,name:queue_job.ir_cron_queue_job_garbage_collector
 msgid "Jobs Garbage Collector"
 msgstr "Recolector de basura de trabajos"
 
@@ -965,6 +962,13 @@ msgstr "Asistente para volver a poner en cola una selección de trabajos"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr "Pid del trabajador"
+
+#~ msgid ""
+#~ "<span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number "
+#~ "of retries is infinite.</span>"
+#~ msgstr ""
+#~ "<span class=\"oe_grey oe_inline\"> Si los reintentos máximos son 0, el "
+#~ "número de reintentos es infinito.</span>"
 
 #~ msgid "Override Channel"
 #~ msgstr "Sobreescribir canal"
