@@ -2,14 +2,15 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import json
-from dateutil.relativedelta import relativedelta
 
 import freezegun
+from dateutil.relativedelta import relativedelta
 
-from odoo import fields
 import odoo.tests.common as common
+from odoo import fields
 
-data_csv = {'data': """{"format": "csv", "model": "res.partner",
+data_csv = {
+    "data": """{"format": "csv", "model": "res.partner",
             "fields": [{"name": "id", "label": "External ID"},
                     {"name": "display_name", "label": "Display Name"},
                     {"name": "email", "label": "Email"},
@@ -19,9 +20,11 @@ data_csv = {'data': """{"format": "csv", "model": "res.partner",
             "context": {"lang": "en_US", "tz": "Europe/Brussels", "uid": 2},
             "import_compat": false,
             "user_ids": [2]
-            }"""}
+            }"""
+}
 
-data_xls = {'data': """{"format": "xls", "model": "res.partner",
+data_xls = {
+    "data": """{"format": "xls", "model": "res.partner",
             "fields": [{"name": "id", "label": "External ID"},
                     {"name": "display_name", "label": "Display Name"},
                     {"name": "email", "label": "Email"},
@@ -31,55 +34,54 @@ data_xls = {'data': """{"format": "xls", "model": "res.partner",
             "context": {"lang": "en_US", "tz": "Europe/Brussels", "uid": 2},
             "import_compat": false,
             "user_ids": [2]
-            }"""}
+            }"""
+}
 
 
 class TestBaseExportAsync(common.TransactionCase):
-
     def setUp(self):
         super(TestBaseExportAsync, self).setUp()
-        self.delay_export_obj = self.env['delay.export']
-        self.job_obj = self.env['queue.job']
+        self.delay_export_obj = self.env["delay.export"]
+        self.job_obj = self.env["queue.job"]
 
     def test_delay_export(self):
-        """ Check that the call create a new JOB"""
+        """Check that the call create a new JOB"""
         nbr_job = len(self.job_obj.search([]))
         self.delay_export_obj.delay_export(data_csv)
         new_nbr_job = len(self.job_obj.search([]))
         self.assertEqual(new_nbr_job, nbr_job + 1)
 
     def test_export_csv(self):
-        """ Check that the export generate an attachment and email"""
-        params = json.loads(data_csv.get('data'))
-        mails = self.env['mail.mail'].search([])
-        attachments = self.env['ir.attachment'].search([])
+        """Check that the export generate an attachment and email"""
+        params = json.loads(data_csv.get("data"))
+        mails = self.env["mail.mail"].search([])
+        attachments = self.env["ir.attachment"].search([])
         self.delay_export_obj.export(params)
-        new_mail = self.env['mail.mail'].search([]) - mails
-        new_attachment = self.env['ir.attachment'].search([]) - attachments
+        new_mail = self.env["mail.mail"].search([]) - mails
+        new_attachment = self.env["ir.attachment"].search([]) - attachments
         self.assertEqual(len(new_mail), 1)
-        self.assertEqual(new_attachment.datas_fname,
-                         "res.partner.csv")
+        self.assertEqual(new_attachment.datas_fname, "res.partner.csv")
 
     def test_export_xls(self):
-        """ Check that the export generate an attachment and email"""
-        params = json.loads(data_xls.get('data'))
-        mails = self.env['mail.mail'].search([])
-        attachments = self.env['ir.attachment'].search([])
+        """Check that the export generate an attachment and email"""
+        params = json.loads(data_xls.get("data"))
+        mails = self.env["mail.mail"].search([])
+        attachments = self.env["ir.attachment"].search([])
         self.delay_export_obj.export(params)
-        new_mail = self.env['mail.mail'].search([]) - mails
-        new_attachment = self.env['ir.attachment'].search([]) - attachments
+        new_mail = self.env["mail.mail"].search([]) - mails
+        new_attachment = self.env["ir.attachment"].search([]) - attachments
         self.assertEqual(len(new_mail), 1)
-        self.assertEqual(new_attachment.datas_fname,
-                         "res.partner.xls")
+        self.assertEqual(new_attachment.datas_fname, "res.partner.xls")
 
     def test_cron_delete(self):
-        """ Check that cron delete attachment after TTL"""
-        params = json.loads(data_csv.get('data'))
-        attachments = self.env['ir.attachment'].search([])
+        """Check that cron delete attachment after TTL"""
+        params = json.loads(data_csv.get("data"))
+        attachments = self.env["ir.attachment"].search([])
         self.delay_export_obj.export(params)
-        new_attachment = self.env['ir.attachment'].search([]) - attachments
-        time_to_live = self.env['ir.config_parameter'].sudo(). \
-            get_param('attachment.ttl', 7)
+        new_attachment = self.env["ir.attachment"].search([]) - attachments
+        time_to_live = (
+            self.env["ir.config_parameter"].sudo().get_param("attachment.ttl", 7)
+        )
         date_today = fields.Datetime.now()
         date_past_ttl = date_today + relativedelta(days=int(time_to_live))
         with freezegun.freeze_time(date_past_ttl):
