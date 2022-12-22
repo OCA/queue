@@ -60,7 +60,7 @@ class TestBaseExportAsync(common.TransactionCase):
         new_mail = self.env["mail.mail"].search([]) - mails
         new_attachment = self.env["ir.attachment"].search([]) - attachments
         self.assertEqual(len(new_mail), 1)
-        self.assertEqual(new_attachment.datas_fname, "res.partner.csv")
+        self.assertEqual(new_attachment.name, "res.partner.csv")
 
     def test_export_xls(self):
         """Check that the export generate an attachment and email"""
