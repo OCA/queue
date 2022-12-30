@@ -8,7 +8,7 @@
     "website": "https://github.com/OCA/sale-channel",
     "license": "AGPL-3",
     "category": "Generic Modules",
-    "depends": ["queue_job", "component"],
+    "depends": ["queue_job"],
     "data": [
         "views/queue_job_chunk.xml",
         "security/security.xml",

@@ -2,56 +2,60 @@
 #  License AGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 
-from odoo.addons.component.tests.common import TransactionComponentCase
+from odoo_test_helper import FakeModelLoader
+
+from odoo.tests import TransactionCase
 
 
-class TestQueueJobChunk(TransactionComponentCase):
-    def setUp(self):
-        super().setUp()
-        self.env = self.env(
-            context=dict(self.env.context, test_queue_job_no_delay=True)
-        )
-        self.main_company = self.env.ref("base.main_company")
-        self.another_company_partner = self.env["res.partner"].create(
+class TestQueueJobChunk(TransactionCase, FakeModelLoader):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.loader = FakeModelLoader(cls.env, cls.__module__)
+        cls.loader.backup_registry()
+        from .models import QueueJobChunk, TestOdooStateProcessor
+
+        cls.loader.update_registry((TestOdooStateProcessor, QueueJobChunk))
+
+        cls.env = cls.env(context=dict(cls.env.context, test_queue_job_no_delay=True))
+        cls.main_company = cls.env.ref("base.main_company")
+        cls.another_company_partner = cls.env["res.partner"].create(
             {"name": "Company2"}
         )
-        self.another_company = self.env["res.company"].create(
+        cls.another_company = cls.env["res.company"].create(
             {
-                "name": self.another_company_partner.name,
-                "partner_id": self.another_company_partner.id,
-                "currency_id": self.env.ref("base.main_company").currency_id.id,
+                "name": cls.another_company_partner.name,
+                "partner_id": cls.another_company_partner.id,
+                "currency_id": cls.env.ref("base.main_company").currency_id.id,
             }
         )
-        self.partner = self.env.ref("base.res_partner_3")
-        self.chunk_data_contact = [
+        cls.partner = cls.env.ref("base.res_partner_3")
+        cls.chunk_data_contact = [
             {
-                "apply_on_model": "res.partner",
                 "data_str": '{"name": "Steve Queue Job"}',
-                "usage": "basic_create",
+                "processor": "test_partner",
                 "model_name": "res.partner",
-                "record_id": self.partner.id,
+                "record_id": cls.partner.id,
             },
             {
-                "apply_on_model": "res.partner",
                 "data_str": '{"name": "Other"}',
-                "usage": "basic_create",
+                "processor": "test_partner",
                 "model_name": "res.partner",
-                "record_id": self.partner.id,
+                "record_id": cls.partner.id,
             },
         ]
-        self.chunk_data_bad = {
-            "apply_on_model": "res.partner",
+        cls.chunk_data_bad = {
             "data_str": "{''(;,),x*}",
-            "usage": "basic_create",
+            "processor": "test_partner",
             "model_name": "res.partner",
-            "record_id": self.partner.id,
+            "record_id": cls.partner.id,
         }
-        USA = self.env.ref("base.us")
-        self.chunk_data_state = {
-            "apply_on_model": "res.country.state",
+        USA = cls.env.ref("base.us")
+        cls.chunk_data_state = {
+            "processor": "test_state",
             "data_str": '{"name": "New Stateshire", "code": "NS", "country_id": %d}'
             % USA.id,
-            "usage": "basic_create",
             "model_name": "res.country",
             "record_id": USA.id,
         }

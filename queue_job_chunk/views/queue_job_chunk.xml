@@ -17,6 +17,7 @@
                 <sheet>
                     <group>
                         <group>
+                            <field name="processor" />
                             <field name="data_str" />
                             <field name="model_name" />
                             <field name="record_id" />
@@ -28,10 +29,6 @@
                                 groups="base.group_system"
                                 attrs="{'readonly': 1}"
                             />
-                        </group>
-                        <group name="component">
-                            <field name="usage" />
-                            <field name="apply_on_model" />
                         </group>
                     </group>
                 </sheet>
