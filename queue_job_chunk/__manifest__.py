@@ -3,7 +3,7 @@
 
 {
     "name": "Job Queue Chunk",
-    "version": "14.0.1.0.1",
+    "version": "16.0.0.0.0",
     "author": "Akretion, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/sale-channel",
     "license": "AGPL-3",
@@ -14,5 +14,5 @@
         "security/security.xml",
         "security/ir.model.access.csv",
     ],
-    "installable": False,
+    "installable": True,
 }

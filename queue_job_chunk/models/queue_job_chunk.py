@@ -35,26 +35,24 @@ class QueueJobChunk(models.Model):
                 rec.reference = False
 
     # component fields
-    usage = fields.Char("Usage")
-    apply_on_model = fields.Char("Apply on model")
+    usage = fields.Char()
+    apply_on_model = fields.Char()
 
     data_str = fields.Text(string="Editable data")
     state = fields.Selection(
         [("pending", "Pending"), ("done", "Done"), ("fail", "Failed")],
         default="pending",
-        string="State",
     )
     state_info = fields.Text("Additional state information")
-    model_name = fields.Char("Model ID")
-    record_id = fields.Integer("Record ID")
+    model_name = fields.Char()
+    record_id = fields.Integer()
     reference = fields.Reference(
-        string="Reference",
         selection="_selection_target_model",
         compute=_compute_reference,
         store=True,
     )
     company_id = fields.Many2one("res.company", compute=_compute_reference, store=True)
-    stack_trace = fields.Text("Stack trace")
+    stack_trace = fields.Text()
 
     @api.model_create_multi
     def create(self, vals):
