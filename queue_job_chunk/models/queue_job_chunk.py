@@ -17,7 +17,7 @@ class QueueJobChunk(models.Model):
     _name = "queue.job.chunk"
     _description = "Queue Job Chunk"
 
-    processor = fields.Char()
+    processor = fields.Selection([])
     data_str = fields.Text(string="Editable data")
     state = fields.Selection(
         [("pending", "Pending"), ("done", "Done"), ("fail", "Failed")],
@@ -76,12 +76,15 @@ class QueueJobChunk(models.Model):
         # it can be a pure python class, an odoo TransientModel ...
         raise NotImplementedError
 
+    def _get_data(self):
+        return json.loads(self.data_str)
+
     def process_chunk(self):
         self.ensure_one()
         try:
             with self.env.cr.savepoint():
                 processor = self._get_processor()
-                result = processor.run(json.loads(self.data_str))
+                result = processor.run()
         except Exception as e:
             if DEBUG_MODE:
                 raise
