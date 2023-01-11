@@ -2,10 +2,12 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from datetime import datetime
+
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models
 from odoo.tools.safe_eval import safe_eval
+
 from odoo.addons.base.models.res_partner import _lang_get
 
 
@@ -45,9 +47,7 @@ class ExportAsyncSchedule(models.Model):
     )
 
     # Scheduling
-    next_execution = fields.Datetime(
-        default=fields.Datetime.now, required=True
-    )
+    next_execution = fields.Datetime(default=fields.Datetime.now, required=True)
     interval = fields.Integer(default=1, required=True)
     interval_unit = fields.Selection(
         selection=[
@@ -65,9 +65,7 @@ class ExportAsyncSchedule(models.Model):
     def name_get(self):
         result = []
         for record in self:
-            name = "{}: {}".format(
-                record.model_id.name, record.ir_export_id.name
-            )
+            name = "{}: {}".format(record.model_id.name, record.ir_export_id.name)
             result.append((record.id, name))
         return result
 
@@ -120,8 +118,7 @@ class ExportAsyncSchedule(models.Model):
 
     def _prepare_export_params(self):
         export_fields = [
-            export_field.name
-            for export_field in self.ir_export_id.export_fields
+            export_field.name for export_field in self.ir_export_id.export_fields
         ]
         if self.import_compat:
             export_fields = [
