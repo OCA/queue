@@ -77,12 +77,15 @@ class ExportAsyncSchedule(models.Model):
             record.next_execution = record._compute_next_date()
 
     def _compute_next_date(self):
+        next_execution = self.next_execution
+        if next_execution < datetime.now():
+            next_execution = datetime.now()
         args = {self.interval_unit: self.interval}
         if self.interval_unit == "months" and self.end_of_month:
             # dateutil knows how to deal with variable days of months,
             # it will put the latest possible day
             args.update({"day": 31, "hour": 23, "minute": 59, "second": 59})
-        return self.next_execution + relativedelta(**args)
+        return next_execution + relativedelta(**args)
 
     @api.onchange("end_of_month")
     def onchange_end_of_month(self):
@@ -130,9 +133,9 @@ class ExportAsyncSchedule(models.Model):
                 self.model_name,
                 [export_field for export_field in export_fields],
             )
-
+        export_format = self.export_format == "excel" and "xlsx" or self.export_format
         return {
-            "format": self.export_format,
+            "format": export_format,
             "model": self.model_name,
             "fields": export_fields,
             "ids": False,

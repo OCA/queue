@@ -51,7 +51,6 @@ class TestExportAsyncSchedule(common.SavepointCase):
             "email",
             "phone",
             "title/shortcut",
-            "parent_id/customer",
             "parent_id/company_id/name",
         ]
         result = self.env["export.async.schedule"]._get_fields_with_labels(
@@ -62,10 +61,6 @@ class TestExportAsyncSchedule(common.SavepointCase):
             {"label": "Email", "name": "email"},
             {"label": "Phone", "name": "phone"},
             {"label": "Title/Abbreviation", "name": "title/shortcut"},
-            {
-                "label": "Related Company/Is a Customer",
-                "name": "parent_id/customer",
-            },
             {
                 "label": "Related Company/Company/Company Name",
                 "name": "parent_id/company_id/name",
@@ -117,7 +112,7 @@ class TestExportAsyncSchedule(common.SavepointCase):
         self.assertDictEqual(prepared, expected)
 
     def test_schedule_next_date(self):
-        start_date = datetime(2019, 11, 23, 12, 0, 0)
+        start_date = datetime.now() + relativedelta(hours=1)
 
         def assert_next_schedule(interval, unit, expected):
             self.schedule.next_execution = start_date
