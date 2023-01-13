@@ -6,7 +6,7 @@
         <field name="model">queue.jobs.to.cancelled</field>
         <field name="arch" type="xml">
             <form>
-                <span>Some jobs will be cancelled</span>
+                <span>Selected jobs will be cancelled</span>
                 <footer>
                     <button
                         name="set_cancelled"
