@@ -2,12 +2,14 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import json
+from unittest import mock
 
 import freezegun
 from dateutil.relativedelta import relativedelta
 
 import odoo.tests.common as common
 from odoo import fields
+from odoo.http import _request_stack
 
 data_csv = {
     "data": """{"format": "csv", "model": "res.partner",
@@ -43,6 +45,12 @@ class TestBaseExportAsync(common.TransactionCase):
         super(TestBaseExportAsync, self).setUp()
         self.delay_export_obj = self.env["delay.export"]
         self.job_obj = self.env["queue.job"]
+        _request_stack.push(
+            mock.Mock(
+                env=self.env,
+            )
+        )
+        self.addCleanup(_request_stack.pop)
 
     def test_delay_export(self):
         """Check that the call create a new JOB"""
@@ -60,7 +68,7 @@ class TestBaseExportAsync(common.TransactionCase):
         new_mail = self.env["mail.mail"].search([]) - mails
         new_attachment = self.env["ir.attachment"].search([]) - attachments
         self.assertEqual(len(new_mail), 1)
-        self.assertEqual(new_attachment.datas_fname, "res.partner.csv")
+        self.assertEqual(new_attachment.name, "res.partner.csv")
 
     def test_export_xls(self):
         """Check that the export generate an attachment and email"""
@@ -71,7 +79,7 @@ class TestBaseExportAsync(common.TransactionCase):
         new_mail = self.env["mail.mail"].search([]) - mails
         new_attachment = self.env["ir.attachment"].search([]) - attachments
         self.assertEqual(len(new_mail), 1)
-        self.assertEqual(new_attachment.datas_fname, "res.partner.xls")
+        self.assertEqual(new_attachment.name, "res.partner.xls")
 
     def test_cron_delete(self):
         """Check that cron delete attachment after TTL"""
