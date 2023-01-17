@@ -10,7 +10,7 @@ from odoo.tests import common
 from odoo.addons.queue_job.tests.common import mock_with_delay
 
 
-class TestExportAsyncSchedule(common.SavepointCase):
+class TestExportAsyncSchedule(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -51,7 +51,6 @@ class TestExportAsyncSchedule(common.SavepointCase):
             "email",
             "phone",
             "title/shortcut",
-            "parent_id/customer",
             "parent_id/company_id/name",
         ]
         result = self.env["export.async.schedule"]._get_fields_with_labels(
@@ -62,10 +61,6 @@ class TestExportAsyncSchedule(common.SavepointCase):
             {"label": "Email", "name": "email"},
             {"label": "Phone", "name": "phone"},
             {"label": "Title/Abbreviation", "name": "title/shortcut"},
-            {
-                "label": "Related Company/Is a Customer",
-                "name": "parent_id/customer",
-            },
             {
                 "label": "Related Company/Company/Company Name",
                 "name": "parent_id/company_id/name",

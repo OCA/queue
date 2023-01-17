@@ -5,7 +5,7 @@
         <field name="name">export.async.schedule.tree</field>
         <field name="model">export.async.schedule</field>
         <field name="arch" type="xml">
-            <tree string="Scheduled Exports">
+            <tree>
                 <field name="model_id" />
                 <field name="ir_export_id" />
                 <field name="interval" />
@@ -115,7 +115,6 @@
         <field name="name">Scheduled Exports</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">export.async.schedule</field>
-        <field name="view_type">form</field>
         <field name="help">Schedule Exports to send by email</field>
     </record>
 
