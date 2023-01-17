@@ -2,12 +2,17 @@
 <templates id="template" xml:space="preserve">
 
 <t t-extend="ExportDialog">
-    <t t-jquery="div.row" t-operation="append">
-        <div class="col-lg-12">
-            <label>
-                <input type="checkbox" name="async_export" id="async_export" />
+    <t t-jquery="div.o_import_compat" t-operation="after">
+        <div class="form-check">
+            <input
+                    class="form-check-input"
+                    id="async_export"
+                    type="checkbox"
+                    name="async_export"
+                />
+            <label class="form-check-label" for="async_export">
                 <strong
-                    > Asynchronous export </strong> (You will receive the export by email)
+                    >Asynchronous export </strong> (You will receive the export by email)
             </label>
         </div>
     </t>

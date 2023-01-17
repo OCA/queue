@@ -18,33 +18,18 @@ odoo.define("base_export_async.DataExport", function (require) {
             this._super.apply(this, arguments);
             this.async = this.$("#async_export");
         },
-        export_data: function () {
-            var self = this;
-            if (self.async.is(":checked")) {
+        _exportData(exportedFields, exportFormat, idsToExport) {
+            if (this.async && this.async.is(":checked")) {
                 /*
                     Checks from the standard method
                 */
-                var exported_fields = this.$(".o_fields_list option")
-                    .map(function () {
-                        return {
-                            name: (self.records[this.value] || this).value,
-                            label: this.textContent || this.innerText,
-                        };
-                    })
-                    .get();
-
-                if (_.isEmpty(exported_fields)) {
+                if (_.isEmpty(exportedFields)) {
                     Dialog.alert(this, _t("Please select fields to export..."));
                     return;
                 }
-                if (!this.isCompatibleMode) {
-                    exported_fields.unshift({
-                        name: "id",
-                        label: _t("External ID"),
-                    });
+                if (this.isCompatibleMode) {
+                    exportedFields.unshift({name: "id", label: _t("External ID")});
                 }
-
-                var export_format = this.$export_format_inputs.filter(":checked").val();
 
                 /*
                     Call the delay export if Async is checked
@@ -56,22 +41,20 @@ odoo.define("base_export_async.DataExport", function (require) {
                     args: [
                         {
                             data: JSON.stringify({
-                                format: export_format,
+                                format: exportFormat,
                                 model: this.record.model,
-                                fields: exported_fields,
-                                ids: this.ids_to_export,
+                                fields: exportedFields,
+                                ids: idsToExport,
                                 domain: this.domain,
                                 context: pyUtils.eval("contexts", [
                                     this.record.getContext(),
                                 ]),
-                                import_compat: Boolean(
-                                    this.$import_compat_radios.filter(":checked").val()
-                                ),
+                                import_compat: this.isCompatibleMode,
                                 user_ids: [this.record.context.uid],
                             }),
                         },
                     ],
-                }).then(function (result) {
+                }).then(function () {
                     framework.unblockUI();
                     Dialog.alert(
                         this,
