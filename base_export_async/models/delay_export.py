@@ -3,7 +3,6 @@
 
 import base64
 import json
-import logging
 import operator
 
 from dateutil.relativedelta import relativedelta
@@ -11,10 +10,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
-from odoo.addons.queue_job.job import job
 from odoo.addons.web.controllers.main import CSVExport, ExcelExport
-
-_logger = logging.getLogger(__name__)
 
 
 class DelayExport(models.Model):
@@ -35,7 +31,6 @@ class DelayExport(models.Model):
     @api.model
     def _get_file_content(self, params):
         export_format = params.get("format")
-        raw_data = export_format != "csv"
 
         items = operator.itemgetter(
             "model", "fields", "ids", "domain", "import_compat", "context", "user_ids"
@@ -53,7 +48,7 @@ class DelayExport(models.Model):
             fields_name = [field for field in fields_name if field["name"] != "id"]
 
         field_names = [f["name"] for f in fields_name]
-        import_data = records.export_data(field_names, raw_data).get("datas", [])
+        import_data = records.export_data(field_names).get("datas", [])
 
         if import_compat:
             columns_headers = field_names
@@ -68,7 +63,6 @@ class DelayExport(models.Model):
             return xls.from_data(columns_headers, import_data)
 
     @api.model
-    @job
     def export(self, params):
         """Delayed export of a file sent by email
 
@@ -97,7 +91,6 @@ class DelayExport(models.Model):
             {
                 "name": name,
                 "datas": base64.b64encode(content),
-                "datas_fname": name,
                 "type": "binary",
                 "res_model": self._name,
                 "res_id": export_record.id,
