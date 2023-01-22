@@ -12,8 +12,11 @@ class QueueJob(models.Model):
     @api.model
     def create(self, vals):
         batch = self.env.context.get("job_batch")
-        if batch and isinstance(batch, models.Model) and batch.state == "draft":
-            vals.update({"job_batch_id": batch.id})
+        if batch:
+            if isinstance(batch, int):
+                batch = self.env["queue.job.batch"].browse(batch)
+            if isinstance(batch, models.Model) and batch.state == "draft":
+                vals.update({"job_batch_id": batch.id})
         return super().create(vals)
 
     def write(self, vals):
