@@ -5,7 +5,7 @@
 
 {
     "name": "Job Queue Batch",
-    "version": "14.0.1.0.0",
+    "version": "15.0.1.0.0",
     "author": "Creu Blanca,Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/queue",
     "license": "AGPL-3",
@@ -26,6 +26,11 @@
         # views
         "views/queue_job_views.xml",
         "views/queue_job_batch_views.xml",
-        "views/assets_backend.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "queue_job_batch/static/src/js/systray.js",
+            "queue_job_batch/static/src/scss/systray.scss",
+        ],
+    },
 }
