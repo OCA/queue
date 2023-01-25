@@ -15,6 +15,7 @@
         "security/ir_rule.xml",
         "data/config_parameter.xml",
         "data/cron.xml",
+        "data/mail_template.xml",
     ],
     "demo": [],
     "qweb": ["static/src/xml/base.xml"],
