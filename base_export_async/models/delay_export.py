@@ -19,6 +19,9 @@ class DelayExport(models.Model):
     _description = "Asynchronous Export"
 
     user_ids = fields.Many2many("res.users", string="Users", index=True)
+    model_description = fields.Char()
+    url = fields.Char()
+    expiration_date = fields.Date()
 
     @api.model
     def delay_export(self, data):
@@ -111,30 +114,24 @@ class DelayExport(models.Model):
             date_today + relativedelta(days=+int(time_to_live))
         )
 
-        # TODO : move to email template
         odoo_bot = self.sudo().env.ref("base.partner_root")
         email_from = odoo_bot.email
         model_description = self.env[model_name]._description
-        self.env["mail.mail"].create(
+        export_record.write(
             {
+                "url": url,
+                "expiration_date": expiration_date,
+                "model_description": model_description,
+            }
+        )
+
+        self.env.ref("base_export_async.delay_export_mail_template").send_mail(
+            export_record.id,
+            email_values={
                 "email_from": email_from,
                 "reply_to": email_from,
                 "recipient_ids": [(6, 0, users.mapped("partner_id").ids)],
-                "subject": _("Export {} {}").format(
-                    model_description, fields.Date.to_string(fields.Date.today())
-                ),
-                "body_html": _(
-                    """
-                <p>Your export is available <a href="{}">here</a>.</p>
-                <p>It will be automatically deleted the {}.</p>
-                <p>&nbsp;</p>
-                <p><span style="color: #808080;">
-                This is an automated message please do not reply.
-                </span></p>
-                """
-                ).format(url, expiration_date),
-                "auto_delete": True,
-            }
+            },
         )
 
     @api.model
