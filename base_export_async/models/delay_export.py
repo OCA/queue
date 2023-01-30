@@ -7,25 +7,27 @@ import logging
 import operator
 
 from dateutil.relativedelta import relativedelta
+
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
+
 from odoo.addons.queue_job.job import job
 from odoo.addons.web.controllers.main import CSVExport, ExcelExport
-from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
 
 class DelayExport(models.Model):
 
-    _name = 'delay.export'
-    _description = 'Asynchronous Export'
+    _name = "delay.export"
+    _description = "Asynchronous Export"
 
-    user_ids = fields.Many2many('res.users', string='Users', index=True)
+    user_ids = fields.Many2many("res.users", string="Users", index=True)
 
     @api.model
     def delay_export(self, data):
         """Delay the export, called from js"""
-        params = json.loads(data.get('data'))
+        params = json.loads(data.get("data"))
         if not self.env.user.email:
             raise UserError(_("You must set an email address to your user."))
         self.with_delay().export(params)
@@ -36,11 +38,9 @@ class DelayExport(models.Model):
         raw_data = export_format != "csv"
 
         items = operator.itemgetter(
-            'model', 'fields', 'ids', 'domain',
-            'import_compat', 'context', 'user_ids'
+            "model", "fields", "ids", "domain", "import_compat", "context", "user_ids"
         )(params)
-        (model_name, fields_name, ids, domain,
-         import_compat, context, user_ids) = items
+        (model_name, fields_name, ids, domain, import_compat, context, user_ids) = items
 
         model = self.env[model_name].with_context(
             import_compat=import_compat, **context
@@ -86,13 +86,11 @@ class DelayExport(models.Model):
         """
         content = self._get_file_content(params)
 
-        items = operator.itemgetter(
-            'model', 'context', 'format', 'user_ids'
-        )(params)
+        items = operator.itemgetter("model", "context", "format", "user_ids")(params)
         model_name, context, export_format, user_ids = items
-        users = self.env['res.users'].browse(user_ids)
+        users = self.env["res.users"].browse(user_ids)
 
-        export_record = self.sudo().create({'user_ids': [(6, 0, users.ids)]})
+        export_record = self.sudo().create({"user_ids": [(6, 0, users.ids)]})
 
         name = "{}.{}".format(model_name, export_format)
         attachment = self.env["ir.attachment"].create(
@@ -124,13 +122,16 @@ class DelayExport(models.Model):
         odoo_bot = self.sudo().env.ref("base.partner_root")
         email_from = odoo_bot.email
         model_description = self.env[model_name]._description
-        self.env['mail.mail'].create({
-            'email_from': email_from,
-            'reply_to': email_from,
-            'recipient_ids': [(6, 0, users.mapped('partner_id').ids)],
-            'subject': _("Export {} {}").format(
-                model_description, fields.Date.to_string(fields.Date.today())),
-            'body_html': _("""
+        self.env["mail.mail"].create(
+            {
+                "email_from": email_from,
+                "reply_to": email_from,
+                "recipient_ids": [(6, 0, users.mapped("partner_id").ids)],
+                "subject": _("Export {} {}").format(
+                    model_description, fields.Date.to_string(fields.Date.today())
+                ),
+                "body_html": _(
+                    """
                 <p>Your export is available <a href="{}">here</a>.</p>
                 <p>It will be automatically deleted the {}.</p>
                 <p>&nbsp;</p>
