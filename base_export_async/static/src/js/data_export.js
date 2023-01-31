@@ -19,7 +19,7 @@ odoo.define("base_export_async.DataExport", function (require) {
             this.async = this.$("#async_export");
         },
         _exportData(exportedFields, exportFormat, idsToExport) {
-            if (this.async.is(":checked")) {
+            if (this.async && this.async.is(":checked")) {
                 /*
                     Checks from the standard method
                 */
