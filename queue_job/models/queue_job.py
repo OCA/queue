@@ -297,8 +297,9 @@ class QueueJob(models.Model):
         self.ensure_one()
         jobs = self.env["queue.job"].search([("graph_uuid", "=", self.graph_uuid)])
 
-        action_jobs = self.env.ref("queue_job.action_queue_job")
-        action = action_jobs.read()[0]
+        action = self.env["ir.actions.act_window"]._for_xml_id(
+            "queue_job.action_queue_job"
+        )
         action.update(
             {
                 "name": _("Jobs for graph %s") % (self.graph_uuid),
