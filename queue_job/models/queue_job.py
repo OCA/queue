@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 from odoo import _, api, exceptions, fields, models
 from odoo.osv import expression
-from odoo.tools import html_escape
+from odoo.tools import config, html_escape
 
 from odoo.addons.base_sparse_field.models.fields import Serialized
 
@@ -409,6 +409,8 @@ class QueueJob(models.Model):
                 )
                 if jobs:
                     jobs.unlink()
+                    if not config["test_enable"]:
+                        self.env.cr.commit()  # pylint: disable=E8102
                 else:
                     break
         return True
