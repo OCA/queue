@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2022-06-30 10:05+0000\n"
-"Last-Translator: Jairo Llopis <yajo.sk8@gmail.com>\n"
+"PO-Revision-Date: 2023-02-15 17:23+0000\n"
+"Last-Translator: FranciscoFactorLibre <francisco.santos@factorlibre.com>\n"
 "Language-Team: none\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.3.2\n"
+"X-Generator: Weblate 4.14.1\n"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -292,7 +292,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__failed
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Failed"
-msgstr "Falló"
+msgstr "Fallido"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__ttype
