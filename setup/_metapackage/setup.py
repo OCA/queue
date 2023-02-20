@@ -10,6 +10,7 @@ setuptools.setup(
     install_requires=[
         'odoo-addon-queue_job>=16.0dev,<16.1dev',
         'odoo-addon-queue_job_cron>=16.0dev,<16.1dev',
+        'odoo-addon-queue_job_cron_jobrunner>=16.0dev,<16.1dev',
         'odoo-addon-test_queue_job>=16.0dev,<16.1dev',
     ],
     classifiers=[
