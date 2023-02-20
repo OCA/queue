@@ -19,6 +19,7 @@ msgid "If checked, the cron is considered to be a queue.job runner."
 msgstr ""
 
 #. module: queue_job_cron_jobrunner
+#. odoo-python
 #: code:addons/queue_job_cron_jobrunner/models/queue_job.py:0
 #, python-format
 msgid "Job interrupted and set to Done: nothing to do."
@@ -32,7 +33,6 @@ msgstr ""
 #. module: queue_job_cron_jobrunner
 #: model:ir.actions.server,name:queue_job_cron_jobrunner.queue_job_cron_ir_actions_server
 #: model:ir.cron,cron_name:queue_job_cron_jobrunner.queue_job_cron
-#: model:ir.cron,name:queue_job_cron_jobrunner.queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron_jobrunner.field_ir_cron__queue_job_runner
 msgid "Queue Job Runner"
 msgstr ""
