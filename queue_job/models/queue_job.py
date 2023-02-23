@@ -222,7 +222,7 @@ class QueueJob(models.Model):
         companies = self.mapped("company_id")
         domain = [("groups_id", "=", group.id)]
         if companies:
-            domain.append(("company_id", "in", companies.ids))
+            domain.append(("company_ids", "in", companies.ids))
         return domain
 
     def _message_failed_job(self):
