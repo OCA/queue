@@ -1,0 +1,8 @@
+{
+  "pull_requests": {
+    "387": "Reverted later by https://github.com/OCA/queue/pull/466",
+    "413": "No reason to port repo template sync",
+    "440": "Already ported",
+    "466": "Reverts https://github.com/OCA/queue/pull/387"
+  }
+}
