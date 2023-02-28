@@ -4,11 +4,11 @@
 
 import itertools
 import logging
-import os
 import uuid
 from collections import defaultdict, deque
 
 from .job import Job
+from .utils import must_run_without_delay
 
 _logger = logging.getLogger(__name__)
 
@@ -217,17 +217,9 @@ class DelayableGraph(Graph):
         In tests, prefer to use
         :func:`odoo.addons.queue_job.tests.common.trap_jobs`.
         """
-        if os.getenv("TEST_QUEUE_JOB_NO_DELAY"):
-            _logger.warning(
-                "`TEST_QUEUE_JOB_NO_DELAY` env var found. NO JOB scheduled."
-            )
-            return True
         envs = {vertex.recordset.env for vertex in vertices}
         for env in envs:
-            if env.context.get("test_queue_job_no_delay"):
-                _logger.warning(
-                    "`test_queue_job_no_delay` ctx key found. NO JOB scheduled."
-                )
+            if must_run_without_delay(env):
                 return True
         return False
 

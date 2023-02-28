@@ -453,13 +453,14 @@ Example:
 When you are developing (ie: connector modules) you might want
 to bypass the queue job and run your code immediately.
 
-To do so you can set `TEST_QUEUE_JOB_NO_DELAY=1` in your enviroment.
+To do so you can set `QUEUE_JOB__NO_DELAY=1` in your enviroment.
 
 **Bypass jobs in tests**
 
 When writing tests on job-related methods is always tricky to deal with
-delayed recordsets. To make your testing life easier
-you can set `test_queue_job_no_delay=True` in the context.
+delayed recordsets. To make your testing life easier,
+or to run a delayed action immediately,
+you can set `queue_job__no_delay=True` in the context.
 
 Tip: you can do this at test case level like this
 
@@ -470,7 +471,7 @@ Tip: you can do this at test case level like this
         super().setUpClass()
         cls.env = cls.env(context=dict(
             cls.env.context,
-            test_queue_job_no_delay=True,  # no jobs thanks
+            queue_job__no_delay=True,  # no jobs thanks
         ))
 
 Then all your tests execute the job methods synchronously
@@ -575,7 +576,7 @@ If you prefer, you can still test the whole thing in a single test, by calling
 When you are developing (ie: connector modules) you might want
 to bypass the queue job and run your code immediately.
 
-To do so you can set ``TEST_QUEUE_JOB_NO_DELAY=1`` in your environment.
+To do so you can set ``QUEUE_JOB__NO_DELAY=1`` in your environment.
 
 .. WARNING:: Do not do this in production
 
@@ -583,7 +584,7 @@ To do so you can set ``TEST_QUEUE_JOB_NO_DELAY=1`` in your environment.
 
 You should use ``trap_jobs``, really, but if for any reason you could not use it,
 and still need to have job methods executed synchronously in your tests, you can
-do so by setting ``test_queue_job_no_delay=True`` in the context.
+do so by setting ``queue_job__no_delay=True`` in the context.
 
 Tip: you can do this at test case level like this
 
@@ -594,7 +595,7 @@ Tip: you can do this at test case level like this
         super().setUpClass()
         cls.env = cls.env(context=dict(
             cls.env.context,
-            test_queue_job_no_delay=True,  # no jobs thanks
+            queue_job__no_delay=True,  # no jobs thanks
         ))
 
 Then all your tests execute the job methods synchronously without delaying any
@@ -604,7 +605,7 @@ In tests you'll have to mute the logger like:
 
     @mute_logger('odoo.addons.queue_job.models.base')
 
-.. NOTE:: in graphs of jobs, the ``test_queue_job_no_delay`` context key must be in at
+.. NOTE:: in graphs of jobs, the ``queue_job__no_delay`` context key must be in at
           least one job's env of the graph for the whole graph to be executed synchronously
 
 
