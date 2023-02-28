@@ -3,6 +3,9 @@
     "387": "Reverted later by https://github.com/OCA/queue/pull/466",
     "413": "No reason to port repo template sync",
     "440": "Already ported",
-    "466": "Reverts https://github.com/OCA/queue/pull/387"
+    "466": "Reverts https://github.com/OCA/queue/pull/387",
+    "511": "Icon already updated for v15",
+    "443": "Squashed w/ 453, commit rewritten",
+    "453": "Squashed w/ 443, commit rewritten"
   }
 }
