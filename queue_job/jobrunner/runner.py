@@ -35,6 +35,10 @@ How to use it?
     or ``False`` if unset.
   - ``ODOO_QUEUE_JOB_JOBRUNNER_DB_PORT=5432``, default ``db_port``
     or ``False`` if unset.
+  - ``ODOO_QUEUE_JOB_JOBRUNNER_DB_USER=userdb``, default ``db_user``
+    or ``False`` if unset.
+  - ``ODOO_QUEUE_JOB_JOBRUNNER_DB_PASSWORD=passdb``, default ``db_password``
+    or ``False`` if unset.
 
 * Alternatively, configure the channels through the Odoo configuration
   file, like:
@@ -50,6 +54,8 @@ How to use it?
   http_auth_password = s3cr3t
   jobrunner_db_host = master-db
   jobrunner_db_port = 5432
+  jobrunner_db_user = userdb
+  jobrunner_db_password = passdb
 
 * Or, if using ``anybox.recipe.odoo``, add this to your buildout configuration:
 
@@ -187,7 +193,7 @@ def _odoo_now():
 def _connection_info_for(db_name):
     db_or_uri, connection_info = odoo.sql_db.connection_info_for(db_name)
 
-    for p in ("host", "port"):
+    for p in ("host", "port", "user", "password"):
         cfg = os.environ.get(
             "ODOO_QUEUE_JOB_JOBRUNNER_DB_%s" % p.upper()
         ) or queue_job_config.get("jobrunner_db_" + p)
