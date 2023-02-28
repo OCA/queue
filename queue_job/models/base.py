@@ -2,14 +2,12 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import functools
-import logging
 
 from odoo import api, models
 
 from ..delay import Delayable
 from ..job import DelayableRecordset
-
-_logger = logging.getLogger(__name__)
+from ..utils import must_run_without_delay
 
 
 class Base(models.AbstractModel):
@@ -216,8 +214,7 @@ class Base(models.AbstractModel):
             if (
                 self.env.context.get("job_uuid")
                 or not context_delay
-                or self.env.context.get("_job_force_sync")
-                or self.env.context.get("test_queue_job_no_delay")
+                or must_run_without_delay(self.env)
             ):
                 # we are in the job execution
                 return auto_delay_wrapper.origin(self, *args, **kwargs)

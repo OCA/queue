@@ -133,8 +133,8 @@ class TestDelayMocks(common.TransactionCase):
             self.assertEqual(delay_args, (1,))
             self.assertDictEqual(delay_kwargs, {"foo": 2})
 
-    @mute_logger("odoo.addons.queue_job.models.base")
-    @mock.patch.dict(os.environ, {"TEST_QUEUE_JOB_NO_DELAY": "1"})
+    @mute_logger("odoo.addons.queue_job.utils")
+    @mock.patch.dict(os.environ, {"QUEUE_JOB__NO_DELAY": "1"})
     def test_delay_graph_direct_exec_env_var(self):
         node = Delayable(self.env["test.queue.job"]).create_ir_logging(
             "test_delay_graph_direct_exec 1"
@@ -157,10 +157,10 @@ class TestDelayMocks(common.TransactionCase):
         self.assertEqual(logs[0].message, "test_delay_graph_direct_exec 2")
         self.assertEqual(logs[1].message, "test_delay_graph_direct_exec 1")
 
-    @mute_logger("odoo.addons.queue_job.models.base")
+    @mute_logger("odoo.addons.queue_job.utils")
     def test_delay_graph_direct_exec_context_key(self):
         node = Delayable(
-            self.env["test.queue.job"].with_context(test_queue_job_no_delay=True)
+            self.env["test.queue.job"].with_context(queue_job__no_delay=True)
         ).create_ir_logging("test_delay_graph_direct_exec 1")
         node2 = Delayable(self.env["test.queue.job"]).create_ir_logging(
             "test_delay_graph_direct_exec 2"
@@ -180,8 +180,8 @@ class TestDelayMocks(common.TransactionCase):
         self.assertEqual(logs[0].message, "test_delay_graph_direct_exec 2")
         self.assertEqual(logs[1].message, "test_delay_graph_direct_exec 1")
 
-    @mute_logger("odoo.addons.queue_job.models.base")
-    @mock.patch.dict(os.environ, {"TEST_QUEUE_JOB_NO_DELAY": "1"})
+    @mute_logger("odoo.addons.queue_job.utils")
+    @mock.patch.dict(os.environ, {"QUEUE_JOB__NO_DELAY": "1"})
     def test_delay_with_delay_direct_exec_env_var(self):
         model = self.env["test.queue.job"]
         model.with_delay().create_ir_logging("test_delay_graph_direct_exec 1")
@@ -196,9 +196,9 @@ class TestDelayMocks(common.TransactionCase):
         self.assertEqual(len(logs), 1)
         self.assertEqual(logs[0].message, "test_delay_graph_direct_exec 1")
 
-    @mute_logger("odoo.addons.queue_job.models.base")
+    @mute_logger("odoo.addons.queue_job.utils")
     def test_delay_with_delay_direct_exec_context_key(self):
-        model = self.env["test.queue.job"].with_context(test_queue_job_no_delay=True)
+        model = self.env["test.queue.job"].with_context(queue_job__no_delay=True)
         model.with_delay().create_ir_logging("test_delay_graph_direct_exec 1")
         # jobs are executed directly
         logs = self.env["ir.logging"].search(
