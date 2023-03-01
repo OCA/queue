@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 14.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -14,6 +14,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: base_import_async
+#. odoo-python
 #: code:addons/base_import_async/models/queue_job.py:0
 #, python-format
 msgid "Attachment"
@@ -25,40 +26,26 @@ msgid "Base Import"
 msgstr ""
 
 #. module: base_import_async
-#: model:ir.model.fields,field_description:base_import_async.field_base_import_import__display_name
-#: model:ir.model.fields,field_description:base_import_async.field_queue_job__display_name
-msgid "Display Name"
-msgstr ""
-
-#. module: base_import_async
-#: model:ir.model.fields,field_description:base_import_async.field_base_import_import__id
-#: model:ir.model.fields,field_description:base_import_async.field_queue_job__id
-msgid "ID"
-msgstr ""
-
-#. module: base_import_async
+#. odoo-python
 #: code:addons/base_import_async/models/base_import_import.py:0
 #, python-format
-msgid "Import %s from file %s"
+msgid ""
+"Import %(model)s from file %(file_name)s - #%(chunk)s - lines %(from)s to "
+"%(to)s"
 msgstr ""
 
 #. module: base_import_async
+#. odoo-python
 #: code:addons/base_import_async/models/base_import_import.py:0
 #, python-format
-msgid "Import %s from file %s - #%s - lines %s to %s"
+msgid "Import %(model)s from file %(from_file)s"
 msgstr ""
 
 #. module: base_import_async
-#. openerp-web
+#. odoo-javascript
 #: code:addons/base_import_async/static/src/xml/import.xml:0
 #, python-format
 msgid "Import in the background"
-msgstr ""
-
-#. module: base_import_async
-#: model:ir.model.fields,field_description:base_import_async.field_base_import_import____last_update
-#: model:ir.model.fields,field_description:base_import_async.field_queue_job____last_update
-msgid "Last Modified on"
 msgstr ""
 
 #. module: base_import_async
@@ -67,7 +54,7 @@ msgid "Queue Job"
 msgstr ""
 
 #. module: base_import_async
-#. openerp-web
+#. odoo-javascript
 #: code:addons/base_import_async/static/src/xml/import.xml:0
 #, python-format
 msgid ""
@@ -77,14 +64,14 @@ msgid ""
 msgstr ""
 
 #. module: base_import_async
-#. openerp-web
+#. odoo-javascript
 #: code:addons/base_import_async/static/src/js/import.js:0
 #, python-format
 msgid "You can check the status of this job in menu 'Queue / Jobs'."
 msgstr ""
 
 #. module: base_import_async
-#. openerp-web
+#. odoo-javascript
 #: code:addons/base_import_async/static/src/js/import.js:0
 #, python-format
 msgid "Your request is being processed"
