@@ -1,26 +1,33 @@
 # Do NOT update manually; changes here will be overwritten by Copier
-_commit: v1.7.0
+_commit: v1.14.2
 _src_path: git+https://github.com/OCA/oca-addons-repo-template
 ci: GitHub
 dependency_installation_mode: PIP
 generate_requirements_txt: true
+github_check_license: true
+github_ci_extra_env: {}
+github_enable_codecov: true
+github_enable_makepot: true
+github_enable_stale_action: true
+github_enforce_dev_status_compatibility: true
 include_wkhtmltopdf: false
 odoo_version: 12.0
 org_name: Odoo Community Association (OCA)
 org_slug: OCA
 rebel_module_groups: []
 repo_description: 'Asynchronous Job Queue. Delay Model methods in asynchronous jobs,
-  executed in
+    executed in
 
-  the background as soon as possible or on a schedule.  Support Channels to
+    the background as soon as possible or on a schedule.  Support Channels to
 
-  segregates jobs in different queues with different capacities. Unlike
+    segregates jobs in different queues with different capacities. Unlike
 
-  scheduled tasks, a job captures arguments for later processing.
+    scheduled tasks, a job captures arguments for later processing.
 
-  '
+    '
 repo_name: Odoo Queue Modules
 repo_slug: queue
 repo_website: https://github.com/OCA/queue
 travis_apt_packages: []
 travis_apt_sources: []
+
