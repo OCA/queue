@@ -65,7 +65,6 @@ Contributors
 
 * Arnaud Pineux (ACSONE SA/NV) authored the initial prototype.
 * Guewen Baconnier (Camptocamp)
-* Cuong Nguyen Minh Tran Manh (Komit)
 
 Maintainers
 ~~~~~~~~~~~
