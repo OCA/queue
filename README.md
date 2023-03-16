@@ -21,6 +21,7 @@ Available addons
 ----------------
 addon | version | maintainers | summary
 --- | --- | --- | ---
+[base_export_async](base_export_async/) | 14.0.1.0.0 |  | Asynchronous export with job queue
 [base_import_async](base_import_async/) | 14.0.1.0.2 |  | Import CSV files in the background
 [queue_job](queue_job/) | 14.0.3.1.2 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
 [queue_job_batch](queue_job_batch/) | 14.0.1.0.0 |  | Job Queue Batch
@@ -31,13 +32,6 @@ addon | version | maintainers | summary
 [test_base_import_async](test_base_import_async/) | 14.0.1.0.1 |  | Test suite for base_import_async. Normally you don't need to install this.
 [test_queue_job](test_queue_job/) | 14.0.3.0.1 |  | Queue Job Tests
 [test_queue_job_batch](test_queue_job_batch/) | 14.0.1.0.0 |  | Test Job Queue Batch
-
-
-Unported addons
----------------
-addon | version | maintainers | summary
---- | --- | --- | ---
-[base_export_async](base_export_async/) | 12.0.1.0.0 (unported) |  | Asynchronous export with job queue
 
 [//]: # (end addons)
 
