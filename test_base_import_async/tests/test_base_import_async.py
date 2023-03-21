@@ -16,7 +16,7 @@ from odoo.addons.base_import_async.models.base_import_import import (
 from odoo.addons.queue_job.job import Job
 
 
-class TestBaseImportAsync(common.SavepointCase):
+class TestBaseImportAsync(common.TransactionCase):
 
     FIELDS = [
         "date",
@@ -79,7 +79,7 @@ class TestBaseImportAsync(common.SavepointCase):
         options = dict(self.OPTIONS)
         options[OPT_USE_QUEUE] = use_queue
         options[OPT_CHUNK_SIZE] = chunk_size
-        return importer.do(self.FIELDS, self.FIELDS, options)
+        return importer.execute_import(self.FIELDS, self.FIELDS, options)
 
     def _check_import_result(self):
         move_count = self.move_obj.search_count(
