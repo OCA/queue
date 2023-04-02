@@ -703,11 +703,11 @@ be customized in <tt class="docutils literal">Base._job_prepare_context_before_e
 <strong>Bypass jobs on running Odoo</strong></p>
 <p>When you are developing (ie: connector modules) you might want
 to bypass the queue job and run your code immediately.</p>
-<p>To do so you can set <cite>TEST_QUEUE_JOB_NO_DELAY=1</cite> in your enviroment.</p>
+<p>To do so you can set <cite>QUEUE_JOB__NO_DELAY=1</cite> in your enviroment.</p>
 <p><strong>Bypass jobs in tests</strong></p>
 <p>When writing tests on job-related methods is always tricky to deal with
 delayed recordsets. To make your testing life easier
-you can set <cite>test_queue_job_no_delay=True</cite> in the context.</p>
+you can set <cite>queue_job__no_delay=True</cite> in the context.</p>
 <p>Tip: you can do this at test case level like this</p>
 <pre class="code python literal-block">
 <span class="nd">&#64;classmethod</span>
@@ -715,7 +715,7 @@ you can set <cite>test_queue_job_no_delay=True</cite> in the context.</p>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUpClass</span><span class="p">()</span>
     <span class="bp">cls</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">env</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
-        <span class="n">test_queue_job_no_delay</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># no jobs thanks</span>
+        <span class="n">queue_job__no_delay</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># no jobs thanks</span>
     <span class="p">))</span>
 </pre>
 <p>Then all your tests execute the job methods synchronously
@@ -806,7 +806,7 @@ tests), and it makes tests smaller.</p>
 <p><strong>Execute jobs synchronously when running Odoo</strong></p>
 <p>When you are developing (ie: connector modules) you might want
 to bypass the queue job and run your code immediately.</p>
-<p>To do so you can set <tt class="docutils literal">TEST_QUEUE_JOB_NO_DELAY=1</tt> in your environment.</p>
+<p>To do so you can set <tt class="docutils literal">QUEUE_JOB__NO_DELAY=1</tt> in your environment.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">Do not do this in production</p>
@@ -814,7 +814,7 @@ to bypass the queue job and run your code immediately.</p>
 <p><strong>Execute jobs synchronously in tests</strong></p>
 <p>You should use <tt class="docutils literal">trap_jobs</tt>, really, but if for any reason you could not use it,
 and still need to have job methods executed synchronously in your tests, you can
-do so by setting <tt class="docutils literal">test_queue_job_no_delay=True</tt> in the context.</p>
+do so by setting <tt class="docutils literal">queue_job__no_delay=True</tt> in the context.</p>
 <p>Tip: you can do this at test case level like this</p>
 <pre class="code python literal-block">
 <span class="nd">&#64;classmethod</span>
@@ -822,7 +822,7 @@ do so by setting <tt class="docutils literal">test_queue_job_no_delay=True</tt> 
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUpClass</span><span class="p">()</span>
     <span class="bp">cls</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">env</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
-        <span class="n">test_queue_job_no_delay</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># no jobs thanks</span>
+        <span class="n">queue_job__no_delay</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># no jobs thanks</span>
     <span class="p">))</span>
 </pre>
 <p>Then all your tests execute the job methods synchronously without delaying any
@@ -832,7 +832,7 @@ jobs.</p>
 &#64;mute_logger(‘odoo.addons.queue_job.models.base’)</blockquote>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">in graphs of jobs, the <tt class="docutils literal">test_queue_job_no_delay</tt> context key must be in at
+<p class="last">in graphs of jobs, the <tt class="docutils literal">queue_job__no_delay</tt> context key must be in at
 least one job’s env of the graph for the whole graph to be executed synchronously</p>
 </div>
 </div>
