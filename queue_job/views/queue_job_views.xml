@@ -245,6 +245,11 @@
                     string="Failed"
                     domain="[('state', '=', 'failed')]"
                 />
+                <filter
+                    name="cancelled"
+                    string="Cancelled"
+                    domain="[('state', '=', 'cancelled')]"
+                />
                 <group expand="0" string="Group By">
                     <filter
                         name="group_by_channel"
