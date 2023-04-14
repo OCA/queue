@@ -96,9 +96,14 @@ class BaseImportImport(models.TransientModel):
         writer.writerow(fields)
         for row in data:
             writer.writerow(row)
-        # create attachment
+        # create attachment. Remove default values from context
+        context = self.env.context
+        context_copy = {}
+        for key in context.keys():
+            if not key.startswith("default_"):
+                context_copy[key] = context[key]
         datas = base64.encodebytes(f.getvalue().encode(encoding))
-        attachment = self.env['ir.attachment'].create({
+        attachment = self.env['ir.attachment'].with_context(context_copy).create({
             'name': file_name,
             'datas': datas,
             'datas_fname': file_name,
