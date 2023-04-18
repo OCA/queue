@@ -146,6 +146,7 @@ import select
 import threading
 import time
 from contextlib import closing, contextmanager
+from urllib.parse import urlparse
 
 import psycopg2
 import requests
@@ -366,12 +367,35 @@ class QueueJobRunner(object):
         self._stop_pipe = os.pipe()
 
     @classmethod
+    def get_web_base_url(cls):
+        scheme, hostname = None, None
+        for db_name in cls.get_db_names():
+            db = Database(db_name)
+            with closing(db.conn.cursor()) as cr:
+                try:
+                    cr.execute(
+                        "SELECT value FROM ir_config_parameter WHERE key='web.base.url' limit 1"
+                    )
+                    res = cr.fetchone()
+                    if res:
+                        url = urlparse(res[0])
+                        scheme, hostname = url.scheme, url.hostname
+                except Exception:
+                    _logger.exception("Getting web.base.url failed")
+            db.close()
+        return scheme, hostname
+
+    @classmethod
     def from_environ_or_config(cls):
-        scheme = os.environ.get("ODOO_QUEUE_JOB_SCHEME") or queue_job_config.get(
-            "scheme"
+        web_base_scheme, web_base_host = cls.get_web_base_url()
+        scheme = (
+            web_base_scheme
+            or os.environ.get("ODOO_QUEUE_JOB_SCHEME")
+            or queue_job_config.get("scheme")
         )
         host = (
-            os.environ.get("ODOO_QUEUE_JOB_HOST")
+            web_base_host
+            or os.environ.get("ODOO_QUEUE_JOB_HOST")
             or queue_job_config.get("host")
             or config["http_interface"]
         )
@@ -395,7 +419,8 @@ class QueueJobRunner(object):
         )
         return runner
 
-    def get_db_names(self):
+    @staticmethod
+    def get_db_names():
         if config["db_name"]:
             db_names = config["db_name"].split(",")
         else:
