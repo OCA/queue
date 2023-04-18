@@ -13,6 +13,7 @@ from functools import total_ordering
 from random import randint
 
 import odoo
+from psycopg2.errors import UniqueViolation
 
 from .exception import FailedJobError, NoSuchJobError, RetryableJobError
 
@@ -507,6 +508,15 @@ class Job(object):
         if any(j.state != DONE for j in jobs):
             self.state = WAIT_DEPENDENCIES
 
+    def failed_retries(self):
+        type_, value, traceback = sys.exc_info()
+        # change the exception type but keep the original
+        # traceback and message:
+        # http://blog.ianbicking.org/2007/09/12/re-raising-exceptions/
+        return FailedJobError(
+            "Max. retries (%d) reached: %s" % (self.max_retries, value or type_)
+        )
+
     def perform(self):
         """Execute the job.
 
@@ -515,6 +525,10 @@ class Job(object):
         self.retry += 1
         try:
             self.result = self.func(*tuple(self.args), **self.kwargs)
+        except UniqueViolation:
+            if self.max_retries and self.retry >= self.max_retries:
+                raise self.failed_retries()
+            raise RetryableJobError(msg="UniqueViolation, postponed")
         except RetryableJobError as err:
             if err.ignore_retry:
                 self.retry -= 1
@@ -522,14 +536,7 @@ class Job(object):
             elif not self.max_retries:  # infinite retries
                 raise
             elif self.retry >= self.max_retries:
-                type_, value, traceback = sys.exc_info()
-                # change the exception type but keep the original
-                # traceback and message:
-                # http://blog.ianbicking.org/2007/09/12/re-raising-exceptions/
-                new_exc = FailedJobError(
-                    "Max. retries (%d) reached: %s" % (self.max_retries, value or type_)
-                )
-                raise new_exc from err
+                raise self.failed_retries() from err
             raise
 
         return self.result
