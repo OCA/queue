@@ -3,7 +3,7 @@
 
 import logging
 import random
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from odoo import _, api, exceptions, fields, models
 from odoo.addons.base_sparse_field.models.fields import Serialized
@@ -32,7 +32,11 @@ class QueueJob(models.Model):
 
     _name = "queue.job"
     _description = "Queue Job"
-    _inherit = ["mail.thread", "mail.activity.mixin"]
+    _inherit = [
+        "mail.thread",
+        "mail.activity.mixin",
+        "alfaleads_utils.autovacuum_mixin",
+    ]
     _log_access = False
 
     _order = "date_created DESC, date_done DESC"
@@ -390,31 +394,39 @@ class QueueJob(models.Model):
         """
         return [("state", "=", "failed")]
 
-    def autovacuum(self):
+    def autovacuum(self, batch_size=1000, limit_batches=0, vacuum_failed=False):
         """Delete all jobs done based on the removal interval defined on the
            channel
 
         Called from a cron.
         """
+
         for channel in self.env["queue.job.channel"].search([]):
-            deadline = datetime.now() - timedelta(days=int(channel.removal_interval))
-            while True:
-                jobs = self.search(
-                    [
-                        "|",
-                        ("date_done", "<=", deadline),
-                        ("date_cancelled", "<=", deadline),
-                        ("channel", "=", channel.complete_name),
-                    ],
-                    limit=1000,
-                )
-                if jobs:
-                    jobs.unlink()
-                    if not config["test_enable"]:
-                        self.env.cr.commit()  # pylint: disable=E8102
-                else:
-                    break
+            self._vacuum(
+                domain=self._get_vacuum_domain(vacuum_failed, channel),
+                batch_size=batch_size,
+                limit_batches=limit_batches,
+            )
         return True
+
+    @staticmethod
+    def _get_vacuum_domain(vacuum_failed, channel):
+        deadline = fields.Datetime.now() - timedelta(days=int(channel.removal_interval))
+        if vacuum_failed:
+            domain = [
+                ("state", "=", FAILED),
+                ("date_created", "<=", deadline),
+                ("channel", "=", channel.complete_name),
+            ]
+        else:
+            domain = [
+                "|",
+                ("date_done", "<=", deadline),
+                ("date_cancelled", "<=", deadline),
+                ("channel", "=", channel.complete_name),
+            ]
+
+        return domain
 
     def requeue_stuck_jobs(self, enqueued_delta=5, started_delta=0):
         """Fix jobs that are in a bad states
