@@ -8,7 +8,6 @@
     "license": "LGPL-3",
     "category": "Generic Modules",
     "depends": ["mail", "base_sparse_field"],
-    "external_dependencies": {"python": ["requests"]},
     "data": [
         "security/security.xml",
         "security/ir.model.access.csv",
