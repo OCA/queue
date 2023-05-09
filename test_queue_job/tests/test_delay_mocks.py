@@ -13,7 +13,7 @@ from odoo.addons.queue_job.tests.common import mock_with_delay, trap_jobs
 
 
 class TestDelayMocks(common.TransactionCase):
-    def test_trap_jobs_on_with_delay(self):
+    def test_trap_jobs_on_with_delay_model(self):
         with trap_jobs() as trap:
             self.env["test.queue.job"].button_that_uses_with_delay()
             trap.assert_jobs_count(1)
@@ -32,6 +32,133 @@ class TestDelayMocks(common.TransactionCase):
                     priority=15,
                 ),
             )
+
+    def test_trap_jobs_on_with_delay_recordset(self):
+        recordset = self.env["test.queue.job"].create({"name": "test"})
+        with trap_jobs() as trap:
+            recordset.button_that_uses_with_delay()
+            trap.assert_jobs_count(1)
+            trap.assert_jobs_count(1, only=recordset.testing_method)
+
+            trap.assert_enqueued_job(
+                recordset.testing_method,
+                args=(1,),
+                kwargs={"foo": 2},
+                properties=dict(
+                    channel="root.test",
+                    description="Test",
+                    eta=15,
+                    identity_key=identity_exact,
+                    max_retries=1,
+                    priority=15,
+                ),
+            )
+
+    def test_trap_jobs_on_with_delay_recordset_no_properties(self):
+        """Verify that trap_jobs() can omit properties"""
+        recordset = self.env["test.queue.job"].create({"name": "test"})
+        with trap_jobs() as trap:
+            recordset.button_that_uses_with_delay()
+
+            trap.assert_enqueued_job(
+                recordset.testing_method,
+                args=(1,),
+                kwargs={"foo": 2},
+            )
+
+    def test_trap_jobs_on_with_delay_recordset_partial_properties(self):
+        """Verify that trap_jobs() can check partially properties"""
+        recordset = self.env["test.queue.job"].create({"name": "test"})
+        with trap_jobs() as trap:
+            recordset.button_that_uses_with_delay()
+
+            trap.assert_enqueued_job(
+                recordset.testing_method,
+                args=(1,),
+                kwargs={"foo": 2},
+                properties=dict(
+                    description="Test",
+                    eta=15,
+                ),
+            )
+
+    def test_trap_jobs_on_with_delay_assert_model_count_mismatch(self):
+        recordset = self.env["test.queue.job"].create({"name": "test"})
+        with trap_jobs() as trap:
+            self.env["test.queue.job"].button_that_uses_with_delay()
+            trap.assert_jobs_count(1)
+            with self.assertRaises(AssertionError, msg="0 != 1"):
+                trap.assert_jobs_count(1, only=recordset.testing_method)
+
+    def test_trap_jobs_on_with_delay_assert_recordset_count_mismatch(self):
+        recordset = self.env["test.queue.job"].create({"name": "test"})
+        with trap_jobs() as trap:
+            recordset.button_that_uses_with_delay()
+            trap.assert_jobs_count(1)
+            with self.assertRaises(AssertionError, msg="0 != 1"):
+                trap.assert_jobs_count(
+                    1, only=self.env["test.queue.job"].testing_method
+                )
+
+    def test_trap_jobs_on_with_delay_assert_model_enqueued_mismatch(self):
+        recordset = self.env["test.queue.job"].create({"name": "test"})
+        with trap_jobs() as trap:
+            recordset.button_that_uses_with_delay()
+            trap.assert_jobs_count(1)
+            message = (
+                r"Job <test\.queue.job\(\)>\.testing_method\(1, foo=2\) with "
+                r"properties \(channel=root\.test, description=Test, eta=15, "
+                "identity_key=<function identity_exact at 0x[0-9a-fA-F]+>, "
+                "max_retries=1, priority=15\\) was not enqueued\\.\n"
+                "Actual enqueued jobs:\n"
+                r" \* <test.queue.job\(%s,\)>.testing_method\(1, foo=2\) with properties "
+                r"\(priority=15, max_retries=1, eta=15, description=Test, channel=root.test, "
+                r"identity_key=<function identity_exact at 0x[0-9a-fA-F]+>\)"
+            ) % (recordset.id,)
+            with self.assertRaisesRegex(AssertionError, message):
+                trap.assert_enqueued_job(
+                    self.env["test.queue.job"].testing_method,
+                    args=(1,),
+                    kwargs={"foo": 2},
+                    properties=dict(
+                        channel="root.test",
+                        description="Test",
+                        eta=15,
+                        identity_key=identity_exact,
+                        max_retries=1,
+                        priority=15,
+                    ),
+                )
+
+    def test_trap_jobs_on_with_delay_assert_recordset_enqueued_mismatch(self):
+        recordset = self.env["test.queue.job"].create({"name": "test"})
+        with trap_jobs() as trap:
+            self.env["test.queue.job"].button_that_uses_with_delay()
+            trap.assert_jobs_count(1)
+            message = (
+                r"Job <test\.queue.job\(%s,\)>\.testing_method\(1, foo=2\) with "
+                r"properties \(channel=root\.test, description=Test, eta=15, "
+                "identity_key=<function identity_exact at 0x[0-9a-fA-F]+>, "
+                "max_retries=1, priority=15\\) was not enqueued\\.\n"
+                "Actual enqueued jobs:\n"
+                r" \* <test.queue.job\(\)>.testing_method\(1, foo=2\) with properties "
+                r"\(priority=15, max_retries=1, eta=15, description=Test, channel=root.test, "
+                r"identity_key=<function identity_exact at 0x[0-9a-fA-F]+>\)"
+            ) % (recordset.id,)
+            with self.assertRaisesRegex(AssertionError, message):
+                trap.assert_enqueued_job(
+                    recordset.testing_method,
+                    args=(1,),
+                    kwargs={"foo": 2},
+                    properties=dict(
+                        channel="root.test",
+                        description="Test",
+                        eta=15,
+                        identity_key=identity_exact,
+                        max_retries=1,
+                        priority=15,
+                    ),
+                )
 
     def test_trap_jobs_on_graph(self):
         with trap_jobs() as trap:
