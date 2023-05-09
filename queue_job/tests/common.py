@@ -110,7 +110,8 @@ class JobCall(typing.NamedTuple):
         if not isinstance(other, JobCall):
             return NotImplemented
         return (
-            self.method.__func__ == other.method.__func__
+            self.method.__self__ == other.method.__self__
+            and self.method.__func__ == other.method.__func__
             and self.args == other.args
             and self.kwargs == other.kwargs
             and self.properties == other.properties
@@ -279,7 +280,8 @@ class JobsTrap:
         enqueued_jobs = [
             job
             for job in self.enqueued_jobs
-            if job.func.__func__ == job_method.__func__
+            if job.func.__self__ == job_method.__self__
+            and job.func.__func__ == job_method.__func__
         ]
         return enqueued_jobs
 
@@ -292,7 +294,7 @@ class JobsTrap:
                 ", ".join("%s=%s" % (key, value) for key, value in call.kwargs.items())
             )
         return "<%s>.%s(%s) with properties (%s)" % (
-            call.method.__self__.__class__._name,
+            call.method.__self__,
             call.method.__name__,
             ", ".join(method_all_args),
             ", ".join("%s=%s" % (key, value) for key, value in call.properties.items()),
