@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2023-02-15 17:23+0000\n"
-"Last-Translator: FranciscoFactorLibre <francisco.santos@factorlibre.com>\n"
+"PO-Revision-Date: 2023-05-18 11:21+0000\n"
+"Last-Translator: David Ramia <david.ramia@processcontrol.es>\n"
 "Language-Team: none\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
@@ -23,6 +23,9 @@ msgid ""
 "                            <span class=\"oe_grey oe_inline\"> If the max. "
 "retries is 0, the number of retries is infinite.</span>"
 msgstr ""
+"<br/>\n"
+"                             <span class=\"oe_grey oe_inline\"> Si el máx. "
+"reintentos es 0, el número de reintentos es infinito.</span>"
 
 #. module: queue_job
 #. odoo-python
@@ -87,30 +90,30 @@ msgstr "Cancelar"
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_cancelled
 msgid "Cancel all selected jobs"
-msgstr ""
+msgstr "Cancelar todos los trabajos seleccionados"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Cancel job"
-msgstr ""
+msgstr "Cancelar trabajo"
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_set_jobs_cancelled
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
 msgid "Cancel jobs"
-msgstr ""
+msgstr "Cancelar trabajos"
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__cancelled
 msgid "Cancelled"
-msgstr ""
+msgstr "Cancelada"
 
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Cancelled by %s"
-msgstr ""
+msgstr "Cancelado por %s"
 
 #. module: queue_job
 #. odoo-python
@@ -155,7 +158,7 @@ msgstr "Empresa"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__channel_method_name
 msgid "Complete Method Name"
-msgstr ""
+msgstr "Nombre completo del método"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__complete_name
@@ -197,7 +200,7 @@ msgstr "Intento actual / reintentos máx."
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_cancelled
 msgid "Date Cancelled"
-msgstr ""
+msgstr "Fecha de cancelación"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_done
@@ -208,12 +211,12 @@ msgstr "Fecha de realización"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__dependencies
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Dependencies"
-msgstr ""
+msgstr "Dependencias"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__dependency_graph
 msgid "Dependency Graph"
-msgstr ""
+msgstr "Gráfico de dependencias"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__name
@@ -251,7 +254,7 @@ msgstr "En la cola"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_name
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Exception"
-msgstr ""
+msgstr "Excepción"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_info
@@ -266,17 +269,17 @@ msgstr "Información de la excepción"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_message
 msgid "Exception Message"
-msgstr ""
+msgstr "Mensaje de la excepción"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Exception message"
-msgstr ""
+msgstr "Mensaje de la excepción"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Exception:"
-msgstr ""
+msgstr "Excepción:"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__eta
@@ -286,7 +289,7 @@ msgstr "Ejecutar solo después de"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__exec_time
 msgid "Execution Time (avg)"
-msgstr ""
+msgstr "Duración media de ejecución"
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__failed
@@ -322,22 +325,22 @@ msgstr "Icono de Font Awesome ej. fa-tasks"
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Graph"
-msgstr ""
+msgstr "Gráfico"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Graph Jobs"
-msgstr ""
+msgstr "Gráfico de trabajos"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_jobs_count
 msgid "Graph Jobs Count"
-msgstr ""
+msgstr "Nº de gráfico de trabajos"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_uuid
 msgid "Graph UUID"
-msgstr ""
+msgstr "UUID del Gráfico"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
@@ -481,7 +484,7 @@ msgstr "Recolector de basura de trabajos"
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Jobs for graph %s"
-msgstr ""
+msgstr "Trabajos para gráfico %s"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__kwargs
@@ -682,7 +685,7 @@ msgstr "Cola de trabajos"
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Queue jobs must be created by calling 'with_delay()'."
-msgstr ""
+msgstr "Los trabajos en cola deben crearse llamando a 'with_delay()'."
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__record_ids
@@ -726,7 +729,7 @@ msgstr "Registros relacionados"
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_tree
 msgid "Remaining days to execute"
-msgstr ""
+msgstr "Días restantes para ejecutar"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__removal_interval
@@ -763,7 +766,7 @@ msgstr "Resultado"
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Results"
-msgstr ""
+msgstr "Resultados"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_retry_pattern
@@ -809,6 +812,7 @@ msgstr "Marcar como hecho"
 #: model:ir.model.fields,help:queue_job.field_queue_job__graph_uuid
 msgid "Single shared identifier of a Graph. Empty for a single job."
 msgstr ""
+"Identificador único compartido de un gráfico. Vacío para un solo trabajo."
 
 #. module: queue_job
 #. odoo-python
@@ -882,7 +886,7 @@ msgstr ""
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
 msgid "The selected jobs will be cancelled."
-msgstr ""
+msgstr "Los trabajos seleccionados serán cancelados."
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
