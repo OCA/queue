@@ -8,6 +8,7 @@ from psycopg2.errors import (
     SerializationFailure,
     UniqueViolation,
 )
+from requests.exceptions import ConnectionError
 
 
 class BaseQueueJobError(Exception):
@@ -62,3 +63,4 @@ class StringifyExceptions(Enum):
     LockNotAvailable = LockNotAvailable
     SerializationFailure = SerializationFailure
     CacheMiss = CacheMiss
+    ConnectionError = ConnectionError
