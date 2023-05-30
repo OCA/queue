@@ -9,6 +9,8 @@ from psycopg2 import OperationalError
 from odoo import api, fields, models
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
+from odoo.addons.queue_job.exception import RetryableJobError
+
 # Use to bypass chunks entirely for easier debugging
 DEBUG_MODE = False
 
@@ -89,6 +91,8 @@ class QueueJobChunk(models.Model):
             with self.env.cr.savepoint():
                 processor = self._get_processor()
                 result = processor.run()
+        except RetryableJobError:
+            raise
         except Exception as e:
             if DEBUG_MODE:
                 raise
