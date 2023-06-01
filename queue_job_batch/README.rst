@@ -23,9 +23,9 @@ Job Queue Batch
     :target: https://runbot.odoo-community.org/runbot/230/14.0
     :alt: Try me on Runbot
 
-|badge1| |badge2| |badge3| |badge4| |badge5| 
+|badge1| |badge2| |badge3| |badge4| |badge5|
 
-This addon adds an a grouper for queue jobs.
+This addon adds a grouper for queue jobs.
 
 It allows to show your jobs in a batched form in order to know better the
 results.
