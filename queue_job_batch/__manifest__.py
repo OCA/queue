@@ -13,9 +13,6 @@
     "depends": [
         "queue_job",
     ],
-    "qweb": [
-        "static/src/xml/systray.xml",
-    ],
     "data": [
         # data
         "data/queue_job_channel_data.xml",
@@ -28,6 +25,9 @@
         "views/queue_job_batch_views.xml",
     ],
     "assets": {
+        "web.assets_qweb": [
+            "queue_job_batch/static/src/xml/systray.xml",
+        ],
         "web.assets_backend": [
             "queue_job_batch/static/src/js/systray.js",
             "queue_job_batch/static/src/scss/systray.scss",
