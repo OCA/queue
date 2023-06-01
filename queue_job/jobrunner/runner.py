@@ -151,6 +151,7 @@ from urllib.parse import urlparse
 import psycopg2
 import requests
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from psycopg2.errors import UndefinedTable
 
 import odoo
 from odoo.tools import config
@@ -380,6 +381,8 @@ class QueueJobRunner(object):
                     if res:
                         url = urlparse(res[0])
                         scheme, hostname = url.scheme, url.hostname
+                except UndefinedTable:
+                    _logger.warning("No ir_config_parameter table - maybe this is the first run with -i option")
                 except Exception:
                     _logger.exception("Getting web.base.url failed")
             db.close()
