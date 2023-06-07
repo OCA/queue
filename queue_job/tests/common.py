@@ -111,7 +111,8 @@ class JobCall(typing.NamedTuple):
         if not isinstance(other, JobCall):
             return NotImplemented
         return (
-            self.method.__func__ == other.method.__func__
+            self.method.__self__ == other.method.__self__
+            and self.method.__func__ == other.method.__func__
             and self.args == other.args
             and self.kwargs == other.kwargs
             and self.properties == other.properties
@@ -280,7 +281,8 @@ class JobsTrap:
         enqueued_jobs = [
             job
             for job in self.enqueued_jobs
-            if job.func.__func__ == job_method.__func__
+            if job.func.__self__ == job_method.__self__
+            and job.func.__func__ == job_method.__func__
         ]
         return enqueued_jobs
 
@@ -293,7 +295,7 @@ class JobsTrap:
                 ", ".join("%s=%s" % (key, value) for key, value in call.kwargs.items())
             )
         return "<%s>.%s(%s) with properties (%s)" % (
-            call.method.__self__.__class__._name,
+            call.method.__self__,
             call.method.__name__,
             ", ".join(method_all_args),
             ", ".join("%s=%s" % (key, value) for key, value in call.properties.items()),
@@ -408,7 +410,9 @@ class OdooDocTestCase(doctest.DocTestCase):
     - output a more meaningful test name than default "DocTestCase.runTest"
     """
 
-    def __init__(self, doctest, optionflags=0, setUp=None, tearDown=None, checker=None):
+    def __init__(
+        self, doctest, optionflags=0, setUp=None, tearDown=None, checker=None, seq=0
+    ):
         super().__init__(
             doctest._dt_test,
             optionflags=optionflags,
@@ -416,6 +420,7 @@ class OdooDocTestCase(doctest.DocTestCase):
             tearDown=tearDown,
             checker=checker,
         )
+        self.test_sequence = seq
 
     def setUp(self):
         """Log an extra statement which test is started."""
@@ -439,8 +444,8 @@ def load_doctests(module):
             doctest.DocTestCase.doClassCleanups = lambda: None
             doctest.DocTestCase.tearDown_exceptions = []
 
-        for test in doctest.DocTestSuite(module):
-            odoo_test = OdooDocTestCase(test)
+        for idx, test in enumerate(doctest.DocTestSuite(module)):
+            odoo_test = OdooDocTestCase(test, seq=idx)
             odoo_test.test_tags = {"standard", "at_install", "queue_job", "doctest"}
             tests.addTest(odoo_test)
 
