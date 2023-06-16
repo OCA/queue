@@ -82,6 +82,38 @@ class TestDelayMocks(common.TransactionCase):
                 ),
             )
 
+    def test_trap_with_identity_key(self):
+        with trap_jobs() as trap:
+            self.env["test.queue.job"].button_that_uses_with_delay()
+            trap.assert_jobs_count(1)
+            trap.assert_jobs_count(1, only=self.env["test.queue.job"].testing_method)
+
+            trap.assert_enqueued_job(
+                self.env["test.queue.job"].testing_method,
+                args=(1,),
+                kwargs={"foo": 2},
+                properties=dict(
+                    channel="root.test",
+                    description="Test",
+                    eta=15,
+                    identity_key=identity_exact,
+                    max_retries=1,
+                    priority=15,
+                ),
+            )
+
+            # Should not enqueue again
+            self.env["test.queue.job"].button_that_uses_with_delay()
+            trap.assert_jobs_count(1)
+
+            trap.perform_enqueued_jobs()
+            # Should no longer be enqueued
+            trap.assert_jobs_count(0)
+
+            # Can now requeue
+            self.env["test.queue.job"].button_that_uses_with_delay()
+            trap.assert_jobs_count(1)
+
     def test_trap_jobs_on_with_delay_assert_model_count_mismatch(self):
         recordset = self.env["test.queue.job"].create({"name": "test"})
         with trap_jobs() as trap:
@@ -218,6 +250,8 @@ class TestDelayMocks(common.TransactionCase):
 
             # perform the jobs
             trap.perform_enqueued_jobs()
+
+            trap.assert_jobs_count(0)
 
             logs = self.env["ir.logging"].search(
                 [
