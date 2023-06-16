@@ -269,10 +269,10 @@ class QueueJob(models.Model):
                 lambda records: records.env.user.id != vals["user_id"]
             )
 
+        result = super().write(vals)
+
         if vals.get("state") == "failed":
             self._message_post_on_failure()
-
-        result = super().write(vals)
 
         for record in different_user_jobs:
             # the user is stored in the env of the record, but we still want to
