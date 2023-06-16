@@ -38,6 +38,38 @@ class TestDelayMocks(common.SavepointCase):
                 )
             )
 
+    def test_trap_with_identity_key(self):
+        with trap_jobs() as trap:
+            self.env["test.queue.job"].button_that_uses_with_delay()
+            trap.assert_jobs_count(1)
+            trap.assert_jobs_count(1, only=self.env["test.queue.job"].testing_method)
+
+            trap.assert_enqueued_job(
+                self.env["test.queue.job"].testing_method,
+                args=(1,),
+                kwargs={"foo": 2},
+                properties=dict(
+                    channel="root.test",
+                    description="Test",
+                    eta=15,
+                    identity_key=identity_exact,
+                    max_retries=1,
+                    priority=15,
+                ),
+            )
+
+            # Should not enqueue again
+            self.env["test.queue.job"].button_that_uses_with_delay()
+            trap.assert_jobs_count(1)
+
+            trap.perform_enqueued_jobs()
+            # Should no longer be enqueued
+            trap.assert_jobs_count(0)
+
+            # Can now requeue
+            self.env["test.queue.job"].button_that_uses_with_delay()
+            trap.assert_jobs_count(1)
+
     def test_trap_jobs_on_graph(self):
         with trap_jobs() as trap:
             self.env['test.queue.job'].button_that_uses_delayable_chain()
@@ -106,6 +138,8 @@ class TestDelayMocks(common.SavepointCase):
 
             # perform the jobs
             trap.perform_enqueued_jobs()
+
+            trap.assert_jobs_count(0)
 
             logs = self.env["ir.logging"].search(
                 [
