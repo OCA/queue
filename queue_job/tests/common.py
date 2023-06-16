@@ -233,6 +233,7 @@ class JobsTrap:
                 self._perform_graph_jobs(jobs)
             else:
                 self._perform_single_jobs(jobs)
+        self.enqueued_jobs = []
 
     def _perform_single_jobs(self, jobs):
         # we probably don't want to replicate a perfect order here, but at
@@ -252,11 +253,14 @@ class JobsTrap:
 
     def _add_job(self, *args, **kwargs):
         job = Job(*args, **kwargs)
-        self.enqueued_jobs.append(job)
+        if not job.identity_key or all(
+            j.identity_key != job.identity_key for j in self.enqueued_jobs
+        ):
+            self.enqueued_jobs.append(job)
 
-        patcher = mock.patch.object(job, "store")
-        self._store_patchers.append(patcher)
-        patcher.start()
+            patcher = mock.patch.object(job, "store")
+            self._store_patchers.append(patcher)
+            patcher.start()
 
         job_args = kwargs.pop("args", None) or ()
         job_kwargs = kwargs.pop("kwargs", None) or {}
