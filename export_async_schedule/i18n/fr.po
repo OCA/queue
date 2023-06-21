@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* export_async_schedule
+# 	* export_async_schedule
 #
 msgid ""
 msgstr ""
@@ -27,7 +27,7 @@ msgid "All"
 msgstr "Tout"
 
 #. module: export_async_schedule
-#: selection:export.async.schedule,export_format:0
+#: model:ir.model.fields.selection,name:export_async_schedule.selection__export_async_schedule__export_format__csv
 msgid "CSV"
 msgstr "CSV"
 
@@ -42,7 +42,7 @@ msgid "Created on"
 msgstr "Créé le"
 
 #. module: export_async_schedule
-#: selection:export.async.schedule,interval_unit:0
+#: model:ir.model.fields.selection,name:export_async_schedule.selection__export_async_schedule__interval_unit__days
 msgid "Day(s)"
 msgstr "Jour(s)"
 
@@ -57,7 +57,7 @@ msgid "End Of Month"
 msgstr "Fin de mois"
 
 #. module: export_async_schedule
-#: selection:export.async.schedule,export_format:0
+#: model:ir.model.fields.selection,name:export_async_schedule.selection__export_async_schedule__export_format__excel
 msgid "Excel"
 msgstr "Excel"
 
@@ -97,7 +97,7 @@ msgid "Group By"
 msgstr "Regrouper par"
 
 #. module: export_async_schedule
-#: selection:export.async.schedule,interval_unit:0
+#: model:ir.model.fields.selection,name:export_async_schedule.selection__export_async_schedule__interval_unit__hours
 msgid "Hour(s)"
 msgstr "Heure(s)"
 
@@ -148,7 +148,7 @@ msgid "Model Name"
 msgstr "Nom du modèle"
 
 #. module: export_async_schedule
-#: selection:export.async.schedule,interval_unit:0
+#: model:ir.model.fields.selection,name:export_async_schedule.selection__export_async_schedule__interval_unit__months
 msgid "Month(s)"
 msgstr "Mois"
 
@@ -199,6 +199,6 @@ msgid "Unit"
 msgstr "Unité"
 
 #. module: export_async_schedule
-#: selection:export.async.schedule,interval_unit:0
+#: model:ir.model.fields.selection,name:export_async_schedule.selection__export_async_schedule__interval_unit__weeks
 msgid "Week(s)"
 msgstr "Semaines(s)"
