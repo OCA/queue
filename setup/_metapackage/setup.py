@@ -8,6 +8,7 @@ setuptools.setup(
     description="Meta package for oca-queue Odoo addons",
     version=version,
     install_requires=[
+        'odoo-addon-base_export_async>=15.0dev,<15.1dev',
         'odoo-addon-queue_job>=15.0dev,<15.1dev',
         'odoo-addon-queue_job_cron>=15.0dev,<15.1dev',
         'odoo-addon-queue_job_cron_jobrunner>=15.0dev,<15.1dev',
