@@ -16,8 +16,9 @@
     <record id="queue_job_chunk_comp_rule" model="ir.rule">
         <field name="name">Job Queue chunk multi-company</field>
         <field name="model_id" ref="model_queue_job_chunk" />
-        <field name="domain_force">['|', ('company_id', '=', False),
-                                    ('company_id', 'child_of', [user.company_id.id])]</field>
+        <field
+            name="domain_force"
+        >['|', ('company_id','=',False), ('company_id','in',company_ids)]</field>
     </record>
 
 </odoo>
