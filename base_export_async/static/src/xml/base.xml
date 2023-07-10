@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<templates id="template" xml:space="preserve">
+<templates xml:space="preserve">
 
-<t t-extend="ExportDialog">
-    <t t-jquery="div.o_import_compat" t-operation="after">
-        <div class="form-check">
-            <input
-                    class="form-check-input"
-                    id="async_export"
-                    type="checkbox"
-                    name="async_export"
-                />
-            <label class="form-check-label" for="async_export">
-                <strong
-                    >Asynchronous export </strong> (You will receive the export by email)
-            </label>
-        </div>
-    </t>
+<t
+        t-name="base_export_async.ExportDataDialogAsync"
+        t-inherit="web.ExportDataDialog"
+        t-inherit-mode="extension"
+    >
+    <xpath expr="//div[hasclass('o_import_compat')]" position="after">
+        <CheckBox
+                id="async_export"
+                value="state.async"
+                onChange.bind="onToggleExportAsync"
+            >
+            <strong>Asynchronous export </strong> (You will receive the export by email)
+        </CheckBox>
+    </xpath>
 </t>
 
 </templates>
