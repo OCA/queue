@@ -4,7 +4,7 @@
 {
     "name": "Base Export Async",
     "summary": "Asynchronous export with job queue",
-    "version": "15.0.1.0.0",
+    "version": "16.0.1.0.0",
     "license": "AGPL-3",
     "author": "ACSONE SA/NV, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/queue",
@@ -18,10 +18,9 @@
     ],
     "demo": [],
     "assets": {
-        "web.assets_qweb": [
-            "base_export_async/static/src/xml/base.xml",
-        ],
         "web.assets_backend": [
+            "base_export_async/static/src/xml/base.xml",
+            "base_export_async/static/src/js/list_controller.js",
             "base_export_async/static/src/js/data_export.js",
         ],
     },
