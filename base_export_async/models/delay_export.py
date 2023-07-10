@@ -10,11 +10,10 @@ from dateutil.relativedelta import relativedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
-from odoo.addons.web.controllers.main import CSVExport, ExcelExport
+from odoo.addons.web.controllers.export import CSVExport, ExcelExport
 
 
 class DelayExport(models.Model):
-
     _name = "delay.export"
     _description = "Asynchronous Export"
 
