@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import {download} from "@web/core/network/download";
+import {blockUI, unblockUI} from "web.framework";
+
+import Dialog from "web.Dialog";
 import {ListController} from "@web/views/list/list_controller";
+import {_t} from "web.core";
+import {download} from "@web/core/network/download";
 import {patch} from "@web/core/utils/patch";
-import framework from "@web.framework";
-import Dialog from "@web.Dialog";
-import core from "@web.core";
-const _t = core._t;
 
 patch(ListController.prototype, "base_export_async", {
     async downloadExport(fields, import_compat, format, async = false) {
@@ -28,7 +28,7 @@ patch(ListController.prototype, "base_export_async", {
             /*
                 Call the delay export if Async is checked
             */
-            framework.blockUI();
+            blockUI();
             const args = [
                 {
                     data: JSON.stringify({
@@ -45,7 +45,7 @@ patch(ListController.prototype, "base_export_async", {
             ];
             const orm = this.env.services.orm;
             orm.call("delay.export", "delay_export", args).then(function () {
-                framework.unblockUI();
+                unblockUI();
                 Dialog.alert(
                     this,
                     _t(
