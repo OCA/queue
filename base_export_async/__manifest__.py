@@ -20,8 +20,8 @@
     "assets": {
         "web.assets_backend": [
             "base_export_async/static/src/xml/base.xml",
-            "base_export_async/static/src/js/list_controller.js",
-            "base_export_async/static/src/js/data_export.js",
+            "base_export_async/static/src/js/list_controller.esm.js",
+            "base_export_async/static/src/js/data_export.esm.js",
         ],
     },
     "installable": True,
