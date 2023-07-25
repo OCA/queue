@@ -32,10 +32,10 @@ DEFAULT_CHUNK_SIZE = 100
 class BaseImportImport(models.TransientModel):
     _inherit = "base_import.import"
 
-    def do(self, fields, columns, options, dryrun=False):
+    def execute_import(self, fields, columns, options, dryrun=False):
         if dryrun or not options.get(OPT_USE_QUEUE):
             # normal import
-            return super().do(fields, columns, options, dryrun=dryrun)
+            return super().execute_import(fields, columns, options, dryrun=dryrun)
 
         # asynchronous import
         try:
@@ -52,10 +52,10 @@ class BaseImportImport(models.TransientModel):
             translated_model_name = search_result[0][1]
         else:
             translated_model_name = self._description
-        description = _("Import %s from file %s") % (
-            translated_model_name,
-            self.file_name,
-        )
+        description = _("Import %(model)s from file %(from_file)s") % {
+            "model": translated_model_name,
+            "from_file": self.file_name,
+        }
         attachment = self._create_csv_attachment(
             import_fields, data, options, self.file_name
         )
@@ -130,7 +130,7 @@ class BaseImportImport(models.TransientModel):
         options,
         file_name="file.csv",
     ):
-        """ Split a CSV attachment in smaller import jobs """
+        """Split a CSV attachment in smaller import jobs"""
         model_obj = self.env[model_name]
         fields, data = self._read_csv_attachment(attachment, options)
         padding = len(str(len(data)))
@@ -144,14 +144,17 @@ class BaseImportImport(models.TransientModel):
             model_obj, fields, data, chunk_size
         ):
             chunk = str(priority - INIT_PRIORITY).zfill(padding)
-            description = _("Import %s from file %s - #%s - lines %s to %s")
-            description = description % (
-                translated_model_name,
-                file_name,
-                chunk,
-                row_from + 1 + header_offset,
-                row_to + 1 + header_offset,
+            description = _(
+                "Import %(model)s from file %(file_name)s - "
+                "#%(chunk)s - lines %(from)s to %(to)s"
             )
+            description = description % {
+                "model": translated_model_name,
+                "file_name": file_name,
+                "chunk": chunk,
+                "from": row_from + 1 + header_offset,
+                "to": row_to + 1 + header_offset,
+            }
             # create a CSV attachment and enqueue the job
             root, ext = splitext(file_name)
             attachment = self._create_csv_attachment(
