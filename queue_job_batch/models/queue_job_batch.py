@@ -116,18 +116,18 @@ class QueueJobBatch(models.Model):
         })
         return self.sudo().create(vals).sudo(self.env.uid)
 
-    @api.depends('job_ids')
+    @api.depends("job_ids", "job_ids.state")
     def _compute_job_count(self):
         for record in self:
-            job_count = len(record.job_ids)
-            failed_job_count = len(record.job_ids.filtered(
-                lambda r: r.state == 'failed'
-            ))
-            done_job_count = len(record.job_ids.filtered(
-                lambda r: r.state == 'done'
-            ))
-            record.job_count = job_count
-            record.finished_job_count = done_job_count
-            record.failed_job_count = failed_job_count
-            record.completeness = done_job_count / max(1, job_count)
-            record.failed_percentage = failed_job_count / max(1, job_count)
+            jobs = record.job_ids
+            states = [r["state"] for r in jobs.read(["state"])]
+
+            total = len(jobs)
+            failed = states.count("failed")
+            done = states.count("done")
+
+            record.job_count = total
+            record.finished_job_count = done
+            record.failed_job_count = failed
+            record.completeness = done / max(1, total)
+            record.failed_percentage = failed / max(1, total)
