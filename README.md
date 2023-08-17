@@ -25,7 +25,7 @@ Available addons
 ----------------
 addon | version | maintainers | summary
 --- | --- | --- | ---
-[base_export_async](base_export_async/) | 12.0.1.1.0 |  | Asynchronous export with job queue
+[base_export_async](base_export_async/) | 12.0.1.2.0 |  | Asynchronous export with job queue
 [base_import_async](base_import_async/) | 12.0.2.0.0 |  | Import CSV files in the background
 [export_async_schedule](export_async_schedule/) | 12.0.1.0.0 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Generate and send exports by emails on a schedule
 [queue_job](queue_job/) | 12.0.4.0.0 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
