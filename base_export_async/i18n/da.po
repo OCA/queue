@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* base_export_async
+# 	* base_export_async
 #
 msgid ""
 msgstr ""
@@ -17,32 +17,23 @@ msgstr ""
 "X-Generator: Weblate 4.3.2\n"
 
 #. module: base_export_async
-#: code:addons/base_export_async/models/delay_export.py:129
-#, python-format
-msgid "\n"
-"                <p>Your export is available <a href=\"{}\">here</a>.</p>\n"
-"                <p>It will be automatically deleted the {}.</p>\n"
-"                <p>&nbsp;</p>\n"
-"                <p><span style=\"color: #808080;\">\n"
-"                This is an automated message please do not reply.\n"
-"                </span></p>\n"
-"                "
-msgstr ""
-"\n"
-"                <p>Din export er tilgængelig <a href=\"{}\">her</a>.</p>\n"
-"                <p>Den vil atutomatisk blive slettet den {}.</p>\n"
-"                <p>&nbsp;</p>\n"
-"                <p><span style=\"color: #808080;\">\n"
-"                Dette er en automatisk besked. Undlad venlisgt at besvare.\n"
-"                </span></p>\n"
-"                "
-
-#. module: base_export_async
 #. openerp-web
 #: code:addons/base_export_async/static/src/xml/base.xml:9
 #, python-format
 msgid "(You will receive the export by email)"
 msgstr "(Du vil modtage eksporten via mail)"
+
+#. module: base_export_async
+#: model:mail.template,body_html:base_export_async.delay_export_mail_template
+msgid ""
+"<p>Your export is available <a href=\"${object.url}\">here</a>.</p>\n"
+"            <p>It will be automatically deleted on ${object.expiration_date}."
+"</p>\n"
+"            <br/>\n"
+"            <p><span style=\"color: #808080;\">This is an automated message "
+"please do not reply.</span></p>\n"
+"        "
+msgstr ""
 
 #. module: base_export_async
 #: model:ir.model,name:base_export_async.model_delay_export
@@ -79,10 +70,14 @@ msgid "Display Name"
 msgstr "Vist navn"
 
 #. module: base_export_async
-#: code:addons/base_export_async/models/delay_export.py:127
-#, python-format
-msgid "Export {} {}"
-msgstr "Eksport {} {}"
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__expiration_date
+msgid "Expiration Date"
+msgstr ""
+
+#. module: base_export_async
+#: model:mail.template,subject:base_export_async.delay_export_mail_template
+msgid "Export ${object.model_description} ${datetime.date.today()}"
+msgstr ""
 
 #. module: base_export_async
 #. openerp-web
@@ -112,6 +107,11 @@ msgid "Last Updated on"
 msgstr "Senest rettet den"
 
 #. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__model_description
+msgid "Model Description"
+msgstr ""
+
+#. module: base_export_async
 #. openerp-web
 #: code:addons/base_export_async/static/src/js/data_export.js:39
 #, python-format
@@ -119,12 +119,17 @@ msgid "Please select fields to export..."
 msgstr "Vælg venligst felter til eksporten..."
 
 #. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__url
+msgid "Url"
+msgstr ""
+
+#. module: base_export_async
 #: model:ir.model.fields,field_description:base_export_async.field_delay_export__user_ids
 msgid "Users"
 msgstr "Brugere"
 
 #. module: base_export_async
-#: code:addons/base_export_async/models/delay_export.py:30
+#: code:addons/base_export_async/models/delay_export.py:33
 #, python-format
 msgid "You must set an email address to your user."
 msgstr "Du skal have en email adresse på dit brugeropsæt."
@@ -135,3 +140,28 @@ msgstr "Du skal have en email adresse på dit brugeropsæt."
 #, python-format
 msgid "You will receive the export file by email as soon as it is finished."
 msgstr "Du vil modtage et link til eksporten så snart den er færdig."
+
+#, python-format
+#~ msgid ""
+#~ "\n"
+#~ "                <p>Your export is available <a href=\"{}\">here</a>.</p>\n"
+#~ "                <p>It will be automatically deleted the {}.</p>\n"
+#~ "                <p>&nbsp;</p>\n"
+#~ "                <p><span style=\"color: #808080;\">\n"
+#~ "                This is an automated message please do not reply.\n"
+#~ "                </span></p>\n"
+#~ "                "
+#~ msgstr ""
+#~ "\n"
+#~ "                <p>Din export er tilgængelig <a href=\"{}\">her</a>.</p>\n"
+#~ "                <p>Den vil atutomatisk blive slettet den {}.</p>\n"
+#~ "                <p>&nbsp;</p>\n"
+#~ "                <p><span style=\"color: #808080;\">\n"
+#~ "                Dette er en automatisk besked. Undlad venlisgt at "
+#~ "besvare.\n"
+#~ "                </span></p>\n"
+#~ "                "
+
+#, python-format
+#~ msgid "Export {} {}"
+#~ msgstr "Eksport {} {}"
