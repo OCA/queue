@@ -544,6 +544,8 @@ class QueueJobRunner(object):
             except InterruptedError:
                 # Interrupted system call, i.e. KeyboardInterrupt during select
                 self.stop()
+            except OSError:
+                self.stop()
             except Exception:
                 _logger.exception(
                     "exception: sleeping %ds and retrying", ERROR_RECOVERY_DELAY
