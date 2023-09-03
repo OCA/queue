@@ -616,8 +616,8 @@ msgstr "错误数量"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "需要操作消息数量"
+msgid "Number of messages requiring action"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error_counter
@@ -943,6 +943,9 @@ msgstr "重新排队向导所选的作业"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr ""
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "需要操作消息数量"
 
 #~ msgid ""
 #~ "<span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number "
