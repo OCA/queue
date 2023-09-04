@@ -155,7 +155,7 @@ import odoo
 from odoo.tools import config
 
 from . import queue_job_config
-from .channels import ENQUEUED, NOT_DONE, PENDING, ChannelManager
+from .channels import ENQUEUED, NOT_DONE, PENDING, STARTED, ChannelManager
 
 SELECT_TIMEOUT = 60
 ERROR_RECOVERY_DELAY = 5
@@ -414,6 +414,13 @@ class QueueJobRunner(object):
                 _logger.warning("error closing database %s", db_name, exc_info=True)
         self.db_by_name = {}
 
+    def get_job_data_to_notify(self, job_data):
+        if job_data[-1] in (ENQUEUED, STARTED):
+            new_job_data = list(job_data)
+            new_job_data[-1] = PENDING
+            job_data = tuple(new_job_data)
+        return job_data
+
     def initialize_databases(self):
         for db_name in self.get_db_names():
             db = Database(db_name)
@@ -421,6 +428,7 @@ class QueueJobRunner(object):
                 self.db_by_name[db_name] = db
                 with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
                     for job_data in cr:
+                        job_data = self.get_job_data_to_notify(job_data)
                         self.channel_manager.notify(db_name, *job_data)
                 _logger.info("queue job runner ready for db %s", db_name)
 
