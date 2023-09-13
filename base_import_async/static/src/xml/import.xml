@@ -7,7 +7,11 @@
 after splitting your file in small chunks that will be processed independently.
 Use this to import very large files."
             >
-                <input type="checkbox" class="form-check-input" id="oe_import_queue" />
+                <input
+                    type="checkbox"
+                    class="oe_import_queue form-check-input"
+                    id="oe_import_queue"
+                />
                 <label for="oe_import_queue">Import in the background</label>
             </div>
         </t>
