@@ -617,8 +617,8 @@ msgstr "Anzahl der Fehler"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Das ist die Anzahl von Nachrichten, die eine Aktion benötigen"
+msgid "Number of messages requiring action"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error_counter
@@ -947,6 +947,9 @@ msgstr "Assistent zur erneuten Einreihung einer Job-Auswahl"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr ""
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Das ist die Anzahl von Nachrichten, die eine Aktion benötigen"
 
 #~ msgid ""
 #~ "<span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number "
