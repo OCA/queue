@@ -6,25 +6,27 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2023-09-25 09:34+0000\n"
+"Last-Translator: Asier Neira <asier_neira@hotmail.com>\n"
 "Language-Team: none\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.17\n"
 
 #. module: base_import_async
 #. odoo-python
 #: code:addons/base_import_async/models/queue_job.py:0
 #, python-format
 msgid "Attachment"
-msgstr ""
+msgstr "Archivo adjunto"
 
 #. module: base_import_async
 #: model:ir.model,name:base_import_async.model_base_import_import
 msgid "Base Import"
-msgstr ""
+msgstr "Importación Base"
 
 #. module: base_import_async
 #. odoo-python
@@ -34,25 +36,27 @@ msgid ""
 "Import %(model)s from file %(file_name)s - #%(chunk)s - lines %(from)s to "
 "%(to)s"
 msgstr ""
+"Importar %(model)s del archivo %(file_name)s - #%(chunk)s - líneas %(from)s "
+"a %(to)s"
 
 #. module: base_import_async
 #. odoo-python
 #: code:addons/base_import_async/models/base_import_import.py:0
 #, python-format
 msgid "Import %(model)s from file %(from_file)s"
-msgstr ""
+msgstr "Importar %(model)s del fichero %(from_file)s"
 
 #. module: base_import_async
 #. odoo-javascript
 #: code:addons/base_import_async/static/src/xml/import.xml:0
 #, python-format
 msgid "Import in the background"
-msgstr ""
+msgstr "Importación en segundo plano"
 
 #. module: base_import_async
 #: model:ir.model,name:base_import_async.model_queue_job
 msgid "Queue Job"
-msgstr ""
+msgstr "Cola de trabajo"
 
 #. module: base_import_async
 #. odoo-javascript
@@ -63,17 +67,21 @@ msgid ""
 "splitting your file in small chunks that will be processed independently. "
 "Use this to import very large files."
 msgstr ""
+"Si esta opción está seleccionada, la importación se ejecutará como un "
+"trabajo en segundo plano, tras dividir el archivo en pequeños trozos que se "
+"procesarán de forma independiente. Utilícelo para importar archivos muy "
+"grandes."
 
 #. module: base_import_async
 #. odoo-javascript
 #: code:addons/base_import_async/static/src/js/import.js:0
 #, python-format
 msgid "You can check the status of this job in menu 'Queue / Jobs'."
-msgstr ""
+msgstr "Puede comprobar el estado de este trabajo en el menú 'Cola / Trabajos'."
 
 #. module: base_import_async
 #. odoo-javascript
 #: code:addons/base_import_async/static/src/js/import.js:0
 #, python-format
 msgid "Your request is being processed"
-msgstr ""
+msgstr "Su solicitud está siendo procesada"
