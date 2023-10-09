@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* queue_job_cron
+# 	* queue_job_cron
 #
 msgid ""
 msgstr ""
