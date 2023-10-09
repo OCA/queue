@@ -300,8 +300,8 @@ msgstr "Clé d’identité"
 #, python-format
 msgid "If both parameters are 0, ALL jobs will be requeued!"
 msgstr ""
-"Si les deux paramètres sont à 0, toutes les tâches seront remises en file d’"
-"attente !"
+"Si les deux paramètres sont à 0, toutes les tâches seront remises en file "
+"d’attente !"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction
@@ -542,7 +542,8 @@ msgstr "Canal parent requis."
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_retry_pattern
 msgid ""
-"Pattern expressing from the count of retries on retryable errors, the number of of seconds to postpone the next execution.\n"
+"Pattern expressing from the count of retries on retryable errors, the number "
+"of of seconds to postpone the next execution.\n"
 "Example: {1: 10, 5: 20, 10: 30, 15: 300}.\n"
 "See the module description for details."
 msgstr ""
@@ -696,8 +697,8 @@ msgid ""
 "Something bad happened during the execution of the job. More details in the "
 "'Exception Information' section."
 msgstr ""
-"Un problème a été rencontré lors de l’exécution de la tâche. La section « "
-"Information d’exception » contient plus de détails."
+"Un problème a été rencontré lors de l’exécution de la tâche. La section "
+"« Information d’exception » contient plus de détails."
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_started
@@ -737,7 +738,9 @@ msgstr "Tâche"
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_related_action
 msgid ""
-"The action when the button *Related Action* is used on a job. The default action is to open the view of the record related to the job. Configured as a dictionary with optional keys: enable, func_name, kwargs.\n"
+"The action when the button *Related Action* is used on a job. The default "
+"action is to open the view of the record related to the job. Configured as a "
+"dictionary with optional keys: enable, func_name, kwargs.\n"
 "See the module description for details."
 msgstr ""
 "L’action lorsque le bouton « Action rattachée » est utilisé dans une tâche. "
@@ -794,12 +797,13 @@ msgstr "UUID"
 msgid ""
 "Unexpected format of Related Action for {}.\n"
 "Example of valid format:\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" {{\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs"
+"\" {{\"limit\": 10}}}}"
 msgstr ""
 "Format inattendu pour l’action rattachée de {}.\n"
 "Exemple de format valide :\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" {{"
-"\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs"
+"\" {{\"limit\": 10}}}}"
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:0
