@@ -26,11 +26,14 @@ msgstr "(Recibirás la exportación por correo electrónico)"
 #. module: base_export_async
 #: model:mail.template,body_html:base_export_async.delay_export_mail_template
 msgid ""
-"<p>Your export is available <a t-attf-href=\"{{ object.url }}\" target=\"_blank\">here</a>.</p>\n"
-"            <p>It will be automatically deleted the <t t-out=\"object.expiration_date\"></t>.</p>\n"
+"<p>Your export is available <a t-attf-href=\"{{ object.url }}\" target="
+"\"_blank\">here</a>.</p>\n"
+"            <p>It will be automatically deleted the <t t-out=\"object."
+"expiration_date\"></t>.</p>\n"
 "            <br>\n"
 "            <p>\n"
-"                <span style=\"color: #808080;\">This is an automated message please do not reply.</span>\n"
+"                <span style=\"color: #808080;\">This is an automated message "
+"please do not reply.</span>\n"
 "            </p>\n"
 "        "
 msgstr ""
@@ -148,7 +151,8 @@ msgstr "Usuarios"
 #: code:addons/base_export_async/models/delay_export.py:0
 #, python-format
 msgid "You must set an email address to your user."
-msgstr "Debes proporcionar una dirección de correo electrónico para tu usuario."
+msgstr ""
+"Debes proporcionar una dirección de correo electrónico para tu usuario."
 
 #. module: base_export_async
 #. odoo-javascript
