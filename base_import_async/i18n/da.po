@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* base_import_async
+# 	* base_import_async
 #
 msgid ""
 msgstr ""
@@ -55,7 +55,10 @@ msgstr "Queue Job"
 #. openerp-web
 #: code:addons/base_import_async/static/src/xml/import.xml:7
 #, python-format
-msgid "When checked, the import will be executed as a background job,  after splitting your file in small chunks that will be processed independently.  Use this to import very large files."
+msgid ""
+"When checked, the import will be executed as a background job,  after "
+"splitting your file in small chunks that will be processed independently.  "
+"Use this to import very large files."
 msgstr ""
 "Når det er markeret, vil importen blive udført som et baggrundsjob, efter at "
 "din fil er opdelt i små bidder, der vil blive behandlet uafhængigt. Brug "
