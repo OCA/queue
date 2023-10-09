@@ -42,5 +42,5 @@ msgstr ""
 
 #. module: queue_job_subscribe
 #: model:ir.model,name:queue_job_subscribe.model_res_users
-msgid "Users"
+msgid "User"
 msgstr ""

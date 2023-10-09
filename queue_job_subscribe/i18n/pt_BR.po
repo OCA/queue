@@ -12,8 +12,8 @@ msgstr ""
 "POT-Creation-Date: 2017-05-01 16:11+0000\n"
 "PO-Revision-Date: 2022-02-01 19:33+0000\n"
 "Last-Translator: Rodrigo Macedo <rmsolucoeseminformatica@protonmail.com>\n"
-"Language-Team: Portuguese (Brazil) (https://www.transifex.com/oca/teams/"
-"23907/pt_BR/)\n"
+"Language-Team: Portuguese (Brazil) (https://www.transifex.com/oca/"
+"teams/23907/pt_BR/)\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -47,8 +47,11 @@ msgstr "Fila de tarefas"
 
 #. module: queue_job_subscribe
 #: model:ir.model,name:queue_job_subscribe.model_res_users
-msgid "Users"
-msgstr "Usuários"
+msgid "User"
+msgstr ""
+
+#~ msgid "Users"
+#~ msgstr "Usuários"
 
 #~ msgid "Sale Pricelist"
 #~ msgstr "Lista de Preços de Venda"
