@@ -12,8 +12,8 @@ msgstr ""
 "POT-Creation-Date: 2017-05-01 16:11+0000\n"
 "PO-Revision-Date: 2022-02-01 19:33+0000\n"
 "Last-Translator: Rodrigo Macedo <rmsolucoeseminformatica@protonmail.com>\n"
-"Language-Team: Portuguese (Brazil) (https://www.transifex.com/oca/teams/"
-"23907/pt_BR/)\n"
+"Language-Team: Portuguese (Brazil) (https://www.transifex.com/oca/"
+"teams/23907/pt_BR/)\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,6 +25,18 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:queue_job_subscribe.view_user_connector_form
 msgid "Connectors"
 msgstr "Conectores"
+
+#. module: queue_job_subscribe
+#: model:ir.model.fields,field_description:queue_job_subscribe.field_queue_job__display_name
+#: model:ir.model.fields,field_description:queue_job_subscribe.field_res_users__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: queue_job_subscribe
+#: model:ir.model.fields,field_description:queue_job_subscribe.field_queue_job__id
+#: model:ir.model.fields,field_description:queue_job_subscribe.field_res_users__id
+msgid "ID"
+msgstr ""
 
 #. module: queue_job_subscribe
 #: model:ir.model.fields,help:queue_job_subscribe.field_res_users__subscribe_job
@@ -39,6 +51,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job_subscribe.field_res_users__subscribe_job
 msgid "Job Notifications"
 msgstr "Notificações de trabalho"
+
+#. module: queue_job_subscribe
+#: model:ir.model.fields,field_description:queue_job_subscribe.field_queue_job____last_update
+#: model:ir.model.fields,field_description:queue_job_subscribe.field_res_users____last_update
+msgid "Last Modified on"
+msgstr ""
 
 #. module: queue_job_subscribe
 #: model:ir.model,name:queue_job_subscribe.model_queue_job

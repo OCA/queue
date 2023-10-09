@@ -24,6 +24,18 @@ msgid "Connectors"
 msgstr "Connectors"
 
 #. module: queue_job_subscribe
+#: model:ir.model.fields,field_description:queue_job_subscribe.field_queue_job__display_name
+#: model:ir.model.fields,field_description:queue_job_subscribe.field_res_users__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: queue_job_subscribe
+#: model:ir.model.fields,field_description:queue_job_subscribe.field_queue_job__id
+#: model:ir.model.fields,field_description:queue_job_subscribe.field_res_users__id
+msgid "ID"
+msgstr ""
+
+#. module: queue_job_subscribe
 #: model:ir.model.fields,help:queue_job_subscribe.field_res_users__subscribe_job
 msgid ""
 "If this flag is checked and the user is Connector Manager, he will receive "
@@ -33,6 +45,12 @@ msgstr ""
 #. module: queue_job_subscribe
 #: model:ir.model.fields,field_description:queue_job_subscribe.field_res_users__subscribe_job
 msgid "Job Notifications"
+msgstr ""
+
+#. module: queue_job_subscribe
+#: model:ir.model.fields,field_description:queue_job_subscribe.field_queue_job____last_update
+#: model:ir.model.fields,field_description:queue_job_subscribe.field_res_users____last_update
+msgid "Last Modified on"
 msgstr ""
 
 #. module: queue_job_subscribe
