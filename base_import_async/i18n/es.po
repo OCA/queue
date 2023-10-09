@@ -77,7 +77,8 @@ msgstr ""
 #: code:addons/base_import_async/static/src/js/import.js:0
 #, python-format
 msgid "You can check the status of this job in menu 'Queue / Jobs'."
-msgstr "Puede comprobar el estado de este trabajo en el menú 'Cola / Trabajos'."
+msgstr ""
+"Puede comprobar el estado de este trabajo en el menú 'Cola / Trabajos'."
 
 #. module: base_import_async
 #. odoo-javascript
