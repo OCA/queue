@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* export_async_schedule
+# 	* export_async_schedule
 #
 msgid ""
 msgstr ""
