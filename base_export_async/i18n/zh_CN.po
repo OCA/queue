@@ -17,7 +17,7 @@ msgstr ""
 "X-Generator: Weblate 3.7.1\n"
 
 #. module: base_export_async
-#. openerp-web
+#. odoo-javascript
 #: code:addons/base_export_async/static/src/xml/base.xml:0
 #, python-format
 msgid "(You will receive the export by email)"
@@ -29,8 +29,8 @@ msgid ""
 "<p>Your export is available <a t-attf-href=\"{{ object.url }}\" target="
 "\"_blank\">here</a>.</p>\n"
 "            <p>It will be automatically deleted the <t t-out=\"object."
-"expiration_date\"/>.</p>\n"
-"            <br/>\n"
+"expiration_date\"></t>.</p>\n"
+"            <br>\n"
 "            <p>\n"
 "                <span style=\"color: #808080;\">This is an automated message "
 "please do not reply.</span>\n"
@@ -45,7 +45,7 @@ msgid "Asynchronous Export"
 msgstr "异步导出"
 
 #. module: base_export_async
-#. openerp-web
+#. odoo-javascript
 #: code:addons/base_export_async/static/src/xml/base.xml:0
 #, python-format
 msgid "Asynchronous export"
@@ -69,7 +69,6 @@ msgstr ""
 #. module: base_export_async
 #: model:ir.actions.server,name:base_export_async.to_delete_attachment_ir_actions_server
 #: model:ir.cron,cron_name:base_export_async.to_delete_attachment
-#: model:ir.cron,name:base_export_async.to_delete_attachment
 msgid "Delete Generated Exports"
 msgstr "删除生成的导出"
 
@@ -89,8 +88,8 @@ msgid "Export {{ object.model_description }} {{ datetime.date.today() }}"
 msgstr ""
 
 #. module: base_export_async
-#. openerp-web
-#: code:addons/base_export_async/static/src/js/data_export.js:0
+#. odoo-javascript
+#: code:addons/base_export_async/static/src/js/list_controller.esm.js:0
 #, python-format
 msgid "External ID"
 msgstr "外部ID"
@@ -121,11 +120,11 @@ msgid "Model Description"
 msgstr ""
 
 #. module: base_export_async
-#. openerp-web
-#: code:addons/base_export_async/static/src/js/data_export.js:0
+#. odoo-javascript
+#: code:addons/base_export_async/static/src/js/data_export.esm.js:0
 #, python-format
-msgid "Please select fields to export..."
-msgstr "请选择要导出的字段..."
+msgid "Please select fields to save export list..."
+msgstr ""
 
 #. module: base_export_async
 #: model:ir.model.fields,field_description:base_export_async.field_delay_export__url
@@ -138,17 +137,22 @@ msgid "Users"
 msgstr "用户"
 
 #. module: base_export_async
+#. odoo-python
 #: code:addons/base_export_async/models/delay_export.py:0
 #, python-format
 msgid "You must set an email address to your user."
 msgstr "您必须为您的用户设置电子邮件地址。"
 
 #. module: base_export_async
-#. openerp-web
-#: code:addons/base_export_async/static/src/js/data_export.js:0
+#. odoo-javascript
+#: code:addons/base_export_async/static/src/js/list_controller.esm.js:0
 #, python-format
 msgid "You will receive the export file by email as soon as it is finished."
 msgstr "完成后，您将通过电子邮件收到导出文件。"
+
+#, python-format
+#~ msgid "Please select fields to export..."
+#~ msgstr "请选择要导出的字段..."
 
 #, python-format
 #~ msgid ""
