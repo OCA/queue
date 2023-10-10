@@ -230,11 +230,16 @@ class JobsTrap():
 
     def _add_job(self, *args, **kwargs):
         job = Job(*args, **kwargs)
-        self.enqueued_jobs.append(job)
 
-        patcher = mock.patch.object(job, 'store')
-        self._store_patchers.append(patcher)
-        patcher.start()
+        # Do not enqueue the job if another exists with the same identity_key
+        if not job.identity_key or all(
+            j.identity_key != job.identity_key for j in self.enqueued_jobs
+        ):
+            self.enqueued_jobs.append(job)
+
+            patcher = mock.patch.object(job, 'store')
+            self._store_patchers.append(patcher)
+            patcher.start()
 
         job_args = kwargs.pop("args", None) or ()
         job_kwargs = kwargs.pop("kwargs", None) or {}
