@@ -388,7 +388,6 @@ msgstr "Wenn es gesetzt ist, erfordern neue Nachrichten Ihre Aufmerksamkeit."
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
 "Wenn es gesetzt ist, gibt es einige Nachrichten mit einem Übertragungsfehler."
@@ -765,11 +764,6 @@ msgid "Retry Pattern (serialized)"
 msgstr ""
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "Fehler bei der SMS Nachrichtenübermittlung"
-
-#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
 msgid "Set all selected jobs to done"
 msgstr "Alle ausgewählten Jobs als Erledigt markieren"
@@ -948,6 +942,9 @@ msgstr "Assistent zur erneuten Einreihung einer Job-Auswahl"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr ""
+
+#~ msgid "SMS Delivery error"
+#~ msgstr "Fehler bei der SMS Nachrichtenübermittlung"
 
 #~ msgid "Channel Method Name"
 #~ msgstr "Kanal-Methodenname"
