@@ -395,7 +395,6 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "Si se encuentra seleccionado, algunos mensajes tienen error de envío."
 
@@ -779,11 +778,6 @@ msgid "Retry Pattern (serialized)"
 msgstr "Patrón de reintentos (en serie)"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "Error de entrega del SMS"
-
-#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
 msgid "Set all selected jobs to done"
 msgstr "Marcar como hechos todos los trabajos seleccionados"
@@ -968,6 +962,9 @@ msgstr "Asistente para volver a poner en cola una selección de trabajos"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr "Pid del trabajador"
+
+#~ msgid "SMS Delivery error"
+#~ msgstr "Error de entrega del SMS"
 
 #~ msgid "Number of messages which requires an action"
 #~ msgstr "Número de mensajes que requieren una acción"
