@@ -89,14 +89,18 @@ class DelayExport(models.Model):
         export_record = self.sudo().create({"user_ids": [(6, 0, users.ids)]})
 
         name = "{}.{}".format(model_name, export_format)
-        attachment = self.env["ir.attachment"].create(
-            {
-                "name": name,
-                "datas": base64.b64encode(content),
-                "type": "binary",
-                "res_model": self._name,
-                "res_id": export_record.id,
-            }
+        attachment = (
+            self.env["ir.attachment"]
+            .sudo()
+            .create(
+                {
+                    "name": name,
+                    "datas": base64.b64encode(content),
+                    "type": "binary",
+                    "res_model": self._name,
+                    "res_id": export_record.id,
+                }
+            )
         )
 
         url = "{}/web/content/ir.attachment/{}/datas/{}?download=true".format(
