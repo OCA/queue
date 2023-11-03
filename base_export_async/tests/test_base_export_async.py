@@ -64,22 +64,26 @@ class TestBaseExportAsync(common.TransactionCase):
         params = json.loads(data_csv.get("data"))
         mails = self.env["mail.mail"].search([])
         attachments = self.env["ir.attachment"].search([])
-        self.delay_export_obj.export(params)
+        self.delay_export_obj.export(
+            params, self.env.ref("base_export_async.delay_export_mail_template"), True
+        )
         new_mail = self.env["mail.mail"].search([]) - mails
-        new_attachment = self.env["ir.attachment"].search([]) - attachments
+        new_attachments = self.env["ir.attachment"].search([]) - attachments
         self.assertEqual(len(new_mail), 1)
-        self.assertEqual(new_attachment.name, "res.partner.csv")
+        self.assertEqual(len(new_mail.attachment_ids), 1)
+        self.assertEqual(new_attachments[0].name, "res.partner.csv")
 
     def test_export_xls(self):
         """Check that the export generate an attachment and email"""
         params = json.loads(data_xls.get("data"))
         mails = self.env["mail.mail"].search([])
         attachments = self.env["ir.attachment"].search([])
-        self.delay_export_obj.export(params)
+        self.delay_export_obj.export(params, None, True)
         new_mail = self.env["mail.mail"].search([]) - mails
-        new_attachment = self.env["ir.attachment"].search([]) - attachments
+        new_attachments = self.env["ir.attachment"].search([]) - attachments
         self.assertEqual(len(new_mail), 1)
-        self.assertEqual(new_attachment.name, "res.partner.xls")
+        self.assertEqual(len(new_mail.attachment_ids), 1)
+        self.assertEqual(new_attachments[0].name, "res.partner.xls")
 
     def test_cron_delete(self):
         """Check that cron delete attachment after TTL"""

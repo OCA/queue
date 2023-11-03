@@ -66,7 +66,9 @@ class DelayExport(models.Model):
             return xls.from_data(columns_headers, import_data)
 
     @api.model
-    def export(self, params):
+    def export(
+        self, params, mail_template=None, is_export_file_attached_to_email=False
+    ):
         """Delayed export of a file sent by email
 
         The ``params`` is a dict of parameters, contains:
@@ -124,15 +126,24 @@ class DelayExport(models.Model):
                 "model_description": model_description,
             }
         )
+        email_values = {
+            "email_from": email_from,
+            "reply_to": email_from,
+            "recipient_ids": [(6, 0, users.mapped("partner_id").ids)],
+        }
+        if is_export_file_attached_to_email:
+            email_values.update({"attachments": [(name, base64.b64encode(content))]})
 
-        self.env.ref("base_export_async.delay_export_mail_template").send_mail(
-            export_record.id,
-            email_values={
-                "email_from": email_from,
-                "reply_to": email_from,
-                "recipient_ids": [(6, 0, users.mapped("partner_id").ids)],
-            },
-        )
+        if mail_template:
+            mail_template.send_mail(
+                export_record.id,
+                email_values=email_values,
+            )
+        else:
+            self.env.ref("base_export_async.delay_export_mail_template").send_mail(
+                export_record.id,
+                email_values=email_values,
+            )
 
     @api.model
     def cron_delete(self):

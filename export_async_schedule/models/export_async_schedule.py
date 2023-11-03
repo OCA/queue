@@ -45,7 +45,16 @@ class ExportAsyncSchedule(models.Model):
         default=lambda self: self.env.lang,
         help="Exports will be translated in this language.",
     )
-
+    mail_template_id = fields.Many2one(
+        "mail.template",
+        string="Email addresses",
+        default=lambda self: self.env.ref(
+            "base_export_async.delay_export_mail_template"
+        ),
+    )
+    is_export_file_attached_to_email = fields.Boolean(
+        "Export file attached to email", default=False
+    )
     # Scheduling
     next_execution = fields.Datetime(default=fields.Datetime.now, required=True)
     interval = fields.Integer(default=1, required=True)
@@ -149,4 +158,8 @@ class ExportAsyncSchedule(models.Model):
         for record in self:
             record = record.with_context(lang=record.lang)
             params = record._prepare_export_params()
-            record.env["delay.export"].with_delay().export(params)
+            record.env["delay.export"].with_delay().export(
+                params,
+                mail_template=record.mail_template_id,
+                is_export_file_attached_to_email=record.is_export_file_attached_to_email,
+            )
