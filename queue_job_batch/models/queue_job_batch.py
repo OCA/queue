@@ -1,6 +1,5 @@
 # Copyright 2019 Creu Blanca
-# Copyright 2019 Eficent Business and IT Consulting Services S.L.
-#     (http://www.eficent.com)
+# Copyright 2023 ForgeFlow S.L. (http://www.forgeflow.com)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 from odoo import api, fields, models
@@ -86,9 +85,8 @@ class QueueJobBatch(models.Model):
     def set_read(self):
         res = self.write({"is_read": True})
         notifications = []
-        channel = "queue.job.batch"
-        notification_type = "is_read"
-        notifications.append([channel, notification_type, {}])
+        channel = "queue.job.batch/updated"
+        notifications.append([self.env.user.partner_id, channel, {}])
         self.env["bus.bus"]._sendmany(notifications)
         return res
 
