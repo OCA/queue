@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+
+    <t t-name="queue_job_batch.QueueJobBatchMenuView" owl="1">
+        <div class="o_ActivityMenuView dropdown o_job_batch_navbar_item" t-ref="root">
+            <a
+                class="o_ActivityMenuView_dropdownToggle dropdown-toggle o-no-caret o-dropdown--narrow"
+                title="Job batches"
+                t-att-aria-expanded="queueJobBatchMenuView.isOpen ? 'true' : 'false'"
+                href="#"
+                role="button"
+                t-on-click="queueJobBatchMenuView.onClickDropdownToggle"
+            >
+                <i class="fa fa-list" role="img" aria-label="Job batches" />
+                <span
+                    t-if="queueJobBatchMenuView.counter > 0"
+                    class="o_ActivityMenuView_counter badge"
+                    t-esc="queueJobBatchMenuView.counter"
+                />
+            </a>
+            <div
+                t-if="queueJobBatchMenuView.isOpen"
+                class="o_ActivityMenuView_dropdownMenu o-dropdown-menu dropdown-menu-end show bg-view"
+                role="menu"
+            >
+                <div
+                    class="border-bottom d-flex flex-shrink-0"
+                    bis_skin_checked="1"
+                    t-if="queueJobBatchMenuView.counter > 0"
+                >
+                    <button
+                        class="o-desktop btn btn-link o-active fw-bolder"
+                        type="button"
+                    >Job
+                        Batches</button>
+                    <div class="flex-grow-1" bis_skin_checked="1" />
+                    <button
+                        class="btn btn-link"
+                        type="button"
+                        t-on-click="queueJobBatchMenuView._viewAllQueueJobBatches"
+                    >View All</button>
+                </div>
+                <t t-if="queueJobBatchMenuView.queueJobBatches.length === 0">
+                    <div class="o_ActivityMenuView_activityGroups">
+                        <div
+                            class="o_ActivityMenuView_noActivity dropdown-item-text text-center d-flex justify-content-center"
+                        >
+                            <span>No jobs to view.</span>
+                        </div>
+                    </div>
+                </t>
+                <div
+                    t-if="queueJobBatchMenuView.queueJobBatches.length > 0"
+                    class="row"
+                    style="width:100%"
+                >
+                    <t
+                        t-foreach="queueJobBatchMenuView.queueJobBatches"
+                        t-as="queueJobBatch"
+                        t-key="queueJobBatch.localId"
+                        name="activityGroupLoop"
+                    >
+                        <div
+                            class="col-2 m-2"
+                            t-on-click="queueJobBatch._onQueueJobBatchClick"
+                        >
+                            <span
+                                class="fa fa-list fa-3x o_job_queue_failed"
+                                t-if="queueJobBatch.irModel.failed_job_count > 0"
+                            />
+                            <span
+                                class="fa fa-list fa-3x o_job_queue_finished"
+                                t-if="queueJobBatch.irModel.failed_job_count == 0 and queueJobBatch.irModel.finished_job_count == queueJobBatch.irModel.job_count"
+                            />
+                            <span
+                                class="fa fa-list fa-3x o_job_queue_progress"
+                                t-if="queueJobBatch.irModel.failed_job_count == 0 and queueJobBatch.irModel.finished_job_count != queueJobBatch.irModel.job_count"
+                            />
+                        </div>
+                        <div
+                            class="col-8"
+                            t-on-click="queueJobBatch._onQueueJobBatchClick"
+                        >
+                            <strong
+                                class="o_NotificationListItem_name o_NotificationGroup_name text-truncate"
+                            >
+                                <t t-esc="queueJobBatch.irModel.name" />
+                            </strong>
+                            <div class="progress">
+                                <div
+                                    class="progress-bar o_queue_job_finished_progressbar"
+                                    role="progressbar"
+                                    t-att-style="'width: '+ (100 * queueJobBatch.irModel.completeness) + '%'"
+                                    t-att-aria-valuenow="100 * queueJobBatch.irModel.completeness"
+                                />
+                                <div
+                                    class="progress-bar o_queue_job_failed_progressbar"
+                                    role="progressbar"
+                                    t-att-style="'width: '+ (100 * queueJobBatch.irModel.failed_percentage) + '%'"
+                                    t-att-aria-valuenow="100 * queueJobBatch.irModel.failed_percentage"
+                                />
+                            </div>
+                            <span
+                                t-out="queueJobBatch.irModel.finished_job_count + '/' + queueJobBatch.irModel.failed_job_count  + '/' + queueJobBatch.irModel.job_count"
+                            />
+                        </div>
+                        <div
+                            class="col-1 mt-3"
+                            t-on-click="queueJobBatch._hideJobBatch"
+                        >
+                            <span
+                                title="Mark as Read"
+                                class="fa fa-check"
+                                t-if="queueJobBatch.irModel.state === 'finished'"
+                                t-att-data-job-batch-id="queueJobBatch.irModel.id"
+                            />
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>
