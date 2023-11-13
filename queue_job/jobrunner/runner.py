@@ -39,6 +39,7 @@ How to use it?
     or ``False`` if unset.
   - ``ODOO_QUEUE_JOB_JOBRUNNER_DB_PASSWORD=passdb``, default ``db_password``
     or ``False`` if unset.
+  - ``ODOO_QUEUE_JOB_JOBRUNNER_DB_NAME=firstdb,seconddb``, default ``db_name``
 
 * Alternatively, configure the channels through the Odoo configuration
   file, like:
@@ -54,6 +55,7 @@ How to use it?
   http_auth_password = s3cr3t
   jobrunner_db_host = master-db
   jobrunner_db_port = 5432
+  jobrunner_db_name = firstdb,seconddb
   jobrunner_db_user = userdb
   jobrunner_db_password = passdb
 
@@ -398,7 +400,11 @@ class QueueJobRunner(object):
         return runner
 
     def get_db_names(self):
-        if config["db_name"]:
+        if os.environ.get("ODOO_QUEUE_JOB_JOBRUNNER_DB_NAME"):
+            db_names = os.environ["ODOO_QUEUE_JOB_JOBRUNNER_DB_NAME"].split(",")
+        elif queue_job_config.get("jobrunner_db_name"):
+            db_names = queue_job_config["jobrunner_db_name"].split(",")
+        elif config["db_name"]:
             db_names = config["db_name"].split(",")
         else:
             db_names = odoo.service.db.exp_list(True)
