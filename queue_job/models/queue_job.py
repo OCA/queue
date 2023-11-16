@@ -102,7 +102,8 @@ class QueueJob(models.Model):
                              index=True)
     priority = fields.Integer()
     exc_name = fields.Char(string="Exception", readonly=True)
-    exc_message = fields.Char(string="Exception Message", readonly=True)
+    exc_message = fields.Char(string="Exception Message", readonly=True,
+                              track_visibility='onchange')
     exc_info = fields.Text(string='Exception Info', readonly=True)
     result = fields.Text(readonly=True)
 
