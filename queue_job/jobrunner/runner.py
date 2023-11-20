@@ -407,12 +407,11 @@ class QueueJobRunner(object):
         >>> runner.get_db_names()
         ['db1', 'db2']
 
-        >>> os.environ["ODOO_QUEUE_JOB_JOBRUNNER_DB_NAME"] = None
+        >>> os.environ.pop("ODOO_QUEUE_JOB_JOBRUNNER_DB_NAME")
         >>> config["db_name"] = "db3,db4"
         >>> runner.get_db_names()
         ['db3', 'db4']
 
-        >>> os.environ["ODOO_QUEUE_JOB_JOBRUNNER_DB_NAME"] = None
         >>> config["db_name"] = None
         >>> runner.get_db_names()
         ['odoo']
