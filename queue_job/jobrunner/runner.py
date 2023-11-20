@@ -402,7 +402,7 @@ class QueueJobRunner(object):
     def get_db_names(self):
         """
         Get the database names based on certain conditions.
-
+        >>> runner = QueueJobRunner()
         >>> os.environ["ODOO_QUEUE_JOB_JOBRUNNER_DB_NAME"] = "db1,db2"
         >>> self.get_db_names()
         ['db1', 'db2']
