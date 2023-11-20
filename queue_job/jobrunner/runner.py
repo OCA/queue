@@ -403,11 +403,6 @@ class QueueJobRunner(object):
         """
         Get the database names based on certain conditions.
         >>> runner = QueueJobRunner()
-        >>> os.environ["ODOO_QUEUE_JOB_JOBRUNNER_DB_NAME"] = "db1,db2"
-        >>> runner.get_db_names()
-        ['db1', 'db2']
-
-        >>> os.environ.pop("ODOO_QUEUE_JOB_JOBRUNNER_DB_NAME")
         >>> config["db_name"] = "db3,db4"
         >>> runner.get_db_names()
         ['db3', 'db4']
@@ -415,6 +410,10 @@ class QueueJobRunner(object):
         >>> config["db_name"] = None
         >>> runner.get_db_names()
         ['odoo']
+
+        >>> os.environ["ODOO_QUEUE_JOB_JOBRUNNER_DB_NAME"] = "db1,db2"
+        >>> runner.get_db_names()
+        ['db1', 'db2']
         """
         if os.environ.get("ODOO_QUEUE_JOB_JOBRUNNER_DB_NAME"):
             db_names = os.environ["ODOO_QUEUE_JOB_JOBRUNNER_DB_NAME"].split(",")
