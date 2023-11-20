@@ -1,3 +1,4 @@
+import os
 from odoo.tests.common import TransactionCase
 from odoo.tools import config
 
@@ -10,3 +11,7 @@ class TestGetDbNames(TransactionCase):
 
         db_names = self.env["queue.job"].get_db_names()
         self.assertEqual(db_names, ["db1", "db2"])
+
+        os.environ["ODOO_QUEUE_JOB_JOBRUNNER_DB_NAME"] = False
+        db_names = self.env["queue.job"].get_db_names()
+        self.assertEqual(db_names, ["db3", "db4"])
