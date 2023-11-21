@@ -300,7 +300,7 @@ class Job(object):
             .search(
                 [
                     ("identity_key", "=", self.identity_key),
-                    ("state", "in", [WAIT_DEPENDENCIES, PENDING, ENQUEUED, STARTED]),
+                    ("state", "in", [WAIT_DEPENDENCIES, PENDING, ENQUEUED]),
                 ],
                 limit=1,
             )
