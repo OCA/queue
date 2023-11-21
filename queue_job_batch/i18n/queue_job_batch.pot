@@ -147,7 +147,6 @@ msgstr ""
 
 #. module: queue_job_batch
 #: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__message_has_error
-#: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
 
@@ -180,11 +179,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job__job_batch_id
 #: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_form
 msgid "Job Batch"
-msgstr ""
-
-#. module: queue_job_batch
-#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_tree
-msgid "Job Batches"
 msgstr ""
 
 #. module: queue_job_batch
@@ -307,11 +301,6 @@ msgstr ""
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__activity_user_id
 msgid "Responsible User"
-msgstr ""
-
-#. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_has_sms_error
-msgid "SMS Delivery error"
 msgstr ""
 
 #. module: queue_job_batch
