@@ -169,7 +169,6 @@ msgstr ""
 #: model:ir.actions.act_window,name:export_async_schedule.action_export_async_schedule
 #: model:ir.ui.menu,name:export_async_schedule.menu_export_async_schedule
 #: model_terms:ir.ui.view,arch_db:export_async_schedule.view_export_async_schedule_search
-#: model_terms:ir.ui.view,arch_db:export_async_schedule.view_export_async_schedule_tree
 msgid "Scheduled Exports"
 msgstr ""
 
