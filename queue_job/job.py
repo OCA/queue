@@ -35,7 +35,7 @@ STATES = [
 ]
 
 DEFAULT_PRIORITY = 10  # used by the PriorityQueue to sort the jobs
-DEFAULT_MAX_RETRIES = 5
+DEFAULT_MAX_RETRIES = 10
 RETRY_INTERVAL = 10 * 60  # seconds
 
 _logger = logging.getLogger(__name__)

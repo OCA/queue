@@ -404,7 +404,9 @@ class QueueJob(models.Model):
                         "|",
                         ("date_done", "<=", deadline),
                         ("date_cancelled", "<=", deadline),
+                        "|",
                         ("channel", "=", channel.complete_name),
+                        ("channel", "ilike", channel.complete_name + ".%"),
                     ],
                     limit=1000,
                 )
