@@ -150,7 +150,6 @@ msgstr "Si coché, de nouveaux messages requièrent votre attention."
 
 #. module: queue_job_batch
 #: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__message_has_error
-#: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "Si coché, des messages n'ont pas pu être livré."
 
@@ -184,11 +183,6 @@ msgstr "Poste"
 #: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_form
 msgid "Job Batch"
 msgstr "Lot de travaux"
-
-#. module: queue_job_batch
-#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_tree
-msgid "Job Batches"
-msgstr "Lots de travaux"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__job_count
@@ -312,11 +306,6 @@ msgid "Responsible User"
 msgstr "Responsable"
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr ""
-
-#. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__state
 #: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "State"
@@ -372,6 +361,9 @@ msgstr "Messages du sites web"
 #: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__website_message_ids
 msgid "Website communication history"
 msgstr "Historique de la communication du site web"
+
+#~ msgid "Job Batches"
+#~ msgstr "Lots de travaux"
 
 #~ msgid "If checked new messages require your attention."
 #~ msgstr "Si coché, de nouveaux messages requièrent votre attention."
