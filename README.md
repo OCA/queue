@@ -23,7 +23,7 @@ addon | version | maintainers | summary
 --- | --- | --- | ---
 [base_export_async](base_export_async/) | 16.0.1.0.0 |  | Asynchronous export with job queue
 [base_import_async](base_import_async/) | 16.0.1.1.0 |  | Import CSV files in the background
-[queue_job](queue_job/) | 16.0.2.5.0 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
+[queue_job](queue_job/) | 16.0.2.5.1 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
 [queue_job_cron](queue_job_cron/) | 16.0.1.0.0 |  | Scheduled Actions as Queue Jobs
 [queue_job_cron_jobrunner](queue_job_cron_jobrunner/) | 16.0.1.0.0 | [![ivantodorovich](https://github.com/ivantodorovich.png?size=30px)](https://github.com/ivantodorovich) | Run jobs without a dedicated JobRunner
 [queue_job_subscribe](queue_job_subscribe/) | 16.0.1.0.0 |  | Control which users are subscribed to queue job notifications
