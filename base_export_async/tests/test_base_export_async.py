@@ -21,7 +21,7 @@ data_csv = {
             "domain": [],
             "context": {"lang": "en_US", "tz": "Europe/Brussels", "uid": 2},
             "import_compat": false,
-            "user_ids": [2]
+            "user_ids": [6]
             }"""
 }
 
@@ -35,7 +35,7 @@ data_xls = {
             "domain": [],
             "context": {"lang": "en_US", "tz": "Europe/Brussels", "uid": 2},
             "import_compat": false,
-            "user_ids": [2]
+            "user_ids": [6]
             }"""
 }
 
