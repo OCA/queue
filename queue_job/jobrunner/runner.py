@@ -401,6 +401,7 @@ class QueueJobRunner(object):
         """
         >>> runner = QueueJobRunner()
         >>> config["db_name"] = None
+        >>> config["list_db"] = False
         >>> runner.get_db_names()
         ['odoo']
         """
