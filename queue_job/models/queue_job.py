@@ -398,13 +398,19 @@ class QueueJob(models.Model):
         """
         for channel in self.env["queue.job.channel"].search([]):
             deadline = datetime.now() - timedelta(days=int(channel.removal_interval))
+            subchannels = self.env["queue.job.channel"].search(
+                [("parent_id", "=", channel.id)]
+            )
             while True:
                 jobs = self.search(
                     [
                         "|",
                         ("date_done", "<=", deadline),
                         ("date_cancelled", "<=", deadline),
+                        "|",
                         ("channel", "=", channel.complete_name),
+                        ("channel", "ilike", channel.complete_name + ".%"),
+                        ("channel", "not in", subchannels.mapped("complete_name")),
                     ],
                     limit=1000,
                 )
