@@ -97,19 +97,19 @@ msgid "Cancelled"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:344
+#: code:addons/queue_job/models/queue_job.py:345
 #, python-format
 msgid "Cancelled by %s"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:634
+#: code:addons/queue_job/models/queue_job.py:635
 #, python-format
 msgid "Cannot change the root channel"
 msgstr "Der Root-Kanal kann nicht geändert werden"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:641
+#: code:addons/queue_job/models/queue_job.py:642
 #, python-format
 msgid "Cannot remove the root channel"
 msgstr "Der Root-Kanal kann nicht entfernt werden"
@@ -349,7 +349,7 @@ msgid "Identity Key"
 msgstr "Identitätsschlüssel"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:457
+#: code:addons/queue_job/models/queue_job.py:458
 #, fuzzy, python-format
 msgid "If both parameters are 0, ALL jobs will be requeued!"
 msgstr "Die ausgewählten Jobs werden erneut eingereiht."
@@ -371,7 +371,7 @@ msgstr ""
 "Wenn es gesetzt ist, gibt es einige Nachrichten mit einem Übertragungsfehler."
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:722
+#: code:addons/queue_job/models/queue_job.py:723
 #, python-format
 msgid "Invalid job function: {}"
 msgstr ""
@@ -450,7 +450,7 @@ msgid "Jobs Garbage Collector"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:308
+#: code:addons/queue_job/models/queue_job.py:309
 #, python-format
 msgid "Jobs for graph %s"
 msgstr ""
@@ -492,7 +492,7 @@ msgid "Main Attachment"
 msgstr "Haupt-Anhang"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:338
+#: code:addons/queue_job/models/queue_job.py:339
 #, python-format
 msgid "Manually set to done by %s"
 msgstr "Manuell als Erledigt markiert von: %s"
@@ -530,7 +530,7 @@ msgid "Model"
 msgstr "Modell"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:727
+#: code:addons/queue_job/models/queue_job.py:728
 #, python-format
 msgid "Model {} not found"
 msgstr ""
@@ -557,13 +557,13 @@ msgid "Next Activity Type"
 msgstr "Typ der nächsten Aktivität"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:296
+#: code:addons/queue_job/models/queue_job.py:297
 #, python-format
 msgid "No action available for this job"
 msgstr "Für diesen Job ist keine Aktion verfügbar"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:264
+#: code:addons/queue_job/models/queue_job.py:265
 #, python-format
 msgid "Not allowed to change field(s): {}"
 msgstr ""
@@ -604,7 +604,7 @@ msgid "Parent Channel"
 msgstr "Übergeordneter Kanal"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:601
+#: code:addons/queue_job/models/queue_job.py:602
 #, python-format
 msgid "Parent channel required."
 msgstr "Es ist ein übergeordneter Kanal notwendig."
@@ -645,7 +645,7 @@ msgid "Queue Job"
 msgstr "Job einreihen"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:250
+#: code:addons/queue_job/models/queue_job.py:251
 #, python-format
 msgid "Queue jobs must be created by calling 'with_delay()'."
 msgstr ""
@@ -676,13 +676,13 @@ msgid "Related Action (serialized)"
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:487
+#: code:addons/queue_job/models/queue_job.py:488
 #, python-format
 msgid "Related Record"
 msgstr "Zugehöriger Datensatz"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:497
+#: code:addons/queue_job/models/queue_job.py:498
 #, python-format
 msgid "Related Records"
 msgstr "Zugehörige Datensätze"
@@ -765,7 +765,7 @@ msgid "Single shared identifier of a Graph. Empty for a single job."
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:390
+#: code:addons/queue_job/models/queue_job.py:391
 #, python-format
 msgid ""
 "Something bad happened during the execution of the job. More details in the "
@@ -865,7 +865,7 @@ msgid "UUID"
 msgstr "UUID"
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:849
+#: code:addons/queue_job/models/queue_job.py:850
 #, python-format
 msgid ""
 "Unexpected format of Related Action for {}.\n"
@@ -875,7 +875,7 @@ msgid ""
 msgstr ""
 
 #. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:826
+#: code:addons/queue_job/models/queue_job.py:827
 #, python-format
 msgid ""
 "Unexpected format of Retry Pattern for {}.\n"
