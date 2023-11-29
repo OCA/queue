@@ -9,7 +9,6 @@ from odoo.addons.queue_job.job import identity_exact
 
 
 class QueueJob(models.Model):
-
     _inherit = "queue.job"
 
     additional_info = fields.Char()
@@ -31,7 +30,6 @@ class QueueJob(models.Model):
 
 
 class ModelTestQueueJob(models.Model):
-
     _name = "test.queue.job"
     _description = "Test model for queue.job"
 
@@ -143,7 +141,6 @@ class ModelTestQueueJob(models.Model):
 
 
 class ModelTestQueueChannel(models.Model):
-
     _name = "test.queue.channel"
     _description = "Test model for queue.channel"
 
@@ -158,7 +155,6 @@ class ModelTestQueueChannel(models.Model):
 
 
 class ModelTestRelatedAction(models.Model):
-
     _name = "test.related.action"
     _description = "Test model for related actions"
 
