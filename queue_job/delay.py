@@ -336,7 +336,7 @@ class DelayableChain:
 
     def __repr__(self):
         inner_graph = "\n\t".join(repr(self._graph).split("\n"))
-        return "DelayableChain(\n\t{}\n)".format(inner_graph)
+        return f"DelayableChain(\n\t{inner_graph}\n)"
 
     def on_done(self, *delayables):
         """Connects the current chain to other delayables/chains/groups
@@ -388,7 +388,7 @@ class DelayableGroup:
 
     def __repr__(self):
         inner_graph = "\n\t".join(repr(self._graph).split("\n"))
-        return "DelayableGroup(\n\t{}\n)".format(inner_graph)
+        return f"DelayableGroup(\n\t{inner_graph}\n)"
 
     def on_done(self, *delayables):
         """Connects the current group to other delayables/chains/groups
@@ -563,7 +563,7 @@ class Delayable:
         self._generated_job.perform()
 
 
-class DelayableRecordset(object):
+class DelayableRecordset:
     """Allow to delay a method for a recordset (shortcut way)
 
     Usage::

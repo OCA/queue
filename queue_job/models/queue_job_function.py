@@ -139,7 +139,7 @@ class QueueJobFunction(models.Model):
 
     @staticmethod
     def job_function_name(model_name, method_name):
-        return "<{}>.{}".format(model_name, method_name)
+        return f"<{model_name}>.{method_name}"
 
     def job_default_config(self):
         return self.JobConfig(

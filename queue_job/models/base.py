@@ -221,9 +221,7 @@ class Base(models.AbstractModel):
             else:
                 # replace the synchronous call by a job on itself
                 method_name = auto_delay_wrapper.origin.__name__
-                job_options_method = getattr(
-                    self, "{}_job_options".format(method_name), None
-                )
+                job_options_method = getattr(self, f"{method_name}_job_options", None)
                 job_options = {}
                 if job_options_method:
                     job_options.update(job_options_method(*args, **kwargs))
