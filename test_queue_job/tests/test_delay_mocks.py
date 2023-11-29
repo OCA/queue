@@ -143,10 +143,10 @@ class TestDelayMocks(common.TransactionCase):
                 "identity_key=<function identity_exact at 0x[0-9a-fA-F]+>, "
                 "max_retries=1, priority=15\\) was not enqueued\\.\n"
                 "Actual enqueued jobs:\n"
-                r" \* <test.queue.job\(%s,\)>.testing_method\(1, foo=2\) with properties "
+                r" \* <test.queue.job\({record_id},\)>.testing_method\(1, foo=2\) with properties "
                 r"\(priority=15, max_retries=1, eta=15, description=Test, channel=root.test, "
                 r"identity_key=<function identity_exact at 0x[0-9a-fA-F]+>\)"
-            ) % (recordset.id,)
+            ).format(record_id=recordset.id)
             with self.assertRaisesRegex(AssertionError, message):
                 trap.assert_enqueued_job(
                     self.env["test.queue.job"].testing_method,
@@ -168,7 +168,7 @@ class TestDelayMocks(common.TransactionCase):
             self.env["test.queue.job"].button_that_uses_with_delay()
             trap.assert_jobs_count(1)
             message = (
-                r"Job <test\.queue.job\(%s,\)>\.testing_method\(1, foo=2\) with "
+                rf"Job <test\.queue.job\({recordset.id},\)>\.testing_method\(1, foo=2\) with "
                 r"properties \(channel=root\.test, description=Test, eta=15, "
                 "identity_key=<function identity_exact at 0x[0-9a-fA-F]+>, "
                 "max_retries=1, priority=15\\) was not enqueued\\.\n"
@@ -176,7 +176,7 @@ class TestDelayMocks(common.TransactionCase):
                 r" \* <test.queue.job\(\)>.testing_method\(1, foo=2\) with properties "
                 r"\(priority=15, max_retries=1, eta=15, description=Test, channel=root.test, "
                 r"identity_key=<function identity_exact at 0x[0-9a-fA-F]+>\)"
-            ) % (recordset.id,)
+            )
             with self.assertRaisesRegex(AssertionError, message):
                 trap.assert_enqueued_job(
                     recordset.testing_method,
