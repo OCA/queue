@@ -100,7 +100,7 @@ def identity_exact(job_):
 
 
 @total_ordering
-class Job(object):
+class Job:
     """A Job is a task to execute. It is the in-memory representation of a job.
 
     Jobs are stored in the ``queue.job`` Odoo Model, but they are handled
@@ -671,9 +671,9 @@ class Job(object):
     def func_string(self):
         model = repr(self.recordset)
         args = [repr(arg) for arg in self.args]
-        kwargs = ["{}={!r}".format(key, val) for key, val in self.kwargs.items()]
+        kwargs = [f"{key}={val!r}" for key, val in self.kwargs.items()]
         all_args = ", ".join(args + kwargs)
-        return "{}.{}({})".format(model, self.method_name, all_args)
+        return f"{model}.{self.method_name}({all_args})"
 
     def __eq__(self, other):
         return self.uuid == other.uuid
@@ -743,7 +743,7 @@ class Job(object):
         elif self.func.__doc__:
             return self.func.__doc__.splitlines()[0].strip()
         else:
-            return "{}.{}".format(self.model_name, self.func.__name__)
+            return f"{self.model_name}.{self.func.__name__}"
 
     @property
     def uuid(self):
