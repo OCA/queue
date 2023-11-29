@@ -34,7 +34,7 @@ class TestJobAutoDelay(JobCommonCase):
         """method forced to run synchronously"""
         result = (
             self.env["test.queue.job"]
-            .with_context(_job_force_sync=True)
+            .with_context(queue_job__no_delay=True)
             .delay_me(1, kwarg=2)
         )
         self.assertTrue(result, (1, 2))
