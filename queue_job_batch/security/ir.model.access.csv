@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_queue_job_batch_user,queue job manager,model_queue_job_batch,group_queue_job_batch_user,1,1,0,0
+access_queue_job_batch_manager,queue job manager,model_queue_job_batch,queue_job.group_queue_job_manager,1,1,1,1
+access_queue_job_queue_job_batch_user,queue job manager,queue_job.model_queue_job,group_queue_job_batch_user,1,0,0,0
