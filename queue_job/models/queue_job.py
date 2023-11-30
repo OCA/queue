@@ -379,8 +379,9 @@ class QueueJob(models.Model):
         """
         self.ensure_one()
         return _(
-            "Something bad happened during the execution of the job. "
-            "More details in the 'Exception Information' section."
+            "Something bad happened during the execution of job %s. "
+            "More details in the 'Exception Information' section.",
+            self.uuid,
         )
 
     def _needaction_domain_get(self):
