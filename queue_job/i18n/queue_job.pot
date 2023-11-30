@@ -792,7 +792,7 @@ msgstr ""
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid ""
-"Something bad happened during the execution of the job. More details in the "
+"Something bad happened during the execution of job %s. More details in the "
 "'Exception Information' section."
 msgstr ""
 
