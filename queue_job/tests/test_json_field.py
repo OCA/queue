@@ -58,14 +58,18 @@ class TestJson(common.TransactionCase):
         demo_user = self.env.ref("base.user_demo")
         context = demo_user.context_get()
         partner = self.env(user=demo_user).ref("base.main_partner")
-        value_json = (
-            '{"_type": "odoo_recordset",'
-            '"model": "res.partner",'
-            '"su": false,'
-            '"ids": [%s],"uid": %s, '
-            '"context": {"tz": "%s", "lang": "%s"}}'
-            % (partner.id, demo_user.id, context["tz"], context["lang"])
+
+        value_json = json.dumps(
+            {
+                "_type": "odoo_recordset",
+                "model": "res.partner",
+                "su": False,
+                "ids": partner.ids,
+                "uid": demo_user.id,
+                "context": {"tz": context["tz"], "lang": context["lang"]},
+            }
         )
+
         expected = partner
         value = json.loads(value_json, cls=JobDecoder, env=self.env)
         self.assertEqual(value, expected)
@@ -75,14 +79,19 @@ class TestJson(common.TransactionCase):
         demo_user = self.env.ref("base.user_demo")
         context = demo_user.context_get()
         partner = self.env(user=demo_user).ref("base.main_partner")
-        value_json = (
-            '["a", 1, '
-            '{"_type": "odoo_recordset",'
-            '"model": "res.partner",'
-            '"su": false,'
-            '"ids": [%s],"uid": %s, '
-            '"context": {"tz": "%s", "lang": "%s"}}]'
-            % (partner.id, demo_user.id, context["tz"], context["lang"])
+        value_json = json.dumps(
+            [
+                "a",
+                1,
+                {
+                    "_type": "odoo_recordset",
+                    "model": "res.partner",
+                    "su": False,
+                    "ids": partner.ids,
+                    "uid": demo_user.id,
+                    "context": {"tz": context["tz"], "lang": context["lang"]},
+                },
+            ]
         )
         expected = ["a", 1, partner]
         value = json.loads(value_json, cls=JobDecoder, env=self.env)

@@ -866,7 +866,7 @@ class ChannelManager:
             name = config_items[0]
             if not name:
                 raise ValueError(
-                    "Invalid channel config %s: missing channel name" % config_string
+                    f"Invalid channel config {config_string}: missing channel name"
                 )
             config["name"] = name
             if len(config_items) > 1:
@@ -875,8 +875,8 @@ class ChannelManager:
                     config["capacity"] = int(capacity)
                 except Exception as ex:
                     raise ValueError(
-                        "Invalid channel config %s: "
-                        "invalid capacity %s" % (config_string, capacity)
+                        f"Invalid channel config {config_string}: "
+                        f"invalid capacity {capacity}"
                     ) from ex
                 for config_item in config_items[2:]:
                     kv = split_strip(config_item, "=")
@@ -886,13 +886,13 @@ class ChannelManager:
                         k, v = kv
                     else:
                         raise ValueError(
-                            "Invalid channel config %s: "
-                            "incorrect config item %s" % (config_string, config_item)
+                            f"Invalid channel config {config_string}: "
+                            f"incorrect config item {config_item}"
                         )
                     if k in config:
                         raise ValueError(
-                            "Invalid channel config %s: "
-                            "duplicate key %s" % (config_string, k)
+                            f"Invalid channel config {config_string}: "
+                            f"duplicate key {k}"
                         )
                     config[k] = v
             else:

@@ -2,12 +2,14 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 import doctest
 import logging
-import sys
 import typing
 from contextlib import contextmanager
 from itertools import groupby
 from operator import attrgetter
 from unittest import TestCase, mock
+
+from odoo.tests.case import TestCase as _TestCase
+from odoo.tests.common import MetaCase
 
 from odoo.addons.queue_job.delay import Graph
 
@@ -210,13 +212,10 @@ class JobsTrap:
 
         if expected_call not in actual_calls:
             raise AssertionError(
-                "Job %s was not enqueued.\n"
-                "Actual enqueued jobs:\n%s"
-                % (
+                "Job {} was not enqueued.\n" "Actual enqueued jobs:\n{}".format(
                     self._format_job_call(expected_call),
                     "\n".join(
-                        " * %s" % (self._format_job_call(call),)
-                        for call in actual_calls
+                        f" * {self._format_job_call(call)}" for call in actual_calls
                     ),
                 )
             )
@@ -293,16 +292,16 @@ class JobsTrap:
     def _format_job_call(self, call):
         method_all_args = []
         if call.args:
-            method_all_args.append(", ".join("%s" % (arg,) for arg in call.args))
+            method_all_args.append(", ".join(f"{arg}" for arg in call.args))
         if call.kwargs:
             method_all_args.append(
-                ", ".join("%s=%s" % (key, value) for key, value in call.kwargs.items())
+                ", ".join(f"{key}={value}" for key, value in call.kwargs.items())
             )
-        return "<%s>.%s(%s) with properties (%s)" % (
+        return "<{}>.{}({}) with properties ({})".format(
             call.method.__self__,
             call.method.__name__,
             ", ".join(method_all_args),
-            ", ".join("%s=%s" % (key, value) for key, value in call.properties.items()),
+            ", ".join(f"{key}={value}" for key, value in call.properties.items()),
         )
 
     def __repr__(self):
@@ -407,7 +406,7 @@ def mock_with_delay():
         yield delayable_cls, delayable
 
 
-class OdooDocTestCase(doctest.DocTestCase):
+class OdooDocTestCase(doctest.DocTestCase, _TestCase, MetaCase("DummyCase", (), {})):
     """
     We need a custom DocTestCase class in order to:
     - define test_tags to run as part of standard tests
@@ -428,7 +427,7 @@ class OdooDocTestCase(doctest.DocTestCase):
 
     def setUp(self):
         """Log an extra statement which test is started."""
-        super(OdooDocTestCase, self).setUp()
+        super().setUp()
         logging.getLogger(__name__).info("Running tests for %s", self._dt_test.name)
 
 
@@ -444,9 +443,10 @@ def load_doctests(module):
         Also extend the DocTestCase class trivially to fit the class teardown
         that Odoo backported for its own test classes from Python 3.8.
         """
-        if sys.version_info < (3, 8):
-            doctest.DocTestCase.doClassCleanups = lambda: None
-            doctest.DocTestCase.tearDown_exceptions = []
+        # UP036 Version block is outdated for minimum Python version
+        # if sys.version_info < (3, 8):
+        #     doctest.DocTestCase.doClassCleanups = lambda: None
+        #     doctest.DocTestCase.tearDown_exceptions = []
 
         for idx, test in enumerate(doctest.DocTestSuite(module)):
             odoo_test = OdooDocTestCase(test, seq=idx)

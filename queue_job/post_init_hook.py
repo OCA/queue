@@ -6,10 +6,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def post_init_hook(cr, registry):
+def post_init_hook(env):
     # this is the trigger that sends notifications when jobs change
     logger.info("Create queue_job_notify trigger")
-    cr.execute(
+    env.cr.execute(
         """
             DROP TRIGGER IF EXISTS queue_job_notify ON queue_job;
             CREATE OR REPLACE
