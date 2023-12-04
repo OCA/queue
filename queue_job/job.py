@@ -851,7 +851,7 @@ class Job:
                     break
         elif not seconds:
             seconds = RETRY_INTERVAL
-        if isinstance(seconds, (list, tuple)):
+        if isinstance(seconds, (list | tuple)):
             seconds = randint(seconds[0], seconds[1])
         return seconds
 

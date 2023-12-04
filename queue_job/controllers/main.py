@@ -244,7 +244,7 @@ class RunJobController(http.Controller):
             )
             ._test_job(failure_rate=failure_rate)
         )
-        return "job uuid: %s" % (delayed.db_record().uuid,)
+        return f"job uuid: {delayed.db_record().uuid}"
 
     TEST_GRAPH_MAX_PER_GROUP = 5
 
@@ -292,6 +292,6 @@ class RunJobController(http.Controller):
 
         root_delayable.delay()
 
-        return "graph uuid: %s" % (
-            list(root_delayable._head())[0]._generated_job.graph_uuid,
+        return "graph uuid: {}".format(
+            list(root_delayable._head())[0]._generated_job.graph_uuid
         )

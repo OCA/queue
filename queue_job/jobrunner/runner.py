@@ -322,7 +322,7 @@ class Database:
         query = (
             "SELECT channel, uuid, id as seq, date_created, "
             "priority, EXTRACT(EPOCH FROM eta), state "
-            "FROM queue_job WHERE %s" % (where,)
+            f"FROM queue_job WHERE {where}"
         )
         with closing(self.conn.cursor("select_jobs", withhold=True)) as cr:
             cr.execute(query, args)

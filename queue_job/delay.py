@@ -232,8 +232,7 @@ class DelayableGraph(Graph):
         elif jobs_count == 1:
             if jobs[0].graph_uuid:
                 raise ValueError(
-                    "Job %s is a single job, it should not"
-                    " have a graph uuid" % (jobs[0],)
+                    f"Job {jobs[0]} is a single job, it should not" " have a graph uuid"
                 )
         else:
             graph_uuids = {job.graph_uuid for job in jobs if job.graph_uuid}
@@ -498,7 +497,7 @@ class Delayable:
     def _set_from_dict(self, properties):
         for key, value in properties.items():
             if key not in self._properties:
-                raise ValueError("No property %s" % (key,))
+                raise ValueError(f"No property {key}")
             setattr(self, key, value)
 
     def set(self, *args, **kwargs):
@@ -552,7 +551,7 @@ class Delayable:
             return super().__getattr__(name)
         if name in self.recordset:
             raise AttributeError(
-                "only methods can be delayed (%s called on %s)" % (name, self.recordset)
+                f"only methods can be delayed ({name} called on {self.recordset})"
             )
         recordset_method = getattr(self.recordset, name)
         self._job_method = recordset_method
@@ -612,7 +611,7 @@ class DelayableRecordset:
         return _delay_delayable
 
     def __str__(self):
-        return "DelayableRecordset(%s%s)" % (
+        return "DelayableRecordset({}{})".format(
             self.delayable.recordset._name,
             getattr(self.delayable.recordset, "_ids", ""),
         )

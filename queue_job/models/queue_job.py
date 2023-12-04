@@ -210,10 +210,8 @@ class QueueJob(models.Model):
         }
         return {
             "id": self.id,
-            "title": "<strong>%s</strong><br/>%s"
-            % (
-                html_escape(self.display_name),
-                html_escape(self.func_string),
+            "title": "<strong>{}</strong><br/>{}".format(
+                html_escape(self.display_name), html_escape(self.func_string)
             ),
             "color": colors.get(self.state, default)[0],
             "border": colors.get(self.state, default)[1],

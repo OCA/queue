@@ -9,7 +9,7 @@
                 <header>
                     <button
                         name="requeue"
-                        states="failed"
+                        invisible="state != 'failed'"
                         class="oe_highlight"
                         string="Requeue Job"
                         type="object"
@@ -17,7 +17,7 @@
                     />
                     <button
                         name="button_done"
-                        states="wait_dependencies,pending,enqueued,failed"
+                        invisible="state not in ('wait_dependencies', 'pending', 'enqueued', 'failed')"
                         class="oe_highlight"
                         string="Set to 'Done'"
                         type="object"
@@ -25,7 +25,7 @@
                     />
                     <button
                         name="button_cancelled"
-                        states="pending,enqueued,failed"
+                        invisible="state not in ('pending', 'enqueued', 'failed')"
                         class="oe_highlight"
                         string="Cancel job"
                         type="object"
@@ -46,7 +46,7 @@
                             type="object"
                             class="oe_stat_button"
                             icon="fa-sitemap"
-                            attrs="{'invisible':[('graph_uuid', '=', False)]}"
+                            invisible="graph_uuid == False"
                         >
                             <field
                                 name="graph_jobs_count"
@@ -100,19 +100,19 @@
                       <page
                             name="results"
                             string="Results"
-                            attrs="{'invisible': [('result', '=', False), ('exc_info', '=', False)]}"
+                            invisible="result == False and exc_info == False"
                         >
                         <group
                                 name="result"
                                 string="Result"
-                                attrs="{'invisible': [('result', '=', False)]}"
+                                invisible="result == False"
                             >
                             <field nolabel="1" name="result" />
                         </group>
                         <group
                                 name="exc_info"
                                 string="Exception Information"
-                                attrs="{'invisible': [('exc_info', '=', False)]}"
+                                invisible="exc_info == False"
                                 colspan="4"
                             >
                             <div id="exc_name" colspan="4">
@@ -125,7 +125,7 @@
                       <page
                             name="dependencies"
                             string="Dependencies"
-                            attrs="{'invisible': [('graph_uuid', '=', False)]}"
+                            invisible="graph_uuid == False"
                         >
                         <field
                                 nolabel="1"

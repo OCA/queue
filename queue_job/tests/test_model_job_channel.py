@@ -52,8 +52,8 @@ class TestJobChannel(common.TransactionCase):
         else:
             self.assertEqual(True, False)
 
-    def test_channel_name_get(self):
+    def test_channel_display_name(self):
         channel = self.Channel.create(
             {"name": "test", "parent_id": self.root_channel.id}
         )
-        self.assertEqual(channel.name_get(), [(channel.id, "root.test")])
+        self.assertEqual(channel.display_name, channel.complete_name)
