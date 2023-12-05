@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_test_queue_job,access_test_queue_job,model_test_queue_job,,1,1,1,1
+access_test_queue_channel,access_test_queue_channel,model_test_queue_channel,,1,1,1,1
+access_test_related_action,access_test_related_action,model_test_related_action,,1,1,1,1
