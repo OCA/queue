@@ -11,10 +11,7 @@
         <field name="inherit_id" ref="base.ir_cron_view_form" />
         <field name="arch" type="xml">
             <field name="doall" position="after">
-                <field
-                    name="queue_job_runner"
-                    attrs="{'invisible': [('model_name', '!=', 'queue.job')]}"
-                />
+                <field name="queue_job_runner" invisible="model_name != 'queue.job'" />
             </field>
         </field>
     </record>
