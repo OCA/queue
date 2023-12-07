@@ -10,3 +10,5 @@
 * Souheil Bejaoui <souheil.bejaoui@acsone.eu>
 * Eric Antones <eantones@nuobit.com>
 * Simone Orsi <simone.orsi@camptocamp.com>
+* Paul Catinean <pca@pledra.com>
+* Ruchir Shukla <ruchir@bizzappdev.com>

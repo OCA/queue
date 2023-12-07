@@ -492,6 +492,20 @@ start immediately and in parallel.</li>
 of running Odoo is obviously not for production purposes.</td></tr>
 </tbody>
 </table>
+<ul class="simple">
+<li>Deploying in high availability mode or odoo.sh:</li>
+</ul>
+<p>When deploying queue_job on multiple nodes or on odoo.sh, on top of the configuration
+parameters mentioned above you need to also set the env variable
+ODOO_QUEUE_JOB_HIGH_AVAILABILITY=1 or via config parameter as such:</p>
+<pre class="code ini literal-block">
+<span class="na">(...)</span><span class="w">
+</span><span class="k">[queue_job]</span><span class="w">
+</span><span class="na">high_availability</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">1</span>
+</pre>
+<p>&gt; :warning: <strong>Warning:</strong> Failure to enable the high_availability flag on odoo.sh could
+constitute a breach of Acceptable Use Policy. Always enable this flag via the odoo.conf file for odoo.sh
+deployment</p>
 </div>
 <div class="section" id="usage">
 <h1><a class="toc-backref" href="#toc-entry-3">Usage</a></h1>
@@ -871,6 +885,11 @@ it does not attempt to restart them automatically. Such stale jobs
 therefore fill the running queue and prevent other jobs to start.
 You must therefore requeue them manually, either from the Jobs view,
 or by running the following SQL statement <em>before starting Odoo</em>:</li>
+<li>When deployed in high_availability mode the allocated databases for the
+jobrunners must be identical. If the databases are different and overlap
+i.e jobrunner A runs on DB1,DB2 and jobrunner B runs on DB2,DB3 then either
+DB1 or DB3 will not proccess jobs because there can be only one leader per
+sets of databases.</li>
 </ul>
 <pre class="code sql literal-block">
 <span class="k">update</span><span class="w"> </span><span class="n">queue_job</span><span class="w"> </span><span class="k">set</span><span class="w"> </span><span class="k">state</span><span class="o">=</span><span class="s1">'pending'</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="k">state</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="p">(</span><span class="s1">'started'</span><span class="p">,</span><span class="w"> </span><span class="s1">'enqueued'</span><span class="p">)</span>
@@ -930,6 +949,8 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 <li>Souheil Bejaoui &lt;<a class="reference external" href="mailto:souheil.bejaoui&#64;acsone.eu">souheil.bejaoui&#64;acsone.eu</a>&gt;</li>
 <li>Eric Antones &lt;<a class="reference external" href="mailto:eantones&#64;nuobit.com">eantones&#64;nuobit.com</a>&gt;</li>
 <li>Simone Orsi &lt;<a class="reference external" href="mailto:simone.orsi&#64;camptocamp.com">simone.orsi&#64;camptocamp.com</a>&gt;</li>
+<li>Paul Catinean &lt;<a class="reference external" href="mailto:pca&#64;pledra.com">pca&#64;pledra.com</a>&gt;</li>
+<li>Ruchir Shukla &lt;<a class="reference external" href="mailto:ruchir&#64;bizzappdev.com">ruchir&#64;bizzappdev.com</a>&gt;</li>
 </ul>
 </div>
 <div class="section" id="maintainers">
