@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 {
     "name": "Queue Job Subscribe",
-    "version": "16.0.1.0.0",
+    "version": "17.0.1.0.0",
     "author": "Acsone SA/NV, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/queue",
     "summary": "Control which users are subscribed to queue job notifications",
