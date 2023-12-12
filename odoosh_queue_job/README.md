@@ -16,7 +16,16 @@ the http workers so only one jobrunner is active at any given time.
    server_wide_modules=web,odoosh_queue_job
    ```
 
-3. Restart odoo
+3. Do not forget to add your host in the same file for each environment
+
+   ```
+   [queue_job]
+   scheme=https
+   host=your-odoo-sh-branch-domain.odoo.com
+   port=443
+   ```
+
+4. Restart odoo
 
    ```
    odoosh-restart http
