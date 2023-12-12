@@ -369,19 +369,22 @@ ul.auto-toc {
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! source digest: sha256:ea15f976f55eddd46d51fc2bb989455756811717bbdc8f69764d02a0d6014b32
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
-<p><a class="reference external image-reference" href="https://odoo-community.org/page/development-status"><img alt="Alpha" src="https://img.shields.io/badge/maturity-Alpha-red.png" /></a> <a class="reference external image-reference" href="http://www.gnu.org/licenses/agpl-3.0-standalone.html"><img alt="License: AGPL-3" src="https://img.shields.io/badge/licence-AGPL--3-blue.png" /></a> <a class="reference external image-reference" href="https://github.com/OCA/queue/tree/16.0/queue_job_cron_jobrunner"><img alt="OCA/queue" src="https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github" /></a> <a class="reference external image-reference" href="https://translation.odoo-community.org/projects/queue-16-0/queue-16-0-queue_job_cron_jobrunner"><img alt="Translate me on Weblate" src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png" /></a> <a class="reference external image-reference" href="https://runboat.odoo-community.org/builds?repo=OCA/queue&amp;target_branch=16.0"><img alt="Try me on Runboat" src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png" /></a></p>
-<p>This module implements a simple <tt class="docutils literal">queue.job</tt> runner using <tt class="docutils literal">ir.cron</tt> triggers.</p>
-<p>It’s meant to be used on environments where the regular job runner can’t be run, like
-on Odoo.sh.</p>
-<p>Unlike the regular job runner, where jobs are dispatched to the HttpWorkers, jobs are
-processed on the CronWorker threads by the job runner crons. This is a design decision
-because:</p>
+<p><a class="reference external image-reference" href="https://odoo-community.org/page/development-status"><img alt="Alpha" src="https://img.shields.io/badge/maturity-Alpha-red.png" /></a> <a class="reference external image-reference" href="http://www.gnu.org/licenses/agpl-3.0-standalone.html"><img alt="License: AGPL-3" src="https://img.shields.io/badge/licence-AGPL--3-blue.png" /></a> <a class="reference external image-reference" href="https://github.com/OCA/queue/tree/17.0/queue_job_cron_jobrunner"><img alt="OCA/queue" src="https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github" /></a> <a class="reference external image-reference" href="https://translation.odoo-community.org/projects/queue-17-0/queue-17-0-queue_job_cron_jobrunner"><img alt="Translate me on Weblate" src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png" /></a> <a class="reference external image-reference" href="https://runboat.odoo-community.org/builds?repo=OCA/queue&amp;target_branch=17.0"><img alt="Try me on Runboat" src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png" /></a></p>
+<p>This module implements a simple <tt class="docutils literal">queue.job</tt> runner using <tt class="docutils literal">ir.cron</tt>
+triggers.</p>
+<p>It’s meant to be used on environments where the regular job runner can’t
+be run, like on Odoo.sh.</p>
+<p>Unlike the regular job runner, where jobs are dispatched to the
+HttpWorkers, jobs are processed on the CronWorker threads by the job
+runner crons. This is a design decision because:</p>
 <ul class="simple">
 <li>Odoo.sh puts HttpWorkers to sleep when there’s no network activity</li>
-<li>HttpWorkers are meant for traffic. Users shouldn’t pay the price of background tasks.</li>
+<li>HttpWorkers are meant for traffic. Users shouldn’t pay the price of
+background tasks.</li>
 </ul>
-<p>For now, it only implements the most basic features of the <tt class="docutils literal">queue_job</tt> runner, notably
-no channel capacity nor priorities. Please check the ROADMAP for further details.</p>
+<p>For now, it only implements the most basic features of the <tt class="docutils literal">queue_job</tt>
+runner, notably no channel capacity nor priorities. Please check the
+ROADMAP for further details.</p>
 <div class="admonition important">
 <p class="first admonition-title">Important</p>
 <p class="last">This is an alpha version, the data model and design can change at any time without warning.
@@ -404,23 +407,24 @@ Only for development or testing purpose, do not use in production.
 </div>
 <div class="section" id="configuration">
 <h1><a class="toc-backref" href="#toc-entry-1">Configuration</a></h1>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">Don’t use this module if you’re already running the regular <tt class="docutils literal">queue_job</tt> runner.</p>
-</div>
-<p>For the easiest case, no configuration is required besides installing the module.</p>
-<p>To avoid CronWorker CPU timeout from abruptly stopping the job processing cron, it’s
-recommended to launch Odoo with <tt class="docutils literal"><span class="pre">--limit-time-real-cron=0</span></tt>, to disable the CronWorker
-timeout altogether.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">In Odoo.sh, this is done by default.</p>
-</div>
-<p>Parallel execution of jobs can be achieved by leveraging multiple <tt class="docutils literal">ir.cron</tt> records:</p>
+<p>Warning</p>
+<p>Don’t use this module if you’re already running the regular
+<tt class="docutils literal">queue_job</tt> runner.</p>
+<p>For the easiest case, no configuration is required besides installing
+the module.</p>
+<p>To avoid CronWorker CPU timeout from abruptly stopping the job
+processing cron, it’s recommended to launch Odoo with
+<tt class="docutils literal"><span class="pre">--limit-time-real-cron=0</span></tt>, to disable the CronWorker timeout
+altogether.</p>
+<p>Note</p>
+<p>In Odoo.sh, this is done by default.</p>
+<p>Parallel execution of jobs can be achieved by leveraging multiple
+<tt class="docutils literal">ir.cron</tt> records:</p>
 <ul class="simple">
-<li>Make sure you have enough CronWorkers available (Odoo CLI <tt class="docutils literal"><span class="pre">--max-cron-threads</span></tt>)</li>
-<li>Duplicate the <tt class="docutils literal">queue_job_cron</tt> cron record as many times as needed, until you have
-as much records as cron workers.</li>
+<li>Make sure you have enough CronWorkers available (Odoo CLI
+<tt class="docutils literal"><span class="pre">--max-cron-threads</span></tt>)</li>
+<li>Duplicate the <tt class="docutils literal">queue_job_cron</tt> cron record as many times as needed,
+until you have as much records as cron workers.</li>
 </ul>
 </div>
 <div class="section" id="known-issues-roadmap">
@@ -428,7 +432,8 @@ as much records as cron workers.</li>
 <ul class="simple">
 <li>Support channel capacity and priority. (See <tt class="docutils literal">_acquire_one_job</tt>)</li>
 <li>Gracefully handle CronWorker CPU timeouts. (See <tt class="docutils literal">_job_runner</tt>)</li>
-<li>Commit transaction after job state updated to started. (See <tt class="docutils literal">_process</tt>)</li>
+<li>Commit transaction after job state updated to started. (See
+<tt class="docutils literal">_process</tt>)</li>
 </ul>
 </div>
 <div class="section" id="bug-tracker">
@@ -436,7 +441,7 @@ as much records as cron workers.</li>
 <p>Bugs are tracked on <a class="reference external" href="https://github.com/OCA/queue/issues">GitHub Issues</a>.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us to smash it by providing a detailed and welcomed
-<a class="reference external" href="https://github.com/OCA/queue/issues/new?body=module:%20queue_job_cron_jobrunner%0Aversion:%2016.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**">feedback</a>.</p>
+<a class="reference external" href="https://github.com/OCA/queue/issues/new?body=module:%20queue_job_cron_jobrunner%0Aversion:%2017.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**">feedback</a>.</p>
 <p>Do not contact contributors directly about support or help with technical issues.</p>
 </div>
 <div class="section" id="credits">
@@ -468,7 +473,7 @@ mission is to support the collaborative development of Odoo features and
 promote its widespread use.</p>
 <p>Current <a class="reference external" href="https://odoo-community.org/page/maintainer-role">maintainer</a>:</p>
 <p><a class="reference external image-reference" href="https://github.com/ivantodorovich"><img alt="ivantodorovich" src="https://github.com/ivantodorovich.png?size=40px" /></a></p>
-<p>This module is part of the <a class="reference external" href="https://github.com/OCA/queue/tree/16.0/queue_job_cron_jobrunner">OCA/queue</a> project on GitHub.</p>
+<p>This module is part of the <a class="reference external" href="https://github.com/OCA/queue/tree/17.0/queue_job_cron_jobrunner">OCA/queue</a> project on GitHub.</p>
 <p>You are welcome to contribute. To learn how please visit <a class="reference external" href="https://odoo-community.org/page/Contribute">https://odoo-community.org/page/Contribute</a>.</p>
 </div>
 </div>
