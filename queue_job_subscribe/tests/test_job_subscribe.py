@@ -8,7 +8,7 @@ from odoo.addons.queue_job.job import Job
 
 class TestJobSubscribe(common.TransactionCase):
     def setUp(self):
-        super(TestJobSubscribe, self).setUp()
+        super().setUp()
         grp_queue_job_manager = self.ref("queue_job.group_queue_job_manager")
         self.other_partner_a = self.env["res.partner"].create(
             {"name": "My Company a", "is_company": True, "email": "test@tes.ttest"}
