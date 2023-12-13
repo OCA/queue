@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -32,7 +32,6 @@ msgstr ""
 
 #. module: queue_job_cron_jobrunner
 #: model:ir.actions.server,name:queue_job_cron_jobrunner.queue_job_cron_ir_actions_server
-#: model:ir.cron,cron_name:queue_job_cron_jobrunner.queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron_jobrunner.field_ir_cron__queue_job_runner
 msgid "Queue Job Runner"
 msgstr ""
