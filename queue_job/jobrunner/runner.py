@@ -398,13 +398,6 @@ class QueueJobRunner(object):
         return runner
 
     def get_db_names(self):
-        """
-        >>> runner = QueueJobRunner()
-        >>> config["db_name"] = None
-        >>> config["list_db"] = False
-        >>> runner.get_db_names()
-        ['odoo']
-        """
         if config["db_name"]:
             db_names = config["db_name"].split(",")
         else:
