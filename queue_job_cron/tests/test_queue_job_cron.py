@@ -39,3 +39,22 @@ class TestQueueJobCron(TransactionCase):
         cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
         IrCron = self.env["ir.cron"]
         IrCron._run_job_as_queue_job(server_action=cron.ir_actions_server_id)
+
+    def test_queue_job_no_parallelism(self):
+        cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
+        default_channel = self.env.ref("queue_job_cron.channel_root_ir_cron")
+        cron.write(
+            {
+                "no_parallel_queue_job_run": True,
+                "run_as_queue_job": True,
+                "channel_id": default_channel.id,
+            }
+        )
+        cron.method_direct_trigger()
+        cron.method_direct_trigger()
+        nb_jobs = self.env["queue.job"].search_count([("name", "=", cron.name)])
+        self.assertEqual(nb_jobs, 1)
+        cron.no_parallel_queue_job_run = False
+        cron.method_direct_trigger()
+        nb_jobs = self.env["queue.job"].search_count([("name", "=", cron.name)])
+        self.assertEqual(nb_jobs, 2)
