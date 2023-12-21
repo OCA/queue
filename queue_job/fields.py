@@ -70,6 +70,8 @@ class JobEncoder(json.JSONEncoder):
     """Encode Odoo recordsets so that we can later recompose them"""
 
     def _get_record_context(self, obj):
+        if obj.env["ir.config_parameter"].sudo().get_param("queue_job.keep_context"):
+            return obj.env.context
         return obj._job_prepare_context_before_enqueue()
 
     def default(self, obj):
