@@ -79,8 +79,8 @@ Authors
 Contributors
 ------------
 
--  Cédric Pigeon <cedric.pigeon@acsone.eu>
--  Nguyen Minh Chien <chien@trobz.com>
+- Cédric Pigeon <cedric.pigeon@acsone.eu>
+- Nguyen Minh Chien <chien@trobz.com>
 
 Maintainers
 -----------
