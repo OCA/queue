@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo noupdate="1">
-    <record id="delay_export_user_only" model="ir.rule">
-        <field name="name">Only user can read delay.export</field>
+    <record id="delay_export_user" model="ir.rule">
+        <field name="name">Recipient can read delay.export</field>
         <field name="model_id" ref="model_delay_export" />
         <field name="groups" eval="[(4, ref('base.group_user'))]" />
         <field name="perm_read" eval="True" />
@@ -9,5 +9,15 @@
         <field name="perm_write" eval="False" />
         <field name="perm_unlink" eval="False" />
         <field name="domain_force">[('user_ids', 'in', user.id)]</field>
+    </record>
+    <record id="delay_export_admin" model="ir.rule">
+        <field name="name">Admin / Settings can read all delay.export</field>
+        <field name="model_id" ref="model_delay_export" />
+        <field name="groups" eval="[(4, ref('base.group_system'))]" />
+        <field name="perm_read" eval="True" />
+        <field name="perm_create" eval="False" />
+        <field name="perm_write" eval="False" />
+        <field name="perm_unlink" eval="False" />
+        <field name="domain_force">[(1, '=', 1)]</field>
     </record>
 </odoo>
