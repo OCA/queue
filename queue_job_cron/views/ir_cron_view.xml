@@ -9,8 +9,8 @@
                 <field name="run_as_queue_job" />
                 <field
                     name="channel_id"
-                    attrs="{'invisible': [('run_as_queue_job', '=', False)],
-                                'required': [('run_as_queue_job', '=', True)]}"
+                    invisible="not run_as_queue_job"
+                    required="run_as_queue_job"
                 />
             </field>
         </field>

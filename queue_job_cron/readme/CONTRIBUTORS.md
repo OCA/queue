@@ -1,1 +1,2 @@
 - Cédric Pigeon \<<cedric.pigeon@acsone.eu>\>
+- Nguyen Minh Chien \<<chien@trobz.com>\>
