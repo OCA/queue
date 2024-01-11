@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 9.0c\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-04-05 00:42+0000\n"
-"PO-Revision-Date: 2023-12-07 18:37+0000\n"
+"PO-Revision-Date: 2024-01-11 09:34+0000\n"
 "Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: Italian (https://www.transifex.com/oca/teams/23907/it/)\n"
 "Language: it\n"
@@ -46,7 +46,7 @@ msgstr "Lavoro in coda"
 #. module: queue_job_subscribe
 #: model:ir.model,name:queue_job_subscribe.model_res_users
 msgid "User"
-msgstr ""
+msgstr "Utente"
 
 #~ msgid "Users"
 #~ msgstr "Utenti"
