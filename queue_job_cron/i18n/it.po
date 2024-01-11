@@ -6,13 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2024-01-11 09:34+0000\n"
+"Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: none\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.17\n"
 
 #. module: queue_job_cron
 #: model:ir.model.fields,help:queue_job_cron.field_ir_cron__no_parallel_queue_job_run
@@ -21,28 +23,32 @@ msgid ""
 "skipped. By default, odoo never runs the same cron job in parallel. This "
 "option is therefore set to True by default when job is run as a queue job."
 msgstr ""
+"Evita esecuzioni parallele. Se il lavoro del cron è in esecuzione, il nuovo "
+"verrà saltato. In modo predefinito, Odoo non esegue lo stesso lavoro cron in "
+"parallelo. Di conseguenza questa opzione è impostata a True in modo "
+"predefinito quando un lavoro è eseguito come un lavoro in coda."
 
 #. module: queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__channel_id
 msgid "Channel"
-msgstr ""
+msgstr "Canale"
 
 #. module: queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__no_parallel_queue_job_run
 msgid "No Parallel Queue Job Run"
-msgstr ""
+msgstr "Nessun lavoro in coda parallelo in esecuzione"
 
 #. module: queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__run_as_queue_job
 msgid "Run As Queue Job"
-msgstr ""
+msgstr "Eseguire come lavoro in coda"
 
 #. module: queue_job_cron
 #: model:ir.model,name:queue_job_cron.model_ir_cron
 msgid "Scheduled Actions"
-msgstr ""
+msgstr "Azioni pianificate"
 
 #. module: queue_job_cron
 #: model:ir.model.fields,help:queue_job_cron.field_ir_cron__run_as_queue_job
 msgid "Specify if this cron should be ran as a queue job"
-msgstr ""
+msgstr "Indica se questo cron deve essere eseguito come un lavoro in coda"
