@@ -35,11 +35,11 @@ export class JobDirectGraph extends Component {
     }
 
     get resId() {
-        return this.props.record.data.id;
+        return this.props.record.resId;
     }
 
     get context() {
-        return this.props.record.getFieldContext(this.props.name);
+        return this.props.record.context;
     }
 
     get model() {
@@ -56,17 +56,24 @@ export class JobDirectGraph extends Component {
         if (this.network) {
             this.$el.empty();
         }
-        let nodes = this.props.value.nodes || [];
+        let value = this.props.record.data[this.props.name];
+        let nodes = value.nodes || [];
         if (!nodes.length) {
             return;
         }
         nodes = nodes.map((node) => {
-            node.title = this.htmlTitle(node.title || "");
-            return node;
+            let obj = {};
+            for (let key in node) {
+                if (node.hasOwnProperty(key)) {
+                    obj[key] = node[key];
+                }
+            }
+            obj.title = this.htmlTitle(node.title || "");
+            return obj;
         });
 
         const edges = [];
-        _.each(this.props.value.edges || [], function (edge) {
+        value.edges.forEach(function (edge) {
             const edgeFrom = edge[0];
             const edgeTo = edge[1];
             edges.push({
@@ -140,4 +147,8 @@ JobDirectGraph.props = {
 
 JobDirectGraph.template = "queue.JobDirectGraph";
 
-registry.category("fields").add("job_directed_graph", JobDirectGraph);
+export const jobDirectGraph = {
+    component: JobDirectGraph,
+};
+
+registry.category("fields").add("job_directed_graph", jobDirectGraph);
