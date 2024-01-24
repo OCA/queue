@@ -984,7 +984,7 @@ class ChannelManager(object):
         'root.sub'
         >>> c = cm.get_channel_by_name('root.sub.not.configured', parent_fallback=True)
         >>> c.fullname
-        'root.sub.sub.not.configured'
+        'root.sub.not.configured'
         """
         if not channel_name or channel_name == self._root_channel.name:
             return self._root_channel
@@ -1012,7 +1012,7 @@ class ChannelManager(object):
                         parent_name,
                     )
                     break
-        for subchannel_name in channel_name.split(".")[1:]:
+        for subchannel_name in channel_name.split(".")[parent.fullname.count(".") + 1:]:
             subchannel = parent.get_subchannel_by_name(subchannel_name)
             if not subchannel:
                 subchannel = Channel(subchannel_name, parent, capacity=None)
