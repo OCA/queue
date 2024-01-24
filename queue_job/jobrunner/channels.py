@@ -1013,7 +1013,7 @@ class ChannelManager(object):
                     )
                     break
         for subchannel_name in channel_name.split(".")[
-            parent.fullname.count(".") + 1:
+            parent.fullname.count(".") + 1 :
         ]:
             subchannel = parent.get_subchannel_by_name(subchannel_name)
             if not subchannel:
