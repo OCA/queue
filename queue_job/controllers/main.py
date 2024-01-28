@@ -122,6 +122,8 @@ class RunJobController(http.Controller):
             job.store()
             env.cr.commit()
 
+        # FIXME: this exception never triggers up, so it never reaches
+        # `perform` method that handles retries.
         except RetryableJobError as err:
             # delay the job later, requeue
             retry_postpone(job, str(err), seconds=err.seconds)

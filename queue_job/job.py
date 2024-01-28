@@ -512,6 +512,10 @@ class Job(object):
 
         The job is executed with the user which has initiated it.
         """
+        if self.max_retries and self.retry >= self.max_retries:
+            raise FailedJobError(
+                "Max. retries (%d) reached: %s" % (self.max_retries, self._uuid)
+            )
         self.retry += 1
         try:
             self.result = self.func(*tuple(self.args), **self.kwargs)
