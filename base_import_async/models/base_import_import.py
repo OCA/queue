@@ -15,7 +15,7 @@ from odoo.models import fix_import_export_id_paths
 from odoo.addons.queue_job.exception import FailedJobError
 
 # options defined in base_import/import.js
-OPT_HAS_HEADER = "headers"
+OPT_HAS_HEADER = "has_headers"
 OPT_SEPARATOR = "separator"
 OPT_QUOTING = "quoting"
 OPT_ENCODING = "encoding"
