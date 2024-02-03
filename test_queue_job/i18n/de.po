@@ -50,13 +50,6 @@ msgid "ID"
 msgstr "ID"
 
 #. module: test_queue_job
-#: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel____last_update
-#: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job____last_update
-#: model:ir.model.fields,field_description:test_queue_job.field_test_related_action____last_update
-msgid "Last Modified on"
-msgstr "Zuletzt geändert am"
-
-#. module: test_queue_job
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_channel__write_uid
 #: model:ir.model.fields,field_description:test_queue_job.field_test_queue_job__write_uid
 #: model:ir.model.fields,field_description:test_queue_job.field_test_related_action__write_uid
@@ -94,3 +87,6 @@ msgstr ""
 #: model:ir.model,name:test_queue_job.model_test_related_action
 msgid "Test model for related actions"
 msgstr ""
+
+#~ msgid "Last Modified on"
+#~ msgstr "Zuletzt geändert am"
