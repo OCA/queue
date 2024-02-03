@@ -68,7 +68,6 @@ msgstr "Anzahl der Anhänge"
 
 #. module: queue_job
 #: model:ir.actions.server,name:queue_job.ir_cron_autovacuum_queue_jobs_ir_actions_server
-#: model:ir.cron,cron_name:queue_job.ir_cron_autovacuum_queue_jobs
 msgid "AutoVacuum Job Queue"
 msgstr "AutoVacuum für Job-Warteschlange"
 
@@ -390,6 +389,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error
+#: model:ir.model.fields,help:queue_job.field_queue_job__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
 "Wenn das Häkchen gesetzt ist, gibt es einige Nachrichten mit einem "
@@ -471,7 +471,6 @@ msgstr "Jobs"
 
 #. module: queue_job
 #: model:ir.actions.server,name:queue_job.ir_cron_queue_job_garbage_collector_ir_actions_server
-#: model:ir.cron,cron_name:queue_job.ir_cron_queue_job_garbage_collector
 msgid "Jobs Garbage Collector"
 msgstr ""
 
@@ -488,16 +487,6 @@ msgid "Kwargs"
 msgstr "Kwargs"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_job_function____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job____last_update
-msgid "Last Modified on"
-msgstr "Zuletzt geändert am"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
@@ -512,11 +501,6 @@ msgstr "Zuletzt aktualisiert von"
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
 msgid "Last Updated on"
 msgstr "Zuletzt aktualisiert am"
-
-#. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "Haupt-Anhang"
 
 #. module: queue_job
 #. odoo-python
@@ -770,6 +754,11 @@ msgid "Retry Pattern (serialized)"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Fehler bei der SMS Nachrichtenübermittlung"
+
+#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
 msgid "Set all selected jobs to done"
 msgstr "Alle ausgewählten Jobs als Erledigt markieren"
@@ -942,8 +931,11 @@ msgstr "Assistent zur erneuten Einreihung einer Job-Auswahl"
 msgid "Worker Pid"
 msgstr ""
 
-#~ msgid "SMS Delivery error"
-#~ msgstr "Fehler bei der SMS Nachrichtenübermittlung"
+#~ msgid "Last Modified on"
+#~ msgstr "Zuletzt geändert am"
+
+#~ msgid "Main Attachment"
+#~ msgstr "Haupt-Anhang"
 
 #~ msgid "Number of messages which requires an action"
 #~ msgstr "Das ist die Anzahl von Nachrichten, die eine Aktion benötigen"
