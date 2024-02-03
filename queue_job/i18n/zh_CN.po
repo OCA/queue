@@ -68,7 +68,6 @@ msgstr "附件数量"
 
 #. module: queue_job
 #: model:ir.actions.server,name:queue_job.ir_cron_autovacuum_queue_jobs_ir_actions_server
-#: model:ir.cron,cron_name:queue_job.ir_cron_autovacuum_queue_jobs
 msgid "AutoVacuum Job Queue"
 msgstr "自动清空作业队列"
 
@@ -389,6 +388,7 @@ msgstr "确认后, 出现提示消息。"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error
+#: model:ir.model.fields,help:queue_job.field_queue_job__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "如果勾选此项， 某些消息将会产生传递错误。"
 
@@ -469,7 +469,6 @@ msgstr "作业"
 
 #. module: queue_job
 #: model:ir.actions.server,name:queue_job.ir_cron_queue_job_garbage_collector_ir_actions_server
-#: model:ir.cron,cron_name:queue_job.ir_cron_queue_job_garbage_collector
 msgid "Jobs Garbage Collector"
 msgstr ""
 
@@ -486,16 +485,6 @@ msgid "Kwargs"
 msgstr "关键字参数"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_job_function____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job____last_update
-msgid "Last Modified on"
-msgstr "最后修改日"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
@@ -510,11 +499,6 @@ msgstr "最后更新者"
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
 msgid "Last Updated on"
 msgstr "最后更新时间"
-
-#. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "附件"
 
 #. module: queue_job
 #. odoo-python
@@ -769,6 +753,11 @@ msgid "Retry Pattern (serialized)"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "短信传递错误"
+
+#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
 msgid "Set all selected jobs to done"
 msgstr "将所有选定的作业设置为完成"
@@ -938,8 +927,11 @@ msgstr "重新排队向导所选的作业"
 msgid "Worker Pid"
 msgstr ""
 
-#~ msgid "SMS Delivery error"
-#~ msgstr "短信传递错误"
+#~ msgid "Last Modified on"
+#~ msgstr "最后修改日"
+
+#~ msgid "Main Attachment"
+#~ msgstr "附件"
 
 #~ msgid "Number of messages which requires an action"
 #~ msgstr "需要操作消息数量"

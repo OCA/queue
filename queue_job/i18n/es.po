@@ -71,7 +71,6 @@ msgstr "Nº de archivos adjuntos"
 
 #. module: queue_job
 #: model:ir.actions.server,name:queue_job.ir_cron_autovacuum_queue_jobs_ir_actions_server
-#: model:ir.cron,cron_name:queue_job.ir_cron_autovacuum_queue_jobs
 msgid "AutoVacuum Job Queue"
 msgstr "Vaciado automático de la cola de trabajos"
 
@@ -395,6 +394,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error
+#: model:ir.model.fields,help:queue_job.field_queue_job__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "Si se encuentra seleccionado, algunos mensajes tienen error de envío."
 
@@ -474,7 +474,6 @@ msgstr "Trabajos"
 
 #. module: queue_job
 #: model:ir.actions.server,name:queue_job.ir_cron_queue_job_garbage_collector_ir_actions_server
-#: model:ir.cron,cron_name:queue_job.ir_cron_queue_job_garbage_collector
 msgid "Jobs Garbage Collector"
 msgstr "Recolector de basura de trabajos"
 
@@ -491,16 +490,6 @@ msgid "Kwargs"
 msgstr "Kwargs"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_job_function____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done____last_update
-#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job____last_update
-msgid "Last Modified on"
-msgstr "Última modificación el"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
@@ -515,11 +504,6 @@ msgstr "Última actualización por"
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
 msgid "Last Updated on"
 msgstr "Última actualización el"
-
-#. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "Adjuntos principales"
 
 #. module: queue_job
 #. odoo-python
@@ -778,6 +762,11 @@ msgid "Retry Pattern (serialized)"
 msgstr "Patrón de reintentos (en serie)"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Error de entrega del SMS"
+
+#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
 msgid "Set all selected jobs to done"
 msgstr "Marcar como hechos todos los trabajos seleccionados"
@@ -963,8 +952,11 @@ msgstr "Asistente para volver a poner en cola una selección de trabajos"
 msgid "Worker Pid"
 msgstr "Pid del trabajador"
 
-#~ msgid "SMS Delivery error"
-#~ msgstr "Error de entrega del SMS"
+#~ msgid "Last Modified on"
+#~ msgstr "Última modificación el"
+
+#~ msgid "Main Attachment"
+#~ msgstr "Adjuntos principales"
 
 #~ msgid "Number of messages which requires an action"
 #~ msgstr "Número de mensajes que requieren una acción"
