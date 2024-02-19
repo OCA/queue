@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2024-02-16 18:36+0000\n"
+"PO-Revision-Date: 2024-02-19 14:33+0000\n"
 "Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: none\n"
 "Language: it\n"
@@ -810,7 +810,7 @@ msgid ""
 "'Exception Information' section."
 msgstr ""
 "Qualcosa è andato male durante l'esecuzione del lavoro %s. Maggiori dettagli "
-"nella sezione 'nfrmazioni eccezione'."
+"nella sezione 'informazioni eccezione'."
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_started
@@ -885,13 +885,13 @@ msgstr "I lavori selezionati verranno impostati a completato."
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Time (s)"
-msgstr "Tempo"
+msgstr "Ora (e)"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__exec_time
 msgid "Time required to execute this job in seconds. Average when grouped."
 msgstr ""
-"Tempo in secondi richiesto per eseguire il lavoro. Medio qando raggruppati."
+"Tempo in secondi richiesto per eseguire il lavoro. Medio quando raggruppati."
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_decoration
