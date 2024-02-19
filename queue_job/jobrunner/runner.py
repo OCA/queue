@@ -145,6 +145,7 @@ import os
 import selectors
 import threading
 import time
+import uuid
 from contextlib import closing, contextmanager
 
 import psycopg2
@@ -159,6 +160,8 @@ from .channels import ENQUEUED, NOT_DONE, PENDING, ChannelManager
 
 SELECT_TIMEOUT = 60
 ERROR_RECOVERY_DELAY = 5
+LEADER_CHECK_DELAY = 10
+IDLE_TRANSACTION_TIMEOUT = 60  # idle_in_transaction_session_timeout in seconds
 
 _logger = logging.getLogger(__name__)
 
@@ -192,7 +195,7 @@ def _odoo_now():
     return _datetime_to_epoch(dt)
 
 
-def _connection_info_for(db_name):
+def _connection_info_for(db_name, jobrunner_ha_uuid=None):
     db_or_uri, connection_info = odoo.sql_db.connection_info_for(db_name)
 
     for p in ("host", "port", "user", "password"):
@@ -202,6 +205,8 @@ def _connection_info_for(db_name):
 
         if cfg:
             connection_info[p] = cfg
+        if jobrunner_ha_uuid:
+            connection_info["application_name"] = "jobrunner_%s" % jobrunner_ha_uuid
 
     return connection_info
 
@@ -260,14 +265,13 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
 
 
 class Database(object):
-    def __init__(self, db_name):
+    def __init__(self, db_name, jobrunner_ha_uuid=None):
         self.db_name = db_name
-        connection_info = _connection_info_for(db_name)
+        self.jobrunner_ha_uuid = jobrunner_ha_uuid
+        connection_info = _connection_info_for(db_name, self.jobrunner_ha_uuid)
         self.conn = psycopg2.connect(**connection_info)
         self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         self.has_queue_job = self._has_queue_job()
-        if self.has_queue_job:
-            self._initialize()
 
     def close(self):
         # pylint: disable=except-pass
@@ -279,6 +283,41 @@ class Database(object):
         except Exception:
             pass
         self.conn = None
+
+    def _check_leader(self, jobrunner_db_names):
+        """Check if the linked jobrunner is the leader of all jobrunner_db_names"""
+        if not self.jobrunner_ha_uuid:
+            return False
+
+        with closing(self.conn.cursor()) as cr:
+            cr.execute(
+                """
+                SELECT substring(application_name FROM 'jobrunner_(.*)')
+                FROM pg_stat_activity
+                WHERE application_name LIKE 'jobrunner_%%' AND
+                datname IN %s
+                ORDER BY backend_start, datname
+                LIMIT 1;""",
+                (jobrunner_db_names,),
+            )
+            res = cr.fetchone()
+            leader_uuid = res[0] if res else ""
+            if leader_uuid != self.jobrunner_ha_uuid:
+                _logger.debug(
+                    "jobrunner %s: not leader of db(s) [ %s ]. leader: %s. sleeping %s sec.",
+                    self.jobrunner_ha_uuid,
+                    ", ".join(jobrunner_db_names),
+                    leader_uuid,
+                    LEADER_CHECK_DELAY,
+                )
+                return False
+
+            _logger.info(
+                "jobrunner %s is now the leader of db(s) [ %s ]",
+                self.jobrunner_ha_uuid,
+                ", ".join(jobrunner_db_names),
+            )
+            return True
 
     def _has_queue_job(self):
         with closing(self.conn.cursor()) as cr:
@@ -311,6 +350,11 @@ class Database(object):
 
     def _initialize(self):
         with closing(self.conn.cursor()) as cr:
+            if self.jobrunner_ha_uuid:
+                cr.execute(
+                    "SET idle_in_transaction_session_timeout TO %s",
+                    ((IDLE_TRANSACTION_TIMEOUT * 1000,)),
+                )
             cr.execute("LISTEN queue_job")
 
     @contextmanager
@@ -353,6 +397,7 @@ class QueueJobRunner(object):
         user=None,
         password=None,
         channel_config_string=None,
+        high_availability=None,
     ):
         self.scheme = scheme
         self.host = host
@@ -363,6 +408,10 @@ class QueueJobRunner(object):
         if channel_config_string is None:
             channel_config_string = _channels()
         self.channel_manager.simple_configure(channel_config_string)
+        self.uuid = False
+        if high_availability:
+            self.uuid = str(uuid.uuid4())
+            _logger.info("jobrunner %s initialized in HA mode" % self.uuid)
         self.db_by_name = {}
         self._stop = False
         self._stop_pipe = os.pipe()
@@ -388,12 +437,18 @@ class QueueJobRunner(object):
         password = os.environ.get(
             "ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD"
         ) or queue_job_config.get("http_auth_password")
+        if "ODOO_QUEUE_JOB_HIGH_AVAILABILITY" in os.environ:
+            high_availability = str(os.environ["ODOO_QUEUE_JOB_HIGH_AVAILABILITY"])
+        else:
+            high_availability = str(queue_job_config.get("high_availability"))
+        high_availability = high_availability.lower() in ("true", "1", "t")
         runner = cls(
             scheme=scheme or "http",
             host=host or "localhost",
             port=port or 8069,
             user=user,
             password=password,
+            high_availability=high_availability,
         )
         return runner
 
@@ -414,15 +469,20 @@ class QueueJobRunner(object):
                 _logger.warning("error closing database %s", db_name, exc_info=True)
         self.db_by_name = {}
 
+    def initialize_runner(self):
+        """Listen for db notifications and load existing jobs into memory"""
+        for db in self.db_by_name.values():
+            db._initialize()
+            with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
+                for job_data in cr:
+                    self.channel_manager.notify(db.db_name, *job_data)
+            _logger.info("queue job runner ready for db %s", db.db_name)
+
     def initialize_databases(self):
         for db_name in self.get_db_names():
-            db = Database(db_name)
+            db = Database(db_name, self.uuid)
             if db.has_queue_job:
                 self.db_by_name[db_name] = db
-                with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
-                    for job_data in cr:
-                        self.channel_manager.notify(db_name, *job_data)
-                _logger.info("queue job runner ready for db %s", db_name)
 
     def run_jobs(self):
         now = _odoo_now()
@@ -504,6 +564,17 @@ class QueueJobRunner(object):
         # wakeup the select() in wait_notification
         os.write(self._stop_pipe[1], b".")
 
+    def check_db_leader(self):
+        """Check if the current jobrunner is the leader for all configured databases"""
+        jobrunner_db_names = tuple(self.db_by_name.keys())
+
+        if not jobrunner_db_names:
+            return False
+
+        # Use the first db connection to for leadership check
+        db_obj = self.db_by_name[jobrunner_db_names[0]]
+        return db_obj._check_leader(jobrunner_db_names)
+
     def run(self):
         _logger.info("starting")
         while not self._stop:
@@ -513,6 +584,13 @@ class QueueJobRunner(object):
                 # TODO: how to detect new databases or databases
                 #       on which queue_job is installed after server start?
                 self.initialize_databases()
+                while not self._stop and self.uuid:
+                    leader = self.check_db_leader()
+                    if leader:
+                        break
+                    time.sleep(LEADER_CHECK_DELAY)
+                    continue
+                self.initialize_runner()
                 _logger.info("database connections ready")
                 # inner loop does the normal processing
                 while not self._stop:

@@ -13,6 +13,12 @@
   You must therefore requeue them manually, either from the Jobs view,
   or by running the following SQL statement *before starting Odoo*:
 
+* When deployed in high_availability mode the allocated databases for the
+  jobrunners must be identical. If the databases are different and overlap
+  i.e jobrunner A runs on DB1,DB2 and jobrunner B runs on DB2,DB3 then either
+  DB1 or DB3 will not proccess jobs because there can be only one leader per 
+  sets of databases.
+
 .. code-block:: sql
 
   update queue_job set state='pending' where state in ('started', 'enqueued')
