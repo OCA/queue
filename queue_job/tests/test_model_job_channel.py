@@ -8,10 +8,21 @@ from odoo.tests import common
 
 
 class TestJobChannel(common.TransactionCase):
-    def setUp(self):
-        super().setUp()
-        self.Channel = self.env["queue.job.channel"]
-        self.root_channel = self.Channel.search([("name", "=", "root")])
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # Remove this variable in v16 and put instead:
+        # from odoo.addons.base.tests.common import DISABLED_MAIL_CONTEXT
+        DISABLED_MAIL_CONTEXT = {
+            "tracking_disable": True,
+            "mail_create_nolog": True,
+            "mail_create_nosubscribe": True,
+            "mail_notrack": True,
+            "no_reset_password": True,
+        }
+        cls.env = cls.env(context=dict(cls.env.context, **DISABLED_MAIL_CONTEXT))
+        cls.Channel = cls.env["queue.job.channel"]
+        cls.root_channel = cls.Channel.search([("name", "=", "root")])
 
     def test_channel_new(self):
         channel = self.Channel.new()
