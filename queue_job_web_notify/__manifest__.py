@@ -6,7 +6,7 @@
     "summary": """
         This module allows to display a notification to the related user of a
         failed job. It uses the web_notify notification feature.""",
-    "version": "13.0.1.0.0",
+    "version": "16.0.1.0.0",
     "author": "ACSONE SA/NV,Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/queue",
     "license": "AGPL-3",
