@@ -31,6 +31,23 @@ class TestJson(common.TransactionCase):
         }
         self.assertEqual(json.loads(value_json), expected)
 
+    def test_encoder_recordset_keep_context(self):
+        demo_user = self.env.ref("base.user_demo")
+        self.env["ir.config_parameter"].sudo().set_param("queue_job.keep_context", True)
+        context = dict(**{"foo": "bar"}, **demo_user.context_get())
+        partner = self.env(user=demo_user, context=context).ref("base.main_partner")
+        value = partner
+        value_json = json.dumps(value, cls=JobEncoder)
+        expected = {
+            "uid": demo_user.id,
+            "_type": "odoo_recordset",
+            "model": "res.partner",
+            "ids": [partner.id],
+            "su": False,
+            "context": {"foo": "bar", "tz": context["tz"], "lang": context["lang"]},
+        }
+        self.assertEqual(json.loads(value_json), expected)
+
     def test_encoder_recordset_list(self):
         demo_user = self.env.ref("base.user_demo")
         context = demo_user.context_get()
