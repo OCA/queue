@@ -139,7 +139,7 @@ class QueueJob(models.Model):
             self._cr.execute(
                 "CREATE INDEX queue_job_identity_key_state_partial_index "
                 "ON queue_job (identity_key) WHERE state in ('pending', "
-                "'enqueued') AND identity_key IS NOT NULL;"
+                "'enqueued', 'wait_dependencies') AND identity_key IS NOT NULL;"
             )
 
     @api.depends("records")
