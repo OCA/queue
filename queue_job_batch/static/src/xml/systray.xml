@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+
+    <t t-name="queue_job_batch.view.Menu">
+        <li class="o_mail_systray_item o_job_batch_navbar_item o_hidden">
+            <a
+                class="dropdown-toggle o-no-caret"
+                data-toggle="dropdown"
+                data-display="static"
+                aria-expanded="false"
+                title="Job batches"
+                href="#"
+                role="button"
+            >
+                <i class="fa fa-list" role="img" />
+                <span class="o_notification_counter badge badge-pill" />
+            </a>
+            <ul
+                class="o_mail_systray_dropdown dropdown-menu dropdown-menu-right o_job_batch_navbar_dropdown"
+                role="menu"
+            >
+                <li class="o_mail_systray_dropdown_top">
+                    <div>
+                        <button
+                            type="button"
+                            class="btn btn-sm o_filter_button active"
+                        >Job batches</button>
+                    </div>
+                    <button
+                        type="button"
+                        class="btn btn-link o_view_all_batch_jobs"
+                    > View All </button>
+                </li>
+                <li class="o_mail_systray_dropdown_items" />
+            </ul>
+        </li>
+    </t>
+
+    <t t-name="queue_job_batch.view.Data">
+        <t t-if="_.isEmpty(job_batches)">
+            <div class="dropdown-item-text text-center o_no_activity">
+                <span>No jobs to view.</span>
+            </div>
+        </t>
+        <t t-foreach="job_batches" t-as="job_batch">
+            <div class="o_mail_preview" t-att-data-job-batch-id="job_batch.id">
+                <div class="o_mail_preview_image o_mail_preview_app">
+                    <span
+                        class="o_mail_preview_image fa fa-list fa-3x o_job_queue_failed"
+                        t-if="job_batch.failed_job_count > 0"
+                    />
+                    <span
+                        class="o_mail_preview_image fa fa-list fa-3x o_job_queue_finished"
+                        t-if="job_batch.failed_job_count == 0 and job_batch.finished_job_count == job_batch.job_count"
+                    />
+                    <span
+                        class="o_mail_preview_image fa fa-list fa-3x o_job_queue_progress"
+                        t-if="job_batch.failed_job_count == 0 and job_batch.finished_job_count != job_batch.job_count"
+                    />
+                </div>
+                <div class="o_preview_info">
+                    <div class="o_preview_title">
+                        <strong class="o_preview_name">
+                            <t t-esc="job_batch.name" />
+                        </strong>
+                    </div>
+                    <div class="o_last_message_preview">
+                        <div class="row">
+                            <div class="o_progressbar">
+                                <div class="o_progress o_progress_overflow">
+                                    <div
+                                        class="o_progressbar_complete o_queue_job_finished_progressbar"
+                                        t-att-style="'width:' + (100 * job_batch.completeness) + '%'"
+                                    />
+                                    <div
+                                        class="o_progressbar_complete o_queue_job_failed_progressbar"
+                                        t-att-style="'width:' + (100 * job_batch.failed_percentage) + '%'"
+                                    />
+                                </div>
+                                <div
+                                    class="o_progressbar_value"
+                                    t-esc="job_batch.finished_job_count + '/' + job_batch.failed_job_count  + '/' + job_batch.job_count"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <span
+                        title="Mark as Read"
+                        class="o_discuss_icon o_queue_job_batch_hide fa fa-check"
+                        t-if="job_batch.state === 'finished'"
+                        t-att-data-job-batch-id="job_batch.id"
+                    />
+                </div>
+            </div>
+        </t>
+    </t>
+
+</templates>
