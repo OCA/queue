@@ -5,8 +5,7 @@ import functools
 
 from odoo import api, models
 
-from ..delay import Delayable
-from ..job import DelayableRecordset
+from ..delay import Delayable, DelayableRecordset
 from ..utils import must_run_without_delay
 
 
