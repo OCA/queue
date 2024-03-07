@@ -1,4 +1,4 @@
-# Copyright 2013-2020 Camptocamp SA
+# Copyright 2013 Camptocamp SA
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import logging
@@ -234,10 +234,20 @@ class QueueJob(models.Model):
             raise exceptions.AccessError(
                 _("Queue jobs must be created by calling 'with_delay()'.")
             )
-        return super(
+        records = super(
             QueueJob,
             self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True),
         ).create(vals_list)
+        records._handle_origin_link()
+        return records
+
+    def _handle_origin_link(self):
+        """Update job relation on origin records."""
+        for qjob in self:
+            model = self.env.get(qjob.model_name)
+            if not model or model and not hasattr(model, "_collect_queue_job"):
+                continue
+            qjob.records._collect_queue_job(qjob)
 
     def write(self, vals):
         if self.env.context.get("_job_edit_sentinel") is not self.EDIT_SENTINEL:
