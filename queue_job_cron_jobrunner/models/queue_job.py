@@ -150,7 +150,7 @@ class QueueJob(models.Model):
                 nextcall = at
         for cron in crons:
             if nextcall < cron.nextcall:
-                cron.nextcall = nextcall
+                cron.try_write({"nextcall": nextcall})
 
     def _ensure_cron_trigger(self):
         """Create cron triggers for these jobs"""

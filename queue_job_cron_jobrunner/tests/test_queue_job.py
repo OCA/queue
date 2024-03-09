@@ -2,8 +2,11 @@
 # @author Iván Todorovich <ivan.todorovich@camptocamp.com>
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
+from datetime import datetime
+
 from freezegun import freeze_time
 
+from odoo import SUPERUSER_ID, api
 from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger
 
@@ -13,6 +16,12 @@ class TestQueueJob(TransactionCase):
         super().setUp()
         self.env = self.env(context=dict(self.env.context, tracking_disable=True))
         self.cron = self.env.ref("queue_job_cron_jobrunner.queue_job_cron")
+        self.env2 = api.Environment(self.env.registry.cursor(), SUPERUSER_ID, {})
+
+        def cleanUp():
+            self.env2.cr.close()
+
+        self.addCleanup(cleanUp)
 
     @mute_logger("odoo.addons.queue_job_cron_jobrunner.models.queue_job")
     def test_queue_job_process(self):
@@ -45,5 +54,34 @@ class TestQueueJob(TransactionCase):
 
         self.assertEqual(job_record.state, "done", "Processed OK")
         # if the state is "waiting_dependencies", it means the "enqueue_waiting()"
-        # step has not been doen when the parent job has been done
+        # step has not been done when the parent job has been done
         self.assertEqual(job_record_depends.state, "done", "Processed OK")
+        self.assertEqual(self.cron.nextcall, datetime(2022, 2, 22, 22, 22, 22))
+
+    @freeze_time("2022-02-22 22:22:22")
+    def test_concurrent_cron_access(self):
+        """to avoid to launch ir cron twice odoo add a lock
+        while running task, if task take times to compute
+        other users should be able to create new queue job
+        at the same time
+        """
+        self.env2.cr.execute(
+            """SELECT * FROM ir_cron WHERE id=%s FOR UPDATE NOWAIT""",
+            (self.cron.id,),
+            log_exceptions=False,
+        )
+
+        delayable = self.env["res.partner"].delayable().create({"name": "test"})
+        delayable2 = self.env["res.partner"].delayable().create({"name": "test2"})
+        delayable.on_done(delayable2)
+        delayable.delay()
+        job_record = delayable._generated_job.db_record()
+        job_record_depends = delayable2._generated_job.db_record()
+
+        self.env["queue.job"]._job_runner(commit=False)
+
+        self.assertEqual(job_record.state, "done", "Processed OK")
+        # if the state is "waiting_dependencies", it means the "enqueue_waiting()"
+        # step has not been done when the parent job has been done
+        self.assertEqual(job_record_depends.state, "done", "Processed OK")
+        self.assertNotEqual(self.cron.nextcall, datetime(2022, 2, 22, 22, 22, 22))
