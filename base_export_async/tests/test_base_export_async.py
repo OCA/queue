@@ -81,6 +81,17 @@ class TestBaseExportAsync(common.TransactionCase):
         self.assertEqual(len(new_mail), 1)
         self.assertEqual(new_attachment.name, "res.partner.xls")
 
+    def test_export_mail_attachments(self):
+        """Check that the export generate an email and attached the generated attachment"""
+        params = json.loads(data_csv.get("data"))
+        mails = self.env["mail.mail"].search([])
+        self.delay_export_obj.export(
+            params, mail_template=None, is_export_file_attached_to_email=True
+        )
+        new_mail = self.env["mail.mail"].search([]) - mails
+        self.assertEqual(len(new_mail.attachment_ids), 1)
+        self.assertEqual(new_mail.attachment_ids.name, "res.partner.csv")
+
     def test_cron_delete(self):
         """Check that cron delete attachment after TTL"""
         params = json.loads(data_csv.get("data"))

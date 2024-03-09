@@ -4,7 +4,7 @@
         <field name="name">Delay Export</field>
         <field
             name="subject"
-        >Export ${object.model_description} ${datetime.date.today()}</field>
+        >Export ${object.sudo().model_description} ${datetime.date.today()}</field>
         <field name="model_id" ref="base_export_async.model_delay_export" />
         <field name="auto_delete" eval="True" />
         <field name="body_html" type="html">

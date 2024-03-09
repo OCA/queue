@@ -43,11 +43,17 @@
                             name="model_id"
                             options="{'no_open': True, 'no_create_edit': True}"
                         />
+                        <field
+                            name="mail_template_id"
+                            domain="[('model_id.model','=', 'delay.export')]"
+                        />
                         <field name="model_name" invisible="1" />
+                        <field name="is_mail_template_has_recipients" invisible="1" />
                         <field
                             name="user_ids"
                             widget="many2many_tags"
                             options="{'no_open': True, 'no_create_edit': True}"
+                            attrs="{'required': [('is_mail_template_has_recipients', '=', False)]}"
                         />
                         <field name="lang" />
                         <field
@@ -61,6 +67,7 @@
                         />
                         <field name="export_format" />
                         <field name="import_compat" />
+                        <field name="is_export_file_attached_to_email" />
                     </group>
                     <group name="scheduling" string="Scheduling">
                         <field name="next_execution" />

@@ -22,9 +22,7 @@ class ExportAsyncSchedule(models.Model):
         comodel_name="ir.model", required=True, ondelete="cascade"
     )
     model_name = fields.Char(related="model_id.model", string="Model Name")
-    user_ids = fields.Many2many(
-        string="Recipients", comodel_name="res.users", required=True
-    )
+    user_ids = fields.Many2many(string="Recipients", comodel_name="res.users")
     domain = fields.Char(string="Export Domain", default=[])
     ir_export_id = fields.Many2one(
         comodel_name="ir.exports",
@@ -45,7 +43,25 @@ class ExportAsyncSchedule(models.Model):
         default=lambda self: self.env.lang,
         help="Exports will be translated in this language.",
     )
-
+    mail_template_id = fields.Many2one(
+        "mail.template",
+        string="Email Template",
+        default=lambda self: self.env.ref(
+            "base_export_async.delay_export_mail_template"
+        ),
+        context=lambda env: {
+            "default_model_id": env.ref("base_export_async.model_delay_export").id
+        },
+    )
+    is_mail_template_has_recipients = fields.Boolean(
+        compute="_compute_is_mail_template_has_recipients"
+    )
+    is_mail_template_has_recipients = fields.Boolean(
+        compute="_compute_is_mail_template_has_recipients"
+    )
+    is_export_file_attached_to_email = fields.Boolean(
+        "Export file attached to email", default=False
+    )
     # Scheduling
     next_execution = fields.Datetime(default=fields.Datetime.now, required=True)
     interval = fields.Integer(default=1, required=True)
@@ -61,6 +77,15 @@ class ExportAsyncSchedule(models.Model):
         required=True,
     )
     end_of_month = fields.Boolean()
+
+    @api.depends(
+        "mail_template_id", "mail_template_id.email_to", "mail_template_id.partner_to"
+    )
+    def _compute_is_mail_template_has_recipients(self):
+        for record in self:
+            record.is_mail_template_has_recipients = record.mail_template_id and (
+                record.mail_template_id.email_to or record.mail_template_id.partner_to
+            )
 
     def name_get(self):
         result = []
@@ -149,4 +174,8 @@ class ExportAsyncSchedule(models.Model):
         for record in self:
             record = record.with_context(lang=record.lang)
             params = record._prepare_export_params()
-            record.env["delay.export"].with_delay().export(params)
+            record.env["delay.export"].with_delay().export(
+                params,
+                mail_template=record.mail_template_id,
+                is_export_file_attached_to_email=record.is_export_file_attached_to_email,
+            )
