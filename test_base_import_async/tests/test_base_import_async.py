@@ -16,7 +16,7 @@ from odoo.addons.base_import_async.models.base_import_import import (
 from odoo.addons.queue_job.job import Job
 
 
-class TestBaseImportAsync(common.SavepointCase):
+class TestBaseImportAsync(common.TransactionCase):
 
     FIELDS = [
         "date",
@@ -79,7 +79,7 @@ class TestBaseImportAsync(common.SavepointCase):
         options = dict(self.OPTIONS)
         options[OPT_USE_QUEUE] = use_queue
         options[OPT_CHUNK_SIZE] = chunk_size
-        return importer.do(self.FIELDS, self.FIELDS, options)
+        return importer.execute_import(self.FIELDS, self.FIELDS, options)
 
     def _check_import_result(self):
         move_count = self.move_obj.search_count(
@@ -88,13 +88,13 @@ class TestBaseImportAsync(common.SavepointCase):
         self.assertEqual(move_count, 3)
 
     def test_normal_import(self):
-        """ Test the standard import still works. """
+        """Test the standard import still works."""
         res = self._do_import("account.move.csv", use_queue=False)
         self.assertFalse(res["messages"], repr(res))
         self._check_import_result()
 
     def test_async_import(self):
-        """ Basic asynchronous import test with default large chunk size. """
+        """Basic asynchronous import test with default large chunk size."""
         res = self._do_import("account.move.csv", use_queue=True)
         self.assertFalse(res, repr(res))
         # no moves should be created yet
@@ -123,7 +123,7 @@ class TestBaseImportAsync(common.SavepointCase):
         self._check_import_result()
 
     def test_async_import_small_misaligned_chunks(self):
-        """ Chunk size larger than record. """
+        """Chunk size larger than record."""
         res = self._do_import("account.move.csv", use_queue=True, chunk_size=4)
         self.assertFalse(res, repr(res))
         # but we must have one job to split the file
@@ -148,7 +148,7 @@ class TestBaseImportAsync(common.SavepointCase):
         self._check_import_result()
 
     def test_async_import_smaller_misaligned_chunks(self):
-        """ Chunk size smaller than record. """
+        """Chunk size smaller than record."""
         res = self._do_import("account.move.csv", use_queue=True, chunk_size=2)
         self.assertFalse(res, repr(res))
         # but we must have one job to split the file
