@@ -172,6 +172,15 @@ class BaseImportImport(models.TransientModel):
     def _import_one_chunk(self, model_name, attachment, options):
         model_obj = self.env[model_name]
         fields, data = self._read_csv_attachment(attachment, options)
+
+        # Introduce same keys as the one introduced in base_import
+        name_create_enabled_fields = options.get("name_create_enabled_fields", {})
+        import_limit = options.get("limit", None)
+        model_obj = model_obj.with_context(
+            import_file=True,
+            name_create_enabled_fields=name_create_enabled_fields,
+            _import_limit=import_limit,
+        )
         result = model_obj.load(fields, data)
         error_message = [
             message["message"]
