@@ -102,6 +102,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__cancelled
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Cancelled"
 msgstr ""
 

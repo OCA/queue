@@ -20,7 +20,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid ""
 "<br/>\n"
-"                            <span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number of retries is infinite.</span>"
+"                            <span class=\"oe_grey oe_inline\"> If the max. "
+"retries is 0, the number of retries is infinite.</span>"
 msgstr ""
 "<br/>\n"
 "                            <span class=\"oe_grey oe_inline\"> Se il massimo "
@@ -104,6 +105,7 @@ msgstr "Annulla lavori"
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__cancelled
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Cancelled"
 msgstr "Annullata"
 
@@ -638,7 +640,10 @@ msgstr "Richiesto canale padre."
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_retry_pattern
 msgid ""
-"Pattern expressing from the count of retries on retryable errors, the number of of seconds to postpone the next execution. Setting the number of seconds to a 2-element tuple or list will randomize the retry interval between the 2 values.\n"
+"Pattern expressing from the count of retries on retryable errors, the number "
+"of of seconds to postpone the next execution. Setting the number of seconds "
+"to a 2-element tuple or list will randomize the retry interval between the 2 "
+"values.\n"
 "Example: {1: 10, 5: 20, 10: 30, 15: 300}.\n"
 "Example: {1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}.\n"
 "See the module description for details."
@@ -850,7 +855,9 @@ msgstr "Lavoro"
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_related_action
 msgid ""
-"The action when the button *Related Action* is used on a job. The default action is to open the view of the record related to the job. Configured as a dictionary with optional keys: enable, func_name, kwargs.\n"
+"The action when the button *Related Action* is used on a job. The default "
+"action is to open the view of the record related to the job. Configured as a "
+"dictionary with optional keys: enable, func_name, kwargs.\n"
 "See the module description for details."
 msgstr ""
 "L'azione quando si usa il pulsante 'Azione collegata' in un lavoro. L'azione "
@@ -910,12 +917,13 @@ msgstr "UUID"
 msgid ""
 "Unexpected format of Related Action for {}.\n"
 "Example of valid format:\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" {{\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs"
+"\" {{\"limit\": 10}}}}"
 msgstr ""
 "Formato inaspettato di azione colegata per {}.\n"
 "Esempio di formato valido:\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" {{"
-"\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs"
+"\" {{\"limit\": 10}}}}"
 
 #. module: queue_job
 #. odoo-python
