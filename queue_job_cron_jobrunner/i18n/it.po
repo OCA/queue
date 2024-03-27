@@ -6,42 +6,44 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2024-03-27 11:33+0000\n"
+"Last-Translator: Riccardo Bellanova <bellanova@webmonks.it>\n"
 "Language-Team: none\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.17\n"
 
 #. module: queue_job_cron_jobrunner
 #: model:ir.model.fields,field_description:queue_job_cron_jobrunner.field_ir_cron__display_name
 #: model:ir.model.fields,field_description:queue_job_cron_jobrunner.field_queue_job__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "Nome visualizzato"
 
 #. module: queue_job_cron_jobrunner
 #: model:ir.model.fields,field_description:queue_job_cron_jobrunner.field_ir_cron__id
 #: model:ir.model.fields,field_description:queue_job_cron_jobrunner.field_queue_job__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: queue_job_cron_jobrunner
 #: model:ir.model.fields,help:queue_job_cron_jobrunner.field_ir_cron__queue_job_runner
 msgid "If checked, the cron is considered to be a queue.job runner."
-msgstr ""
+msgstr "Se selezionato, il cron è considerato come un runner queue.job."
 
 #. module: queue_job_cron_jobrunner
 #: code:addons/queue_job_cron_jobrunner/models/queue_job.py:0
 #, python-format
 msgid "Job interrupted and set to Done: nothing to do."
-msgstr ""
+msgstr "Job interrotto e impostato a Completato: nient'altro da fare."
 
 #. module: queue_job_cron_jobrunner
 #: model:ir.model.fields,field_description:queue_job_cron_jobrunner.field_ir_cron____last_update
 #: model:ir.model.fields,field_description:queue_job_cron_jobrunner.field_queue_job____last_update
 msgid "Last Modified on"
-msgstr ""
+msgstr "Ultima modifica il"
 
 #. module: queue_job_cron_jobrunner
 #: model:ir.model,name:queue_job_cron_jobrunner.model_queue_job
@@ -59,4 +61,4 @@ msgstr ""
 #. module: queue_job_cron_jobrunner
 #: model:ir.model,name:queue_job_cron_jobrunner.model_ir_cron
 msgid "Scheduled Actions"
-msgstr ""
+msgstr "Azioni pianificate"
