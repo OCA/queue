@@ -47,7 +47,7 @@ def DelayableRecordset(*args, **kwargs):
     # prevent circular import
     from .delay import DelayableRecordset as dr
 
-    _logger.debug(
+    _logger.warning(
         "DelayableRecordset moved from the queue_job.job"
         " to the queue_job.delay python module"
     )
