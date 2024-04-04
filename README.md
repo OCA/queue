@@ -25,6 +25,7 @@ addon | version | maintainers | summary
 [queue_job](queue_job/) | 13.0.3.11.2 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
 [queue_job_cron](queue_job_cron/) | 13.0.2.1.1 |  | Scheduled Actions as Queue Jobs
 [queue_job_subscribe](queue_job_subscribe/) | 13.0.1.0.0 |  | Control which users are subscribed to queue job notifications
+[queue_job_web_notify](queue_job_web_notify/) | 13.0.1.0.0 |  | This module allows to display a notification to the related user of a failed job. It uses the web_notify notification feature.
 [test_base_import_async](test_base_import_async/) | 13.0.1.0.0 |  | Test suite for base_import_async. Normally you don't need to install this.
 [test_queue_job](test_queue_job/) | 13.0.2.5.0 |  | Queue Job Tests
 
