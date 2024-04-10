@@ -40,7 +40,7 @@ class QueueJob(models.Model):
             FROM queue_job
             WHERE state = 'pending'
             AND (eta IS NULL OR eta <= (now() AT TIME ZONE 'UTC'))
-            ORDER BY date_created DESC
+            ORDER BY priority, date_created
             LIMIT 1 FOR NO KEY UPDATE SKIP LOCKED
             """
         )
