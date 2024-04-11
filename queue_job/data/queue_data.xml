@@ -8,7 +8,9 @@
             <field name="numbercall">-1</field>
             <field ref="model_queue_job" name="model_id" />
             <field name="state">code</field>
-            <field name="code">model.requeue_stuck_jobs()</field>
+            <field
+                name="code"
+            >model.requeue_stuck_jobs(enqueued_delta=1, started_delta=-1)</field>
         </record>
         <!-- Queue-job-related subtypes for messaging / Chatter -->
         <record id="mt_job_failed" model="mail.message.subtype">
