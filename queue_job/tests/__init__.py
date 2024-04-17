@@ -1,3 +1,4 @@
+from . import test_run_rob_controller
 from . import test_runner_channels
 from . import test_runner_runner
 from . import test_delayable
