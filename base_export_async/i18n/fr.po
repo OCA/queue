@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2020-11-20 16:54+0000\n"
-"Last-Translator: Yann Papouin <y.papouin@dec-industrie.com>\n"
+"PO-Revision-Date: 2024-05-01 15:36+0000\n"
+"Last-Translator: c2cdidier <didier.donze@camptocamp.com>\n"
 "Language-Team: none\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 3.10\n"
+"X-Generator: Weblate 4.17\n"
 
 #. module: base_export_async
 #. odoo-javascript
@@ -37,6 +37,16 @@ msgid ""
 "            </p>\n"
 "        "
 msgstr ""
+"<p>Votre export est disponible<a t-attf-href=\"{{ object.url }}\" target="
+"\"_blank\">ici</a>.</p>\n"
+"            <p>Il sera automatiquement supprimé le<t t-out=\"object."
+"expiration_date\"></t>.</p>\n"
+"            <br>\n"
+"            <p>\n"
+"                <span style=\"color : #808080 ;\">Ce message est "
+"automatique, merci de ne pas y répondre.</span>\n"
+"            </p>\n"
+"        "
 
 #. module: base_export_async
 #: model:ir.model,name:base_export_async.model_delay_export
@@ -63,7 +73,7 @@ msgstr "Créé le"
 #. module: base_export_async
 #: model:mail.template,name:base_export_async.delay_export_mail_template
 msgid "Delay Export"
-msgstr ""
+msgstr "Retarder l'exportation"
 
 #. module: base_export_async
 #: model:ir.actions.server,name:base_export_async.to_delete_attachment_ir_actions_server
@@ -79,12 +89,12 @@ msgstr "Nom affiché"
 #. module: base_export_async
 #: model:ir.model.fields,field_description:base_export_async.field_delay_export__expiration_date
 msgid "Expiration Date"
-msgstr ""
+msgstr "Date d'expiration"
 
 #. module: base_export_async
 #: model:mail.template,subject:base_export_async.delay_export_mail_template
 msgid "Export {{ object.model_description }} {{ datetime.date.today() }}"
-msgstr ""
+msgstr "Exportation {{ object.model_description }} {{ datetime.date.today() }}"
 
 #. module: base_export_async
 #. odoo-javascript
@@ -116,7 +126,7 @@ msgstr "Dernière mise à jour le"
 #. module: base_export_async
 #: model:ir.model.fields,field_description:base_export_async.field_delay_export__model_description
 msgid "Model Description"
-msgstr ""
+msgstr "Description du modèle"
 
 #. module: base_export_async
 #. odoo-javascript
@@ -124,11 +134,12 @@ msgstr ""
 #, python-format
 msgid "Please select fields to save export list..."
 msgstr ""
+"Veuillez sélectionner les champs pour enregistrer la liste d'exportation..."
 
 #. module: base_export_async
 #: model:ir.model.fields,field_description:base_export_async.field_delay_export__url
 msgid "Url"
-msgstr ""
+msgstr "Url"
 
 #. module: base_export_async
 #: model:ir.model.fields,field_description:base_export_async.field_delay_export__user_ids
