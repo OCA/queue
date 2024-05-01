@@ -44,7 +44,7 @@ class TestJobChannel(common.TransactionCase):
 
         # The context manager 'with self.assertRaises(IntegrityError)' purposefully
         # not uses here due to its 'flush_all()' method inside it and exception raises
-        # before the line 'self.env.flush_all()'. So, we are expecting an IntegrityError.
+        # before the line 'self.env.flush_all()'. So, we are expecting an IntegrityError
         try:
             self.env.flush_all()
         except IntegrityError as ex:
