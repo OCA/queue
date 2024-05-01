@@ -11,7 +11,7 @@ from odoo.addons.queue_job.fields import JobEncoder
 
 
 class TestJsonField(common.TransactionCase):
-    # TODO: when migrating to 16.0, adapt the checks in queue_job/tests/test_json_field.py
+    # TODO: when migrating to 16.0, adapt checks in queue_job/tests/test_json_field.py
     # to verify the context keys are encoded and remove these
     def test_encoder_recordset_store_context(self):
         demo_user = self.env.ref("base.user_demo")
