@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2024-04-11 11:38+0000\n"
+"PO-Revision-Date: 2024-05-06 14:41+0000\n"
 "Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: none\n"
 "Language: it\n"
@@ -698,7 +698,7 @@ msgstr ""
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Related Record"
-msgstr "Record correlato"
+msgstr "Record collegato"
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:0
