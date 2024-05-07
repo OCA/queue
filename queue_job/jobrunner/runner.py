@@ -143,6 +143,7 @@ import datetime
 import logging
 import os
 import selectors
+import socket
 import threading
 import time
 from contextlib import closing, contextmanager
@@ -365,7 +366,23 @@ class QueueJobRunner:
         self.channel_manager.simple_configure(channel_config_string)
         self.db_by_name = {}
         self._stop = False
-        self._stop_pipe = os.pipe()
+        # Initialize stop signals using a socket pair
+        self._stop_sock_recv, self._stop_sock_send = self._create_socket_pair()
+
+    def _create_socket_pair(self):
+        # Method to create a socket pair; returns a tuple of (receiver, sender)
+        if hasattr(socket, 'socketpair'):
+            return socket.socketpair()
+        else:
+            # Compatibility with Windows, manually creating a socket pair
+            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server.bind(('localhost', 0))
+            server.listen(1)
+            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client.connect(server.getsockname())
+            conn, _ = server.accept()
+            server.close()
+            return conn, client
 
     @classmethod
     def from_environ_or_config(cls):
@@ -462,47 +479,28 @@ class QueueJobRunner:
                         self.channel_manager.remove_job(uuid)
 
     def wait_notification(self):
-        for db in self.db_by_name.values():
-            if db.conn.notifies:
-                # something is going on in the queue, no need to wait
-                return
-        # wait for something to happen in the queue_job tables
-        # we'll select() on database connections and the stop pipe
-        conns = [db.conn for db in self.db_by_name.values()]
-        conns.append(self._stop_pipe[0])
-        # look if the channels specify a wakeup time
-        wakeup_time = self.channel_manager.get_wakeup_time()
-        if not wakeup_time:
-            # this could very well be no timeout at all, because
-            # any activity in the job queue will wake us up, but
-            # let's have a timeout anyway, just to be safe
-            timeout = SELECT_TIMEOUT
-        else:
-            timeout = wakeup_time - _odoo_now()
-        # wait for a notification or a timeout;
-        # if timeout is negative (ie wakeup time in the past),
-        # do not wait; this should rarely happen
-        # because of how get_wakeup_time is designed; actually
-        # if timeout remains a large negative number, it is most
-        # probably a bug
-        _logger.debug("select() timeout: %.2f sec", timeout)
-        if timeout > 0:
-            if conns and not self._stop:
-                with select() as sel:
-                    for conn in conns:
-                        sel.register(conn, selectors.EVENT_READ)
-                    events = sel.select(timeout=timeout)
-                    for key, _mask in events:
-                        if key.fileobj == self._stop_pipe[0]:
-                            # stop-pipe is not a conn so doesn't need poll()
-                            continue
-                        key.fileobj.poll()
+        with selectors.DefaultSelector() as selector:
+            # Register the database connections and the stop socket
+            for db in self.db_by_name.values():
+                selector.register(db.conn, selectors.EVENT_READ)
+            selector.register(self._stop_sock_recv, selectors.EVENT_READ)
+
+            wakeup_time = self.channel_manager.get_wakeup_time()
+            timeout = max(0, wakeup_time - _odoo_now()) if wakeup_time else SELECT_TIMEOUT
+
+            events = selector.select(timeout)
+            for key, _ in events:
+                if key.fileobj is self._stop_sock_recv:
+                    self._stop_sock_recv.recv(1024)  # Clear the socket buffer
+                    self.stop()
+                else:
+                    key.fileobj.poll()  # this will trigger notifications
 
     def stop(self):
         _logger.info("graceful stop requested")
         self._stop = True
-        # wakeup the select() in wait_notification
-        os.write(self._stop_pipe[1], b".")
+        # Signal the stop using socket send
+        self._stop_sock_send.send(b'stop')
 
     def run(self):
         _logger.info("starting")
