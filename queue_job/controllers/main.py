@@ -32,7 +32,7 @@ class RunJobController(http.Controller):
         job.perform()
         # Triggers any stored computed fields before calling 'set_done'
         # so that will be part of the 'exec_time'
-        env["base"].flush()
+        env["base"].with_user(job.user_id).flush()
         job.set_done()
         job.store()
         env["base"].flush()
