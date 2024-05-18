@@ -912,8 +912,9 @@ msgstr ""
 #, python-format
 msgid ""
 "Unexpected format of Retry Pattern for {}.\n"
-"Example of valid format:\n"
-"{{1: 300, 5: 600, 10: 1200, 15: 3000}}"
+"Example of valid formats:\n"
+"{{1: 300, 5: 600, 10: 1200, 15: 3000}}\n"
+"{{1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}}"
 msgstr ""
 
 #. module: queue_job
