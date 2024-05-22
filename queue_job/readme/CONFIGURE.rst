@@ -10,6 +10,9 @@
   * Start Odoo with ``--load=web,queue_job``
     and ``--workers`` greater than 1. [1]_
 
+* Keep in mind that the number of workers should be greater than the number of
+  channels. ``queue_job`` will reuse normal Odoo workers to process jobs. It
+  will not spawn its own workers.
 
 * Using the Odoo configuration file:
 
@@ -23,6 +26,8 @@
   (...)
   [queue_job]
   channels = root:2
+
+* Environment variables have priority over the configuration file.
 
 * Confirm the runner is starting correctly by checking the odoo log file:
 
