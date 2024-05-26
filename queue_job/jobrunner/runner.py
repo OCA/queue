@@ -199,7 +199,7 @@ def _connection_info_for(db_name):
 
     for p in ("host", "port", "user", "password"):
         cfg = os.environ.get(
-            "ODOO_QUEUE_JOB_JOBRUNNER_DB_%s" % p.upper()
+            f"ODOO_QUEUE_JOB_JOBRUNNER_DB_{p.upper()}"
         ) or queue_job_config.get("jobrunner_db_" + p)
 
         if cfg:
@@ -411,7 +411,7 @@ class QueueJobRunner:
                         self.channel_manager.notify(db_name, *job_data)
                 _logger.info("queue job runner ready for new db %s", db_name)
 
-        # Check if `queue_job` is installed on any known database that didn't have it before
+        # Check if `queue_job` is installed on any known database that didn't have it
         for db_name in known_dbs:
             db = self.db_by_name[db_name]
             if not db.has_queue_job:
