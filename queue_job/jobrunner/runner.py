@@ -150,7 +150,6 @@ import time
 from contextlib import closing, contextmanager
 
 import aiohttp
-
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
@@ -389,7 +388,7 @@ class QueueJobRunner:
             target=self._check_new_databases_periodically, daemon=True
         )
         self._new_db_check_thread.start()  # Start the thread here only
-    
+        
     def _check_new_databases_periodically(self):
         while not self._stop:
             try:
