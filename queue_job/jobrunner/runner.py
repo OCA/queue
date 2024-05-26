@@ -371,12 +371,12 @@ class QueueJobRunner:
 
     def _create_socket_pair(self):
         # Method to create a socket pair; returns a tuple of (receiver, sender)
-        if hasattr(socket, 'socketpair'):
+        if hasattr(socket, "socketpair"):
             return socket.socketpair()
         else:
             # Compatibility with Windows, manually creating a socket pair
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server.bind(('localhost', 0))
+            server.bind(("localhost", 0))
             server.listen(1)
             client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client.connect(server.getsockname())
@@ -486,7 +486,9 @@ class QueueJobRunner:
             selector.register(self._stop_sock_recv, selectors.EVENT_READ)
 
             wakeup_time = self.channel_manager.get_wakeup_time()
-            timeout = max(0, wakeup_time - _odoo_now()) if wakeup_time else SELECT_TIMEOUT
+            timeout = (
+                max(0, wakeup_time - _odoo_now()) if wakeup_time else SELECT_TIMEOUT
+                )
 
             events = selector.select(timeout)
             for key, _ in events:
@@ -500,7 +502,7 @@ class QueueJobRunner:
         _logger.info("graceful stop requested")
         self._stop = True
         # Signal the stop using socket send
-        self._stop_sock_send.send(b'stop')
+        self._stop_sock_send.send(b"stop")
 
     def run(self):
         _logger.info("starting")
