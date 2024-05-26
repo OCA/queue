@@ -488,7 +488,7 @@ class QueueJobRunner:
             wakeup_time = self.channel_manager.get_wakeup_time()
             timeout = (
                 max(0, wakeup_time - _odoo_now()) if wakeup_time else SELECT_TIMEOUT
-                )
+            )
 
             events = selector.select(timeout)
             for key, _ in events:
