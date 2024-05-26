@@ -148,6 +148,9 @@ import threading
 import time
 from contextlib import closing, contextmanager
 
+import asyncio
+import aiohttp
+
 import psycopg2
 import requests
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -207,57 +210,54 @@ def _connection_info_for(db_name):
     return connection_info
 
 
-def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
-    # Method to set failed job (due to timeout, etc) as pending,
-    # to avoid keeping it as enqueued.
-    def set_job_pending():
-        connection_info = _connection_info_for(db_name)
-        conn = psycopg2.connect(**connection_info)
-        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        with closing(conn.cursor()) as cr:
-            cr.execute(
-                "UPDATE queue_job SET state=%s, "
-                "date_enqueued=NULL, date_started=NULL "
-                "WHERE uuid=%s and state=%s "
-                "RETURNING uuid",
-                (PENDING, job_uuid, ENQUEUED),
-            )
-            if cr.fetchone():
-                _logger.warning(
-                    "state of job %s was reset from %s to %s",
-                    job_uuid,
-                    ENQUEUED,
-                    PENDING,
-                )
-
-    # TODO: better way to HTTP GET asynchronously (grequest, ...)?
-    #       if this was python3 I would be doing this with
-    #       asyncio, aiohttp and aiopg
-    def urlopen():
-        url = "{}://{}:{}/queue_job/runjob?db={}&job_uuid={}".format(
-            scheme, host, port, db_name, job_uuid
-        )
+async def _async_http_get(scheme, host, port, user, password, db_name, job_uuid, timeout=5):
+    async def set_job_pending():
         try:
-            auth = None
-            if user:
-                auth = (user, password)
-            # we are not interested in the result, so we set a short timeout
-            # but not too short so we trap and log hard configuration errors
-            response = requests.get(url, timeout=1, auth=auth)
+            connection_info = _connection_info_for(db_name)
+            conn = psycopg2.connect(**connection_info)
+            conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+            with closing(conn.cursor()) as cr:
+                cr.execute(
+                    "UPDATE queue_job SET state=%s, "
+                    "date_enqueued=NULL, date_started=NULL "
+                    "WHERE uuid=%s and state=%s "
+                    "RETURNING uuid",
+                    (PENDING, job_uuid, ENQUEUED),
+                )
+                if cr.fetchone():
+                    _logger.warning(
+                        "state of job %s was reset from %s to %s",
+                        job_uuid,
+                        ENQUEUED,
+                        PENDING,
+                    )
+        except Exception as e:
+            _logger.error(f"Failed to set job {job_uuid} to pending: {e}")
 
-            # raise_for_status will result in either nothing, a Client Error
-            # for HTTP Response codes between 400 and 500 or a Server Error
-            # for codes between 500 and 600
-            response.raise_for_status()
-        except requests.Timeout:
-            set_job_pending()
-        except Exception:
-            _logger.exception("exception in GET %s", url)
-            set_job_pending()
+    url = f"{scheme}://{host}:{port}/queue_job/runjob?db={db_name}&job_uuid={job_uuid}"
+    auth = aiohttp.BasicAuth(user, password) if user else None
 
-    thread = threading.Thread(target=urlopen)
-    thread.daemon = True
-    thread.start()
+    async with aiohttp.ClientSession(auth=auth) as session:
+        try:
+            async with session.get(url, timeout=timeout) as response:
+                response.raise_for_status()
+        except aiohttp.ClientTimeout:
+            _logger.warning(f"Timeout while accessing {url}")
+            await set_job_pending()
+        except aiohttp.ClientError as e:
+            _logger.error(f"ClientError for {url}: {e}")
+            await set_job_pending()
+        except Exception as e:
+            _logger.exception(f"Unhandled exception for {url}: {e}")
+            await set_job_pending()
+
+
+def start_async_http_get(scheme, host, port, user, password, db_name, job_uuid, timeout=5):
+    loop = asyncio.get_event_loop()
+    if loop.is_running():
+        loop.create_task(_async_http_get(scheme, host, port, user, password, db_name, job_uuid, timeout))
+    else:
+        asyncio.run(_async_http_get(scheme, host, port, user, password, db_name, job_uuid, timeout))
 
 
 class Database:
@@ -354,6 +354,7 @@ class QueueJobRunner:
         user=None,
         password=None,
         channel_config_string=None,
+        check_interval=60,  # Add a parameter to control the check interval
     ):
         self.scheme = scheme
         self.host = host
@@ -368,6 +369,50 @@ class QueueJobRunner:
         self._stop = False
         # Initialize stop signals using a socket pair
         self._stop_sock_recv, self._stop_sock_send = self._create_socket_pair()
+        self.loop = asyncio.new_event_loop()
+        self.loop_thread = threading.Thread(target=self._run_event_loop, daemon=True)
+        self.loop_thread.start()
+        # Add a parameter to control the check interval
+        self.check_interval = check_interval
+        self._new_db_check_thread = threading.Thread(target=self._check_new_databases_periodically, daemon=True)
+        self._new_db_check_thread.start()  # Start the thread here only
+    
+    def _check_new_databases_periodically(self):
+        while not self._stop:
+            try:
+                self.check_and_initialize_new_databases()
+            except Exception as e:
+                _logger.error(f"Error while checking new databases: {e}")
+            time.sleep(self.check_interval)
+
+    def check_and_initialize_new_databases(self):
+        current_dbs = self.get_db_names()
+        known_dbs = set(self.db_by_name.keys())
+
+        new_dbs = set(current_dbs) - known_dbs
+        for db_name in new_dbs:
+            db = Database(db_name)
+            if db.has_queue_job:
+                self.db_by_name[db_name] = db
+                with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
+                    for job_data in cr:
+                        self.channel_manager.notify(db_name, *job_data)
+                _logger.info("queue job runner ready for new db %s", db_name)
+
+        # Check if `queue_job` is installed on any known database that didn't have it before
+        for db_name in known_dbs:
+            db = self.db_by_name[db_name]
+            if not db.has_queue_job:
+                if db._has_queue_job():
+                    db.has_queue_job = True
+                    with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
+                        for job_data in cr:
+                            self.channel_manager.notify(db_name, *job_data)
+                    _logger.info("queue job installed and runner ready for db %s", db_name)
+
+    def _run_event_loop(self):
+        asyncio.set_event_loop(self.loop)
+        self.loop.run_forever()
 
     def _create_socket_pair(self):
         # Method to create a socket pair; returns a tuple of (receiver, sender)
@@ -448,7 +493,8 @@ class QueueJobRunner:
                 break
             _logger.info("asking Odoo to run job %s on db %s", job.uuid, job.db_name)
             self.db_by_name[job.db_name].set_job_enqueued(job.uuid)
-            _async_http_get(
+            self.loop.call_soon_threadsafe(
+                start_async_http_get,
                 self.scheme,
                 self.host,
                 self.port,
@@ -501,8 +547,11 @@ class QueueJobRunner:
     def stop(self):
         _logger.info("graceful stop requested")
         self._stop = True
-        # Signal the stop using socket send
+        self.loop.call_soon_threadsafe(self.loop.stop)
         self._stop_sock_send.send(b"stop")
+        # Ensure the new DB check thread is also stopped
+        if self._new_db_check_thread.is_alive():
+            self._new_db_check_thread.join()
 
     def run(self):
         _logger.info("starting")
@@ -510,11 +559,8 @@ class QueueJobRunner:
             # outer loop does exception recovery
             try:
                 _logger.info("initializing database connections")
-                # TODO: how to detect new databases or databases
-                #       on which queue_job is installed after server start?
                 self.initialize_databases()
                 _logger.info("database connections ready")
-                # inner loop does the normal processing
                 while not self._stop:
                     self.process_notifications()
                     self.run_jobs()
@@ -531,4 +577,5 @@ class QueueJobRunner:
                 self.close_databases()
                 time.sleep(ERROR_RECOVERY_DELAY)
         self.close_databases(remove_jobs=False)
+        self.loop.call_soon_threadsafe(self.loop.close)
         _logger.info("stopped")
