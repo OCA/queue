@@ -210,7 +210,7 @@ def _connection_info_for(db_name):
 
 
 async def _async_http_get(
-        scheme, host, port, user, password, db_name, job_uuid, timeout=5
+    scheme, host, port, user, password, db_name, job_uuid, timeout=5
 ):
     async def set_job_pending():
         try:
@@ -254,7 +254,7 @@ async def _async_http_get(
 
 
 def start_async_http_get(
-        scheme, host, port, user, password, db_name, job_uuid, timeout=5
+    scheme, host, port, user, password, db_name, job_uuid, timeout=5
 ):
     loop = asyncio.get_event_loop()
     if loop.is_running():
@@ -410,9 +410,7 @@ class QueueJobRunner:
                 with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
                     for job_data in cr:
                         self.channel_manager.notify(db_name, *job_data)
-                _logger.info(
-                    "queue job runner ready for new db %s", db_name
-                )
+                _logger.info("queue job runner ready for new db %s", db_name)
 
         # Check if `queue_job` is installed on any known database that didn't have it before
         for db_name in known_dbs:
@@ -423,7 +421,9 @@ class QueueJobRunner:
                     with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
                         for job_data in cr:
                             self.channel_manager.notify(db_name, *job_data)
-                    _logger.info("queue job installed and runner ready for db %s", db_name)
+                    _logger.info(
+                        "queue job installed and runner ready for db %s", db_name
+                    )
 
     def _run_event_loop(self):
         asyncio.set_event_loop(self.loop)
