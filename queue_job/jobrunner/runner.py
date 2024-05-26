@@ -139,6 +139,7 @@ Caveat
        of running Odoo is obviously not for production purposes.
 """
 
+import asyncio
 import datetime
 import logging
 import os
@@ -148,11 +149,9 @@ import threading
 import time
 from contextlib import closing, contextmanager
 
-import asyncio
 import aiohttp
 
 import psycopg2
-import requests
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 import odoo
@@ -210,7 +209,9 @@ def _connection_info_for(db_name):
     return connection_info
 
 
-async def _async_http_get(scheme, host, port, user, password, db_name, job_uuid, timeout=5):
+async def _async_http_get(
+        scheme, host, port, user, password, db_name, job_uuid, timeout=5
+):
     async def set_job_pending():
         try:
             connection_info = _connection_info_for(db_name)
@@ -252,12 +253,22 @@ async def _async_http_get(scheme, host, port, user, password, db_name, job_uuid,
             await set_job_pending()
 
 
-def start_async_http_get(scheme, host, port, user, password, db_name, job_uuid, timeout=5):
+def start_async_http_get(
+        scheme, host, port, user, password, db_name, job_uuid, timeout=5
+):
     loop = asyncio.get_event_loop()
     if loop.is_running():
-        loop.create_task(_async_http_get(scheme, host, port, user, password, db_name, job_uuid, timeout))
+        loop.create_task(
+            _async_http_get(
+                scheme, host, port, user, password, db_name, job_uuid, timeout
+            )
+        )
     else:
-        asyncio.run(_async_http_get(scheme, host, port, user, password, db_name, job_uuid, timeout))
+        asyncio.run(
+            _async_http_get(
+                scheme, host, port, user, password, db_name, job_uuid, timeout
+            )
+        )
 
 
 class Database:
@@ -374,7 +385,9 @@ class QueueJobRunner:
         self.loop_thread.start()
         # Add a parameter to control the check interval
         self.check_interval = check_interval
-        self._new_db_check_thread = threading.Thread(target=self._check_new_databases_periodically, daemon=True)
+        self._new_db_check_thread = threading.Thread(
+            target=self._check_new_databases_periodically, daemon=True
+        )
         self._new_db_check_thread.start()  # Start the thread here only
     
     def _check_new_databases_periodically(self):
@@ -397,7 +410,9 @@ class QueueJobRunner:
                 with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
                     for job_data in cr:
                         self.channel_manager.notify(db_name, *job_data)
-                _logger.info("queue job runner ready for new db %s", db_name)
+                _logger.info(
+                    "queue job runner ready for new db %s", db_name
+                )
 
         # Check if `queue_job` is installed on any known database that didn't have it before
         for db_name in known_dbs:
