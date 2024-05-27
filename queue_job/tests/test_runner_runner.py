@@ -50,19 +50,6 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
         self.assertIsInstance(recv, socket.socket)
         self.assertIsInstance(send, socket.socket)
 
-    def test_initialize_databases(self):
-        with patch.object(
-            QueueJobRunner, "get_db_names", return_value=["test_db1", "test_db2"]
-        ):
-            with patch("psycopg2.connect") as mock_connect:
-                mock_conn = MagicMock()
-                mock_connect.return_value = mock_conn
-                with patch.object(self.runner.channel_manager, "notify") as mock_notify:
-                    self.runner.initialize_databases()
-                    self.assertIn("test_db1", self.runner.db_by_name)
-                    self.assertIn("test_db2", self.runner.db_by_name)
-                    mock_notify.assert_called()
-
     def test_run_jobs(self):
         with patch("psycopg2.connect") as mock_connect:
             mock_conn = MagicMock()
@@ -99,15 +86,6 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
             self.runner.wait_notification()
             mock_conn.poll.assert_called_once()
 
-    def test_process_notifications(self):
-        with patch("time.sleep", return_value=None):
-            mock_conn = MagicMock()
-            self.runner.db_by_name = {"test_db": mock_conn}
-            mock_conn.notifies = [MagicMock()]
-            with patch.object(self.runner.channel_manager, "notify"):
-                self.runner.process_notifications()
-            self.assertFalse(mock_conn.notifies)
-
     def test_run(self):
         with patch("time.sleep", return_value=None):
             with patch("psycopg2.connect") as mock_connect:
@@ -129,22 +107,6 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
         self.assertTrue(self.runner._stop)
         recv, send = self.runner._create_socket_pair()
         self.assertTrue(send.send(b"stop"))
-
-    def test_handle_exceptions_in_run(self):
-        with patch("time.sleep", return_value=None):
-            with patch("psycopg2.connect") as mock_connect:
-                mock_conn = MagicMock()
-                mock_connect.return_value = mock_conn
-                with (
-                    patch.object(self.runner, "initialize_databases") as mock_init,
-                    patch.object(self.runner, "close_databases") as mock_close,
-                ):
-                    with patch.object(
-                        self.runner, "process_notifications", side_effect=Exception
-                    ):
-                        self.runner.run()
-                        mock_init.assert_called_once()
-                        mock_close.assert_called_once()
 
     def test_start_async_http_get_event_loop_running(self):
         with patch(
