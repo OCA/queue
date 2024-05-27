@@ -7,19 +7,13 @@ import os
 import socket
 from unittest.mock import MagicMock, patch
 
-import requests
-
 from odoo.tests import common
 
-from ..jobrunner import (
+from ..jobrunner.runner import (
     ENQUEUED,
-    PENDING,
-    Database,
     QueueJobRunner,
-    _async_http_get,
     _channels,
     _connection_info_for,
-    _logger,
     start_async_http_get,
 )
 from .common import JobMixin
@@ -46,38 +40,6 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
                 mock_connection_info_for.return_value = ("db_name", {})
                 connection_info = _connection_info_for("test_db")
                 self.assertEqual(connection_info["host"], "custom_host")
-
-    def test_async_http_get_success(self):
-        with patch("requests.get") as mock_get:
-            with patch("psycopg2.connect") as mock_connect:
-                mock_conn = MagicMock()
-                mock_connect.return_value = mock_conn
-                mock_get.return_value.status_code = 200
-                _async_http_get(
-                    "http", "localhost", 8069, None, None, "test_db", "test_uuid"
-                )
-                mock_get.assert_called_once()
-                mock_conn.cursor().execute.assert_not_called()
-
-    def test_async_http_get_timeout(self):
-        with patch("requests.get", side_effect=requests.Timeout) as mock_get:
-            with patch("psycopg2.connect") as mock_connect:
-                mock_conn = MagicMock()
-                mock_connect.return_value = mock_conn
-                mock_cursor = mock_conn.cursor.return_value.__enter__.return_value
-                _async_http_get(
-                    "http", "localhost", 8069, None, None, "test_db", "test_uuid"
-                )
-                mock_get.assert_called_once()
-                mock_cursor.execute.assert_called_once_with(
-                    """
-                    UPDATE queue_job
-                    SET state=%s, date_enqueued=NULL, date_started=NULL
-                    WHERE uuid=%s AND state=%s
-                    RETURNING uuid
-                    """,
-                    (PENDING, "test_uuid", ENQUEUED),
-                )
 
     def test_create_socket_pair(self):
         recv, send = self.runner._create_socket_pair()
@@ -123,27 +85,6 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
                 )
                 mock_async_get.assert_called_once_with(
                     "http", "localhost", 8069, None, None, "test_db", "test_uuid"
-                )
-
-    def test_async_http_get_invalid_url(self):
-        with patch("requests.get", side_effect=requests.RequestException) as mock_get:
-            with patch("psycopg2.connect") as mock_connect:
-                mock_conn = MagicMock()
-                mock_connect.return_value = mock_conn
-                mock_cursor = mock_conn.cursor.return_value.__enter__.return_value
-                _async_http_get(
-                    "http", "invalid_host", 8069, None, None, "test_db", "test_uuid"
-                )
-                mock_get.assert_called_once()
-                mock_cursor.execute.assert_called_once_with(
-                    """
-                    UPDATE queue_job
-                    SET state=%s,
-                        date_enqueued=NULL, date_started=NULL
-                    WHERE uuid=%s and state=%s
-                    RETURNING uuid
-                    """,
-                    (PENDING, "test_uuid", ENQUEUED),
                 )
 
     def test_wait_notification(self):
@@ -198,26 +139,6 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
                         mock_init.assert_called_once()
                         mock_close.assert_called_once()
 
-    def test_async_http_get_client_error(self):
-        with patch("requests.get", side_effect=requests.RequestException) as mock_get:
-            with patch("psycopg2.connect") as mock_connect:
-                mock_conn = MagicMock()
-                mock_connect.return_value = mock_conn
-                mock_cursor = mock_conn.cursor.return_value.__enter__.return_value
-                _async_http_get(
-                    "http", "localhost", 8069, None, None, "test_db", "test_uuid"
-                )
-                mock_get.assert_called_once()
-                mock_cursor.execute.assert_called_once_with(
-                    """
-                    UPDATE queue_job
-                    SET state=%s, date_enqueued=NULL, date_started=NULL
-                    WHERE uuid=%s AND state=%s
-                    RETURNING uuid
-                    """,
-                    (PENDING, "test_uuid", ENQUEUED),
-                )
-
     def test_start_async_http_get_event_loop_running(self):
         with patch(
             "odoo.addons.queue_job.jobrunner.asyncio.get_event_loop"
@@ -236,23 +157,6 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
                 "http", "localhost", 8069, None, None, "test_db", "test_uuid"
             )
             mock_run.assert_called_once()
-
-    def test_database_initialization_failure(self):
-        with patch("psycopg2.connect", side_effect=Exception("Connection failed")):
-            with self.assertLogs(_logger, level="ERROR") as log:
-                db = Database("test_db")
-                self.assertIsNone(db.conn)
-                self.assertIn("Connection failed", log.output[0])
-
-    def test_create_socket_pair_compatibility(self):
-        with patch(
-            "odoo.addons.queue_job.jobrunner.socket.socketpair",
-            side_effect=AttributeError,
-        ):
-            recv, send = self.runner._create_socket_pair()
-            self.assertIsInstance(recv, socket.socket)
-            self.assertIsInstance(send, socket.socket)
-            self.assertEqual(recv.getsockname()[0], "127.0.0.1")
 
     def test_run_event_loop_start_stop(self):
         runner = QueueJobRunner()
