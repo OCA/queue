@@ -71,9 +71,9 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
                 mock_get.assert_called_once()
                 mock_cursor.execute.assert_called_once_with(
                     """
-                    UPDATE queue_job 
-                    SET state=%s, date_enqueued=NULL, date_started=NULL 
-                    WHERE uuid=%s AND state=%s 
+                    UPDATE queue_job
+                    SET state=%s, date_enqueued=NULL, date_started=NULL
+                    WHERE uuid=%s AND state=%s
                     RETURNING uuid
                     """,
                     (PENDING, "test_uuid", ENQUEUED),
@@ -114,8 +114,8 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
                     self.runner.run_jobs()
                 mock_conn.cursor().execute.assert_called_with(
                     """
-                    UPDATE queue_job 
-                    SET state=%s, 
+                    UPDATE queue_job
+                    SET state=%s,
                         date_enqueued=date_trunc('seconds', now() at time zone 'utc')
                     WHERE uuid=%s
                     """,
@@ -137,10 +137,10 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
                 mock_get.assert_called_once()
                 mock_cursor.execute.assert_called_once_with(
                     """
-                    UPDATE queue_job 
-                    SET state=%s, 
-                        date_enqueued=NULL, date_started=NULL 
-                    WHERE uuid=%s and state=%s 
+                    UPDATE queue_job
+                    SET state=%s,
+                        date_enqueued=NULL, date_started=NULL
+                    WHERE uuid=%s and state=%s
                     RETURNING uuid
                     """,
                     (PENDING, "test_uuid", ENQUEUED),
@@ -210,9 +210,9 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
                 mock_get.assert_called_once()
                 mock_cursor.execute.assert_called_once_with(
                     """
-                    UPDATE queue_job 
-                    SET state=%s, date_enqueued=NULL, date_started=NULL 
-                    WHERE uuid=%s AND state=%s 
+                    UPDATE queue_job
+                    SET state=%s, date_enqueued=NULL, date_started=NULL
+                    WHERE uuid=%s AND state=%s
                     RETURNING uuid
                     """,
                     (PENDING, "test_uuid", ENQUEUED),
