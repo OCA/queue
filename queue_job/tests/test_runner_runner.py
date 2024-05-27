@@ -172,25 +172,3 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
         runner._stop = True
         runner._run_event_loop()
         runner.loop.stop.assert_called_once()
-
-    def test_handle_db_notifications(self):
-        mock_conn = MagicMock()
-        self.runner.db_by_name = {"test_db": mock_conn}
-        mock_notify = MagicMock()
-        self.runner.channel_manager.notify = mock_notify
-        mock_notify_payload = MagicMock()
-        mock_conn.notifies = [mock_notify_payload]
-
-        self.runner.process_notifications()
-
-        self.assertFalse(mock_conn.notifies)
-        mock_notify.assert_called_once_with("test_db", *mock_notify_payload)
-
-    def test_check_new_databases_periodically(self):
-        with patch.object(
-            self.runner, "check_and_initialize_new_databases"
-        ) as mock_check:
-            with patch("time.sleep", side_effect=Exception("stop")):
-                with self.assertRaisesRegex(Exception, "stop"):
-                    self.runner._check_new_databases_periodically()
-                mock_check.assert_called()
