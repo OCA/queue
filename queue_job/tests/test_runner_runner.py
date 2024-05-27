@@ -23,8 +23,9 @@ from .common import JobMixin
 class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
     def setUp(self):
         super().setUp()
-        with patch.object(QueueJobRunner, '_run_event_loop'), \
-             patch.object(threading.Thread, 'start'):
+        with patch.object(QueueJobRunner, '_run_event_loop'), patch.object(
+            threading.Thread, 'start'
+        ):
             self.runner = QueueJobRunner()
 
     def test_channels_from_env(self):
@@ -121,9 +122,9 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
                     mock_close.assert_called_once()
 
     def test_stop(self):
-        with patch.object(self.runner, 'loop'), \
-             patch.object(self.runner, '_stop_sock_send'), \
-             patch.object(self.runner, '_new_db_check_thread'):
+        with patch.object(self.runner, 'loop'), patch.object(
+            self.runner, '_stop_sock_send'
+        ), patch.object(self.runner, '_new_db_check_thread'):
             self.runner.stop()
         self.assertTrue(self.runner._stop)
         recv, send = self.runner._create_socket_pair()
