@@ -5,6 +5,7 @@
 # we are testing, we want to test as we were an external consumer of the API
 import os
 import socket
+import threading
 from unittest.mock import MagicMock, patch
 
 from odoo.tests import common
@@ -22,7 +23,9 @@ from .common import JobMixin
 class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
     def setUp(self):
         super().setUp()
-        self.runner = QueueJobRunner()
+        with patch.object(QueueJobRunner, '_run_event_loop'), \
+             patch.object(threading.Thread, 'start'):
+            self.runner = QueueJobRunner()
 
     def test_channels_from_env(self):
         with patch.dict(os.environ, {"ODOO_QUEUE_JOB_CHANNELS": "root:4"}):
@@ -118,7 +121,10 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
                     mock_close.assert_called_once()
 
     def test_stop(self):
-        self.runner.stop()
+        with patch.object(self.runner, 'loop'), \
+             patch.object(self.runner, '_stop_sock_send'), \
+             patch.object(self.runner, '_new_db_check_thread'):
+            self.runner.stop()
         self.assertTrue(self.runner._stop)
         recv, send = self.runner._create_socket_pair()
         self.assertTrue(send.send(b"stop"))
