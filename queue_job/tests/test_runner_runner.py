@@ -24,7 +24,7 @@ class TestQueueJobRunnerUpdates(common.TransactionCase, JobMixin):
     def setUp(self):
         super().setUp()
         with patch.object(QueueJobRunner, "_run_event_loop"), patch.object(
-+            threading.Thread, "start"
+            threading.Thread, "start"
         ):
             self.runner = QueueJobRunner()
 
