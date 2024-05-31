@@ -418,7 +418,7 @@ class QueueJob(models.Model):
         ).requeue()
         return True
 
-    def fail_dead_jobs(self, started_delta):
+    def fail_dead_jobs(self, started_delta, force_low_delta=False):
         """Set as failed job started since too long ago.
 
         Workers can be dead without anyone noticing
@@ -430,12 +430,25 @@ class QueueJob(models.Model):
 
         Cause of death can be CPU Time limit reached
         a SIGTERM, a power shortage, we can't know, etc.
+
+        This mechanism should be very exceptionnal.
+        It may help, for instance, if someone forget to configure
+        properly his system.
+
+        :param started_delta: lookup time in minutes for jobs
+                                that are in started state,
+
+        :param force_low_delta: force a started_delta in less 10min
+                                = you know what you do
         """
         now = fields.datetime.now()
         started_dl = now - timedelta(minutes=started_delta)
-        if started_delta <= 10:
+        if started_delta <= 10 and not force_low_delta:
             raise exceptions.ValidationError(
-                _("started_delta is too low. Set at least 10min")
+                _(
+                    "started_delta is too low. Set at least 10min"
+                    " or set argument force_low_delta=True"
+                )
             )
         domain = [
             "&",
@@ -449,7 +462,7 @@ class QueueJob(models.Model):
             "exc_name": "Not responding worker. Is it dead ?",
             "exc_message": (
                 "Check for odoo.service.server logs."
-                "Insestigate logs for CPU time limit reached or check system log"
+                "Investigate logs for CPU time limit reached or check system log"
             ),
         }
         for job in stuck_jobs:
