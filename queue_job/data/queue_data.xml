@@ -10,7 +10,7 @@
             <field name="state">code</field>
             <field name="code">model.requeue_stuck_jobs()</field>
         </record>
-        <record id="ir_cron_queue_job_fail_dead_jobs()" model="ir.cron">
+        <record id="ir_cron_queue_job_fail_dead_jobs" model="ir.cron">
             <field name="name">Take care of unresponsive jobs</field>
             <field name="interval_number">15</field>
             <field name="interval_type">minutes</field>
