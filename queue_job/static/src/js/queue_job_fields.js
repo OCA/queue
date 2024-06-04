@@ -16,6 +16,7 @@ odoo.define("queue_job.fields", function (require) {
         init: function () {
             this._super.apply(this, arguments);
             this.network = null;
+            this.forceRender = false;
             this.tabListenerInstalled = false;
         },
         start: function () {
@@ -87,6 +88,25 @@ odoo.define("queue_job.fields", function (require) {
                     arrows: "to",
                 });
             });
+
+            if (nodes.length * edges.length > 5000 && !this.forceRender) {
+                const warningDiv = document.createElement("div");
+                warningDiv.className = "alert alert-warning";
+                warningDiv.innerText =
+                    `This graph is big (${nodes.length} nodes, ` +
+                    `${edges.length} edges), it may take a while to display.`;
+                const button = document.createElement("button");
+                button.innerText = "Display anyway";
+                button.className = "btn btn-secondary";
+                button.onclick = function () {
+                    self.forceRender = true;
+                    warningDiv.parentNode.removeChild(warningDiv);
+                    self._render();
+                };
+                warningDiv.appendChild(button);
+                this.$el.append(warningDiv);
+                return;
+            }
 
             var data = {
                 // eslint-disable-next-line no-undef
