@@ -3,7 +3,7 @@
     "summary": "Run jobs without a dedicated JobRunner",
     "version": "14.0.1.0.2",
     "development_status": "Alpha",
-    "author": "Camptocamp SA, Odoo Community Association (OCA)",
+    "author": "Camptocamp, Odoo Community Association (OCA)",
     "maintainers": ["ivantodorovich"],
     "website": "https://github.com/OCA/queue",
     "license": "AGPL-3",
