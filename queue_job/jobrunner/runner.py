@@ -264,10 +264,14 @@ class Database:
         self.db_name = db_name
         connection_info = _connection_info_for(db_name)
         self.conn = psycopg2.connect(**connection_info)
-        self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        self.has_queue_job = self._has_queue_job()
-        if self.has_queue_job:
-            self._initialize()
+        try:
+            self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+            self.has_queue_job = self._has_queue_job()
+            if self.has_queue_job:
+                self._initialize()
+        except BaseException:
+            self.close()
+            raise
 
     def close(self):
         # pylint: disable=except-pass
