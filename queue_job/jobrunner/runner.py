@@ -420,7 +420,7 @@ class QueueJobRunner:
             db_names = config["db_name"].split(",")
         else:
             db_names = odoo.service.db.list_dbs(True)
-        return sorted(db_names)
+        return db_names
 
     def close_databases(self, remove_jobs=True):
         for db_name, db in self.db_by_name.items():
@@ -433,7 +433,8 @@ class QueueJobRunner:
         self.db_by_name = {}
 
     def initialize_databases(self):
-        for db_name in self.get_db_names():
+        for db_name in sorted(self.get_db_names()):
+            # sorting is important to avoid deadlocks in acquiring the master lock
             db = Database(db_name)
             if db.has_queue_job:
                 self.db_by_name[db_name] = db
