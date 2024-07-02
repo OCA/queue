@@ -534,9 +534,9 @@ class Delayable:
         """Delay the whole graph"""
         self._graph.delay()
 
-    def split(self, size):
-        """Split the Delayable into a DelayableGroup containing batches
-        of size `size`
+    def split(self, size, chain=False):
+        """Split the Delayable into a DelayableGroup or DelayableChain
+        if `chain` is True containing batches of size `size`
         """
         if not self._job_method:
             raise ValueError("No method set on the Delayable")
@@ -576,7 +576,7 @@ class Delayable:
         # Prevent warning on deletion
         self._generated_job = True
 
-        return DelayableGroup(*delayables)
+        return (DelayableChain if chain else DelayableGroup)(*delayables)
 
     def _build_job(self):
         if self._generated_job:
