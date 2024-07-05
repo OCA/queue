@@ -24,6 +24,20 @@ class QueueJobChannel(models.Model):
     removal_interval = fields.Integer(
         default=lambda self: self.env["queue.job"]._removal_interval, required=True
     )
+    enqueued_delta = fields.Integer(
+        help="If this value is set (in minutes), it will take preference over the "
+        "enqueued_delta parameter in the 'Jobs Garbage Collector' scheduled action. "
+        "This action is responsible for requeuing jobs stuck in the 'enqueued' "
+        "state for more than the configured time. If set to -1 it will use "
+        "the server's --limit-time-real config parameter.",
+    )
+    started_delta = fields.Integer(
+        help="If this value is set (in minutes), it will take preference over the "
+        "started_delta parameter in the 'Jobs Garbage Collector' scheduled action. "
+        "This action is responsible for requeuing jobs stuck in the 'started' "
+        "state for more than the configured time. If set to -1 it will use "
+        "the server's --limit-time-real config parameter.",
+    )
 
     _sql_constraints = [
         ("name_uniq", "unique(complete_name)", "Channel complete name must be unique")

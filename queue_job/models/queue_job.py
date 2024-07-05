@@ -417,6 +417,9 @@ class QueueJob(models.Model):
                     break
         return True
 
+    def _get_limit_time_real_delta(self):
+        return (config["limit_time_real"] // 60) + 1
+
     def requeue_stuck_jobs(self, enqueued_delta=1, started_delta=0):
         """Fix jobs that are in a bad states
 
@@ -430,37 +433,75 @@ class QueueJob(models.Model):
                               -1 will use `--limit-time-real` config value
         """
         if started_delta == -1:
-            started_delta = (config["limit_time_real"] // 60) + 1
+            started_delta = self._get_limit_time_real_delta()
         return self._get_stuck_jobs_to_requeue(
             enqueued_delta=enqueued_delta, started_delta=started_delta
         ).requeue()
 
     def _get_stuck_jobs_domain(self, queue_dl, started_dl):
+        def _enqueued_domain(enqueued_dl):
+            return [
+                "&",
+                (
+                    "date_enqueued",
+                    "<=",
+                    fields.Datetime.to_string(enqueued_dl),
+                ),
+                ("state", "=", "enqueued"),
+            ]
+
+        def _started_domain(started_dl):
+            return [
+                "&",
+                (
+                    "date_started",
+                    "<=",
+                    fields.Datetime.to_string(started_dl),
+                ),
+                ("state", "=", "started"),
+            ]
+
         domain = []
         now = fields.datetime.now()
+        searched_channels = []
+        for channel in self.env["queue.job.channel"].search([]):
+            channel_domain = []
+            channel_queue_dl = channel.enqueued_delta or queue_dl
+            if channel_queue_dl == -1:
+                channel_queue_dl = self._get_limit_time_real_delta()
+            if channel_queue_dl:
+                channel_queue_dl = now - timedelta(minutes=channel_queue_dl)
+                channel_domain.append(_enqueued_domain(channel_queue_dl))
+            channel_started_dl = channel.started_delta or started_dl
+            if channel_started_dl == -1:
+                channel_started_dl = self._get_limit_time_real_delta()
+            if channel_started_dl:
+                channel_started_dl = now - timedelta(minutes=channel_started_dl)
+                channel_domain.append(_started_domain(channel_started_dl))
+            searched_channels.append(channel.complete_name)
+            channel_domain = expression.AND(
+                [
+                    expression.OR(channel_domain),
+                    [("channel", "=", channel.complete_name)],
+                ]
+            )
+            domain = expression.OR([domain, channel_domain])
+        other_domain = []
         if queue_dl:
             queue_dl = now - timedelta(minutes=queue_dl)
-            domain.append(
-                [
-                    "&",
-                    ("date_enqueued", "<=", fields.Datetime.to_string(queue_dl)),
-                    ("state", "=", "enqueued"),
-                ]
-            )
+            other_domain.append(_enqueued_domain(queue_dl))
         if started_dl:
             started_dl = now - timedelta(minutes=started_dl)
-            domain.append(
-                [
-                    "&",
-                    ("date_started", "<=", fields.Datetime.to_string(started_dl)),
-                    ("state", "=", "started"),
-                ]
-            )
+            other_domain.append(_started_domain(started_dl))
+        other_domain = expression.AND(
+            [expression.OR(other_domain), [("channel", "not in", searched_channels)]]
+        )
+        domain = expression.OR([domain, other_domain])
         if not domain:
             raise exceptions.ValidationError(
                 _("If both parameters are 0, ALL jobs will be requeued!")
             )
-        return expression.OR(domain)
+        return domain
 
     def _get_stuck_jobs_to_requeue(self, enqueued_delta, started_delta):
         job_model = self.env["queue.job"]

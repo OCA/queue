@@ -17,6 +17,8 @@
                     />
                     <field name="complete_name" />
                     <field name="removal_interval" />
+                    <field name="enqueued_delta" />
+                    <field name="started_delta" />
                 </group>
                 <group>
                     <field name="job_function_ids" widget="many2many_tags" />

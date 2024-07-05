@@ -144,6 +144,8 @@ Configuration
   * ``started_delta``: Spent time in minutes after which a started job is considered stuck.
     This parameter should not be less than ``--limit-time-real // 60`` parameter in your configuration.
     Set it to 0 to disable this check. Set it to -1 to automate it, based in the server's ``--limit-time-real`` config parameter.
+  * These parameters are also configurable on a channel by channel basis, if set to 0 it will use the global value.
+    If set to -1 it will work the same as above.
 
   .. code-block:: python
 
