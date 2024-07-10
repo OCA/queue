@@ -47,7 +47,9 @@ class BaseImportImport(models.TransientModel):
 
         # get the translated model name to build
         # a meaningful job description
-        search_result = self.env["ir.model"].name_search(self.res_model, operator="=")
+        search_result = (
+            self.env["ir.model"].sudo().name_search(self.res_model, operator="=")
+        )
         if search_result:
             translated_model_name = search_result[0][1]
         else:
