@@ -32,11 +32,15 @@ class RunJobController(http.Controller):
         job.store()
         env.cr.commit()
         _logger.debug("%s started", job)
+        try:
+            job.perform()
+            # Triggers any stored computed fields before calling 'set_done'
+            # so that will be part of the 'exec_time'
+            env.flush_all()
+        except Exception:
+            env.cr.rollback()
+            raise
 
-        job.perform()
-        # Triggers any stored computed fields before calling 'set_done'
-        # so that will be part of the 'exec_time'
-        env.flush_all()
         job.set_done()
         job.store()
         env.flush_all()
