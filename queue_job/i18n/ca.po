@@ -6,13 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2024-07-24 19:58+0000\n"
+"Last-Translator: QuiJoQuim <quim.rebull@gmail.com>\n"
 "Language-Team: none\n"
 "Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.6.2\n"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -20,6 +22,9 @@ msgid ""
 "<br/>\n"
 "                            <span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number of retries is infinite.</span>"
 msgstr ""
+"<br/>\n"
+"                             <span class=\"oe_grey oe_inline\"> Si el máx. "
+"reintents es 0, el nombre de reintents es infinit.</span>"
 
 #. module: queue_job
 #. odoo-python
@@ -46,7 +51,7 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_state
 msgid "Activity State"
-msgstr ""
+msgstr "Estat de l'activitat"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_type_icon
@@ -67,7 +72,7 @@ msgstr ""
 #: model:ir.actions.server,name:queue_job.ir_cron_autovacuum_queue_jobs_ir_actions_server
 #: model:ir.cron,cron_name:queue_job.ir_cron_autovacuum_queue_jobs
 msgid "AutoVacuum Job Queue"
-msgstr ""
+msgstr "Buidat automàtic de la cua de Treballs"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_base
@@ -237,13 +242,13 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_enqueued
 msgid "Enqueue Time"
-msgstr ""
+msgstr "Encua el treball"
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__enqueued
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Enqueued"
-msgstr ""
+msgstr "Encuat"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_name
@@ -427,12 +432,12 @@ msgstr ""
 #: model:ir.module.category,name:queue_job.module_category_queue_job
 #: model:ir.ui.menu,name:queue_job.menu_queue_job_root
 msgid "Job Queue"
-msgstr ""
+msgstr "Cua de treballs"
 
 #. module: queue_job
 #: model:res.groups,name:queue_job.group_queue_job_manager
 msgid "Job Queue Manager"
-msgstr ""
+msgstr "Gestor de la Cua de treballs"
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__ir_model_fields__ttype__job_serialized
@@ -462,7 +467,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_pivot
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Jobs"
-msgstr ""
+msgstr "Treballs"
 
 #. module: queue_job
 #: model:ir.actions.server,name:queue_job.ir_cron_queue_job_garbage_collector_ir_actions_server
@@ -654,12 +659,12 @@ msgstr ""
 #. module: queue_job
 #: model:ir.ui.menu,name:queue_job.menu_queue
 msgid "Queue"
-msgstr ""
+msgstr "Cua"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job
 msgid "Queue Job"
-msgstr ""
+msgstr "Cua de treballs"
 
 #. module: queue_job
 #. odoo-python
@@ -720,18 +725,18 @@ msgstr ""
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
 msgid "Requeue"
-msgstr ""
+msgstr "Reencua"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Requeue Job"
-msgstr ""
+msgstr "Reencua el treball"
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_requeue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
 msgid "Requeue Jobs"
-msgstr ""
+msgstr "Reencua el treball"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_user_id
