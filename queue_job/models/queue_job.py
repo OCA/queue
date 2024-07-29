@@ -316,6 +316,7 @@ class QueueJob(models.Model):
             elif state == CANCELLED:
                 job_.set_cancelled(result=result)
                 job_.store()
+                self.env.cr.commit()
             else:
                 raise ValueError("State not supported: %s" % state)
 
