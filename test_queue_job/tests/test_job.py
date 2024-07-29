@@ -530,6 +530,24 @@ class TestJobModel(JobCommonCase):
             stored.result, "Manually set to done by %s" % self.env.user.name
         )
 
+    def test_button_done_enqueue_waiting_dependencies(self):
+        job_root = Job(self.env["test.queue.job"].testing_method)
+        job_child = Job(self.env["test.queue.job"].testing_method)
+        job_child.add_depends({job_root})
+
+        DelayableGraph._ensure_same_graph_uuid([job_root, job_child])
+        job_root.store()
+        job_child.store()
+
+        self.assertEqual(job_child.state, WAIT_DEPENDENCIES)
+        record_root = job_root.db_record()
+        record_child = job_child.db_record()
+        # Trigger button done
+        record_root.button_done()
+        # Check the state
+        self.assertEqual(record_root.state, DONE)
+        self.assertEqual(record_child.state, PENDING)
+
     def test_requeue(self):
         stored = self._create_job()
         stored.write({"state": "failed"})
