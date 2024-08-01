@@ -325,6 +325,8 @@ class QueueJob(models.Model):
             elif state == CANCELLED:
                 job_.set_cancelled(result=result)
                 job_.store()
+                record.env["queue.job"].flush_model()
+                job_.cancel_dependent_jobs()
             else:
                 raise ValueError("State not supported: %s" % state)
 
