@@ -15,6 +15,7 @@ from odoo.addons.queue_job.exception import (
     RetryableJobError,
 )
 from odoo.addons.queue_job.job import (
+    CANCELLED,
     DONE,
     ENQUEUED,
     FAILED,
@@ -547,6 +548,24 @@ class TestJobModel(JobCommonCase):
         # Check the state
         self.assertEqual(record_root.state, DONE)
         self.assertEqual(record_child.state, PENDING)
+
+    def test_button_cancel_dependencies(self):
+        job_root = Job(self.env["test.queue.job"].testing_method)
+        job_child = Job(self.env["test.queue.job"].testing_method)
+        job_child.add_depends({job_root})
+
+        DelayableGraph._ensure_same_graph_uuid([job_root, job_child])
+        job_root.store()
+        job_child.store()
+
+        self.assertEqual(job_child.state, WAIT_DEPENDENCIES)
+        record_root = job_root.db_record()
+        record_child = job_child.db_record()
+        # Trigger button cancelled
+        record_root.button_cancelled()
+        # Check the state
+        self.assertEqual(record_root.state, CANCELLED)
+        self.assertEqual(record_child.state, CANCELLED)
 
     def test_requeue(self):
         stored = self._create_job()
