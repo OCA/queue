@@ -308,7 +308,6 @@ class QueueJob(models.Model):
             if state == DONE:
                 job_.set_done(result=result)
                 job_.store()
-                record.env["queue.job"].flush()
                 job_.enqueue_waiting()
             elif state == PENDING:
                 job_.set_pending(result=result)
@@ -316,7 +315,6 @@ class QueueJob(models.Model):
             elif state == CANCELLED:
                 job_.set_cancelled(result=result)
                 job_.store()
-                record.env["queue.job"].flush()
                 job_.cancel_dependent_jobs()
             else:
                 raise ValueError("State not supported: %s" % state)
