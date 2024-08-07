@@ -242,6 +242,33 @@ Based on this configuration, we can tell that:
 * retries 10 to 15 postponed 30 seconds later
 * all subsequent retries postponed 5 minutes later
 
+**Job function: reach max retryable times**
+
+When a job has reached the maximum number of retries and still fails, 
+the job's status will be set to ``Failed``. 
+You can define a specific method to handle this event. 
+The method should be named ``{method_name}_on_max_retries_reached``.
+
+Here's an example:
+
+.. code-block:: python
+
+    from odoo import models, fields, api
+
+    class MyModel(models.Model):
+        _name = 'my.model'
+
+        def button_done(self):
+            self.env['my.model'].with_delay().my_method('a', k=2)
+
+        def my_method_on_max_retries_reached(self):
+            # This method is called when the job reaches the maximum retries and fails
+            # Add your custom logic here
+
+In this example, ``my_method_on_max_retries_reached`` is the method 
+that will be called when the job my_method fails after reaching the maximum retries. 
+You can add your custom logic inside this method to handle the event.
+
 **Job Context**
 
 The context of the recordset of the job, or any recordset passed in arguments of

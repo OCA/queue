@@ -8,10 +8,11 @@
 
 /*
 :Author: David Goodger (goodger@python.org)
-:Id: $Id: html4css1.css 8954 2022-01-20 10:10:25Z milde $
+:Id: $Id: html4css1.css 9511 2024-01-13 09:50:07Z milde $
 :Copyright: This stylesheet has been placed in the public domain.
 
 Default cascading style sheet for the HTML output of Docutils.
+Despite the name, some widely supported CSS2 features are used.
 
 See https://docutils.sourceforge.io/docs/howto/html-stylesheets.html for how to
 customize this style sheet.
@@ -274,7 +275,7 @@ pre.literal-block, pre.doctest-block, pre.math, pre.code {
   margin-left: 2em ;
   margin-right: 2em }
 
-pre.code .ln { color: grey; } /* line numbers */
+pre.code .ln { color: gray; } /* line numbers */
 pre.code, code { background-color: #eeeeee }
 pre.code .comment, code .comment { color: #5C6576 }
 pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
@@ -300,7 +301,7 @@ span.option {
 span.pre {
   white-space: pre }
 
-span.problematic {
+span.problematic, pre.problematic {
   color: red }
 
 span.section-subtitle {
@@ -715,6 +716,28 @@ keys are tries and values are seconds to postpone as integers:</p>
 <li>retries 10 to 15 postponed 30 seconds later</li>
 <li>all subsequent retries postponed 5 minutes later</li>
 </ul>
+<p><strong>Job function: reach max retryable times</strong></p>
+<p>When a job has reached the maximum number of retries and still fails,
+the job’s status will be set to <tt class="docutils literal">Failed</tt>.
+You can define a specific method to handle this event.
+The method should be named <tt class="docutils literal">{method_name}_on_max_retries_reached</tt>.</p>
+<p>Here’s an example:</p>
+<pre class="code python literal-block">
+<span class="kn">from</span> <span class="nn">odoo</span> <span class="kn">import</span> <span class="n">models</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">api</span><span class="w">
+
+</span><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
+</span>    <span class="n">_name</span> <span class="o">=</span> <span class="s1">'my.model'</span><span class="w">
+
+</span>    <span class="k">def</span> <span class="nf">button_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">'my.model'</span><span class="p">]</span><span class="o">.</span><span class="n">with_delay</span><span class="p">()</span><span class="o">.</span><span class="n">my_method</span><span class="p">(</span><span class="s1">'a'</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="w">
+
+</span>    <span class="k">def</span> <span class="nf">my_method_on_max_retries_reached</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+</span>        <span class="c1"># This method is called when the job reaches the maximum retries and fails</span><span class="w">
+</span>        <span class="c1"># Add your custom logic here</span>
+</pre>
+<p>In this example, <tt class="docutils literal">my_method_on_max_retries_reached</tt> is the method
+that will be called when the job my_method fails after reaching the maximum retries.
+You can add your custom logic inside this method to handle the event.</p>
 <p><strong>Job Context</strong></p>
 <p>The context of the recordset of the job, or any recordset passed in arguments of
 a job, is transferred to the job according to an allow-list.</p>
@@ -958,7 +981,9 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 <div class="section" id="maintainers">
 <h2><a class="toc-backref" href="#toc-entry-18">Maintainers</a></h2>
 <p>This module is maintained by the OCA.</p>
-<a class="reference external image-reference" href="https://odoo-community.org"><img alt="Odoo Community Association" src="https://odoo-community.org/logo.png" /></a>
+<a class="reference external image-reference" href="https://odoo-community.org">
+<img alt="Odoo Community Association" src="https://odoo-community.org/logo.png" />
+</a>
 <p>OCA, or the Odoo Community Association, is a nonprofit organization whose
 mission is to support the collaborative development of Odoo features and
 promote its widespread use.</p>
