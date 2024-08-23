@@ -32,11 +32,17 @@ class TestJobAutoDelay(JobCommonCase):
 
     def test_auto_delay_force_sync(self):
         """method forced to run synchronously"""
-        result = (
-            self.env["test.queue.job"]
-            .with_context(queue_job__no_delay=True)
-            .delay_me(1, kwarg=2)
+        with self.assertLogs(level="WARNING") as log_catcher:
+            result = (
+                self.env["test.queue.job"]
+                .with_context(_job_force_sync=True)
+                .delay_me(1, kwarg=2)
+            )
+        self.assertEqual(
+            len(log_catcher.output), 2, "Exactly two warnings (one for each job) should"
+            " be logged"
         )
+        self.assertIn(" ctx key found. NO JOB scheduled. ", log_catcher.output[0])
         self.assertTrue(result, (1, 2))
 
     def test_auto_delay_context_key_set(self):

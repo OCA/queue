@@ -4,6 +4,8 @@
 import logging
 import os
 
+from odoo.tools import config
+
 _logger = logging.getLogger(__name__)
 
 
@@ -36,5 +38,8 @@ def must_run_without_delay(env):
             return True
 
     if env.context.get("queue_job__no_delay"):
-        _logger.warning("`queue_job__no_delay` ctx key found. NO JOB scheduled.")
+        if config.get("test_enable"):
+            _logger.info("`queue_job__no_delay` ctx key found. NO JOB scheduled.")
+        else:
+            _logger.warning("`queue_job__no_delay` ctx key found. NO JOB scheduled.")
         return True
