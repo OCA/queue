@@ -104,7 +104,8 @@ class BaseImportImport(models.TransientModel):
         )
         return attachment
 
-    def _read_csv_attachment(self, attachment, options):
+    @staticmethod
+    def _read_csv_attachment(attachment, options):
         decoded_datas = base64.decodebytes(attachment.datas)
         encoding = options.get(OPT_ENCODING) or "utf-8"
         f = TextIOWrapper(BytesIO(decoded_datas), encoding=encoding)
