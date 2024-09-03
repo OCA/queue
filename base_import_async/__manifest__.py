@@ -5,7 +5,7 @@
 {
     "name": "Asynchronous Import",
     "summary": "Import CSV files in the background",
-    "version": "16.0.1.1.2",
+    "version": "17.0.1.0.0",
     "author": "Akretion, ACSONE SA/NV, Odoo Community Association (OCA)",
     "license": "AGPL-3",
     "website": "https://github.com/OCA/queue",
@@ -16,8 +16,8 @@
     ],
     "assets": {
         "web.assets_backend": [
-            "base_import_async/static/src/js/import.js",
-            "base_import_async/static/src/xml/import.xml",
+            "base_import_async/static/src/js/import_model.esm.js",
+            "base_import_async/static/src/xml/import_data_sidepanel.xml",
         ],
     },
     "installable": True,
