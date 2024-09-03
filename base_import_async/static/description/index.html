@@ -369,10 +369,9 @@ ul.auto-toc {
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! source digest: sha256:e7bcaae80fd59cc8e45b2784606eb026fba7dfcac892ad4a986f51e0dc248e1e
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
-<p><a class="reference external image-reference" href="https://odoo-community.org/page/development-status"><img alt="Production/Stable" src="https://img.shields.io/badge/maturity-Production%2FStable-green.png" /></a> <a class="reference external image-reference" href="http://www.gnu.org/licenses/agpl-3.0-standalone.html"><img alt="License: AGPL-3" src="https://img.shields.io/badge/licence-AGPL--3-blue.png" /></a> <a class="reference external image-reference" href="https://github.com/OCA/queue/tree/16.0/base_import_async"><img alt="OCA/queue" src="https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github" /></a> <a class="reference external image-reference" href="https://translation.odoo-community.org/projects/queue-16-0/queue-16-0-base_import_async"><img alt="Translate me on Weblate" src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png" /></a> <a class="reference external image-reference" href="https://runboat.odoo-community.org/builds?repo=OCA/queue&amp;target_branch=16.0"><img alt="Try me on Runboat" src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png" /></a></p>
-<p>This module extends the standard CSV import functionality
-to import files in the background using the OCA/queue
-framework.</p>
+<p><a class="reference external image-reference" href="https://odoo-community.org/page/development-status"><img alt="Production/Stable" src="https://img.shields.io/badge/maturity-Production%2FStable-green.png" /></a> <a class="reference external image-reference" href="http://www.gnu.org/licenses/agpl-3.0-standalone.html"><img alt="License: AGPL-3" src="https://img.shields.io/badge/licence-AGPL--3-blue.png" /></a> <a class="reference external image-reference" href="https://github.com/OCA/queue/tree/17.0/base_import_async"><img alt="OCA/queue" src="https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github" /></a> <a class="reference external image-reference" href="https://translation.odoo-community.org/projects/queue-17-0/queue-17-0-base_import_async"><img alt="Translate me on Weblate" src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png" /></a> <a class="reference external image-reference" href="https://runboat.odoo-community.org/builds?repo=OCA/queue&amp;target_branch=17.0"><img alt="Try me on Runboat" src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png" /></a></p>
+<p>This module extends the standard CSV import functionality to import
+files in the background using the OCA/queue framework.</p>
 <p><strong>Table of contents</strong></p>
 <div class="contents local topic" id="contents">
 <ul class="simple">
@@ -394,38 +393,34 @@ framework.</p>
 </div>
 <div class="section" id="usage">
 <h1><a class="toc-backref" href="#toc-entry-1">Usage</a></h1>
-<p>The user is presented with a new checkbox in the import
-screen. When selected, the import is delayed in a background
-job.</p>
-<p>This job in turn splits the CSV file in chunks of minimum
-100 lines (or more to align with record boundaries). Each
-chunk is then imported in a separate background job.</p>
-<p>When an import fails, the job is marked as such and the
-user can read the error in the job status. The CSV chunk
-being imported is stored as an attachment to the job, making
-it easy to download it, fix it and run a new import, possibly
-in synchronous mode since the chunks are small.</p>
-<p>Any file that can be imported by the standard import mechanism
-can also be imported in the background.</p>
-<p>This module’s scope is limited to making standard imports
-asynchronous. It does not attempt to transform the data nor
-automate ETL flows.</p>
+<p>The user is presented with a new checkbox in the import screen. When
+selected, the import is delayed in a background job.</p>
+<p>This job in turn splits the CSV file in chunks of minimum 100 lines (or
+more to align with record boundaries). Each chunk is then imported in a
+separate background job.</p>
+<p>When an import fails, the job is marked as such and the user can read
+the error in the job status. The CSV chunk being imported is stored as
+an attachment to the job, making it easy to download it, fix it and run
+a new import, possibly in synchronous mode since the chunks are small.</p>
+<p>Any file that can be imported by the standard import mechanism can also
+be imported in the background.</p>
+<p>This module’s scope is limited to making standard imports asynchronous.
+It does not attempt to transform the data nor automate ETL flows.</p>
 <p>Other modules may benefit from this infrastructure in the following way
 (as illustrated in the test suite):</p>
 <ol class="arabic simple">
-<li>create an instance of <cite>base_import.import</cite> and populate its fields
-(<cite>res_model</cite>, <cite>file</cite>, <cite>file_name</cite>),</li>
-<li>invoke the <cite>do</cite> method with appropriate options
-(<cite>header</cite>, <cite>encoding</cite>, <cite>separator</cite>, <cite>quoting</cite>,
-<cite>use_queue</cite>, <cite>chunk_size</cite>).</li>
+<li>create an instance of base_import.import and populate its fields
+(res_model, file, file_name),</li>
+<li>invoke the do method with appropriate options (header, encoding,
+separator, quoting, use_queue, chunk_size).</li>
 </ol>
 </div>
 <div class="section" id="known-issues-roadmap">
 <h1><a class="toc-backref" href="#toc-entry-2">Known issues / Roadmap</a></h1>
 <ul class="simple">
-<li>There is currently no user interface to control the chunk size,
-which is currently 100 by default. Should this proves to be an issue,
-it is easy to add an option to extend the import screen.</li>
+<li>There is currently no user interface to control the chunk size, which
+is currently 100 by default. Should this proves to be an issue, it is
+easy to add an option to extend the import screen.</li>
 <li>Validation cannot be run in the background.</li>
 </ul>
 </div>
@@ -443,7 +438,7 @@ it is easy to add an option to extend the import screen.</li>
 <p>Bugs are tracked on <a class="reference external" href="https://github.com/OCA/queue/issues">GitHub Issues</a>.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us to smash it by providing a detailed and welcomed
-<a class="reference external" href="https://github.com/OCA/queue/issues/new?body=module:%20base_import_async%0Aversion:%2016.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**">feedback</a>.</p>
+<a class="reference external" href="https://github.com/OCA/queue/issues/new?body=module:%20base_import_async%0Aversion:%2017.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**">feedback</a>.</p>
 <p>Do not contact contributors directly about support or help with technical issues.</p>
 </div>
 <div class="section" id="credits">
@@ -459,8 +454,8 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 <h2><a class="toc-backref" href="#toc-entry-8">Contributors</a></h2>
 <p>Sébastien Beau (Akretion) authored the initial prototype.</p>
 <p>Stéphane Bidoul (ACSONE) extended it to version 1.0 to support
-multi-line records, store data to import as attachments
-and let the user control the asynchronous behaviour.</p>
+multi-line records, store data to import as attachments and let the user
+control the asynchronous behaviour.</p>
 <p>Other contributors include:</p>
 <ul class="simple">
 <li>Anthony Muschang (ACSONE)</li>
@@ -469,20 +464,17 @@ and let the user control the asynchronous behaviour.</p>
 <li>Laurent Mignon (ACSONE)</li>
 <li>Dennis Sluijk (Onestein)</li>
 <li>Guewen Baconnier (Camptocamp)</li>
-<li><dl class="first docutils">
-<dt><a class="reference external" href="https://trobz.com">Trobz</a>:</dt>
-<dd><ul class="first last">
+<li><a class="reference external" href="https://trobz.com">Trobz</a>:<ul>
 <li>Dzung Tran &lt;<a class="reference external" href="mailto:dungtd&#64;trobz.com">dungtd&#64;trobz.com</a>&gt;</li>
 </ul>
-</dd>
-</dl>
 </li>
 <li>Daniel Duque (FactorLibre)</li>
 </ul>
 </div>
 <div class="section" id="other-credits">
 <h2><a class="toc-backref" href="#toc-entry-9">Other credits</a></h2>
-<p>The migration of this module from 15.0 to 16.0 was financially supported by Camptocamp</p>
+<p>The migration of this module from 15.0 to 16.0 was financially supported
+by Camptocamp</p>
 </div>
 <div class="section" id="maintainers">
 <h2><a class="toc-backref" href="#toc-entry-10">Maintainers</a></h2>
@@ -493,7 +485,7 @@ and let the user control the asynchronous behaviour.</p>
 <p>OCA, or the Odoo Community Association, is a nonprofit organization whose
 mission is to support the collaborative development of Odoo features and
 promote its widespread use.</p>
-<p>This module is part of the <a class="reference external" href="https://github.com/OCA/queue/tree/16.0/base_import_async">OCA/queue</a> project on GitHub.</p>
+<p>This module is part of the <a class="reference external" href="https://github.com/OCA/queue/tree/17.0/base_import_async">OCA/queue</a> project on GitHub.</p>
 <p>You are welcome to contribute. To learn how please visit <a class="reference external" href="https://odoo-community.org/page/Contribute">https://odoo-community.org/page/Contribute</a>.</p>
 </div>
 </div>

@@ -17,20 +17,19 @@ Asynchronous Import
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github
-    :target: https://github.com/OCA/queue/tree/16.0/base_import_async
+    :target: https://github.com/OCA/queue/tree/17.0/base_import_async
     :alt: OCA/queue
 .. |badge4| image:: https://img.shields.io/badge/weblate-Translate%20me-F47D42.png
-    :target: https://translation.odoo-community.org/projects/queue-16-0/queue-16-0-base_import_async
+    :target: https://translation.odoo-community.org/projects/queue-17-0/queue-17-0-base_import_async
     :alt: Translate me on Weblate
 .. |badge5| image:: https://img.shields.io/badge/runboat-Try%20me-875A7B.png
-    :target: https://runboat.odoo-community.org/builds?repo=OCA/queue&target_branch=16.0
+    :target: https://runboat.odoo-community.org/builds?repo=OCA/queue&target_branch=17.0
     :alt: Try me on Runboat
 
 |badge1| |badge2| |badge3| |badge4| |badge5|
 
-This module extends the standard CSV import functionality
-to import files in the background using the OCA/queue
-framework.
+This module extends the standard CSV import functionality to import
+files in the background using the OCA/queue framework.
 
 **Table of contents**
 
@@ -40,51 +39,47 @@ framework.
 Usage
 =====
 
-The user is presented with a new checkbox in the import
-screen. When selected, the import is delayed in a background
-job.
+The user is presented with a new checkbox in the import screen. When
+selected, the import is delayed in a background job.
 
-This job in turn splits the CSV file in chunks of minimum
-100 lines (or more to align with record boundaries). Each
-chunk is then imported in a separate background job.
+This job in turn splits the CSV file in chunks of minimum 100 lines (or
+more to align with record boundaries). Each chunk is then imported in a
+separate background job.
 
-When an import fails, the job is marked as such and the
-user can read the error in the job status. The CSV chunk
-being imported is stored as an attachment to the job, making
-it easy to download it, fix it and run a new import, possibly
-in synchronous mode since the chunks are small.
+When an import fails, the job is marked as such and the user can read
+the error in the job status. The CSV chunk being imported is stored as
+an attachment to the job, making it easy to download it, fix it and run
+a new import, possibly in synchronous mode since the chunks are small.
 
-Any file that can be imported by the standard import mechanism
-can also be imported in the background.
+Any file that can be imported by the standard import mechanism can also
+be imported in the background.
 
-This module's scope is limited to making standard imports
-asynchronous. It does not attempt to transform the data nor
-automate ETL flows.
+This module's scope is limited to making standard imports asynchronous.
+It does not attempt to transform the data nor automate ETL flows.
 
 Other modules may benefit from this infrastructure in the following way
 (as illustrated in the test suite):
 
-1. create an instance of `base_import.import` and populate its fields
-   (`res_model`, `file`, `file_name`),
-2. invoke the `do` method with appropriate options
-   (`header`, `encoding`, `separator`, `quoting`,
-   `use_queue`, `chunk_size`).
+1. create an instance of base_import.import and populate its fields
+   (res_model, file, file_name),
+2. invoke the do method with appropriate options (header, encoding,
+   separator, quoting, use_queue, chunk_size).
 
 Known issues / Roadmap
 ======================
 
-* There is currently no user interface to control the chunk size,
-  which is currently 100 by default. Should this proves to be an issue,
-  it is easy to add an option to extend the import screen.
-* Validation cannot be run in the background.
+-  There is currently no user interface to control the chunk size, which
+   is currently 100 by default. Should this proves to be an issue, it is
+   easy to add an option to extend the import screen.
+-  Validation cannot be run in the background.
 
 Changelog
 =========
 
 13.0.1.0.0 (2019-12-20)
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
-* [MIGRATION] from 12.0 branched at rev. a7f8031
+-  [MIGRATION] from 12.0 branched at rev. a7f8031
 
 Bug Tracker
 ===========
@@ -92,7 +87,7 @@ Bug Tracker
 Bugs are tracked on `GitHub Issues <https://github.com/OCA/queue/issues>`_.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us to smash it by providing a detailed and welcomed
-`feedback <https://github.com/OCA/queue/issues/new?body=module:%20base_import_async%0Aversion:%2016.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
+`feedback <https://github.com/OCA/queue/issues/new?body=module:%20base_import_async%0Aversion:%2017.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
 
 Do not contact contributors directly about support or help with technical issues.
 
@@ -100,39 +95,48 @@ Credits
 =======
 
 Authors
-~~~~~~~
+-------
 
 * Akretion
 * ACSONE SA/NV
 
 Contributors
-~~~~~~~~~~~~
+------------
 
 Sébastien Beau (Akretion) authored the initial prototype.
 
 Stéphane Bidoul (ACSONE) extended it to version 1.0 to support
-multi-line records, store data to import as attachments
-and let the user control the asynchronous behaviour.
+multi-line records, store data to import as attachments and let the user
+control the asynchronous behaviour.
 
 Other contributors include:
 
-* Anthony Muschang (ACSONE)
-* David Béal (Akretion)
-* Jonathan Nemry (ACSONE)
-* Laurent Mignon (ACSONE)
-* Dennis Sluijk (Onestein)
-* Guewen Baconnier (Camptocamp)
-* `Trobz <https://trobz.com>`_:
-    * Dzung Tran <dungtd@trobz.com>
-* Daniel Duque (FactorLibre)
+-  Anthony Muschang (ACSONE)
+
+-  David Béal (Akretion)
+
+-  Jonathan Nemry (ACSONE)
+
+-  Laurent Mignon (ACSONE)
+
+-  Dennis Sluijk (Onestein)
+
+-  Guewen Baconnier (Camptocamp)
+
+-  `Trobz <https://trobz.com>`__:
+
+   -  Dzung Tran <dungtd@trobz.com>
+
+-  Daniel Duque (FactorLibre)
 
 Other credits
-~~~~~~~~~~~~~
+-------------
 
-The migration of this module from 15.0 to 16.0 was financially supported by Camptocamp
+The migration of this module from 15.0 to 16.0 was financially supported
+by Camptocamp
 
 Maintainers
-~~~~~~~~~~~
+-----------
 
 This module is maintained by the OCA.
 
@@ -144,6 +148,6 @@ OCA, or the Odoo Community Association, is a nonprofit organization whose
 mission is to support the collaborative development of Odoo features and
 promote its widespread use.
 
-This module is part of the `OCA/queue <https://github.com/OCA/queue/tree/16.0/base_import_async>`_ project on GitHub.
+This module is part of the `OCA/queue <https://github.com/OCA/queue/tree/17.0/base_import_async>`_ project on GitHub.
 
 You are welcome to contribute. To learn how please visit https://odoo-community.org/page/Contribute.
