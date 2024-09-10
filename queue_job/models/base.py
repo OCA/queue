@@ -1,6 +1,7 @@
 # Copyright 2016 Camptocamp
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+from ..utils import must_run_without_delay
 import functools
 import inspect
 import logging
@@ -212,8 +213,7 @@ class Base(models.AbstractModel):
             if (
                 self.env.context.get("job_uuid")
                 or not context_delay
-                or self.env.context.get("_job_force_sync")
-                or self.env.context.get("test_queue_job_no_delay")
+                or must_run_without_delay(self.env)
             ):
                 # we are in the job execution
                 return auto_delay_wrapper.origin(self, *args, **kwargs)
