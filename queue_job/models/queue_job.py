@@ -1,6 +1,6 @@
 # Copyright 2013-2020 Camptocamp SA
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
-
+import random
 import logging
 from datetime import datetime, timedelta
 

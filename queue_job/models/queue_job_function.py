@@ -27,7 +27,8 @@ class QueueJobFunction(models.Model):
         "retry_pattern "
         "related_action_enable "
         "related_action_func_name "
-        "related_action_kwargs ",
+        "related_action_kwargs "
+        "job_function_id ",
     )
 
     def _default_channel(self):
@@ -88,8 +89,8 @@ class QueueJobFunction(models.Model):
         groups = regex_job_function_name.match(self.name)
         if not groups:
             raise exceptions.UserError(_("Invalid job function: {}").format(self.name))
-        model_name = groups[1]
-        method = groups[2]
+        model_name = groups.group(1)
+        method = groups.group(2)
         model = self.env["ir.model"].search([("model", "=", model_name)], limit=1)
         if not model:
             raise exceptions.UserError(_("Model {} not found").format(model_name))
@@ -123,6 +124,29 @@ class QueueJobFunction(models.Model):
     def job_function_name(model_name, method_name):
         return "<{}>.{}".format(model_name, method_name)
 
+    @api.model
+    def _find_or_create_channel(self, channel_path):
+        channel_model = self.env['queue.job.channel']
+        parts = channel_path.split('.')
+        parts.reverse()
+        channel_name = parts.pop()
+        assert channel_name == 'root', "A channel path starts with 'root'"
+        # get the root channel
+        channel = channel_model.search([('name', '=', channel_name)])
+        while parts:
+            channel_name = parts.pop()
+            parent_channel = channel
+            channel = channel_model.search([
+                ('name', '=', channel_name),
+                ('parent_id', '=', parent_channel.id),
+            ], limit=1)
+            if not channel:
+                channel = channel_model.create({
+                    'name': channel_name,
+                    'parent_id': parent_channel.id,
+                })
+        return channel
+
     def job_default_config(self):
         return self.JobConfig(
             channel="root",
@@ -130,6 +154,7 @@ class QueueJobFunction(models.Model):
             related_action_enable=True,
             related_action_func_name=None,
             related_action_kwargs={},
+            job_function_id=None,
         )
 
     def _parse_retry_pattern(self):
@@ -162,6 +187,7 @@ class QueueJobFunction(models.Model):
             related_action_enable=config.related_action.get("enable", True),
             related_action_func_name=config.related_action.get("func_name"),
             related_action_kwargs=config.related_action.get("kwargs"),
+            job_function_id=config.id,
         )
 
     def _retry_pattern_format_error_message(self):
@@ -240,3 +266,9 @@ class QueueJobFunction(models.Model):
         res = super().unlink()
         self.clear_caches()
         return res
+
+    def _register_job(self, model, job_method):
+        func_name = self.job_function_name(model._name, job_method.__name__)
+        if not self.search_count([('name', '=', func_name)]):
+            channel = self._find_or_create_channel(job_method.default_channel)
+            self.create({'name': func_name, 'channel_id': channel.id})

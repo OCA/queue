@@ -1,6 +1,7 @@
 # Copyright 2016 Camptocamp
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+from ..utils import must_run_without_delay
 import functools
 import inspect
 import logging
@@ -10,7 +11,6 @@ from ..job import DelayableRecordset
 from ..delay import Delayable
 
 _logger = logging.getLogger(__name__)
-from ..utils import must_run_without_delay
 
 
 class Base(models.AbstractModel):
