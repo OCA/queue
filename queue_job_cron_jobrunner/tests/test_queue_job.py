@@ -85,3 +85,31 @@ class TestQueueJob(TransactionCase):
         # step has not been done when the parent job has been done
         self.assertEqual(job_record_depends.state, "done", "Processed OK")
         self.assertNotEqual(self.cron.nextcall, datetime(2022, 2, 22, 22, 22, 22))
+
+    def test_acquire_one_job_use_priority(self):
+        with freeze_time("2024-01-01 10:01:01"):
+            self.env["res.partner"].with_delay(priority=3).create({"name": "test"})
+
+        with freeze_time("2024-01-01 10:02:01"):
+            job = (
+                self.env["res.partner"].with_delay(priority=1).create({"name": "test"})
+            )
+
+        with freeze_time("2024-01-01 10:03:01"):
+            self.env["res.partner"].with_delay(priority=2).create({"name": "test"})
+
+        self.assertEqual(self.env["queue.job"]._acquire_one_job(), job.db_record())
+
+    def test_acquire_one_job_consume_the_oldest_first(self):
+        with freeze_time("2024-01-01 10:01:01"):
+            job = (
+                self.env["res.partner"].with_delay(priority=30).create({"name": "test"})
+            )
+
+        with freeze_time("2024-01-01 10:02:01"):
+            self.env["res.partner"].with_delay(priority=30).create({"name": "test"})
+
+        with freeze_time("2024-01-01 10:03:01"):
+            self.env["res.partner"].with_delay(priority=30).create({"name": "test"})
+
+        self.assertEqual(self.env["queue.job"]._acquire_one_job(), job.db_record())
