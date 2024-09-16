@@ -250,6 +250,22 @@
                     string="Cancelled"
                     domain="[('state', '=', 'cancelled')]"
                 />
+                <separator />
+                <filter
+                    name="last_24_hours"
+                    string="Last 24 hours"
+                    domain="[('date_created', '&gt;=', (context_today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"
+                />
+                <filter
+                    name="last_7_days"
+                    string="Last 7 days"
+                    domain="[('date_created', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"
+                />
+                <filter
+                    name="last_30_days"
+                    string="Last 30 days"
+                    domain="[('date_created', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"
+                />
                 <group expand="0" string="Group By">
                     <filter
                         name="group_by_channel"
@@ -285,6 +301,11 @@
                         name="group_by_graph"
                         string="Graph"
                         context="{'group_by': 'graph_uuid'}"
+                    />
+                    <filter
+                        name="group_by_date_created"
+                        string="Created date"
+                        context="{'group_by': 'date_created'}"
                     />
                 </group>
             </search>
