@@ -715,16 +715,28 @@ integers:</p>
 <li>all subsequent retries postponed 5 minutes later</li>
 </ul>
 <p><strong>Job Context</strong></p>
-<p>The context of the recordset of the job, or any recordset passed in
-arguments of a job, is transferred to the job according to an
-allow-list.</p>
-<p>The default allow-list is (“tz”, “lang”, “allowed_company_ids”,
-“force_company”, “active_test”). It can be customized in
-<tt class="docutils literal">Base._job_prepare_context_before_enqueue_keys</tt>. <strong>Bypass jobs on
-running Odoo</strong></p>
-<p>When you are developing (ie: connector modules) you might want to bypass
-the queue job and run your code immediately.</p>
-<p>To do so you can set QUEUE_JOB__NO_DELAY=1 in your enviroment.</p>
+<p>The context of the recordset of the job, or any recordset passed in arguments of
+a job, is transferred to the job according to an allow-list.</p>
+<p>The default allow-list is empty for backward compatibility. The allow-list can
+be customized in <tt class="docutils literal">Base._job_prepare_context_before_enqueue_keys</tt>.</p>
+<p>Example:</p>
+<pre class="code python literal-block">
+<span class="k">class</span> <span class="nc">Base</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">AbstractModel</span><span class="p">):</span><span class="w">
+
+</span>    <span class="n">_inherit</span> <span class="o">=</span> <span class="s2">&quot;base&quot;</span><span class="w">
+
+</span>    <span class="nd">&#64;api</span><span class="o">.</span><span class="n">model</span><span class="w">
+</span>    <span class="k">def</span> <span class="nf">_job_prepare_context_before_enqueue_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+        </span><span class="sd">&quot;&quot;&quot;Keys to keep in context of stored jobs
+
+        Empty by default for backward compatibility.
+        &quot;&quot;&quot;</span><span class="w">
+</span>        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;tz&quot;</span><span class="p">,</span> <span class="s2">&quot;lang&quot;</span><span class="p">,</span> <span class="s2">&quot;allowed_company_ids&quot;</span><span class="p">,</span> <span class="s2">&quot;force_company&quot;</span><span class="p">,</span> <span class="s2">&quot;active_test&quot;</span><span class="p">)</span>
+</pre>
+<p><strong>Bypass jobs on running Odoo</strong></p>
+<p>When you are developing (ie: connector modules) you might want
+to bypass the queue job and run your code immediately.</p>
+<p>To do so you can set <cite>QUEUE_JOB__NO_DELAY=1</cite> in your environment.</p>
 <p><strong>Bypass jobs in tests</strong></p>
 <p>When writing tests on job-related methods is always tricky to deal with
 delayed recordsets. To make your testing life easier you can set
