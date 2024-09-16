@@ -441,7 +441,7 @@ be customized in ``Base._job_prepare_context_before_enqueue_keys``.
 When you are developing (ie: connector modules) you might want
 to bypass the queue job and run your code immediately.
 
-To do so you can set `QUEUE_JOB__NO_DELAY=1` in your enviroment.
+To do so you can set `QUEUE_JOB__NO_DELAY=1` in your environment.
 
 **Bypass jobs in tests**
 
