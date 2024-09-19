@@ -11,3 +11,5 @@
 - Eric Antones \<<eantones@nuobit.com>\>
 - Simone Orsi \<<simone.orsi@camptocamp.com>\>
 - Nguyen Minh Chien \<<chien@trobz.com>\>
+- Tran Quoc Duong \<<duongtq@trobz.com>>
+- Vo Hong Thien \<<thienvh@trobz.com>>

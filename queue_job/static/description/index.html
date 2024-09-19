@@ -8,10 +8,11 @@
 
 /*
 :Author: David Goodger (goodger@python.org)
-:Id: $Id: html4css1.css 8954 2022-01-20 10:10:25Z milde $
+:Id: $Id: html4css1.css 9511 2024-01-13 09:50:07Z milde $
 :Copyright: This stylesheet has been placed in the public domain.
 
 Default cascading style sheet for the HTML output of Docutils.
+Despite the name, some widely supported CSS2 features are used.
 
 See https://docutils.sourceforge.io/docs/howto/html-stylesheets.html for how to
 customize this style sheet.
@@ -274,7 +275,7 @@ pre.literal-block, pre.doctest-block, pre.math, pre.code {
   margin-left: 2em ;
   margin-right: 2em }
 
-pre.code .ln { color: grey; } /* line numbers */
+pre.code .ln { color: gray; } /* line numbers */
 pre.code, code { background-color: #eeeeee }
 pre.code .comment, code .comment { color: #5C6576 }
 pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
@@ -300,7 +301,7 @@ span.option {
 span.pre {
   white-space: pre }
 
-span.problematic {
+span.problematic, pre.problematic {
   color: red }
 
 span.section-subtitle {
@@ -368,7 +369,7 @@ ul.auto-toc {
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! source digest: sha256:b9e93efc8b0afac10d4666c9b35305aac8ac679488e6ac1ad649adb7bac65f4a
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
-<p><a class="reference external image-reference" href="https://odoo-community.org/page/development-status"><img alt="Mature" src="https://img.shields.io/badge/maturity-Mature-brightgreen.png" /></a> <a class="reference external image-reference" href="http://www.gnu.org/licenses/lgpl-3.0-standalone.html"><img alt="License: LGPL-3" src="https://img.shields.io/badge/licence-LGPL--3-blue.png" /></a> <a class="reference external image-reference" href="https://github.com/OCA/queue/tree/17.0/queue_job"><img alt="OCA/queue" src="https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github" /></a> <a class="reference external image-reference" href="https://translation.odoo-community.org/projects/queue-17-0/queue-17-0-queue_job"><img alt="Translate me on Weblate" src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png" /></a> <a class="reference external image-reference" href="https://runboat.odoo-community.org/builds?repo=OCA/queue&amp;target_branch=17.0"><img alt="Try me on Runboat" src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png" /></a></p>
+<p><a class="reference external image-reference" href="https://odoo-community.org/page/development-status"><img alt="Mature" src="https://img.shields.io/badge/maturity-Mature-brightgreen.png" /></a> <a class="reference external image-reference" href="http://www.gnu.org/licenses/lgpl-3.0-standalone.html"><img alt="License: LGPL-3" src="https://img.shields.io/badge/licence-LGPL--3-blue.png" /></a> <a class="reference external image-reference" href="https://github.com/OCA/queue/tree/18.0/queue_job"><img alt="OCA/queue" src="https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github" /></a> <a class="reference external image-reference" href="https://translation.odoo-community.org/projects/queue-18-0/queue-18-0-queue_job"><img alt="Translate me on Weblate" src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png" /></a> <a class="reference external image-reference" href="https://runboat.odoo-community.org/builds?repo=OCA/queue&amp;target_branch=18.0"><img alt="Try me on Runboat" src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png" /></a></p>
 <p>This addon adds an integrated Job Queue to Odoo.</p>
 <p>It allows to postpone method calls executed asynchronously.</p>
 <p>Jobs are executed in the background by a <tt class="docutils literal">Jobrunner</tt>, in their own
@@ -437,7 +438,8 @@ record concerned by the job</li>
 <li><a class="reference internal" href="#credits" id="toc-entry-15">Credits</a><ul>
 <li><a class="reference internal" href="#authors" id="toc-entry-16">Authors</a></li>
 <li><a class="reference internal" href="#contributors" id="toc-entry-17">Contributors</a></li>
-<li><a class="reference internal" href="#maintainers" id="toc-entry-18">Maintainers</a></li>
+<li><a class="reference internal" href="#other-credits" id="toc-entry-18">Other credits</a></li>
+<li><a class="reference internal" href="#maintainers" id="toc-entry-19">Maintainers</a></li>
 </ul>
 </li>
 </ul>
@@ -715,28 +717,16 @@ integers:</p>
 <li>all subsequent retries postponed 5 minutes later</li>
 </ul>
 <p><strong>Job Context</strong></p>
-<p>The context of the recordset of the job, or any recordset passed in arguments of
-a job, is transferred to the job according to an allow-list.</p>
-<p>The default allow-list is empty for backward compatibility. The allow-list can
-be customized in <tt class="docutils literal">Base._job_prepare_context_before_enqueue_keys</tt>.</p>
-<p>Example:</p>
-<pre class="code python literal-block">
-<span class="k">class</span> <span class="nc">Base</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">AbstractModel</span><span class="p">):</span><span class="w">
-
-</span>    <span class="n">_inherit</span> <span class="o">=</span> <span class="s2">&quot;base&quot;</span><span class="w">
-
-</span>    <span class="nd">&#64;api</span><span class="o">.</span><span class="n">model</span><span class="w">
-</span>    <span class="k">def</span> <span class="nf">_job_prepare_context_before_enqueue_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
-        </span><span class="sd">&quot;&quot;&quot;Keys to keep in context of stored jobs
-
-        Empty by default for backward compatibility.
-        &quot;&quot;&quot;</span><span class="w">
-</span>        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;tz&quot;</span><span class="p">,</span> <span class="s2">&quot;lang&quot;</span><span class="p">,</span> <span class="s2">&quot;allowed_company_ids&quot;</span><span class="p">,</span> <span class="s2">&quot;force_company&quot;</span><span class="p">,</span> <span class="s2">&quot;active_test&quot;</span><span class="p">)</span>
-</pre>
-<p><strong>Bypass jobs on running Odoo</strong></p>
-<p>When you are developing (ie: connector modules) you might want
-to bypass the queue job and run your code immediately.</p>
-<p>To do so you can set <cite>QUEUE_JOB__NO_DELAY=1</cite> in your environment.</p>
+<p>The context of the recordset of the job, or any recordset passed in
+arguments of a job, is transferred to the job according to an
+allow-list.</p>
+<p>The default allow-list is (“tz”, “lang”, “allowed_company_ids”,
+“force_company”, “active_test”). It can be customized in
+<tt class="docutils literal">Base._job_prepare_context_before_enqueue_keys</tt>. <strong>Bypass jobs on
+running Odoo</strong></p>
+<p>When you are developing (ie: connector modules) you might want to bypass
+the queue job and run your code immediately.</p>
+<p>To do so you can set QUEUE_JOB__NO_DELAY=1 in your enviroment.</p>
 <p><strong>Bypass jobs in tests</strong></p>
 <p>When writing tests on job-related methods is always tricky to deal with
 delayed recordsets. To make your testing life easier you can set
@@ -936,7 +926,7 @@ delayed, and configured using <tt class="docutils literal">queue.job.function</t
 <p>Bugs are tracked on <a class="reference external" href="https://github.com/OCA/queue/issues">GitHub Issues</a>.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us to smash it by providing a detailed and welcomed
-<a class="reference external" href="https://github.com/OCA/queue/issues/new?body=module:%20queue_job%0Aversion:%2017.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**">feedback</a>.</p>
+<a class="reference external" href="https://github.com/OCA/queue/issues/new?body=module:%20queue_job%0Aversion:%2018.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**">feedback</a>.</p>
 <p>Do not contact contributors directly about support or help with technical issues.</p>
 </div>
 <div class="section" id="credits">
@@ -964,18 +954,27 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 <li>Eric Antones &lt;<a class="reference external" href="mailto:eantones&#64;nuobit.com">eantones&#64;nuobit.com</a>&gt;</li>
 <li>Simone Orsi &lt;<a class="reference external" href="mailto:simone.orsi&#64;camptocamp.com">simone.orsi&#64;camptocamp.com</a>&gt;</li>
 <li>Nguyen Minh Chien &lt;<a class="reference external" href="mailto:chien&#64;trobz.com">chien&#64;trobz.com</a>&gt;</li>
+<li>Tran Quoc Duong &lt;<a class="reference external" href="mailto:duongtq&#64;trobz.com">duongtq&#64;trobz.com</a>&gt;</li>
+<li>Vo Hong Thien &lt;<a class="reference external" href="mailto:thienvh&#64;trobz.com">thienvh&#64;trobz.com</a>&gt;</li>
 </ul>
 </div>
+<div class="section" id="other-credits">
+<h2><a class="toc-backref" href="#toc-entry-18">Other credits</a></h2>
+<p>The migration of this module from 17.0 to 18.0 was financially supported
+by Camptocamp.</p>
+</div>
 <div class="section" id="maintainers">
-<h2><a class="toc-backref" href="#toc-entry-18">Maintainers</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-19">Maintainers</a></h2>
 <p>This module is maintained by the OCA.</p>
-<a class="reference external image-reference" href="https://odoo-community.org"><img alt="Odoo Community Association" src="https://odoo-community.org/logo.png" /></a>
+<a class="reference external image-reference" href="https://odoo-community.org">
+<img alt="Odoo Community Association" src="https://odoo-community.org/logo.png" />
+</a>
 <p>OCA, or the Odoo Community Association, is a nonprofit organization whose
 mission is to support the collaborative development of Odoo features and
 promote its widespread use.</p>
 <p>Current <a class="reference external" href="https://odoo-community.org/page/maintainer-role">maintainer</a>:</p>
 <p><a class="reference external image-reference" href="https://github.com/guewen"><img alt="guewen" src="https://github.com/guewen.png?size=40px" /></a></p>
-<p>This module is part of the <a class="reference external" href="https://github.com/OCA/queue/tree/17.0/queue_job">OCA/queue</a> project on GitHub.</p>
+<p>This module is part of the <a class="reference external" href="https://github.com/OCA/queue/tree/18.0/queue_job">OCA/queue</a> project on GitHub.</p>
 <p>You are welcome to contribute. To learn how please visit <a class="reference external" href="https://odoo-community.org/page/Contribute">https://odoo-community.org/page/Contribute</a>.</p>
 </div>
 </div>

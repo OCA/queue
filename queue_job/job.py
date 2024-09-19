@@ -224,9 +224,7 @@ class Job:
         """
         stored = cls.db_records_from_uuids(env, [job_uuid])
         if not stored:
-            raise NoSuchJobError(
-                "Job %s does no longer exist in the storage." % job_uuid
-            )
+            raise NoSuchJobError(f"Job {job_uuid} does no longer exist in the storage.")
         return cls._load_from_db_record(stored)
 
     @classmethod
@@ -424,11 +422,11 @@ class Job:
             args = ()
         if isinstance(args, list):
             args = tuple(args)
-        assert isinstance(args, tuple), "%s: args are not a tuple" % args
+        assert isinstance(args, tuple), f"{args}: args are not a tuple"
         if kwargs is None:
             kwargs = {}
 
-        assert isinstance(kwargs, dict), "%s: kwargs are not a dict" % kwargs
+        assert isinstance(kwargs, dict), f"{kwargs}: kwargs are not a dict"
 
         if not _is_model_method(func):
             raise TypeError("Job accepts only methods of Models")
@@ -577,7 +575,7 @@ class Job:
     def cancel_dependent_jobs(self):
         sql = self._get_common_dependent_jobs_query()
         self.env.cr.execute(sql, (CANCELLED, self.uuid, CANCELLED, WAIT_DEPENDENCIES))
-        self.env["queue.job"].invalidate_cache(["state"])
+        self.env["queue.job"].invalidate_model(["state"])
 
     def store(self):
         """Store the Job"""

@@ -211,7 +211,7 @@ class QueueJobFunction(models.Model):
                     ) from ex
 
     def _retry_value_type_check(self, value):
-        if isinstance(value, (tuple, list)):
+        if isinstance(value, (tuple | list)):
             if len(value) != 2:
                 raise ValueError
             [self._retry_value_type_check(element) for element in value]

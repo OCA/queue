@@ -31,9 +31,9 @@
         <field name="name">queue.job.channel.tree</field>
         <field name="model">queue.job.channel</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="complete_name" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -52,7 +52,7 @@
     <record id="action_queue_job_channel" model="ir.actions.act_window">
         <field name="name">Channels</field>
         <field name="res_model">queue.job.channel</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="context">{}</field>
         <field name="view_id" ref="view_queue_job_channel_tree" />
     </record>

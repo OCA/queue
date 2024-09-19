@@ -104,7 +104,7 @@ class QueueJob(models.Model):
     date_done = fields.Datetime(readonly=True)
     exec_time = fields.Float(
         string="Execution Time (avg)",
-        group_operator="avg",
+        aggregator="avg",
         help="Time required to execute this job in seconds. Average when grouped.",
     )
     date_cancelled = fields.Datetime(readonly=True)
@@ -210,8 +210,9 @@ class QueueJob(models.Model):
         }
         return {
             "id": self.id,
-            "title": "<strong>{}</strong><br/>{}".format(
-                html_escape(self.display_name), html_escape(self.func_string)
+            "title": (
+                f"<strong>{html_escape(self.display_name)}</strong><br/>"
+                f"{html_escape(self.func_string)}"
             ),
             "color": colors.get(self.state, default)[0],
             "border": colors.get(self.state, default)[1],
@@ -326,18 +327,18 @@ class QueueJob(models.Model):
             elif state == CANCELLED:
                 job_.set_cancelled(result=result)
                 job_.store()
-                record.env["queue.job"].flush()
+                record.env["queue.job"].flush_model()
                 job_.cancel_dependent_jobs()
             else:
-                raise ValueError("State not supported: %s" % state)
+                raise ValueError(f"State not supported: {state}")
 
     def button_done(self):
-        result = _("Manually set to done by %s") % self.env.user.name
+        result = _("Manually set to done by {}").format(self.env.user.name)
         self._change_job_state(DONE, result=result)
         return True
 
     def button_cancelled(self):
-        result = _("Cancelled by %s") % self.env.user.name
+        result = _("Cancelled by {}").format(self.env.user.name)
         self._change_job_state(CANCELLED, result=result)
         return True
 

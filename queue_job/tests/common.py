@@ -443,10 +443,6 @@ def load_doctests(module):
         Also extend the DocTestCase class trivially to fit the class teardown
         that Odoo backported for its own test classes from Python 3.8.
         """
-        # UP036 Version block is outdated for minimum Python version
-        # if sys.version_info < (3, 8):
-        #     doctest.DocTestCase.doClassCleanups = lambda: None
-        #     doctest.DocTestCase.tearDown_exceptions = []
 
         for idx, test in enumerate(doctest.DocTestSuite(module)):
             odoo_test = OdooDocTestCase(test, seq=idx)
