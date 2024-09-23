@@ -1,0 +1,4 @@
+#. module: ooops_account_move_import_queue_context
+#: model:ir.model,name:ooops_account_move_import_queue_context.model_base
+msgid "Base"
+msgstr ""
