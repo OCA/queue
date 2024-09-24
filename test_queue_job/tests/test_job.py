@@ -527,9 +527,7 @@ class TestJobModel(JobCommonCase):
         stored = self._create_job()
         stored.button_done()
         self.assertEqual(stored.state, DONE)
-        self.assertEqual(
-            stored.result, "Manually set to done by %s" % self.env.user.name
-        )
+        self.assertEqual(stored.result, f"Manually set to done by {self.env.user.name}")
 
     def test_button_done_enqueue_waiting_dependencies(self):
         job_root = Job(self.env["test.queue.job"].testing_method)

@@ -143,11 +143,12 @@ class TestDelayMocks(common.TransactionCase):
                 "identity_key=<function identity_exact at 0x[0-9a-fA-F]+>, "
                 "max_retries=1, priority=15\\) was not enqueued\\.\n"
                 "Actual enqueued jobs:\n"
-                r" \* <test.queue.job\({record_id},\)>.testing_method\(1, foo=2\) with "
+                rf" \* <test.queue.job\({recordset.id},\)>.testing_method"
+                r"\(1, foo=2\) with "
                 r"properties \(priority=15, max_retries=1, eta=15, description=Test, "
                 r"channel=root.test, "
                 r"identity_key=<function identity_exact at 0x[0-9a-fA-F]+>\)"
-            ).format(record_id=recordset.id)
+            )
             with self.assertRaisesRegex(AssertionError, message):
                 trap.assert_enqueued_job(
                     self.env["test.queue.job"].testing_method,

@@ -4,7 +4,7 @@ from odoo import exceptions
 
 class TestJobFunction(common.TransactionCase):
     def setUp(self):
-        super(TestJobFunction, self).setUp()
+        super().setUp()
         self.test_function_model = self.env.ref(
             "queue_job.job_function_queue_job__test_job"
         )
