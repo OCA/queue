@@ -17,6 +17,6 @@ class JobCommonCase(common.TransactionCase):
     def _create_job(self):
         test_job = Job(self.method)
         test_job.store()
-        stored = Job.db_record_from_uuid(self.env, test_job.uuid)
+        stored = Job.db_records_from_uuids(self.env, [test_job.uuid])
         self.assertEqual(len(stored), 1)
         return stored
