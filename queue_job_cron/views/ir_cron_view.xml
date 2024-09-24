@@ -5,11 +5,11 @@
         <field name="model">ir.cron</field>
         <field name="inherit_id" ref="base.ir_cron_view_form" />
         <field name="arch" type="xml">
-            <field name="doall" position="after">
+            <field name="priority" position="after">
                 <field name="run_as_queue_job" />
                 <field
                     name="no_parallel_queue_job_run"
-                    attrs="{'invisible': [('run_as_queue_job', '=', False)]}"
+                    invisible="run_as_queue_job == False"
                 />
                 <field
                     name="channel_id"
