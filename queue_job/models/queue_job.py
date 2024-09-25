@@ -75,9 +75,6 @@ class QueueJob(models.Model):
 
     model_name = fields.Char(string="Model", readonly=True)
     method_name = fields.Char(readonly=True)
-    # record_ids field is only for backward compatibility (e.g. used in related
-    # actions), can be removed (replaced by "records") in 14.0
-    record_ids = JobSerialized(compute="_compute_record_ids", base_type=list)
     records = JobSerialized(
         string="Record(s)",
         readonly=True,
@@ -141,11 +138,6 @@ class QueueJob(models.Model):
                 "ON queue_job (identity_key) WHERE state in ('pending', "
                 "'enqueued', 'wait_dependencies') AND identity_key IS NOT NULL;"
             )
-
-    @api.depends("records")
-    def _compute_record_ids(self):
-        for record in self:
-            record.record_ids = record.records.ids
 
     @api.depends("dependencies")
     def _compute_dependency_graph(self):

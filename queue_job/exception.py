@@ -34,10 +34,5 @@ class RetryableJobError(JobError):
         self.ignore_retry = ignore_retry
 
 
-# TODO: remove support of NothingToDo: too dangerous
-class NothingToDoJob(JobError):
-    """The Job has nothing to do."""
-
-
 class ChannelNotFound(BaseQueueJobError):
     """A channel could not be found"""

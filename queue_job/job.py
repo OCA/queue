@@ -41,19 +41,6 @@ RETRY_INTERVAL = 10 * 60  # seconds
 _logger = logging.getLogger(__name__)
 
 
-# TODO remove in 15.0 or 16.0, used to keep compatibility as the
-# class has been moved in 'delay'.
-def DelayableRecordset(*args, **kwargs):
-    # prevent circular import
-    from .delay import DelayableRecordset as dr
-
-    _logger.debug(
-        "DelayableRecordset moved from the queue_job.job"
-        " to the queue_job.delay python module"
-    )
-    return dr(*args, **kwargs)
-
-
 def identity_exact(job_):
     """Identity function using the model, method and all arguments as key
 
@@ -368,12 +355,6 @@ class Job:
             self.uuid,
         )
         return self
-
-    @staticmethod
-    def db_record_from_uuid(env, job_uuid):
-        # TODO remove in 15.0 or 16.0
-        _logger.debug("deprecated, use 'db_records_from_uuids")
-        return Job.db_records_from_uuids(env, [job_uuid])
 
     @staticmethod
     def db_records_from_uuids(env, job_uuids):

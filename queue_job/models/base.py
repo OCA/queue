@@ -5,8 +5,7 @@ import functools
 
 from odoo import api, models
 
-from ..delay import Delayable
-from ..job import DelayableRecordset
+from ..delay import Delayable, DelayableRecordset
 from ..utils import must_run_without_delay
 
 
@@ -168,9 +167,6 @@ class Base(models.AbstractModel):
         description, identity_key, ...) can be returned in a dictionary by a
         method named after the name of the method suffixed by ``_job_options``
         which takes the same parameters as the initial method.
-
-        It is still possible to force synchronous execution of the method by
-        setting a key ``_job_force_sync`` to True in the environment context.
 
         Example patching the "foo" method to be automatically delayed as job
         (the job options method is optional):

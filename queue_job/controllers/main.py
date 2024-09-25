@@ -15,7 +15,7 @@ from odoo import SUPERUSER_ID, _, api, http, registry
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
 from ..delay import chain, group
-from ..exception import FailedJobError, NothingToDoJob, RetryableJobError
+from ..exception import FailedJobError, RetryableJobError
 from ..job import ENQUEUED, Job
 
 _logger = logging.getLogger(__name__)
@@ -113,15 +113,6 @@ class RunJobController(http.Controller):
 
                 _logger.debug("%s OperationalError, postponed", job)
                 raise RetryableJobError(err.pgerror, seconds=PG_RETRY) from err
-
-        except NothingToDoJob as err:
-            if str(err):
-                msg = str(err)
-            else:
-                msg = _("Job interrupted and set to Done: nothing to do.")
-            job.set_done(msg)
-            job.store()
-            env.cr.commit()
 
         except RetryableJobError as err:
             # delay the job later, requeue
