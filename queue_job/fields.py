@@ -6,12 +6,13 @@ from datetime import date, datetime
 
 import dateutil
 import lxml
+from psycopg2.extras import Json as PsycopgJson
 
 from odoo import fields, models
 from odoo.tools.func import lazy
 
 
-class JobSerialized(fields.Field):
+class JobSerialized(fields.Json):
     """Provide the storage for job fields stored as json
 
     A base_type must be set, it must be dict, list or tuple.
@@ -23,7 +24,7 @@ class JobSerialized(fields.Field):
     """
 
     type = "job_serialized"
-    column_type = ("text", "text")
+    _column_type = ("jsonb", "jsonb")
 
     _base_type = None
 
@@ -52,7 +53,8 @@ class JobSerialized(fields.Field):
         return default_json
 
     def convert_to_column(self, value, record, values=None, validate=True):
-        return self.convert_to_cache(value, record, validate=validate)
+        value = self.convert_to_cache(value, record, validate=validate)
+        return PsycopgJson(value)
 
     def convert_to_cache(self, value, record, validate=True):
         # cache format: json.dumps(value) or None
@@ -63,7 +65,15 @@ class JobSerialized(fields.Field):
 
     def convert_to_record(self, value, record):
         default = self._base_type_default_json(record.env)
-        return json.loads(value or default, cls=JobDecoder, env=record.env)
+        value = value or default
+        if not isinstance(value, (str | bytes | bytearray)):
+            value = json.dumps(value, cls=JobEncoder)
+        return json.loads(value, cls=JobDecoder, env=record.env)
+
+    def convert_to_export(self, value, record):
+        if not value:
+            return ""
+        return json.dumps(value, cls=JobEncoder)
 
 
 class JobEncoder(json.JSONEncoder):
