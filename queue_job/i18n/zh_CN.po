@@ -24,8 +24,8 @@ msgid ""
 "retries is 0, the number of retries is infinite.</span>"
 msgstr ""
 "<br/>\n"
-"                            <span class=\"oe_grey oe_inline\"> "
-"如果最大重试次数设置为0，则表示重试次数是无限的。</span>"
+"                            <span class=\"oe_grey oe_inline\"> 如果最大重试次"
+"数设置为0，则表示重试次数是无限的。</span>"
 
 #. module: queue_job
 #. odoo-python
@@ -391,7 +391,6 @@ msgstr "确认后, 出现提示消息。"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "如果勾选此项， 某些消息将会产生传递错误。"
 
@@ -757,11 +756,6 @@ msgid "Retry Pattern (serialized)"
 msgstr "重试模式（已序列化）"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "短信传递错误"
-
-#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
 msgid "Set all selected jobs to done"
 msgstr "将所有选定的作业设置为完成"
@@ -845,8 +839,8 @@ msgid ""
 "See the module description for details."
 msgstr ""
 "当在作业上使用“相关操作”按钮时所执行的动作。默认动作是打开与该作业相关的记录"
-"视图。此配置作为一个字典，包含可选键：enable, func_name, kwargs。 "
-"详细配置请参阅模块说明。"
+"视图。此配置作为一个字典，包含可选键：enable, func_name, kwargs。 详细配置请"
+"参阅模块说明。"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__max_retries
@@ -899,13 +893,13 @@ msgstr "UUID"
 msgid ""
 "Unexpected format of Related Action for {}.\n"
 "Example of valid format:\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs"
-"\" {{\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", "
+"\"kwargs\" {{\"limit\": 10}}}}"
 msgstr ""
 "对于 {}，关联操作的格式不符合预期。 \n"
 "有效格式的示例：\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" {{"
-"\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", "
+"\"kwargs\" {{\"limit\": 10}}}}"
 
 #. module: queue_job
 #. odoo-python
@@ -939,6 +933,9 @@ msgstr "重新排队向导所选的作业"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr "工作进程PID"
+
+#~ msgid "SMS Delivery error"
+#~ msgstr "短信传递错误"
 
 #~ msgid "Last Modified on"
 #~ msgstr "最后修改日"
