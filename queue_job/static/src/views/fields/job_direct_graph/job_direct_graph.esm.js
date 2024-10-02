@@ -1,13 +1,14 @@
 /* @odoo-module */
 /* global vis */
 
-import {_t} from "@web/core/l10n/translation";
-import {Component, onWillStart, onMounted, useRef, useState} from "@odoo/owl";
+import {Component, onMounted, onWillStart, useRef, useState} from "@odoo/owl";
 import {loadCSS, loadJS} from "@web/core/assets";
+
+import {_t} from "@web/core/l10n/translation";
 import {registry} from "@web/core/registry";
 import {standardFieldProps} from "@web/views/fields/standard_field_props";
-import {useService} from "@web/core/utils/hooks";
 import {useRecordObserver} from "@web/model/relational_model/utils";
+import {useService} from "@web/core/utils/hooks";
 
 export class JobDirectGraph extends Component {
     setup() {
@@ -17,7 +18,6 @@ export class JobDirectGraph extends Component {
         this.rootRef = useRef("root_vis");
         this.network = null;
         this.state = useState({});
-
 
         onWillStart(async () => {
             await loadJS("/queue_job/static/lib/vis/vis-network.min.js");
@@ -59,13 +59,13 @@ export class JobDirectGraph extends Component {
             this.$el.empty();
         }
 
-        let nodes = (this.state.value.nodes || []).map((node) => {
+        const nodes = (this.state.value.nodes || []).map((node) => {
             node.title = this.htmlTitle(node.title || "");
-            node.label = _t("Job %(id)s", {'id': node.id});
+            node.label = _t("Job %(id)s", {id: node.id});
             return node;
         });
 
-        let edges = (this.state.value.edges || []).map((edge) => {
+        const edges = (this.state.value.edges || []).map((edge) => {
             const edgeFrom = edge[0];
             const edgeTo = edge[1];
             return {
@@ -98,9 +98,9 @@ export class JobDirectGraph extends Component {
             // job selected
             network.selectNodes([this.resId]);
         });
-        network.on("click",  (params) => {
+        network.on("click", (params) => {
             if (params.nodes.length > 0) {
-                let resId = params.nodes[0];
+                const resId = params.nodes[0];
                 if (resId !== this.resId) {
                     this.openDependencyJob(resId);
                 }
