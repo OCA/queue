@@ -407,6 +407,13 @@ msgid "Is Follower"
 msgstr "Ist Abonnent"
 
 #. module: queue_job
+#. odoo-javascript
+#: code:addons/queue_job/static/src/views/fields/job_direct_graph/job_direct_graph.esm.js:0
+#, python-format
+msgid "Job %(id)s"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job_channel
 msgid "Job Channels"
 msgstr "Job-Kanäle"
