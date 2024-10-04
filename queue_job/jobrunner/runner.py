@@ -159,10 +159,15 @@ from .channels import ENQUEUED, NOT_DONE, PENDING, ChannelManager
 
 SELECT_TIMEOUT = 60
 ERROR_RECOVERY_DELAY = 5
+PG_ADVISORY_LOCK_ID = 2293787760715711918
 
 _logger = logging.getLogger(__name__)
 
 select = selectors.DefaultSelector
+
+
+class MasterElectionLost(Exception):
+    pass
 
 
 # Unfortunately, it is not possible to extend the Odoo
@@ -264,10 +269,15 @@ class Database:
         self.db_name = db_name
         connection_info = _connection_info_for(db_name)
         self.conn = psycopg2.connect(**connection_info)
-        self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        self.has_queue_job = self._has_queue_job()
-        if self.has_queue_job:
-            self._initialize()
+        try:
+            self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+            self.has_queue_job = self._has_queue_job()
+            if self.has_queue_job:
+                self._acquire_master_lock()
+                self._initialize()
+        except BaseException:
+            self.close()
+            raise
 
     def close(self):
         # pylint: disable=except-pass
@@ -279,6 +289,14 @@ class Database:
         except Exception:
             pass
         self.conn = None
+
+    def _acquire_master_lock(self):
+        """Acquire the master runner lock or raise MasterElectionLost"""
+        with closing(self.conn.cursor()) as cr:
+            cr.execute("SELECT pg_try_advisory_lock(%s)", (PG_ADVISORY_LOCK_ID,))
+            if not cr.fetchone()[0]:
+                msg = f"could not acquire master runner lock on {self.db_name}"
+                raise MasterElectionLost(msg)
 
     def _has_queue_job(self):
         with closing(self.conn.cursor()) as cr:
@@ -415,7 +433,8 @@ class QueueJobRunner:
         self.db_by_name = {}
 
     def initialize_databases(self):
-        for db_name in self.get_db_names():
+        for db_name in sorted(self.get_db_names()):
+            # sorting is important to avoid deadlocks in acquiring the master lock
             db = Database(db_name)
             if db.has_queue_job:
                 self.db_by_name[db_name] = db
@@ -423,6 +442,8 @@ class QueueJobRunner:
                     for job_data in cr:
                         self.channel_manager.notify(db_name, *job_data)
                 _logger.info("queue job runner ready for db %s", db_name)
+            else:
+                db.close()
 
     def run_jobs(self):
         now = _odoo_now()
@@ -509,7 +530,7 @@ class QueueJobRunner:
         while not self._stop:
             # outer loop does exception recovery
             try:
-                _logger.info("initializing database connections")
+                _logger.debug("initializing database connections")
                 # TODO: how to detect new databases or databases
                 #       on which queue_job is installed after server start?
                 self.initialize_databases()
@@ -524,6 +545,14 @@ class QueueJobRunner:
             except InterruptedError:
                 # Interrupted system call, i.e. KeyboardInterrupt during select
                 self.stop()
+            except MasterElectionLost as e:
+                _logger.debug(
+                    "master election lost: %s, sleeping %ds and retrying",
+                    e,
+                    ERROR_RECOVERY_DELAY,
+                )
+                self.close_databases()
+                time.sleep(ERROR_RECOVERY_DELAY)
             except Exception:
                 _logger.exception(
                     "exception: sleeping %ds and retrying", ERROR_RECOVERY_DELAY
