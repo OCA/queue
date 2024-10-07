@@ -18,7 +18,8 @@ Other contributors include:
 
 - Guewen Baconnier (Camptocamp)
 
-- [Trobz](https://trobz.com):  
+- [Trobz](https://trobz.com):
   - Dzung Tran \<<dungtd@trobz.com>\>
+  - Do Anh Duy \<<duyda@trobz.com>\>
 
 - Daniel Duque (FactorLibre)

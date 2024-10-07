@@ -12,6 +12,7 @@ from os.path import splitext
 from odoo import _, api, models
 from odoo.models import fix_import_export_id_paths
 
+from odoo.addons.base_import.models.base_import import ImportValidationError
 from odoo.addons.queue_job.exception import FailedJobError
 
 # options defined in base_import/import.js
@@ -42,8 +43,8 @@ class BaseImportImport(models.TransientModel):
             data, import_fields = self._convert_import_data(fields, options)
             # Parse date and float field
             data = self._parse_import_data(data, import_fields, options)
-        except ValueError as e:
-            return {"messages": [{"type": "error", "message": str(e), "record": False}]}
+        except (ImportValidationError, ValueError) as e:
+            return {"messages": [e.__dict__]}
 
         # get the translated model name to build
         # a meaningful job description
