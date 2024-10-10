@@ -9,17 +9,22 @@ from odoo.addons.queue_job.job import Job
 class TestJobSubscribe(common.TransactionCase):
     def setUp(self):
         super().setUp()
+        self.env = self.env(context=dict(self.env.context, tracking_disable=True))
         grp_queue_job_manager = self.ref("queue_job.group_queue_job_manager")
         self.other_partner_a = self.env["res.partner"].create(
             {"name": "My Company a", "is_company": True, "email": "test@tes.ttest"}
         )
-        self.other_user_a = self.env["res.users"].create(
-            {
-                "partner_id": self.other_partner_a.id,
-                "login": "my_login a",
-                "name": "my user",
-                "groups_id": [(4, grp_queue_job_manager)],
-            }
+        self.other_user_a = (
+            self.env["res.users"]
+            .with_context(no_reset_password=True)
+            .create(
+                {
+                    "partner_id": self.other_partner_a.id,
+                    "login": "my_login a",
+                    "name": "my user",
+                    "groups_id": [(4, grp_queue_job_manager)],
+                }
+            )
         )
         self.other_partner_b = self.env["res.partner"].create(
             {"name": "My Company b", "is_company": True, "email": "test@tes.ttest"}
