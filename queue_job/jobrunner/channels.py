@@ -2,12 +2,14 @@
 # Copyright 2015-2016 Camptocamp SA
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 import logging
+import os
 from functools import total_ordering
 from heapq import heappop, heappush
 from weakref import WeakValueDictionary
 
 from ..exception import ChannelNotFound
 from ..job import CANCELLED, DONE, ENQUEUED, FAILED, PENDING, STARTED, WAIT_DEPENDENCIES
+from . import queue_job_config
 
 NOT_DONE = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, STARTED, FAILED)
 
@@ -411,7 +413,7 @@ class Channel(object):
         self._running = SafeSet()
         self._failed = SafeSet()
         self._pause_until = 0  # utc seconds since the epoch
-        self.capacity = capacity
+        self.capacity = capacity or _default_subchannel_capacity()
         self.throttle = throttle  # seconds
         self.sequential = sequential
 
@@ -933,7 +935,7 @@ class ChannelManager(object):
         If the channel does not exist it is created.
         The configuration is applied on the channel before returning it.
         If some of the parent channels are missing when creating a subchannel,
-        the parent channels are auto created with an infinite capacity
+        the parent channels are auto created with the default subchannel capacity
         (except for the root channel, which defaults to a capacity of 1
         when not configured explicity).
         """
@@ -1077,3 +1079,11 @@ class ChannelManager(object):
 
     def get_wakeup_time(self):
         return self._root_channel.get_wakeup_time()
+
+
+def _default_subchannel_capacity():
+    capacity = os.environ.get(
+        "ODOO_QUEUE_JOB_DEFAULT_SUBCHANNEL_CAPACITY"
+    ) or queue_job_config.get("default_subchannel_capacity")
+    if capacity:
+        return int(capacity)

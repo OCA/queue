@@ -5,6 +5,9 @@
     - ``ODOO_QUEUE_JOB_CHANNELS=root:4`` or any other channels configuration.
       The default is ``root:1``
 
+    - ``ODOO_QUEUE_JOB_DEFAULT_SUBCHANNEL_CAPACITY=1``
+      The default is infinite capacity.
+
     - if ``xmlrpc_port`` is not set: ``ODOO_QUEUE_JOB_PORT=8069``
 
   * Start Odoo with ``--load=web,queue_job``
@@ -23,6 +26,7 @@
   (...)
   [queue_job]
   channels = root:2
+  # default_subchannel_capacity = 1
 
 * Confirm the runner is starting correctly by checking the odoo log file:
 
