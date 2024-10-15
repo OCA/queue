@@ -17,7 +17,12 @@ queue
 
 [//]: # (addons)
 
-This part will be replaced when running the oca-gen-addons-table script from OCA/maintainer-tools.
+Available addons
+----------------
+addon | version | maintainers | summary
+--- | --- | --- | ---
+[queue_job](queue_job/) | 18.0.1.0.0 | [![guewen](https://github.com/guewen.png?size=30px)](https://github.com/guewen) | Job Queue
+[test_queue_job](test_queue_job/) | 18.0.1.0.0 |  | Queue Job Tests
 
 [//]: # (end addons)
 

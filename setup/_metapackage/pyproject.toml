@@ -1,0 +1,12 @@
+[project]
+name = "odoo-addons-oca-queue"
+version = "18.0.20241015.0"
+dependencies = [
+    "odoo-addon-queue_job==18.0.*",
+    "odoo-addon-test_queue_job==18.0.*",
+]
+classifiers=[
+    "Programming Language :: Python",
+    "Framework :: Odoo",
+    "Framework :: Odoo :: 18.0",
+]
