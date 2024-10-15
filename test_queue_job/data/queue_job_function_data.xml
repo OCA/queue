@@ -1,0 +1,65 @@
+<odoo noupdate="1">
+    <record id="job_function_test_queue_job_testing_method" model="queue.job.function">
+        <field name="model_id" ref="test_queue_job.model_test_queue_job" />
+        <field name="method">testing_method</field>
+        <field name="related_action" eval='{"func_name": "testing_related_method"}' />
+    </record>
+    <record
+        id="job_function_test_queue_job_job_with_retry_pattern"
+        model="queue.job.function"
+    >
+        <field name="model_id" ref="test_queue_job.model_test_queue_job" />
+        <field name="method">job_with_retry_pattern</field>
+        <field name="retry_pattern" eval="{1: 60, 2: 180, 3: 10, 5: 300}" />
+    </record>
+    <record
+        id="job_function_test_queue_job_job_with_retry_pattern__no_zero"
+        model="queue.job.function"
+    >
+        <field name="model_id" ref="test_queue_job.model_test_queue_job" />
+        <field name="method">job_with_retry_pattern__no_zero</field>
+        <field name="retry_pattern" eval="{3: 180}" />
+    </record>
+    <record
+        id="job_function_test_queue_channel_job_sub_channel"
+        model="queue.job.function"
+    >
+        <field name="model_id" ref="test_queue_job.model_test_queue_channel" />
+        <field name="method">job_sub_channel</field>
+        <field name="channel_id" ref="channel_subsub" />
+    </record>
+    <record id="job_function_test_queue_channel_job_a" model="queue.job.function">
+        <field name="model_id" ref="test_queue_job.model_test_queue_channel" />
+        <field name="method">job_a</field>
+    </record>
+    <record
+        id="job_function_test_related_action_testing_related_action__return_none"
+        model="queue.job.function"
+    >
+        <field name="model_id" ref="test_queue_job.model_test_related_action" />
+        <field name="method">testing_related_action__return_none</field>
+        <field name="related_action" eval='{"enable": False}' />
+    </record>
+    <record
+        id="job_function_test_related_action_testing_related_action__kwargs"
+        model="queue.job.function"
+    >
+        <field name="model_id" ref="test_queue_job.model_test_related_action" />
+        <field name="method">testing_related_action__kwargs</field>
+        <field
+            name="related_action"
+            eval='{"func_name": "testing_related_method", "kwargs": {"b": 4}}'
+        />
+    </record>
+    <record
+        id="job_function_test_related_action_testing_related_action__store"
+        model="queue.job.function"
+    >
+        <field name="model_id" ref="test_queue_job.model_test_related_action" />
+        <field name="method">testing_related_action__store</field>
+        <field
+            name="related_action"
+            eval='{"func_name": "testing_related__url", "kwargs": {"url": "https://en.wikipedia.org/wiki/{subject}"}}'
+        />
+    </record>
+</odoo>
