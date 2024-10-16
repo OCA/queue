@@ -1,0 +1,93 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* base_import_async
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 15.0-20221029\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-11-24 07:21+0000\n"
+"PO-Revision-Date: 2022-11-24 10:25+0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: tr_TR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.4.2\n"
+
+#. module: base_import_async
+#. odoo-python
+#: code:addons/base_import_async/models/queue_job.py:0
+#, python-format
+msgid "Attachment"
+msgstr "Ek"
+
+#. module: base_import_async
+#: model:ir.model,name:base_import_async.model_base_import_import
+msgid "Base Import"
+msgstr "İçe aktarım"
+
+#. module: base_import_async
+#. odoo-python
+#: code:addons/base_import_async/models/base_import_import.py:0
+#, python-format
+msgid ""
+"Import %(model)s from file %(file_name)s - #%(chunk)s - lines %(from)s to "
+"%(to)s"
+msgstr ""
+
+#. module: base_import_async
+#. odoo-python
+#: code:addons/base_import_async/models/base_import_import.py:0
+#, python-format
+msgid "Import %(model)s from file %(from_file)s"
+msgstr ""
+
+#. module: base_import_async
+#. odoo-javascript
+#: code:addons/base_import_async/static/src/xml/import.xml:0
+#, python-format
+msgid "Import in the background"
+msgstr "Arka planda içe aktarım"
+
+#. module: base_import_async
+#: model:ir.model,name:base_import_async.model_queue_job
+msgid "Queue Job"
+msgstr "İş Kuyruğu"
+
+#. module: base_import_async
+#. odoo-javascript
+#: code:addons/base_import_async/static/src/xml/import.xml:0
+#, python-format
+msgid ""
+"When checked, the import will be executed as a background job, after "
+"splitting your file in small chunks that will be processed independently. "
+"Use this to import very large files."
+msgstr ""
+"İşaretlendiğinde, içe aktarım işlemi, dosyanızı bağımsız olarak işlenecek "
+"küçük parçalara ayırdıktan sonra bir arka plan işi olarak yürütülür. Çok "
+"büyük dosyaları içe aktarmak için bunu kullanın."
+
+#. module: base_import_async
+#. odoo-javascript
+#: code:addons/base_import_async/static/src/js/import.js:0
+#, python-format
+msgid "You can check the status of this job in menu 'Queue / Jobs'."
+msgstr "Bu işin durumunu 'Kuyruk / İşler' menüsünden kontrol edebilirsiniz."
+
+#. module: base_import_async
+#. odoo-javascript
+#: code:addons/base_import_async/static/src/js/import.js:0
+#, python-format
+msgid "Your request is being processed"
+msgstr "İsteğiniz işleniyor"
+
+#, python-format
+#~ msgid "Import %s from file %s"
+#~ msgstr "%s dosyasından %s içe aktar"
+
+#, python-format
+#~ msgid "Import %s from file %s - #%s - lines %s to %s"
+#~ msgstr "%s dosyasından %s - #%s - %s - %s satırlarını içe aktar"
