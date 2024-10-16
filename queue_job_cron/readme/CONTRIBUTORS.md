@@ -1,0 +1,4 @@
+- Cédric Pigeon \<<cedric.pigeon@acsone.eu>\>
+- Nguyen Minh Chien \<<chien@trobz.com>\>
+- Tran Quoc duong \<<duongtq@trobz.com>\>
+- Vo Hong Thien \<<thienvh@trobz.com>\>
