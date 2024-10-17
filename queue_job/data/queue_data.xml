@@ -10,6 +10,15 @@
             <field name="state">code</field>
             <field name="code">model.requeue_stuck_jobs()</field>
         </record>
+        <record id="ir_cron_queue_job_fail_dead_jobs" model="ir.cron">
+            <field name="name">Take care of unresponsive jobs</field>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="model_id" ref="model_queue_job" />
+            <field name="state">code</field>
+            <field name="code">model.fail_dead_jobs(240)</field>
+        </record>
         <!-- Queue-job-related subtypes for messaging / Chatter -->
         <record id="mt_job_failed" model="mail.message.subtype">
             <field name="name">Job failed</field>

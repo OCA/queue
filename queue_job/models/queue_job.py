@@ -421,6 +421,61 @@ class QueueJob(models.Model):
         ).requeue()
         return True
 
+    def fail_dead_jobs(self, started_delta, force_low_delta=False):
+        """Set as failed job started since too long ago.
+
+        Workers can be dead without anyone noticing
+        Dead workers stuck the channel and provoke
+        famine.
+
+        This function, mark jobs started longtime ago
+        as failed.
+
+        Cause of death can be CPU Time limit reached
+        a SIGTERM, a power shortage, we can't know, etc.
+
+        This mechanism should be very exceptionnal.
+        It may help, for instance, if someone forget to configure
+        properly his system.
+
+        :param started_delta: lookup time in minutes for jobs
+                                that are in started state,
+
+        :param force_low_delta: force a started_delta in less 10min
+                                = you know what you do
+        """
+        now = fields.datetime.now()
+        started_dl = now - timedelta(minutes=started_delta)
+        if started_delta <= 10 and not force_low_delta:
+            raise exceptions.ValidationError(
+                _(
+                    "started_delta is too low. Set at least 10min"
+                    " or set argument force_low_delta=True"
+                )
+            )
+        domain = [
+            "&",
+            ("date_started", "<=", fields.Datetime.to_string(started_dl)),
+            ("state", "=", "started"),
+        ]
+        job_model = self.env["queue.job"]
+        stuck_jobs = job_model.search(domain)
+        msg = {
+            "exc_info": "",
+            "exc_name": "Not responding worker. Is it dead ?",
+            "exc_message": (
+                "Check for odoo.service.server logs."
+                "Investigate logs for CPU time limit reached or check system log"
+            ),
+        }
+        for job in stuck_jobs:
+            # TODO: manage retry:
+            # if retry < max_retry: retry=+1 and enqueue job instead
+            # else: set_failed
+            job_ = Job.load(self.env, job.uuid)
+            job_.set_failed(**msg)
+            job_.store()
+
     def _get_stuck_jobs_domain(self, queue_dl, started_dl):
         domain = []
         now = fields.datetime.now()

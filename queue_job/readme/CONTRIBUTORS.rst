@@ -10,3 +10,4 @@
 * Souheil Bejaoui <souheil.bejaoui@acsone.eu>
 * Eric Antones <eantones@nuobit.com>
 * Simone Orsi <simone.orsi@camptocamp.com>
+* Raphaël Reverdy <raphael.reverdy@akretion.com>
