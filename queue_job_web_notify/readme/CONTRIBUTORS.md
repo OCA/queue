@@ -1,0 +1,2 @@
+- Thomas Binsfeld <thomas.binsfeld@acsone.eu> (https://www.acsone.eu/)
+- Maxime Franco <maxime.franco@acsone.eu> (https://www.acsone.eu/)
