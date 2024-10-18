@@ -17,9 +17,22 @@ msgstr ""
 "X-Generator: Weblate 3.7.1\n"
 
 #. module: queue_job_cron
+#: model:ir.model.fields,help:queue_job_cron.field_ir_cron__no_parallel_queue_job_run
+msgid ""
+"Avoid parallel run. If the cron job is already running, the new one will be "
+"skipped. By default, odoo never runs the same cron job in parallel. This "
+"option is therefore set to True by default when job is run as a queue job."
+msgstr ""
+
+#. module: queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__channel_id
 msgid "Channel"
 msgstr "频道"
+
+#. module: queue_job_cron
+#: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__no_parallel_queue_job_run
+msgid "No Parallel Queue Job Run"
+msgstr ""
 
 #. module: queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__run_as_queue_job
