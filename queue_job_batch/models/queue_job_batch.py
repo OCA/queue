@@ -11,6 +11,7 @@ class QueueJobBatch(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _description = "Batch of jobs"
     _log_access = False
+    _order = "id desc"
 
     name = fields.Char(
         required=True,
