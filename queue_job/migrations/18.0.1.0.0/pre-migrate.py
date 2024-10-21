@@ -1,5 +1,7 @@
 from openupgradelib import openupgrade
 
+from odoo.tools import SQL
+
 
 def migrate(cr, version):
     if not version:
@@ -14,8 +16,14 @@ def migrate(cr, version):
     for table, columns in table_column_map.items():
         for column in columns:
             if openupgrade.column_exists(cr, table, column):
-                cr.execute(f"""
-                    UPDATE {table}
-                    SET {column} = {column}::jsonb
-                    WHERE {column} IS NOT NULL
-                """)
+                cr.execute(
+                    SQL(
+                        """
+                    UPDATE %(table)s
+                    SET %(column)s = %(column)s::jsonb
+                    WHERE %(column)s IS NOT NULL
+                """,
+                        table=SQL.identifier(table),
+                        column=SQL.identifier(column),
+                    )
+                )

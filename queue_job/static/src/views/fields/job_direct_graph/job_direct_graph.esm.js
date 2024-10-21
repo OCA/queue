@@ -8,6 +8,8 @@ import {useService} from "@web/core/utils/hooks";
 
 const {Component, onWillStart, useEffect, useRef} = owl;
 
+const {document} = globalThis;
+
 class JobDirectGraph extends Component {
     static props = {...standardFieldProps};
     static template = "queue.JobDirectGraph";
