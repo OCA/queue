@@ -527,6 +527,21 @@ class Job(object):
             elif not self.max_retries:  # infinite retries
                 raise
             elif self.retry >= self.max_retries:
+                hook = f"{self.method_name}_on_max_retries_reached"
+                if hasattr(self.recordset, hook):
+                    recordset = self.recordset.with_context(
+                        job_uuid=self.uuid, exc_info=self.exc_info
+                    )
+                    try:
+                        getattr(recordset, hook)()
+                    except Exception as ex:
+                        _logger.debug(
+                            "Exception on %s:%s() for Job UUID: %s",
+                            self.recordset,
+                            hook,
+                            self.uuid,
+                            ex,
+                        )
                 type_, value, traceback = sys.exc_info()
                 # change the exception type but keep the original
                 # traceback and message:

@@ -716,6 +716,28 @@ keys are tries and values are seconds to postpone as integers:</p>
 <li>retries 10 to 15 postponed 30 seconds later</li>
 <li>all subsequent retries postponed 5 minutes later</li>
 </ul>
+<p><strong>Job function: reach max retryable times</strong></p>
+<p>When a job has reached the maximum number of retries and still fails,
+the job’s status will be set to <tt class="docutils literal">Failed</tt>.
+You can define a specific method to handle this event.
+The method should be named <tt class="docutils literal">{method_name}_on_max_retries_reached</tt>.</p>
+<p>Here’s an example:</p>
+<pre class="code python literal-block">
+<span class="kn">from</span> <span class="nn">odoo</span> <span class="kn">import</span> <span class="n">models</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">api</span><span class="w">
+
+</span><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
+</span>    <span class="n">_name</span> <span class="o">=</span> <span class="s1">'my.model'</span><span class="w">
+
+</span>    <span class="k">def</span> <span class="nf">button_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">'my.model'</span><span class="p">]</span><span class="o">.</span><span class="n">with_delay</span><span class="p">()</span><span class="o">.</span><span class="n">my_method</span><span class="p">(</span><span class="s1">'a'</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="w">
+
+</span>    <span class="k">def</span> <span class="nf">my_method_on_max_retries_reached</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+</span>        <span class="c1"># This method is called when the job reaches the maximum retries and fails</span><span class="w">
+</span>        <span class="c1"># Add your custom logic here</span>
+</pre>
+<p>In this example, <tt class="docutils literal">my_method_on_max_retries_reached</tt> is the method
+that will be called when the job my_method fails after reaching the maximum retries.
+You can add your custom logic inside this method to handle the event.</p>
 <p><strong>Job Context</strong></p>
 <p>The context of the recordset of the job, or any recordset passed in arguments of
 a job, is transferred to the job according to an allow-list.</p>
