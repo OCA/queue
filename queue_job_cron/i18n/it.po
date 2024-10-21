@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2024-02-05 00:26+0000\n"
+"PO-Revision-Date: 2024-10-21 09:06+0000\n"
 "Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: none\n"
 "Language: it\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.17\n"
+"X-Generator: Weblate 5.6.2\n"
 
 #. module: queue_job_cron
 #: model:ir.model.fields,help:queue_job_cron.field_ir_cron__no_parallel_queue_job_run
@@ -23,6 +23,10 @@ msgid ""
 "skipped. By default, odoo never runs the same cron job in parallel. This "
 "option is therefore set to True by default when job is run as a queue job."
 msgstr ""
+"Evita esecuzioni parallele. Se il lavoro del cron è in esecuzione, il nuovo "
+"verrà saltato. In modo predefinito, Odoo non esegue lo stesso lavoro cron in "
+"parallelo. Di conseguenza questa opzione è impostata a True in modo "
+"predefinito quando un lavoro è eseguito come un lavoro in coda."
 
 #. module: queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__channel_id
@@ -32,7 +36,7 @@ msgstr "Canale"
 #. module: queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__no_parallel_queue_job_run
 msgid "No Parallel Queue Job Run"
-msgstr ""
+msgstr "Nessun lavoro in coda parallelo in esecuzione"
 
 #. module: queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__run_as_queue_job
