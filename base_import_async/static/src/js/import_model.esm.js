@@ -2,6 +2,8 @@ import {BaseImportModel} from "@base_import/import_model";
 import {_t} from "@web/core/l10n/translation";
 import {patch} from "@web/core/utils/patch";
 
+const {document} = globalThis;
+
 patch(BaseImportModel.prototype, {
     get importOptions() {
         const options = super.importOptions;
