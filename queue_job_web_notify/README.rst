@@ -17,13 +17,13 @@ Queue Job Web Notify
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github
-    :target: https://github.com/OCA/queue/tree/13.0/queue_job_web_notify
+    :target: https://github.com/OCA/queue/tree/15.0/queue_job_web_notify
     :alt: OCA/queue
 .. |badge4| image:: https://img.shields.io/badge/weblate-Translate%20me-F47D42.png
-    :target: https://translation.odoo-community.org/projects/queue-13-0/queue-13-0-queue_job_web_notify
+    :target: https://translation.odoo-community.org/projects/queue-15-0/queue-15-0-queue_job_web_notify
     :alt: Translate me on Weblate
 .. |badge5| image:: https://img.shields.io/badge/runboat-Try%20me-875A7B.png
-    :target: https://runboat.odoo-community.org/builds?repo=OCA/queue&target_branch=13.0
+    :target: https://runboat.odoo-community.org/builds?repo=OCA/queue&target_branch=15.0
     :alt: Try me on Runboat
 
 |badge1| |badge2| |badge3| |badge4| |badge5|
@@ -49,22 +49,22 @@ Configuration
 
 To configure this module, you need to:
 
--  Go to the list of queue job functions
--  Enable the web notify feature
+- Go to the list of queue job functions
+- Enable the web notify feature
 
 Usage
 =====
 
 To only usage of this module is its configuration:
 
--  Go to the list of queue job functions
--  Enable the web notify feature
+- Go to the list of queue job functions
+- Enable the web notify feature
 
 Known issues / Roadmap
 ======================
 
--  other notification contexts could be added (job started, job
-   finished, job canceled, etc.)
+- other notification contexts could be added (job started, job finished,
+  job canceled, etc.)
 
 Bug Tracker
 ===========
@@ -72,7 +72,7 @@ Bug Tracker
 Bugs are tracked on `GitHub Issues <https://github.com/OCA/queue/issues>`_.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us to smash it by providing a detailed and welcomed
-`feedback <https://github.com/OCA/queue/issues/new?body=module:%20queue_job_web_notify%0Aversion:%2013.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
+`feedback <https://github.com/OCA/queue/issues/new?body=module:%20queue_job_web_notify%0Aversion:%2015.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
 
 Do not contact contributors directly about support or help with technical issues.
 
@@ -87,7 +87,7 @@ Authors
 Contributors
 ------------
 
--  Thomas Binsfeld thomas.binsfeld@acsone.eu (https://www.acsone.eu/)
+- Thomas Binsfeld thomas.binsfeld@acsone.eu (https://www.acsone.eu/)
 
 Maintainers
 -----------
@@ -102,6 +102,6 @@ OCA, or the Odoo Community Association, is a nonprofit organization whose
 mission is to support the collaborative development of Odoo features and
 promote its widespread use.
 
-This module is part of the `OCA/queue <https://github.com/OCA/queue/tree/13.0/queue_job_web_notify>`_ project on GitHub.
+This module is part of the `OCA/queue <https://github.com/OCA/queue/tree/15.0/queue_job_web_notify>`_ project on GitHub.
 
 You are welcome to contribute. To learn how please visit https://odoo-community.org/page/Contribute.
