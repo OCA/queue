@@ -599,6 +599,34 @@ graph that do not depend on the failed job continue their execution in any case.
 <p>Note: <tt class="docutils literal">delay()</tt> must be called on the delayable, chain, or group which is at the top
 of the graph. In the example above, if it was called on <tt class="docutils literal">group_a</tt>, then <tt class="docutils literal">group_b</tt>
 would never be delayed (but a warning would be shown).</p>
+<p>It is also possible to split a job into several jobs, each one processing a part of the
+work. This can be useful to avoid very long jobs, parallelize some task and get more specific
+errors. Usage is as follows:</p>
+<pre class="code python literal-block">
+<span class="k">def</span> <span class="nf">button_split_delayable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+</span>    <span class="p">(</span><span class="w">
+</span>        <span class="bp">self</span>  <span class="c1"># Can be a big recordset, let's say 1000 records</span><span class="w">
+</span>        <span class="o">.</span><span class="n">delayable</span><span class="p">()</span><span class="w">
+</span>        <span class="o">.</span><span class="n">generate_thumbnail</span><span class="p">((</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span><span class="w">
+</span>        <span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span><span class="w">
+</span>        <span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;generate xxx&quot;</span><span class="p">))</span><span class="w">
+</span>        <span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>  <span class="c1"># Split the job in 20 jobs of 50 records each</span><span class="w">
+</span>        <span class="o">.</span><span class="n">delay</span><span class="p">()</span><span class="w">
+</span>    <span class="p">)</span>
+</pre>
+<p>The <tt class="docutils literal">split()</tt> method takes a <tt class="docutils literal">chain</tt> boolean keyword argument. If set to
+True, the jobs will be chained, meaning that the next job will only start when the previous
+one is done:</p>
+<pre class="code python literal-block">
+<span class="k">def</span> <span class="nf">button_increment_var</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+</span>    <span class="p">(</span><span class="w">
+</span>        <span class="bp">self</span><span class="w">
+</span>        <span class="o">.</span><span class="n">delayable</span><span class="p">()</span><span class="w">
+</span>        <span class="o">.</span><span class="n">increment_counter</span><span class="p">()</span><span class="w">
+</span>        <span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">chain</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># Will exceute the jobs one after the other</span><span class="w">
+</span>        <span class="o">.</span><span class="n">delay</span><span class="p">()</span><span class="w">
+</span>    <span class="p">)</span>
+</pre>
 </div>
 <div class="section" id="enqueing-job-options">
 <h3><a class="toc-backref" href="#toc-entry-6">Enqueing Job Options</a></h3>

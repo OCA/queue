@@ -534,6 +534,52 @@ class Delayable:
         """Delay the whole graph"""
         self._graph.delay()
 
+    def split(self, size, chain=False):
+        """Split the Delayables.
+
+        Use `DelayableGroup` or `DelayableChain`
+        if `chain` is True containing batches of size `size`
+        """
+        if not self._job_method:
+            raise ValueError("No method set on the Delayable")
+
+        total_records = len(self.recordset)
+
+        delayables = []
+        for index in range(0, total_records, size):
+            recordset = self.recordset[index : index + size]
+            delayable = Delayable(
+                recordset,
+                priority=self.priority,
+                eta=self.eta,
+                max_retries=self.max_retries,
+                description=self.description,
+                channel=self.channel,
+                identity_key=self.identity_key,
+            )
+            # Update the __self__
+            delayable._job_method = getattr(recordset, self._job_method.__name__)
+            delayable._job_args = self._job_args
+            delayable._job_kwargs = self._job_kwargs
+
+            delayables.append(delayable)
+
+        description = self.description or (
+            self._job_method.__doc__.splitlines()[0].strip()
+            if self._job_method.__doc__
+            else "{}.{}".format(self.recordset._name, self._job_method.__name__)
+        )
+        for index, delayable in enumerate(delayables):
+            delayable.set(
+                description="%s (split %s/%s)"
+                % (description, index + 1, len(delayables))
+            )
+
+        # Prevent warning on deletion
+        self._generated_job = True
+
+        return (DelayableChain if chain else DelayableGroup)(*delayables)
+
     def _build_job(self):
         if self._generated_job:
             return self._generated_job
