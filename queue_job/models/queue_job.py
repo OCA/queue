@@ -5,6 +5,8 @@ import logging
 import random
 from datetime import datetime, timedelta
 
+import psutil
+
 from odoo import _, api, exceptions, fields, models
 from odoo.osv import expression
 from odoo.tools import config, html_escape
@@ -417,6 +419,35 @@ class QueueJob(models.Model):
                     break
         return True
 
+    def _check_job_worker_pid(self):
+        """
+        Checking that job's worker pids still exist
+        If not, it means that the worker has been killed
+        """
+        jobs = self.env["queue.job"].search(
+            [
+                ("state", "=", "started"),
+                ("worker_pid", "!=", False),
+            ]
+        )
+
+        for job in jobs:
+            if not psutil.pid_exists(job.worker_pid):
+                _logger.info(
+                    "Worker %d executing job %s does not exist"
+                    % (job.worker_pid, job.uuid)
+                )
+                _job = Job.load(job.env, job.uuid)
+                _job.set_failed(
+                    exc_name=_("WorkerError"),
+                    exc_info=_(
+                        "The worker executing the job was killed."
+                        "This is likely to be due to a timeout"
+                    ),
+                    exc_message=_("Associated worker was killed"),
+                )
+                _job.store()
+
     def requeue_stuck_jobs(self, enqueued_delta=1, started_delta=0):
         """Fix jobs that are in a bad states
 
@@ -431,6 +462,9 @@ class QueueJob(models.Model):
         """
         if started_delta == -1:
             started_delta = (config["limit_time_real"] // 60) + 1
+
+        self._check_job_worker_pid()
+
         return self._get_stuck_jobs_to_requeue(
             enqueued_delta=enqueued_delta, started_delta=started_delta
         ).requeue()
