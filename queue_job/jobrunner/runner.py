@@ -114,22 +114,6 @@ Caveat
 * After creating a new database or installing queue_job on an
   existing database, Odoo must be restarted for the runner to detect it.
 
-* When Odoo shuts down normally, it waits for running jobs to finish.
-  However, when the Odoo server crashes or is otherwise force-stopped,
-  running jobs are interrupted while the runner has no chance to know
-  they have been aborted. In such situations, jobs may remain in
-  ``started`` or ``enqueued`` state after the Odoo server is halted.
-  Since the runner has no way to know if they are actually running or
-  not, and does not know for sure if it is safe to restart the jobs,
-  it does not attempt to restart them automatically. Such stale jobs
-  therefore fill the running queue and prevent other jobs to start.
-  You must therefore requeue them manually, either from the Jobs view,
-  or by running the following SQL statement *before starting Odoo*:
-
-.. code-block:: sql
-
-  update queue_job set state='pending' where state in ('started', 'enqueued')
-
 .. rubric:: Footnotes
 
 .. [1] From a security standpoint, it is safe to have an anonymous HTTP
@@ -155,7 +139,7 @@ import odoo
 from odoo.tools import config
 
 from . import queue_job_config
-from .channels import ENQUEUED, NOT_DONE, PENDING, ChannelManager
+from .channels import ENQUEUED, NOT_DONE, ChannelManager
 
 SELECT_TIMEOUT = 60
 ERROR_RECOVERY_DELAY = 5
@@ -207,28 +191,6 @@ def _connection_info_for(db_name):
 
 
 def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
-    # Method to set failed job (due to timeout, etc) as pending,
-    # to avoid keeping it as enqueued.
-    def set_job_pending():
-        connection_info = _connection_info_for(db_name)
-        conn = psycopg2.connect(**connection_info)
-        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        with closing(conn.cursor()) as cr:
-            cr.execute(
-                "UPDATE queue_job SET state=%s, "
-                "date_enqueued=NULL, date_started=NULL "
-                "WHERE uuid=%s and state=%s "
-                "RETURNING uuid",
-                (PENDING, job_uuid, ENQUEUED),
-            )
-            if cr.fetchone():
-                _logger.warning(
-                    "state of job %s was reset from %s to %s",
-                    job_uuid,
-                    ENQUEUED,
-                    PENDING,
-                )
-
     # TODO: better way to HTTP GET asynchronously (grequest, ...)?
     #       if this was python3 I would be doing this with
     #       asyncio, aiohttp and aiopg
@@ -236,6 +198,7 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
         url = "{}://{}:{}/queue_job/runjob?db={}&job_uuid={}".format(
             scheme, host, port, db_name, job_uuid
         )
+        # pylint: disable=except-pass
         try:
             auth = None
             if user:
@@ -249,10 +212,10 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
             # for codes between 500 and 600
             response.raise_for_status()
         except requests.Timeout:
-            set_job_pending()
+            # A timeout is a normal behaviour, it shouldn't be logged as an exception
+            pass
         except Exception:
             _logger.exception("exception in GET %s", url)
-            set_job_pending()
 
     thread = threading.Thread(target=urlopen)
     thread.daemon = True
@@ -343,6 +306,96 @@ class Database:
                 (ENQUEUED, uuid),
             )
 
+    def _query_requeue_dead_jobs(self):
+        return """
+            UPDATE
+                queue_job
+            SET
+                state=(
+                    CASE
+                        WHEN
+                            max_retries IS NOT NULL AND
+                            retry IS NOT NULL AND
+                            retry>max_retries
+                        THEN 'failed'
+                        ELSE 'pending'
+                    END),
+                retry=(
+                    CASE
+                        WHEN state='started'
+                        THEN COALESCE(retry,0)+1 ELSE retry
+                    END),
+                exc_name=(
+                    CASE
+                        WHEN
+                            max_retries IS NOT NULL AND
+                            retry IS NOT NULL AND
+                            retry>max_retries
+                        THEN 'JobFoundDead'
+                        ELSE exc_name
+                    END),
+                exc_info=(
+                    CASE
+                        WHEN
+                            max_retries IS NOT NULL AND
+                            retry IS NOT NULL AND
+                            retry>max_retries
+                        THEN 'Job found dead after too many retries'
+                        ELSE exc_info
+                    END)
+            WHERE
+                id in (
+                    SELECT
+                        id
+                    FROM
+                        queue_job_locks
+                    WHERE
+                        id in (
+                            SELECT
+                                id
+                            FROM
+                                queue_job
+                            WHERE
+                                state IN ('enqueued','started')
+                                AND date_enqueued <
+                                (now() AT TIME ZONE 'utc' - INTERVAL '10 sec')
+                        )
+                    FOR UPDATE SKIP LOCKED
+                )
+            RETURNING uuid
+            """
+
+    def requeue_dead_jobs(self):
+        """
+        Set started and enqueued jobs but not locked to pending
+
+        A job is locked when it's being executed
+        When a job is killed, it releases the lock
+
+        If the number of retries exceeds the number of max retries,
+        the job is set as 'failed' with the error 'JobFoundDead'.
+
+        Adding a buffer on 'date_enqueued' to check
+        that it has been enqueued for more than 10sec.
+        This prevents from requeuing jobs before they are actually started.
+
+        When Odoo shuts down normally, it waits for running jobs to finish.
+        However, when the Odoo server crashes or is otherwise force-stopped,
+        running jobs are interrupted while the runner has no chance to know
+        they have been aborted.
+        """
+
+        with closing(self.conn.cursor()) as cr:
+            query = self._query_requeue_dead_jobs()
+
+            cr.execute(query)
+
+            for (uuid,) in cr.fetchall():
+                _logger.warning(
+                    "Re-queued job with uuid: %s",
+                    uuid,
+                )
+
 
 class QueueJobRunner:
     def __init__(
@@ -423,6 +476,11 @@ class QueueJobRunner:
                     for job_data in cr:
                         self.channel_manager.notify(db_name, *job_data)
                 _logger.info("queue job runner ready for db %s", db_name)
+
+    def requeue_dead_jobs(self):
+        for db in self.db_by_name.values():
+            if db.has_queue_job:
+                db.requeue_dead_jobs()
 
     def run_jobs(self):
         now = _odoo_now()
@@ -516,6 +574,7 @@ class QueueJobRunner:
                 _logger.info("database connections ready")
                 # inner loop does the normal processing
                 while not self._stop:
+                    self.requeue_dead_jobs()
                     self.process_notifications()
                     self.run_jobs()
                     self.wait_notification()
