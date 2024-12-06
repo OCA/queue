@@ -1,6 +1,8 @@
 # Copyright 2016 Camptocamp SA
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+from datetime import datetime, timedelta
+
 from odoo import api, fields, models
 
 from odoo.addons.queue_job.delay import chain
@@ -28,6 +30,35 @@ class QueueJob(models.Model):
             "target": "new",
             "url": kwargs["url"].format(subject=subject),
         }
+
+    @api.model
+    def _create_test_started_job(self, uuid):
+        """Create started jobs to be used within tests"""
+        self.env["queue.job"].with_context(
+            _job_edit_sentinel=self.env["queue.job"].EDIT_SENTINEL,
+        ).create(
+            {
+                "uuid": uuid,
+                "state": "started",
+                "model_name": "queue.job",
+                "method_name": "write",
+            }
+        )
+
+    @api.model
+    def _create_test_enqueued_job(self, uuid):
+        """Create enqueued jobs to be used within tests"""
+        self.env["queue.job"].with_context(
+            _job_edit_sentinel=self.env["queue.job"].EDIT_SENTINEL,
+        ).create(
+            {
+                "uuid": uuid,
+                "state": "enqueued",
+                "model_name": "queue.job",
+                "method_name": "write",
+                "date_enqueued": datetime.now() - timedelta(minutes=1),
+            }
+        )
 
 
 class ModelTestQueueJob(models.Model):
