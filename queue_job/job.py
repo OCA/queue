@@ -240,14 +240,14 @@ class Job(object):
 
     def add_lock_record(self):
         """
-        Create row in db to be locked while the job is being performed.
+        Create row in db to be locked once the job is performed
         """
         self.env.cr.execute(
             """
             INSERT INTO
-                queue_job_lock (id, queue_job_id)
+                queue_job_locks (id)
             SELECT
-                id, id
+                id
             FROM
                 queue_job
             WHERE
@@ -271,9 +271,9 @@ class Job(object):
             SELECT
                 *
             FROM
-                queue_job_lock
+                queue_job_locks
             WHERE
-                queue_job_id in (
+                id in (
                     SELECT
                         id
                     FROM
@@ -874,6 +874,7 @@ class Job(object):
         self.state = STARTED
         self.date_started = datetime.now()
         self.worker_pid = os.getpid()
+        self.add_lock_record()
 
     def set_done(self, result=None):
         self.state = DONE

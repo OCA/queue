@@ -31,6 +31,8 @@ class RunJobController(http.Controller):
         job.set_started()
         job.store()
         env.cr.commit()
+        job.lock()
+
         _logger.debug("%s started", job)
 
         job.perform()
