@@ -42,7 +42,7 @@ data_xls = {
 
 class TestBaseExportAsync(common.TransactionCase):
     def setUp(self):
-        super(TestBaseExportAsync, self).setUp()
+        super().setUp()
         self.delay_export_obj = self.env["delay.export"]
         self.job_obj = self.env["queue.job"]
         _request_stack.push(

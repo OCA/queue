@@ -76,7 +76,7 @@ class ModelTestQueueJob(models.Model):
         return
 
     def mapped(self, func):
-        return super(ModelTestQueueJob, self).mapped(func)
+        return super().mapped(func)
 
     def job_alter_mutable(self, mutable_arg, mutable_kwarg=None):
         mutable_arg.append(2)

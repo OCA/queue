@@ -427,7 +427,7 @@ class OdooDocTestCase(doctest.DocTestCase):
 
     def setUp(self):
         """Log an extra statement which test is started."""
-        super(OdooDocTestCase, self).setUp()
+        super().setUp()
         logging.getLogger(__name__).info("Running tests for %s", self._dt_test.name)
 
 

@@ -650,7 +650,7 @@ class TestJobStorageMultiCompany(common.TransactionCase):
     """Test storage of jobs"""
 
     def setUp(self):
-        super(TestJobStorageMultiCompany, self).setUp()
+        super().setUp()
         self.queue_job = self.env["queue.job"]
         grp_queue_job_manager = self.ref("queue_job.group_queue_job_manager")
         User = self.env["res.users"]
