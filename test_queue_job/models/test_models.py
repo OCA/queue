@@ -29,6 +29,9 @@ class QueueJob(models.Model):
             "url": kwargs["url"].format(subject=subject),
         }
 
+    def testing_error_handler(self, **kwargs):
+        return None
+
 
 class ModelTestQueueJob(models.Model):
 

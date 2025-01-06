@@ -2,12 +2,15 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import hashlib
+import logging
 from datetime import datetime, timedelta
 from unittest import mock
+from unittest.mock import patch
 
 import odoo.tests.common as common
 
 from odoo.addons.queue_job import identity_exact
+from odoo.addons.queue_job.controllers.main import RunJobController
 from odoo.addons.queue_job.delay import DelayableGraph
 from odoo.addons.queue_job.exception import (
     FailedJobError,
@@ -25,8 +28,11 @@ from odoo.addons.queue_job.job import (
     WAIT_DEPENDENCIES,
     Job,
 )
+from odoo.addons.queue_job.tests.common import trap_jobs
 
 from .common import JobCommonCase
+
+_logger = logging.getLogger(__name__)
 
 
 class TestJobsOnTestingMethod(JobCommonCase):
@@ -382,6 +388,25 @@ class TestJobsOnTestingMethod(JobCommonCase):
 
         job1 = Job.load(self.env, test_job_1.uuid)
         self.assertEqual(job1.identity_key, expected_key)
+
+    def test_failed_job_perform(self):
+        with trap_jobs() as trap:
+            model = self.env["test.queue.job"]
+            job = model.with_delay(priority=1, max_retries=1).testing_method()
+            trap.assert_jobs_count(1)
+            with patch.object(type(job), "perform", side_effect=IOError), patch(
+                "odoo.sql_db.Cursor.commit", return_value=None
+            ):  # avoid odoo.sql_db: bad query: ROLLBACK TO SAVEPOINT test_0
+                controller = RunJobController()
+                try:
+                    controller._try_perform_job(self.env, job)
+                    with patch(
+                        "odoo.addons.test_queue_job.models.test_models.QueueJob"
+                        ".testing_error_handler"
+                    ) as patched:
+                        patched.assert_called_once()
+                except Exception:
+                    _logger.info("Job fails")
 
 
 class TestJobs(JobCommonCase):

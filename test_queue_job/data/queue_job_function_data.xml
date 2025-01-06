@@ -3,6 +3,7 @@
         <field name="model_id" ref="test_queue_job.model_test_queue_job" />
         <field name="method">testing_method</field>
         <field name="related_action" eval='{"func_name": "testing_related_method"}' />
+        <field name="error_handler" eval='{"func_name": "testing_error_handler"}' />
     </record>
     <record
         id="job_function_test_queue_job_job_with_retry_pattern"
