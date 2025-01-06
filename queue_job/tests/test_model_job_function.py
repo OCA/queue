@@ -52,6 +52,9 @@ class TestJobFunction(common.TransactionCase):
                 related_action_enable=True,
                 related_action_func_name="related_action_foo",
                 related_action_kwargs={"b": 1},
+                error_handler_enable=True,
+                error_handler_func_name=None,
+                error_handler_kwargs={},
                 job_function_id=job_function.id,
             ),
         )

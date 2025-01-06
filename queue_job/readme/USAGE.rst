@@ -274,6 +274,15 @@ Based on this configuration, we can tell that:
 * retries 10 to 15 postponed 30 seconds later
 * all subsequent retries postponed 5 minutes later
 
+**Job function: Error Handler**
+
+The *Error Handler* is a method executed whenever the job fails
+
+It's configured similarly to Related Action
+
+
+
+
 **Job Context**
 
 The context of the recordset of the job, or any recordset passed in arguments of

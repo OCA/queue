@@ -13,6 +13,7 @@
                     <field name="channel_id" />
                     <field name="edit_retry_pattern" widget="ace" />
                     <field name="edit_related_action" widget="ace" />
+                    <field name="edit_error_handler" widget="ace" />
                 </group>
             </form>
         </field>

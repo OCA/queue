@@ -35,7 +35,14 @@ class RunJobController(http.Controller):
 
         _logger.debug("%s started", job)
 
-        job.perform()
+        try:
+            job.perform()
+        except Exception as exc:
+            with registry(job.env.cr.dbname).cursor() as new_cr:
+                job.env = job.env(cr=new_cr)
+                job.error_handler(exc)
+            raise
+
         # Triggers any stored computed fields before calling 'set_done'
         # so that will be part of the 'exec_time'
         env.flush_all()

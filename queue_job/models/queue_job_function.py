@@ -28,6 +28,9 @@ class QueueJobFunction(models.Model):
         "related_action_enable "
         "related_action_func_name "
         "related_action_kwargs "
+        "error_handler_enable "
+        "error_handler_func_name "
+        "error_handler_kwargs "
         "job_function_id ",
     )
 
@@ -79,6 +82,33 @@ class QueueJobFunction(models.Model):
         "enable, func_name, kwargs.\n"
         "See the module description for details.",
     )
+    error_handler = JobSerialized(base_type=dict)
+    edit_error_handler = fields.Text(
+        string="Error Handler",
+        compute="_compute_edit_error_handler",
+        inverse="_inverse_edit_error_handler",
+        help="The handler is executed when the job fails. "
+        "Configured as a dictionary with optional keys: "
+        "enable, func_name, kwargs.\n"
+        "See the module description for details.",
+    )
+
+    @api.depends("error_handler")
+    def _compute_edit_error_handler(self):
+        for record in self:
+            record.edit_error_handler = str(record.error_handler)
+
+    def _inverse_edit_error_handler(self):
+        try:
+            edited = (self.edit_error_handler or "").strip()
+            if edited:
+                self.error_handler = ast.literal_eval(edited)
+            else:
+                self.error_handler = {}
+        except (ValueError, TypeError, SyntaxError) as ex:
+            raise exceptions.UserError(
+                self._error_handler_format_error_message()
+            ) from ex
 
     @api.depends("model_id.model", "method")
     def _compute_name(self):
@@ -149,6 +179,9 @@ class QueueJobFunction(models.Model):
             related_action_func_name=None,
             related_action_kwargs={},
             job_function_id=None,
+            error_handler_enable=True,
+            error_handler_func_name=None,
+            error_handler_kwargs={},
         )
 
     def _parse_retry_pattern(self):
@@ -184,6 +217,9 @@ class QueueJobFunction(models.Model):
             related_action_func_name=config.related_action.get("func_name"),
             related_action_kwargs=config.related_action.get("kwargs", {}),
             job_function_id=config.id,
+            error_handler_enable=config.error_handler.get("enable", True),
+            error_handler_func_name=config.error_handler.get("func_name"),
+            error_handler_kwargs=config.error_handler.get("kwargs", {}),
         )
 
     def _retry_pattern_format_error_message(self):
@@ -224,6 +260,14 @@ class QueueJobFunction(models.Model):
             "Example of valid format:\n"
             '{{"enable": True, "func_name": "related_action_foo",'
             ' "kwargs" {{"limit": 10}}}}'
+        ).format(self.name)
+
+    def _error_handler_format_error_message(self):
+        return _(
+            "Unexpected format of Error Handler for {}.\n"
+            "Example of valid format:\n"
+            '{{"enable": True, "func_name": "_call_webhook",'
+            ' "kwargs" {"webhook_url": "XXX","payload": {"text":"Hello World!"}}}}'
         ).format(self.name)
 
     @api.constrains("related_action")

@@ -955,6 +955,24 @@ class Job:
         action_kwargs = self.job_config.related_action_kwargs
         return action(**action_kwargs)
 
+    def error_handler(self, exc):
+        record = self.db_record()
+        funcname = self.job_config.error_handler_func_name
+        if not self.job_config.error_handler_enable or not funcname:
+            return None
+
+        if not isinstance(funcname, str):
+            raise ValueError(
+                "error_handler must be the name of the method on queue.job as string"
+            )
+        action = getattr(record, funcname)
+        _logger.info("Job %s fails due to %s, execute %s", self.uuid, exc, action)
+        action_kwargs = {"job": self, **self.job_config.error_handler_kwargs}
+        try:
+            return action(**action_kwargs)
+        except Exception as exc:
+            _logger.warning("Error handler failed: %s", exc)
+
 
 def _is_model_method(func):
     return inspect.ismethod(func) and isinstance(
