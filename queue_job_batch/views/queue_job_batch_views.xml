@@ -4,7 +4,7 @@
         <field name="name">queue.job.batch.tree</field>
         <field name="model">queue.job.batch</field>
         <field name="arch" type="xml">
-            <tree create="false" delete="false">
+            <list create="false" delete="false">
                 <field name="name" readonly="1" />
                 <field name="job_count" column_invisible="1" />
                 <field
@@ -14,7 +14,7 @@
                     options="{'current_value': 'finished_job_count', 'max_value': 'job_count'}"
                 />
                 <field name="state" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -54,11 +54,8 @@
                         />
                     </group>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids" widget="mail_followers" />
-                    <field name="activity_ids" widget="mail_activity" />
-                    <field name="message_ids" widget="mail_thread" />
-                </div>
+                <!-- Chatter -->
+                <chatter />
             </form>
         </field>
     </record>

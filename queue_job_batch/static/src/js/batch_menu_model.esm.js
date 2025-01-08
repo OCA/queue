@@ -1,4 +1,5 @@
 /** @odoo-module **/
+/* eslint-disable no-undef */
 
 import {attr, many} from "@mail/model/model_field";
 import {registerModel} from "@mail/model/model_core";

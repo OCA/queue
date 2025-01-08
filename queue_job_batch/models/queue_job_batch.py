@@ -80,10 +80,8 @@ class QueueJobBatch(models.Model):
 
     def set_read(self):
         res = self.write({"is_read": True})
-        notifications = []
         channel = "queue.job.batch/updated"
-        notifications.append([self.env.user.partner_id, channel, {}])
-        self.env["bus.bus"]._sendmany(notifications)
+        self.env["bus.bus"]._sendone(self.env.user.partner_id, channel, {})
         return res
 
     @api.model
