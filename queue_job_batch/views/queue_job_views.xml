@@ -6,10 +6,7 @@
         <field name="inherit_id" ref="queue_job.view_queue_job_form" />
         <field name="arch" type="xml">
             <field name="channel" position="after">
-                <field
-                    name="job_batch_id"
-                    attrs="{'invisible': [('job_batch_id', '=', False)]}"
-                />
+                <field name="job_batch_id" invisible="not job_batch_id" />
             </field>
         </field>
     </record>

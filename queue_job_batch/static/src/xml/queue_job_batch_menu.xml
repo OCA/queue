@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates>
-    <t t-name="queue_job_batch.QueueJobBatchMenuView" owl="1">
+    <t t-name="queue_job_batch.QueueJobBatchMenuView">
         <div class="o_ActivityMenuView dropdown o_job_batch_navbar_item" t-ref="root">
             <a
                 class="o_ActivityMenuView_dropdownToggle dropdown-toggle o-no-caret o-dropdown--narrow"

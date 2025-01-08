@@ -13,7 +13,6 @@ class QueueJobBatch(models.Model):
 
     name = fields.Char(
         required=True,
-        readonly=True,
         tracking=True,
     )
     job_ids = fields.One2many(
@@ -27,7 +26,6 @@ class QueueJobBatch(models.Model):
     user_id = fields.Many2one(
         "res.users",
         required=True,
-        readonly=True,
         tracking=True,
     )
     state = fields.Selection(
@@ -39,7 +37,6 @@ class QueueJobBatch(models.Model):
         ],
         default="draft",
         required=True,
-        readonly=True,
         tracking=True,
     )
     finished_job_count = fields.Float(
@@ -50,7 +47,6 @@ class QueueJobBatch(models.Model):
     )
     company_id = fields.Many2one(
         "res.company",
-        readonly=True,
     )
     is_read = fields.Boolean(default=True)
     completeness = fields.Float(

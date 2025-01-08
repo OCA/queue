@@ -2,25 +2,28 @@
 
 // ensure components are registered beforehand.
 import "./batch_menu_view.esm";
-import {getMessagingComponent} from "@mail/utils/messaging_component";
-
-const {Component} = owl;
+import {Component, onWillStart, useState} from "@odoo/owl";
+import {MessagingMenu} from "@mail/core/public_web/messaging_menu";
+import {useService} from "@web/core/utils/hooks";
+import {patch} from "@web/core/utils/patch";
 
 export class QueueJobBatchMenuContainer extends Component {
     /**
      * @override
      */
     setup() {
-        super.setup();
-        this.env.services.messaging.modelManager.messagingCreatedPromise.then(() => {
+        // Access the store service using the useService hook
+        this.store = useState(useService("mail.store"));
+
+        // Initialize the QueueJobBatchMenuView once store is ready
+        onWillStart(async () => {
             this.queueJobBatchMenuView =
-                this.env.services.messaging.modelManager.messaging.models.QueueJobBatchMenuView.insert();
-            this.render();
+                await this.store.menuThreads.QueueJobBatchMenuView.insert();
         });
     }
 }
 
-Object.assign(QueueJobBatchMenuContainer, {
-    components: {QueueJobBatchMenuView: getMessagingComponent("QueueJobBatchMenuView")},
+patch(MessagingMenu, {
     template: "queue_job_batch.QueueJobBatchMenuContainer",
+    components: {...MessagingMenu.components, QueueJobBatchMenuContainer},
 });

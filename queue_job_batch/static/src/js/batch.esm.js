@@ -3,7 +3,7 @@
 import {one} from "@mail/model/model_field";
 import {registerModel} from "@mail/model/model_core";
 import session from "web.session";
-const {Component} = owl;
+import {Component} from "@odoo/owl";
 
 registerModel({
     name: "QueueJobBatch",

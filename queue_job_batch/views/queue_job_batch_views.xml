@@ -5,8 +5,8 @@
         <field name="model">queue.job.batch</field>
         <field name="arch" type="xml">
             <tree create="false" delete="false">
-                <field name="name" />
-                <field name="job_count" invisible="1" />
+                <field name="name" readonly="1" />
+                <field name="job_count" column_invisible="1" />
                 <field
                     name="finished_job_count"
                     widget="progressbar"
@@ -24,7 +24,7 @@
         <field name="arch" type="xml">
             <form string="Job Batch" create="false" delete="false" edit="false">
                 <header>
-                    <field name="state" widget="statusbar" />
+                    <field name="state" widget="statusbar" readonly="1" />
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -40,14 +40,18 @@
                         <field name="name" class="oe_inline" />
                     </h1>
                     <group>
-                        <field name="user_id" />
+                        <field name="user_id" readonly="1" />
                         <field
                             name="finished_job_count"
                             widget="progressbar"
                             string="Completeness"
                             options="{'current_value': 'finished_job_count', 'max_value': 'job_count'}"
                         />
-                        <field name="company_id" groups="base.group_multi_company" />
+                        <field
+                            name="company_id"
+                            groups="base.group_multi_company"
+                            readonly="1"
+                        />
                     </group>
                 </sheet>
                 <div class="oe_chatter">
