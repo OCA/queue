@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <data>
-
         <record id="group_queue_job_batch_user" model="res.groups">
             <field name="name">Job Queue Batch User</field>
             <field name="category_id" ref="queue_job.module_category_queue_job" />
@@ -15,7 +14,6 @@
     </data>
 
     <data noupdate="1">
-
         <record id="queue_job_batch_comp_rule" model="ir.rule">
             <field name="name">Job Queue batch multi-company</field>
             <field name="model_id" ref="model_queue_job_batch" />
@@ -44,6 +42,5 @@
             />
             <field name="domain_force">[(1, '=', 1)]</field>
         </record>
-
     </data>
 </odoo>
