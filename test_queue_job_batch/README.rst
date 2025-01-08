@@ -56,13 +56,13 @@ Authors
 Contributors
 ------------
 
--  Enric Tobella <etobella@creublanca.es>
+- Enric Tobella <etobella@creublanca.es>
 
--  Lois Rilo <lois.rilo@eficent.com>
+- Lois Rilo <lois.rilo@eficent.com>
 
--  `Trobz <https://trobz.com>`__:
+- `Trobz <https://trobz.com>`__:
 
-   -  Hoang Diep <hoang@trobz.com>
+  - Hoang Diep <hoang@trobz.com>
 
 Other credits
 -------------
