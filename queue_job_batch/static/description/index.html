@@ -8,10 +8,11 @@
 
 /*
 :Author: David Goodger (goodger@python.org)
-:Id: $Id: html4css1.css 8954 2022-01-20 10:10:25Z milde $
+:Id: $Id: html4css1.css 9511 2024-01-13 09:50:07Z milde $
 :Copyright: This stylesheet has been placed in the public domain.
 
 Default cascading style sheet for the HTML output of Docutils.
+Despite the name, some widely supported CSS2 features are used.
 
 See https://docutils.sourceforge.io/docs/howto/html-stylesheets.html for how to
 customize this style sheet.
@@ -274,7 +275,7 @@ pre.literal-block, pre.doctest-block, pre.math, pre.code {
   margin-left: 2em ;
   margin-right: 2em }
 
-pre.code .ln { color: grey; } /* line numbers */
+pre.code .ln { color: gray; } /* line numbers */
 pre.code, code { background-color: #eeeeee }
 pre.code .comment, code .comment { color: #5C6576 }
 pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
@@ -300,7 +301,7 @@ span.option {
 span.pre {
   white-space: pre }
 
-span.problematic {
+span.problematic, pre.problematic {
   color: red }
 
 span.section-subtitle {
@@ -368,29 +369,29 @@ ul.auto-toc {
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! source digest: sha256:7eceb569ec18547f2b64717734aecc66c0db338d51e13d6f1324785c6c2f8407
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
-<p><a class="reference external image-reference" href="https://odoo-community.org/page/development-status"><img alt="Beta" src="https://img.shields.io/badge/maturity-Beta-yellow.png" /></a> <a class="reference external image-reference" href="http://www.gnu.org/licenses/agpl-3.0-standalone.html"><img alt="License: AGPL-3" src="https://img.shields.io/badge/licence-AGPL--3-blue.png" /></a> <a class="reference external image-reference" href="https://github.com/OCA/queue/tree/16.0/queue_job_batch"><img alt="OCA/queue" src="https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github" /></a> <a class="reference external image-reference" href="https://translation.odoo-community.org/projects/queue-16-0/queue-16-0-queue_job_batch"><img alt="Translate me on Weblate" src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png" /></a> <a class="reference external image-reference" href="https://runboat.odoo-community.org/builds?repo=OCA/queue&amp;target_branch=16.0"><img alt="Try me on Runboat" src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png" /></a></p>
+<p><a class="reference external image-reference" href="https://odoo-community.org/page/development-status"><img alt="Beta" src="https://img.shields.io/badge/maturity-Beta-yellow.png" /></a> <a class="reference external image-reference" href="http://www.gnu.org/licenses/agpl-3.0-standalone.html"><img alt="License: AGPL-3" src="https://img.shields.io/badge/licence-AGPL--3-blue.png" /></a> <a class="reference external image-reference" href="https://github.com/OCA/queue/tree/18.0/queue_job_batch"><img alt="OCA/queue" src="https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github" /></a> <a class="reference external image-reference" href="https://translation.odoo-community.org/projects/queue-18-0/queue-18-0-queue_job_batch"><img alt="Translate me on Weblate" src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png" /></a> <a class="reference external image-reference" href="https://runboat.odoo-community.org/builds?repo=OCA/queue&amp;target_branch=18.0"><img alt="Try me on Runboat" src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png" /></a></p>
 <p>This addon adds an a grouper for queue jobs.</p>
-<p>It allows to show your jobs in a batched form in order to know better the
-results.</p>
+<p>It allows to show your jobs in a batched form in order to know better
+the results.</p>
 <p>Example:</p>
 <pre class="code python literal-block">
-<span class="kn">from</span> <span class="nn">odoo</span> <span class="kn">import</span> <span class="n">models</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">api</span><span class="w">
-</span><span class="kn">from</span> <span class="nn">odoo.addons.queue_job.job</span> <span class="kn">import</span> <span class="n">job</span><span class="w">
+<span class="kn">from</span><span class="w"> </span><span class="nn">odoo</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">api</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">odoo.addons.queue_job.job</span><span class="w"> </span><span class="kn">import</span> <span class="n">job</span><span class="w">
 
-</span><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
+</span><span class="k">class</span><span class="w"> </span><span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
 </span>   <span class="n">_name</span> <span class="o">=</span> <span class="s1">'my.model'</span><span class="w">
 
 </span>   <span class="nd">&#64;api</span><span class="o">.</span><span class="n">multi</span><span class="w">
 </span>   <span class="nd">&#64;job</span><span class="w">
-</span>   <span class="k">def</span> <span class="nf">my_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span><span class="w">
+</span>   <span class="k">def</span><span class="w"> </span><span class="nf">my_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span><span class="w">
 </span>       <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'executed with a: </span><span class="si">%s</span><span class="s1"> and k: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span><span class="w">
 
 
-</span><span class="k">class</span> <span class="nc">MyOtherModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
+</span><span class="k">class</span><span class="w"> </span><span class="nc">MyOtherModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
 </span>    <span class="n">_name</span> <span class="o">=</span> <span class="s1">'my.other.model'</span><span class="w">
 
 </span>    <span class="nd">&#64;api</span><span class="o">.</span><span class="n">multi</span><span class="w">
-</span>    <span class="k">def</span> <span class="nf">button_do_stuff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+</span>    <span class="k">def</span><span class="w"> </span><span class="nf">button_do_stuff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
 </span>        <span class="n">batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">'queue.job.batch'</span><span class="p">]</span><span class="o">.</span><span class="n">get_new_batch</span><span class="p">(</span><span class="s1">'Group'</span><span class="p">)</span><span class="w">
 </span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">):</span><span class="w">
 </span>            <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">'my.model'</span><span class="p">]</span><span class="o">.</span><span class="n">with_context</span><span class="p">(</span><span class="w">
@@ -399,9 +400,9 @@ results.</p>
 </span>        <span class="n">batch</span><span class="o">.</span><span class="n">enqueue</span><span class="p">()</span>
 </pre>
 <p>In the snippet of code above, when we call <tt class="docutils literal">button_do_stuff</tt>, 100 jobs
-capturing the method and arguments will be postponed.  It will be executed as
-soon as the Jobrunner has a free bucket, which can be instantaneous if no other
-job is running.</p>
+capturing the method and arguments will be postponed. It will be
+executed as soon as the Jobrunner has a free bucket, which can be
+instantaneous if no other job is running.</p>
 <p>Once all the jobs have finished, the grouper will be marked as finished.</p>
 <p><strong>Table of contents</strong></p>
 <div class="contents local topic" id="contents">
@@ -419,15 +420,16 @@ job is running.</p>
 </div>
 <div class="section" id="usage">
 <h1><a class="toc-backref" href="#toc-entry-1">Usage</a></h1>
-<p>You can manage your batch jobs from the Systray. A new button will be shown
-with your currently executing job batches and the recently finished job groups.</p>
+<p>You can manage your batch jobs from the Systray. A new button will be
+shown with your currently executing job batches and the recently
+finished job groups.</p>
 </div>
 <div class="section" id="bug-tracker">
 <h1><a class="toc-backref" href="#toc-entry-2">Bug Tracker</a></h1>
 <p>Bugs are tracked on <a class="reference external" href="https://github.com/OCA/queue/issues">GitHub Issues</a>.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us to smash it by providing a detailed and welcomed
-<a class="reference external" href="https://github.com/OCA/queue/issues/new?body=module:%20queue_job_batch%0Aversion:%2016.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**">feedback</a>.</p>
+<a class="reference external" href="https://github.com/OCA/queue/issues/new?body=module:%20queue_job_batch%0Aversion:%2018.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**">feedback</a>.</p>
 <p>Do not contact contributors directly about support or help with technical issues.</p>
 </div>
 <div class="section" id="credits">
@@ -442,37 +444,32 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 <h2><a class="toc-backref" href="#toc-entry-5">Contributors</a></h2>
 <ul class="simple">
 <li>Enric Tobella &lt;<a class="reference external" href="mailto:etobella&#64;creublanca.es">etobella&#64;creublanca.es</a>&gt;</li>
-<li><dl class="first docutils">
-<dt><a class="reference external" href="https://trobz.com">Trobz</a>:</dt>
-<dd><ul class="first last">
+<li><a class="reference external" href="https://trobz.com">Trobz</a>:<ul>
 <li>Hoang Diep &lt;<a class="reference external" href="mailto:hoang&#64;trobz.com">hoang&#64;trobz.com</a>&gt;</li>
 </ul>
-</dd>
-</dl>
 </li>
-<li><dl class="first docutils">
-<dt><a class="reference external" href="https://forgeflow.com">ForgeFlow</a>:</dt>
-<dd><ul class="first last">
+<li><a class="reference external" href="https://forgeflow.com">ForgeFlow</a>:<ul>
 <li>Lois Rilo &lt;<a class="reference external" href="mailto:lois.rilo&#64;forgeflow.com">lois.rilo&#64;forgeflow.com</a>&gt;</li>
 <li>Jasmin Solanki &lt;<a class="reference external" href="mailto:jasmin.solanki&#64;forgeflow.com">jasmin.solanki&#64;forgeflow.com</a>&gt;</li>
 </ul>
-</dd>
-</dl>
 </li>
 </ul>
 </div>
 <div class="section" id="other-credits">
 <h2><a class="toc-backref" href="#toc-entry-6">Other credits</a></h2>
-<p>The migration of this module from 12.0 to 14.0 was financially supported by Camptocamp</p>
+<p>The migration of this module from 12.0 to 14.0 was financially supported
+by Camptocamp</p>
 </div>
 <div class="section" id="maintainers">
 <h2><a class="toc-backref" href="#toc-entry-7">Maintainers</a></h2>
 <p>This module is maintained by the OCA.</p>
-<a class="reference external image-reference" href="https://odoo-community.org"><img alt="Odoo Community Association" src="https://odoo-community.org/logo.png" /></a>
+<a class="reference external image-reference" href="https://odoo-community.org">
+<img alt="Odoo Community Association" src="https://odoo-community.org/logo.png" />
+</a>
 <p>OCA, or the Odoo Community Association, is a nonprofit organization whose
 mission is to support the collaborative development of Odoo features and
 promote its widespread use.</p>
-<p>This module is part of the <a class="reference external" href="https://github.com/OCA/queue/tree/16.0/queue_job_batch">OCA/queue</a> project on GitHub.</p>
+<p>This module is part of the <a class="reference external" href="https://github.com/OCA/queue/tree/18.0/queue_job_batch">OCA/queue</a> project on GitHub.</p>
 <p>You are welcome to contribute. To learn how please visit <a class="reference external" href="https://odoo-community.org/page/Contribute">https://odoo-community.org/page/Contribute</a>.</p>
 </div>
 </div>
