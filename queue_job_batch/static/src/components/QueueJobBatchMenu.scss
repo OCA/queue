@@ -1,0 +1,21 @@
+.o-queue-job-batch-QueueJobBatchMenu {
+    width: 350px;
+    max-height: 400px;
+    min-height: 50px;
+
+    .o-queue-job-batch-QueueJobBatchMenu-item {
+        &:hover {
+            .o-queue-job-batch-QueueJobBatchMenu-markAsRead {
+                visibility: visible;
+            }
+        }
+
+        .o-queue-job-batch-QueueJobBatchMenu-markAsRead {
+            visibility: hidden;
+
+            &:hover {
+                color: $success;
+            }
+        }
+    }
+}

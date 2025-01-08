@@ -7,15 +7,13 @@ Example:
 
 ``` python
 from odoo import models, fields, api
-from odoo.addons.queue_job.job import job
+
 
 class MyModel(models.Model):
-   _name = 'my.model'
+    _name = 'my.model'
 
-   @api.multi
-   @job
-   def my_method(self, a, k=None):
-       _logger.info('executed with a: %s and k: %s', a, k)
+    def my_method(self, a, k=None):
+        _logger.info('executed with a: %s and k: %s', a, k)
 
 
 class MyOtherModel(models.Model):
@@ -24,11 +22,9 @@ class MyOtherModel(models.Model):
     @api.multi
     def button_do_stuff(self):
         batch = self.env['queue.job.batch'].get_new_batch('Group')
+        model = self.env['my.model'].with_context(job_batch=batch)
         for i in range(1, 100):
-            self.env['my.model'].with_context(
-                job_batch=batch
-            ).with_delay().my_method('a', k=i)
-        batch.enqueue()
+            model.with_delay().my_method('a', k=i)
 ```
 
 In the snippet of code above, when we call `button_do_stuff`, 100 jobs

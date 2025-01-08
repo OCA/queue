@@ -4,6 +4,8 @@
 
 from odoo import api, fields, models
 
+from odoo.addons.mail.tools.discuss import Store
+
 
 class QueueJobBatch(models.Model):
     _name = "queue.job.batch"
@@ -32,12 +34,12 @@ class QueueJobBatch(models.Model):
     )
     state = fields.Selection(
         [
-            ("draft", "Draft"),
+            ("pending", "Pending"),
             ("enqueued", "Enqueued"),
             ("progress", "In Progress"),
             ("finished", "Finished"),
         ],
-        default="draft",
+        default="pending",
         required=True,
         readonly=True,
         tracking=True,
@@ -52,7 +54,7 @@ class QueueJobBatch(models.Model):
         "res.company",
         readonly=True,
     )
-    is_read = fields.Boolean(default=True)
+    is_read = fields.Boolean()
     completeness = fields.Float(
         compute="_compute_job_count",
     )
@@ -60,64 +62,67 @@ class QueueJobBatch(models.Model):
         compute="_compute_job_count",
     )
 
-    def enqueue(self):
-        self.filtered(lambda r: r.state == "draft").write({"state": "enqueued"})
-        for record in self:
-            record.check_state()
+    def _get_state(self):
+        self.ensure_one()
+        job_states = set(self.job_ids.grouped("state").keys())
+        if all(state in ("done", "cancelled", "failed") for state in job_states):
+            return "finished"
+        elif {"done", "started"} & job_states:
+            return "progress"
+        elif "enqueued" in job_states:
+            return "enqueued"
+        return "pending"
 
     def check_state(self):
-        self.ensure_one()
-        if self.state == "enqueued" and any(
-            job.state not in ["pending", "enqueued"] for job in self.job_ids
-        ):
-            self.write({"state": "progress"})
-        if self.state != "progress":
-            return True
-        if all(job.state == "done" for job in self.job_ids):
-            self.write(
-                {
-                    "state": "finished",
-                    "is_read": False,
-                }
-            )
-        return True
+        for rec in self:
+            if (state := rec._get_state()) != rec.state:
+                rec.state = state
 
     def set_read(self):
-        res = self.write({"is_read": True})
-        notifications = []
-        channel = "queue.job.batch/updated"
-        notifications.append([self.env.user.partner_id, channel, {}])
-        self.env["bus.bus"]._sendmany(notifications)
-        return res
+        for rec in self:
+            if rec.is_read or rec.state != "finished":
+                continue
+            rec.is_read = True
+            rec.user_id._bus_send("queue.job.batch/updated", {"batch_read": True})
 
     @api.model
     def get_new_batch(self, name, **kwargs):
         vals = kwargs.copy()
-        company_id = self.env.user.company_id.id
-
-        if "company_id" in self.env.context:
-            company_id = self.env.context["company_id"]
-
         vals.update(
             {
                 "user_id": self.env.uid,
                 "name": name,
-                "state": "draft",
-                "company_id": company_id,
+                "company_id": self.env.company.id or self.env.user.company_id.id,
             }
         )
-        return self.sudo().create(vals).with_user(self.env.uid)
+        record = self.sudo().create(vals).with_user(self.env.uid)
+        record.user_id._bus_send("queue.job.batch/updated", {"batch_created": True})
+        return record
 
-    @api.depends("job_ids")
+    @api.depends("job_ids.state")
     def _compute_job_count(self):
-        for record in self:
-            job_count = len(record.job_ids)
-            failed_job_count = len(
-                record.job_ids.filtered(lambda r: r.state == "failed")
-            )
-            done_job_count = len(record.job_ids.filtered(lambda r: r.state == "done"))
-            record.job_count = job_count
-            record.finished_job_count = done_job_count
-            record.failed_job_count = failed_job_count
-            record.completeness = done_job_count / max(1, job_count)
-            record.failed_percentage = failed_job_count / max(1, job_count)
+        for rec in self:
+            jobs_by_state = rec.job_ids.grouped("state")
+            rec.job_count = len(rec.job_ids)
+            rec.failed_job_count = len(jobs_by_state.get("failed", []))
+            rec.finished_job_count = len(jobs_by_state.get("done", []))
+            rec.completeness = rec.finished_job_count / max(1, rec.job_count)
+            rec.failed_percentage = rec.failed_job_count / max(1, rec.job_count)
+
+    @api.model
+    def _to_store_fnames(self):
+        return (
+            "name",
+            "state",
+            "job_count",
+            "finished_job_count",
+            "failed_job_count",
+            "completeness",
+            "failed_percentage",
+        )
+
+    def _to_store(self, store: Store):
+        fnames = self._to_store_fnames()
+        for rec in self:
+            data = rec.read(fnames)[0]
+            store.add(rec, data)

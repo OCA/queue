@@ -376,15 +376,13 @@ the results.</p>
 <p>Example:</p>
 <pre class="code python literal-block">
 <span class="kn">from</span><span class="w"> </span><span class="nn">odoo</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">api</span><span class="w">
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">odoo.addons.queue_job.job</span><span class="w"> </span><span class="kn">import</span> <span class="n">job</span><span class="w">
+
 
 </span><span class="k">class</span><span class="w"> </span><span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
-</span>   <span class="n">_name</span> <span class="o">=</span> <span class="s1">'my.model'</span><span class="w">
+</span>    <span class="n">_name</span> <span class="o">=</span> <span class="s1">'my.model'</span><span class="w">
 
-</span>   <span class="nd">&#64;api</span><span class="o">.</span><span class="n">multi</span><span class="w">
-</span>   <span class="nd">&#64;job</span><span class="w">
-</span>   <span class="k">def</span><span class="w"> </span><span class="nf">my_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span><span class="w">
-</span>       <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'executed with a: </span><span class="si">%s</span><span class="s1"> and k: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span><span class="w">
+</span>    <span class="k">def</span><span class="w"> </span><span class="nf">my_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span><span class="w">
+</span>        <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'executed with a: </span><span class="si">%s</span><span class="s1"> and k: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span><span class="w">
 
 
 </span><span class="k">class</span><span class="w"> </span><span class="nc">MyOtherModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
@@ -393,11 +391,9 @@ the results.</p>
 </span>    <span class="nd">&#64;api</span><span class="o">.</span><span class="n">multi</span><span class="w">
 </span>    <span class="k">def</span><span class="w"> </span><span class="nf">button_do_stuff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
 </span>        <span class="n">batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">'queue.job.batch'</span><span class="p">]</span><span class="o">.</span><span class="n">get_new_batch</span><span class="p">(</span><span class="s1">'Group'</span><span class="p">)</span><span class="w">
+</span>        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">'my.model'</span><span class="p">]</span><span class="o">.</span><span class="n">with_context</span><span class="p">(</span><span class="n">job_batch</span><span class="o">=</span><span class="n">batch</span><span class="p">)</span><span class="w">
 </span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">):</span><span class="w">
-</span>            <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">'my.model'</span><span class="p">]</span><span class="o">.</span><span class="n">with_context</span><span class="p">(</span><span class="w">
-</span>                <span class="n">job_batch</span><span class="o">=</span><span class="n">batch</span><span class="w">
-</span>            <span class="p">)</span><span class="o">.</span><span class="n">with_delay</span><span class="p">()</span><span class="o">.</span><span class="n">my_method</span><span class="p">(</span><span class="s1">'a'</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">i</span><span class="p">)</span><span class="w">
-</span>        <span class="n">batch</span><span class="o">.</span><span class="n">enqueue</span><span class="p">()</span>
+</span>            <span class="n">model</span><span class="o">.</span><span class="n">with_delay</span><span class="p">()</span><span class="o">.</span><span class="n">my_method</span><span class="p">(</span><span class="s1">'a'</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
 </pre>
 <p>In the snippet of code above, when we call <tt class="docutils literal">button_do_stuff</tt>, 100 jobs
 capturing the method and arguments will be postponed. It will be
@@ -451,6 +447,11 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 <li><a class="reference external" href="https://forgeflow.com">ForgeFlow</a>:<ul>
 <li>Lois Rilo &lt;<a class="reference external" href="mailto:lois.rilo&#64;forgeflow.com">lois.rilo&#64;forgeflow.com</a>&gt;</li>
 <li>Jasmin Solanki &lt;<a class="reference external" href="mailto:jasmin.solanki&#64;forgeflow.com">jasmin.solanki&#64;forgeflow.com</a>&gt;</li>
+</ul>
+</li>
+<li><a class="reference external" href="https://camptocamp.com">Camptocamp</a>:<ul>
+<li>Maksym Yankin &lt;<a class="reference external" href="mailto:maksym.yankin&#64;camptocamp.com">maksym.yankin&#64;camptocamp.com</a>&gt;</li>
+<li>Iván Todorovich &lt;<a class="reference external" href="mailto:ivan.todorovich&#64;camptocamp.com">ivan.todorovich&#64;camptocamp.com</a>&gt;</li>
 </ul>
 </li>
 </ul>

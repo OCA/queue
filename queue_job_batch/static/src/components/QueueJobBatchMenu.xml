@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    Copyright 2025 Camptocamp SA (https://www.camptocamp.com).
+    License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+-->
+<templates>
+    <t t-name="queue_job_batch.QueueJobBatchMenu">
+        <Dropdown
+            t-if="store.hasQueueJobBatchUserGroup"
+            position="'bottom-end'"
+            state="dropdown"
+            beforeOpen.bind="onBeforeOpen"
+            menuClass="discussSystray.menuClass"
+        >
+            <button>
+                <i class="fa fa-lg fa-list" role="img" aria-label="Job batches" />
+                <span
+                    t-if="store.queueJobBatchCounter"
+                    t-esc="store.queueJobBatchCounter"
+                    class="o_ActivityMenuView_counter badge"
+                />
+            </button>
+            <t t-set-slot="content">
+                <div
+                    t-att-class="`${discussSystray.contentClass} o-queue-job-batch-QueueJobBatchMenu`"
+                >
+                    <div
+                        t-if="store.queueJobBatchCounter === 0"
+                        class="o-mail-ActivityMenu-empty align-items-center text-muted p-2 opacity-50 d-flex justify-content-center"
+                    >
+                        <span>No jobs to view.</span>
+                    </div>
+                    <div
+                        class="d-flex flex-column list-group list-group-flush"
+                        name="queueJobBatches"
+                    >
+                        <t
+                            t-foreach="Object.values(store.QueueJobBatch.records)"
+                            t-as="queueJobBatch"
+                            t-key="queueJobBatch.id"
+                        >
+                            <div
+                                class="o-queue-job-batch-QueueJobBatchMenu-item list-group-item list-group-item-action d-flex p-2 cursor-pointer"
+                                t-on-click="(ev) => this.onClickItem(ev, queueJobBatch)"
+                            >
+                                <div class="col-2 align-self-center text-center">
+                                    <span
+                                        t-if="queueJobBatch.failed_job_count"
+                                        class="fa fa-2x fa-times-circle text-danger"
+                                    />
+                                    <span
+                                        t-elif="queueJobBatch.finished_job_count == queueJobBatch.job_count"
+                                        class="fa fa-2x fa-check-circle text-success"
+                                    />
+                                    <span
+                                        t-else=""
+                                        class="fa fa-2x fa-clock-o text-warning"
+                                    />
+                                </div>
+                                <div class="col-8">
+                                    <strong
+                                        class="o_NotificationListItem_name o_NotificationGroup_name text-truncate"
+                                    >
+                                        <t t-esc="queueJobBatch.name" />
+                                    </strong>
+                                    <div
+                                        class="d-flex align-items-center justify-content-between mb-3 h-0 mt8"
+                                    >
+                                        <t
+                                            t-set="group"
+                                            t-value="getGroupInfo(queueJobBatch)"
+                                        />
+                                        <ColumnProgress
+                                            t-if="queueJobBatch.job_count"
+                                            group="group"
+                                            progressBar="group.progressBar"
+                                            aggregate="group.aggregate"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="col-2 align-self-center text-center">
+                                    <span
+                                        title="Mark as Read"
+                                        class="fa fa-check o-queue-job-batch-QueueJobBatchMenu-markAsRead"
+                                        t-if="queueJobBatch.state === 'finished'"
+                                        t-on-click="(ev) => this.onClickMarkAsRead(ev, queueJobBatch)"
+                                    />
+                                </div>
+                            </div>
+                        </t>
+                        <a
+                            href="#"
+                            class="list-group-item list-group-item-action p-2 border-0 text-primary text-center"
+                            t-on-click="openMyJobBatches"
+                        >
+                            View all job batches
+                        </a>
+                    </div>
+                </div>
+            </t>
+        </Dropdown>
+    </t>
+</templates>
