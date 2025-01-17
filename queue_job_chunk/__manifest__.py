@@ -5,7 +5,7 @@
     "name": "Job Queue Chunk",
     "version": "16.0.0.1.0",
     "author": "Akretion, Odoo Community Association (OCA)",
-    "website": "https://github.com/OCA/sale-channel",
+    "website": "https://github.com/OCA/queue",
     "license": "AGPL-3",
     "category": "Generic Modules",
     "depends": ["queue_job"],
