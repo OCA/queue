@@ -4,10 +4,10 @@
 
 from odoo_test_helper import FakeModelLoader
 
-from odoo.tests import TransactionCase
+from odoo.tests import SavepointCase
 
 
-class TestQueueJobChunk(TransactionCase, FakeModelLoader):
+class TestQueueJobChunk(SavepointCase, FakeModelLoader):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
