@@ -11,7 +11,15 @@ class QueueJob(models.Model):
         self.ensure_one()
         return _("Job failed")
 
+    def _get_web_notify_done_title(self):
+        self.ensure_one()
+        return _("Job done")
+
     def _get_web_notify_failure_message(self):
+        self.ensure_one()
+        return self.display_name
+
+    def _get_web_notify_done_message(self):
         self.ensure_one()
         return self.display_name
 
@@ -26,3 +34,19 @@ class QueueJob(models.Model):
                 message=notification_message, title=notification_title, sticky=True
             )
         return res
+
+    def _message_post_on_done(self):
+        for job in self:
+            if not job.job_function_id.is_web_notify_done_enabled:
+                continue
+            notification_title = job._get_web_notify_done_title()
+            notification_message = job._get_web_notify_done_message()
+            job.user_id.notify_success(
+                message=notification_message, title=notification_title, sticky=True
+            )
+
+    def write(self, vals):
+        result = super().write(vals)
+        if vals.get("state") == "done":
+            self._message_post_on_done()
+        return result

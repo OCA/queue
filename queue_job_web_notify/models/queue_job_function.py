@@ -12,3 +12,8 @@ class QueueJobFunction(models.Model):
         help="Display a notification in the user interface when the job fails.",
         default=False,
     )
+    is_web_notify_done_enabled = fields.Boolean(
+        string="Notify on done",
+        help="Display a notification in the user interface when the job is done.",
+        default=False,
+    )

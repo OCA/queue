@@ -9,6 +9,7 @@
             <xpath expr="//field[@name='name']/.." position="after">
                 <group name="group_web_notify">
                     <field name="is_web_notify_failure_enabled" />
+                    <field name="is_web_notify_done_enabled" />
                 </group>
             </xpath>
         </field>
