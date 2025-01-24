@@ -74,7 +74,13 @@ class RunJobController(http.Controller):
             else:
                 break
 
-    @http.route("/queue_job/runjob", type="http", auth="none", save_session=False)
+    @http.route(
+        "/queue_job/runjob",
+        type="http",
+        auth="none",
+        save_session=False,
+        readonly=False,
+    )
     def runjob(self, db, job_uuid, **kw):
         http.request.session.db = db
         env = http.request.env(user=SUPERUSER_ID)
