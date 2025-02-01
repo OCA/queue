@@ -240,7 +240,7 @@ class Job:
 
     def add_lock_record(self):
         """
-        Create row in db to be locked once the job is performed
+        Create row in db to be locked while the job is being performed.
         """
         self.env.cr.execute(
             """

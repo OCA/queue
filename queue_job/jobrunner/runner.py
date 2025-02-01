@@ -391,10 +391,7 @@ class Database:
             cr.execute(query)
 
             for (uuid,) in cr.fetchall():
-                _logger.warning(
-                    "Re-queued job with uuid: %s",
-                    uuid,
-                )
+                _logger.warning("Re-queued dead job with uuid: %s", uuid)
 
 
 class QueueJobRunner:
