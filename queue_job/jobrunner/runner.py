@@ -344,7 +344,36 @@ class Database(object):
             )
 
 
-class QueueJobRunner(object):
+    def requeue_dead_jobs(self):
+        """
+        Set started and enqueued jobs but not locked to pending
+
+        A job is locked when it's being executed
+        When a job is killed, it releases the lock
+
+        If the number of retries exceeds the number of max retries,
+        the job is set as 'failed' with the error 'JobFoundDead'.
+
+        Adding a buffer on 'date_enqueued' to check
+        that it has been enqueued for more than 10sec.
+        This prevents from requeuing jobs before they are actually started.
+
+        When Odoo shuts down normally, it waits for running jobs to finish.
+        However, when the Odoo server crashes or is otherwise force-stopped,
+        running jobs are interrupted while the runner has no chance to know
+        they have been aborted.
+        """
+
+        with closing(self.conn.cursor()) as cr:
+            query = self._query_requeue_dead_jobs()
+
+            cr.execute(query)
+
+            for (uuid,) in cr.fetchall():
+                _logger.warning("Re-queued dead job with uuid: %s", uuid)
+
+
+class QueueJobRunner:
     def __init__(
         self,
         scheme="http",
