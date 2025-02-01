@@ -40,11 +40,11 @@ class TestRequeueDeadJob(TransactionCase):
         cr.execute(
             """
             SELECT
-                id
+                queue_job_id
             FROM
-                queue_job_locks
+                queue_job_lock
             WHERE
-                id IN (
+                queue_job_id IN (
                     SELECT
                         id
                     FROM

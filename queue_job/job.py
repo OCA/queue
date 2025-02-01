@@ -245,9 +245,9 @@ class Job:
         self.env.cr.execute(
             """
             INSERT INTO
-                queue_job_locks (id)
+                queue_job_lock (id, queue_job_id)
             SELECT
-                id
+                id, id
             FROM
                 queue_job
             WHERE
@@ -271,9 +271,9 @@ class Job:
             SELECT
                 *
             FROM
-                queue_job_locks
+                queue_job_lock
             WHERE
-                id in (
+                queue_job_id in (
                     SELECT
                         id
                     FROM
