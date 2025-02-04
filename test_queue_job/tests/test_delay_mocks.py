@@ -270,6 +270,12 @@ class TestDelayMocks(common.TransactionCase):
             self.assertEqual(logs[3].message, "test_trap_jobs_perform graph 1")
 
     def test_trap_jobs_prepare_context(self):
+        """Context is transferred to the job according to an allow-list.
+
+        Default allow-list is:
+        ("tz", "lang", "allowed_company_ids", "force_company", "active_test")
+        It can be customized in ``Base._job_prepare_context_before_enqueue_keys``.
+        """
         # pylint: disable=context-overridden
         with trap_jobs() as trap:
             model1 = self.env["test.queue.job"].with_context({"config_key": 42})
