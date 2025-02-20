@@ -69,15 +69,15 @@ msgid "Display Name"
 msgstr "Nome visualizzato"
 
 #. module: queue_job_batch
-#: model:ir.model.fields.selection,name:queue_job_batch.selection__queue_job_batch__state__draft
-#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
-msgid "Draft"
-msgstr "Bozza"
-
-#. module: queue_job_batch
 #: model:ir.model.fields.selection,name:queue_job_batch.selection__queue_job_batch__state__enqueued
 msgid "Enqueued"
 msgstr "In coda"
+
+#. module: queue_job_batch
+#. odoo-javascript
+#: code:addons/queue_job_batch/static/src/components/QueueJobBatchMenu.esm.js:0
+msgid "Failed"
+msgstr ""
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__failed_job_count
@@ -90,6 +90,8 @@ msgid "Failed Percentage"
 msgstr "Percentuale falliti"
 
 #. module: queue_job_batch
+#. odoo-javascript
+#: code:addons/queue_job_batch/static/src/components/QueueJobBatchMenu.esm.js:0
 #: model:ir.model.fields.selection,name:queue_job_batch.selection__queue_job_batch__state__finished
 #: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "Finished"
@@ -147,6 +149,7 @@ msgstr "Se selezionata, nuovi messaggi richiedono attenzione."
 
 #. module: queue_job_batch
 #: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__message_has_error
+#: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "Se selezionata, alcuni messaggi hanno un errore di consegna."
 
@@ -177,16 +180,7 @@ msgstr "Lavoro"
 
 #. module: queue_job_batch
 #. odoo-javascript
-#: code:addons/queue_job_batch/static/src/xml/queue_job_batch_menu.xml:0
-#, python-format
-msgid ""
-"Job\n"
-"                        Batches"
-msgstr ""
-"Gruppi\n"
-"                        lavoro"
-
-#. module: queue_job_batch
+#: code:addons/queue_job_batch/static/src/QueueJobBatchModel.esm.js:0
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job__job_batch_id
 #: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_form
 msgid "Job Batch"
@@ -204,35 +198,21 @@ msgstr "Utente gruppo lavoro coda lavoro"
 
 #. module: queue_job_batch
 #. odoo-javascript
-#: code:addons/queue_job_batch/static/src/xml/queue_job_batch_menu.xml:0
-#: code:addons/queue_job_batch/static/src/xml/queue_job_batch_menu.xml:0
+#: code:addons/queue_job_batch/static/src/components/QueueJobBatchMenu.xml:0
 #: model:ir.actions.act_window,name:queue_job_batch.action_queue_job_batch
 #: model:ir.actions.act_window,name:queue_job_batch.action_view_your_queue_job_batch
 #: model:ir.ui.menu,name:queue_job_batch.menu_queue_job_batch
-#, python-format
 msgid "Job batches"
 msgstr "Gruppi lavoro"
 
 #. module: queue_job_batch
-#: model:ir.actions.act_window,name:queue_job_batch.action_queue_job_related
 #: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_form
 msgid "Jobs"
 msgstr "Lavori"
 
 #. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch____last_update
-msgid "Last Modified on"
-msgstr "Ultima modifica il"
-
-#. module: queue_job_batch
-#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "Allegato principale"
-
-#. module: queue_job_batch
 #. odoo-javascript
-#: code:addons/queue_job_batch/static/src/xml/queue_job_batch_menu.xml:0
-#, python-format
+#: code:addons/queue_job_batch/static/src/components/QueueJobBatchMenu.xml:0
 msgid "Mark as Read"
 msgstr "Segna come letto"
 
@@ -250,6 +230,11 @@ msgstr "Messaggi"
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__my_activity_date_deadline
 msgid "My Activity Deadline"
 msgstr "Scadenza mia attività"
+
+#. module: queue_job_batch
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
+msgid "My batches"
+msgstr ""
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__name
@@ -273,8 +258,7 @@ msgstr "Tipo prossima attività"
 
 #. module: queue_job_batch
 #. odoo-javascript
-#: code:addons/queue_job_batch/static/src/xml/queue_job_batch_menu.xml:0
-#, python-format
+#: code:addons/queue_job_batch/static/src/components/QueueJobBatchMenu.xml:0
 msgid "No jobs to view."
 msgstr "Nssun lavoro da visualizzare."
 
@@ -299,6 +283,18 @@ msgid "Number of messages with delivery error"
 msgstr "Numero di messaggi con errore di consegna"
 
 #. module: queue_job_batch
+#: model:ir.model.fields.selection,name:queue_job_batch.selection__queue_job_batch__state__pending
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
+msgid "Pending"
+msgstr ""
+
+#. module: queue_job_batch
+#. odoo-javascript
+#: code:addons/queue_job_batch/static/src/components/QueueJobBatchMenu.esm.js:0
+msgid "Planned"
+msgstr ""
+
+#. module: queue_job_batch
 #: model:ir.model,name:queue_job_batch.model_queue_job
 msgid "Queue Job"
 msgstr "Lavoro in coda"
@@ -307,6 +303,11 @@ msgstr "Lavoro in coda"
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__activity_user_id
 msgid "Responsible User"
 msgstr "Utente responsabile"
+
+#. module: queue_job_batch
+#: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr ""
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__state
@@ -328,11 +329,23 @@ msgstr ""
 "Pianificato: attività future."
 
 #. module: queue_job_batch
+#. odoo-javascript
+#: code:addons/queue_job_batch/static/src/components/QueueJobBatchMenu.esm.js:0
+msgid "Total"
+msgstr ""
+
+#. module: queue_job_batch
 #: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Tipo di attività eccezione sul record."
 
 #. module: queue_job_batch
+#: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
+msgid "Unread"
+msgstr ""
+
+#. module: queue_job_batch
+#: model:ir.model,name:queue_job_batch.model_res_users
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__user_id
 #: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "User"
@@ -340,7 +353,27 @@ msgstr "Utente"
 
 #. module: queue_job_batch
 #. odoo-javascript
-#: code:addons/queue_job_batch/static/src/xml/queue_job_batch_menu.xml:0
+#: code:addons/queue_job_batch/static/src/components/QueueJobBatchMenu.xml:0
+msgid "View all job batches"
+msgstr ""
+
+#~ msgid "Draft"
+#~ msgstr "Bozza"
+
 #, python-format
-msgid "View All"
-msgstr "Visualizza tutto"
+#~ msgid ""
+#~ "Job\n"
+#~ "                        Batches"
+#~ msgstr ""
+#~ "Gruppi\n"
+#~ "                        lavoro"
+
+#~ msgid "Last Modified on"
+#~ msgstr "Ultima modifica il"
+
+#~ msgid "Main Attachment"
+#~ msgstr "Allegato principale"
+
+#, python-format
+#~ msgid "View All"
+#~ msgstr "Visualizza tutto"
