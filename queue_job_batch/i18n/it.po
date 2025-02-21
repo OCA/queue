@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2024-01-11 13:35+0000\n"
+"PO-Revision-Date: 2025-02-21 18:06+0000\n"
 "Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: none\n"
 "Language: it\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.17\n"
+"X-Generator: Weblate 5.6.2\n"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_needaction
@@ -77,7 +77,7 @@ msgstr "In coda"
 #. odoo-javascript
 #: code:addons/queue_job_batch/static/src/components/QueueJobBatchMenu.esm.js:0
 msgid "Failed"
-msgstr ""
+msgstr "Fallito"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__failed_job_count
@@ -234,7 +234,7 @@ msgstr "Scadenza mia attività"
 #. module: queue_job_batch
 #: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "My batches"
-msgstr ""
+msgstr "I miei gruppi"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__name
@@ -286,13 +286,13 @@ msgstr "Numero di messaggi con errore di consegna"
 #: model:ir.model.fields.selection,name:queue_job_batch.selection__queue_job_batch__state__pending
 #: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "Pending"
-msgstr ""
+msgstr "In sospeso"
 
 #. module: queue_job_batch
 #. odoo-javascript
 #: code:addons/queue_job_batch/static/src/components/QueueJobBatchMenu.esm.js:0
 msgid "Planned"
-msgstr ""
+msgstr "Pianificato"
 
 #. module: queue_job_batch
 #: model:ir.model,name:queue_job_batch.model_queue_job
@@ -307,7 +307,7 @@ msgstr "Utente responsabile"
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr ""
+msgstr "Errore consegna SMS"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__state
@@ -332,7 +332,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/queue_job_batch/static/src/components/QueueJobBatchMenu.esm.js:0
 msgid "Total"
-msgstr ""
+msgstr "Totale"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,help:queue_job_batch.field_queue_job_batch__activity_exception_decoration
@@ -342,7 +342,7 @@ msgstr "Tipo di attività eccezione sul record."
 #. module: queue_job_batch
 #: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "Unread"
-msgstr ""
+msgstr "Non letto"
 
 #. module: queue_job_batch
 #: model:ir.model,name:queue_job_batch.model_res_users
@@ -355,7 +355,7 @@ msgstr "Utente"
 #. odoo-javascript
 #: code:addons/queue_job_batch/static/src/components/QueueJobBatchMenu.xml:0
 msgid "View all job batches"
-msgstr ""
+msgstr "Vedi tutti i gruppi lavoro"
 
 #~ msgid "Draft"
 #~ msgstr "Bozza"
