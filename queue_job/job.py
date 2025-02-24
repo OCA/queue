@@ -14,7 +14,12 @@ from random import randint
 
 import odoo
 
-from .exception import FailedJobError, NoSuchJobError, RetryableJobError
+from .exception import (
+    FailedJobError,
+    NoSuchJobError,
+    RetryableJobError,
+    StringifyExceptions,
+)
 
 WAIT_DEPENDENCIES = "wait_dependencies"
 PENDING = "pending"
@@ -286,6 +291,7 @@ class Job:
         job_.exc_info = stored.exc_info if stored.exc_info else None
         job_.retry = stored.retry
         job_.max_retries = stored.max_retries
+        job_.retryable_exceptions = stored.retryable_exceptions
         if stored.company_id:
             job_.company_id = stored.company_id.id
         job_.identity_key = stored.identity_key
@@ -395,6 +401,7 @@ class Job:
         description=None,
         channel=None,
         identity_key=None,
+        retryable_exceptions=None,
     ):
         """Create a Job
 
@@ -471,6 +478,7 @@ class Job:
 
         self.date_created = datetime.now()
         self._description = description
+        self.retryable_exceptions = retryable_exceptions
 
         if isinstance(identity_key, str):
             self._identity_key = identity_key
@@ -512,14 +520,33 @@ class Job:
         if any(j.state != DONE for j in jobs):
             self.state = WAIT_DEPENDENCIES
 
+    def failed_retries(self):
+        type_, value, traceback = sys.exc_info()
+        # change the exception type but keep the original
+        # traceback and message:
+        # http://blog.ianbicking.org/2007/09/12/re-raising-exceptions/
+        return FailedJobError(
+            "Max. retries (%d) reached: %s" % (self.max_retries, value or type_)
+        )
+
     def perform(self):
         """Execute the job.
 
         The job is executed with the user which has initiated it.
         """
         self.retry += 1
+        if self.retryable_exceptions:
+            expected_errors = tuple(
+                [StringifyExceptions[exc].value for exc in self.retryable_exceptions]
+            )
+        else:
+            expected_errors = (StringifyExceptions.UnusedException.value,)
         try:
             self.result = self.func(*tuple(self.args), **self.kwargs)
+        except expected_errors as err:
+            if self.max_retries and self.retry >= self.max_retries:
+                raise self.failed_retries()
+            raise RetryableJobError(msg="Postponed, %s" % str(err))
         except RetryableJobError as err:
             if err.ignore_retry:
                 self.retry -= 1
@@ -527,14 +554,7 @@ class Job:
             elif not self.max_retries:  # infinite retries
                 raise
             elif self.retry >= self.max_retries:
-                type_, value, traceback = sys.exc_info()
-                # change the exception type but keep the original
-                # traceback and message:
-                # http://blog.ianbicking.org/2007/09/12/re-raising-exceptions/
-                new_exc = FailedJobError(
-                    "Max. retries (%d) reached: %s" % (self.max_retries, value or type_)
-                )
-                raise new_exc from err
+                raise self.failed_retries() from err
             raise
 
         return self.result
@@ -651,6 +671,7 @@ class Job:
                     "records": self.recordset,
                     "args": self.args,
                     "kwargs": self.kwargs,
+                    "retryable_exceptions": self.retryable_exceptions,
                 }
             )
 

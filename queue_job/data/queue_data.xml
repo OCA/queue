@@ -28,6 +28,18 @@
             <field name="state">code</field>
             <field name="code">model.autovacuum()</field>
         </record>
+        <record id="ir_cron_autovacuum_failed_queue_jobs" model="ir.cron">
+            <field name="name">AutoVacuum Failed Jobs</field>
+            <field ref="model_queue_job" name="model_id" />
+            <field eval="True" name="active" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall" />
+            <field name="state">code</field>
+            <field name="code">model.autovacuum(vacuum_failed=True)</field>
+        </record>
     </data>
     <data noupdate="0">
         <record model="queue.job.channel" id="channel_root">

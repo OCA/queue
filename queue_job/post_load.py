@@ -1,5 +1,6 @@
 import logging
 
+from odoo.addons.queue_job.jobrunner.runner import QueueJobRunner
 from odoo import http
 
 _logger = logging.getLogger(__name__)
@@ -23,3 +24,4 @@ def post_load():
         return session, dbname
 
     http.Request._get_session_and_dbname = _get_session_and_dbname
+    QueueJobRunner.requeue_jobs()
