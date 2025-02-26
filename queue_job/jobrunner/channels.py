@@ -381,7 +381,9 @@ class Channel(object):
     without risking to overflow the system.
     """
 
-    def __init__(self, name, parent, capacity=None, sequential=False, throttle=0):
+    def __init__(
+        self, name, parent, capacity=None, sequential=False, throttle=0, subcapacity=0
+    ):
         self.name = name
         self.parent = parent
         if self.parent:
@@ -391,9 +393,10 @@ class Channel(object):
         self._running = set()
         self._failed = set()
         self._pause_until = 0  # utc seconds since the epoch
-        self.capacity = capacity
+        self.capacity = capacity or (parent and parent.subcapacity) or None
         self.throttle = throttle  # seconds
         self.sequential = sequential
+        self.subcapacity = subcapacity
 
     @property
     def sequential(self):
@@ -410,11 +413,13 @@ class Channel(object):
 
         * capacity
         * sequential
+        * subcapacity
         * throttle
         """
         assert self.fullname.endswith(config["name"])
         self.capacity = config.get("capacity", None)
         self.sequential = bool(config.get("sequential", False))
+        self.subcapacity = int(config.get("subcapacity", 0))
         self.throttle = int(config.get("throttle", 0))
         if self.sequential and self.capacity != 1:
             raise ValueError("A sequential channel must have a capacity of 1")
