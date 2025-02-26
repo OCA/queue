@@ -12,6 +12,7 @@ from odoo.addons.queue_job.jobrunner import channels
 @tagged("doctest")
 class TestDoctest(BaseCase):
     def test_doctest(self):
-        doctest.testmod(
+        results = doctest.testmod(
             channels, exclude_empty=True, optionflags=doctest.REPORT_ONLY_FIRST_FAILURE
         )
+        self.assertEqual(results.failed, 0, "doctest failed")
