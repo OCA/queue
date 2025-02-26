@@ -408,7 +408,15 @@ class Channel:
     """
 
     def __init__(
-        self, name, parent, capacity=None, sequential=False, throttle=0, paused=False
+        self,
+        name,
+        parent,
+        capacity=None,
+        sequential=False,
+        throttle=0,
+        paused=False,
+        capacity_default=None,
+        sequential_default=False,
     ):
         self.name = name
         self.parent = parent
@@ -419,9 +427,13 @@ class Channel:
         self._running = set()
         self._failed = set()
         self._pause_until = 0  # utc seconds since the epoch
-        self.capacity = capacity
+        self.capacity = (
+            capacity if (capacity is not None) else (parent and parent.capacity_default)
+        )
+        self.capacity_default = capacity_default
         self.throttle = throttle  # seconds
-        self.sequential = sequential
+        self.sequential = sequential or (parent and parent.sequential_default)
+        self.sequential_default = sequential_default
         self.paused = paused
 
     @property
@@ -438,13 +450,17 @@ class Channel:
         Supported keys are:
 
         * capacity
+        * capacity_default (default for sub channels)
         * sequential
+        * sequential_default (default for sub channels)
         * throttle
         * paused
         """
         assert self.fullname.endswith(config["name"])
         self.capacity = config.get("capacity", None)
+        self.capacity_default = config.get("capacity_default", None)
         self.sequential = bool(config.get("sequential", False))
+        self.sequential_default = config.get("sequential_default", False)
         self.throttle = int(config.get("throttle", 0))
         self.paused = bool(config.get("paused", False))
         if self.sequential and self.capacity != 1:
@@ -902,22 +918,24 @@ class ChannelManager:
                 continue
             config = {}
             config_items = split_strip(channel_config_string, ":")
-            name = config_items[0]
+            name = config_items.pop(0)
             if not name:
                 raise ValueError(
                     "Invalid channel config %s: missing channel name" % config_string
                 )
             config["name"] = name
-            if len(config_items) > 1:
-                capacity = config_items[1]
+            if len(config_items) > 0:
                 try:
-                    config["capacity"] = int(capacity)
+                    config["capacity"] = int(config_items[0])
+                    config_items.pop(0)
                 except Exception:
-                    raise ValueError(
-                        "Invalid channel config %s: "
-                        "invalid capacity %s" % (config_string, capacity)
-                    )
-                for config_item in config_items[2:]:
+                    if name == "root":
+                        raise ValueError(
+                            "Invalid channel config %s: "
+                            "invalid capacity %s" % (config_string, config_items[0])
+                        )
+
+                for config_item in config_items:
                     kv = split_strip(config_item, "=")
                     if len(kv) == 1:
                         k, v = kv[0], True
@@ -933,7 +951,16 @@ class ChannelManager:
                             "Invalid channel config %s: duplicate key %s"
                             % (config_string, k)
                         )
-                    config[k] = v
+                    if k == "capacity_default":
+                        try:
+                            config[k] = int(v)
+                        except Exception:
+                            raise ValueError(
+                                "Invalid channel config %s: "
+                                "invalid capacity_default %s" % (config_string, v)
+                            )
+                    else:
+                        config[k] = v
             else:
                 config["capacity"] = 1
             res.append(config)
@@ -946,6 +973,17 @@ class ChannelManager:
         >>> c = cm.get_channel_by_name('root')
         >>> c.capacity
         1
+
+        >>> cm.simple_configure('root:bogus')
+        Traceback (most recent call last):
+            ...
+        ValueError: Invalid channel config root:bogus: invalid capacity bogus
+
+        >>> cm.simple_configure('root:4,:2')
+        Traceback (most recent call last):
+            ...
+        ValueError: Invalid channel config root:4,:2: missing channel name
+
         >>> cm.simple_configure('root:4,autosub.sub:2,seq:1:sequential')
         >>> cm.get_channel_by_name('root').capacity
         4
@@ -962,7 +1000,28 @@ class ChannelManager:
         1
         >>> cm.get_channel_by_name('seq').sequential
         True
-        """
+
+        >>> cm.simple_configure('root:4:capacity_default=bogus')
+        Traceback (most recent call last):
+            ...
+        ValueError: Invalid channel config root:4:capacity_default=bogus: invalid capacity_default bogus
+
+        >>> cm.simple_configure('root:4,sub:3:capacity_default=2')
+        >>> cm.get_channel_by_name('root.sub').capacity
+        3
+        >>> cm.get_channel_by_name('root.sub.auto', autocreate=True).capacity
+        2
+
+        >>> cm.simple_configure('root:4,seq:2:sequential')
+        Traceback (most recent call last):
+            ...
+        ValueError: A sequential channel must have a capacity of 1
+
+        >>> cm.simple_configure('root:4,seq:sequential_default')
+        >>> cm.get_channel_by_name('root.seq.auto', autocreate=True).sequential
+        True
+
+        """  # noqa: E501,B950
         for config in ChannelManager.parse_simple_config(config_string):
             self.get_channel_from_config(config)
 
