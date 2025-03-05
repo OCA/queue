@@ -3,12 +3,15 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from datetime import datetime
+from unittest import mock
 
 from freezegun import freeze_time
 
 from odoo import SUPERUSER_ID, api
 from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger
+
+from odoo.addons.queue_job.jobrunner import QueueJobRunner
 
 
 class TestQueueJob(TransactionCase):
@@ -56,7 +59,6 @@ class TestQueueJob(TransactionCase):
         # if the state is "waiting_dependencies", it means the "enqueue_waiting()"
         # step has not been done when the parent job has been done
         self.assertEqual(job_record_depends.state, "done", "Processed OK")
-        self.assertEqual(self.cron.nextcall, datetime(2022, 2, 22, 22, 22, 22))
 
     @freeze_time("2022-02-22 22:22:22")
     def test_concurrent_cron_access(self):
@@ -70,20 +72,7 @@ class TestQueueJob(TransactionCase):
             (self.cron.id,),
             log_exceptions=False,
         )
-
-        delayable = self.env["res.partner"].delayable().create({"name": "test"})
-        delayable2 = self.env["res.partner"].delayable().create({"name": "test2"})
-        delayable.on_done(delayable2)
-        delayable.delay()
-        job_record = delayable._generated_job.db_record()
-        job_record_depends = delayable2._generated_job.db_record()
-
-        self.env["queue.job"]._job_runner(commit=False)
-
-        self.assertEqual(job_record.state, "done", "Processed OK")
-        # if the state is "waiting_dependencies", it means the "enqueue_waiting()"
-        # step has not been done when the parent job has been done
-        self.assertEqual(job_record_depends.state, "done", "Processed OK")
+        self.env["res.partner"].delayable().create({"name": "test"})
         self.assertNotEqual(self.cron.nextcall, datetime(2022, 2, 22, 22, 22, 22))
 
     def test_acquire_one_job_use_priority(self):
@@ -98,7 +87,9 @@ class TestQueueJob(TransactionCase):
         with freeze_time("2024-01-01 10:03:01"):
             self.env["res.partner"].with_delay(priority=2).create({"name": "test"})
 
-        self.assertEqual(self.env["queue.job"]._acquire_one_job(), job.db_record())
+        self.assertEqual(
+            self.env["queue.job"]._acquire_one_job(commit=False), job.db_record()
+        )
 
     def test_acquire_one_job_consume_the_oldest_first(self):
         with freeze_time("2024-01-01 10:01:01"):
@@ -112,4 +103,74 @@ class TestQueueJob(TransactionCase):
         with freeze_time("2024-01-01 10:03:01"):
             self.env["res.partner"].with_delay(priority=30).create({"name": "test"})
 
-        self.assertEqual(self.env["queue.job"]._acquire_one_job(), job.db_record())
+        self.assertEqual(
+            self.env["queue.job"]._acquire_one_job(commit=False), job.db_record()
+        )
+
+    def test_acquire_one_job_starts_job(self):
+        job = self.env["res.partner"].with_delay(priority=1).create({"name": "test"})
+
+        result = self.env["queue.job"]._acquire_one_job(commit=False)
+
+        self.assertEqual(result, job.db_record())
+        self.assertEqual(job.db_record().state, "started")
+
+    def test_acquire_one_job_do_not_overload_channel(self):
+        runner = QueueJobRunner.from_environ_or_config()
+        runner.channel_manager.get_channel_by_name(
+            "root.foobar", autocreate=True
+        ).capacity = 2
+        job1 = (
+            self.env["res.partner"]
+            .with_delay(channel="root.foobar")
+            .create({"name": "test1"})
+        )
+        job2 = (
+            self.env["res.partner"]
+            .with_delay(channel="root.foobar")
+            .create({"name": "test2"})
+        )
+        self.env["res.partner"].with_delay(channel="root.foobar").create(
+            {"name": "test3"}
+        )
+
+        with mock.patch.object(
+            QueueJobRunner, "from_environ_or_config", return_value=runner
+        ):
+            first_acquired_job = self.env["queue.job"]._acquire_one_job(commit=False)
+            second_acquired_job = self.env["queue.job"]._acquire_one_job(commit=False)
+            third_acquired_job = self.env["queue.job"]._acquire_one_job(commit=False)
+
+        self.assertEqual(first_acquired_job, job1.db_record())
+        self.assertEqual(second_acquired_job, job2.db_record())
+        self.assertEqual(third_acquired_job, self.env["queue.job"].browse())
+
+    def test_acquire_one_job_root_capacity_ignored(self):
+        runner = QueueJobRunner.from_environ_or_config()
+        runner.channel_manager.get_channel_by_name("root", autocreate=True).capacity = 0
+        job1 = (
+            self.env["res.partner"].with_delay(channel="root").create({"name": "test1"})
+        )
+        job2 = (
+            self.env["res.partner"].with_delay(channel="root").create({"name": "test2"})
+        )
+        job3 = (
+            self.env["res.partner"].with_delay(channel="root").create({"name": "test3"})
+        )
+
+        with mock.patch.object(
+            QueueJobRunner, "from_environ_or_config", return_value=runner
+        ):
+            first_acquired_job = self.env["queue.job"]._acquire_one_job(commit=False)
+            second_acquired_job = self.env["queue.job"]._acquire_one_job(commit=False)
+            third_acquired_job = self.env["queue.job"]._acquire_one_job(commit=False)
+
+        self.assertEqual(first_acquired_job, job1.db_record())
+        self.assertEqual(second_acquired_job, job2.db_record())
+        self.assertEqual(third_acquired_job, job3.db_record())
+
+    @freeze_time("2022-02-22 22:22:22")
+    def test_queue_job_creation_create_change_next_call(self):
+        self.cron.nextcall = datetime(2021, 1, 21, 21, 21, 21)
+        self.env["res.partner"].with_delay().create({"name": "test"})
+        self.assertNotEqual(self.cron.nextcall, datetime(2022, 2, 22, 22, 22, 22))

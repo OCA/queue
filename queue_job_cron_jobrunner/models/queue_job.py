@@ -4,6 +4,7 @@
 
 import logging
 import traceback
+from collections import defaultdict
 from datetime import datetime
 from io import StringIO
 
@@ -19,6 +20,7 @@ from odoo.addons.queue_job.exception import (
     RetryableJobError,
 )
 from odoo.addons.queue_job.job import Job
+from odoo.addons.queue_job.jobrunner import QueueJobRunner
 
 _logger = logging.getLogger(__name__)
 
@@ -27,14 +29,12 @@ class QueueJob(models.Model):
     _inherit = "queue.job"
 
     @api.model
-    def _acquire_one_job(self):
+    def _acquire_one_job(self, commit=False):
         """Acquire the next job to be run.
 
         :returns: queue.job record (locked for update)
         """
-        # TODO: This method should respect channel priority and capacity,
-        #       rather than just fetching them by creation date.
-        self.flush()
+        runner = QueueJobRunner.from_environ_or_config()
         self.env.cr.execute(
             """
             SELECT id
@@ -42,32 +42,73 @@ class QueueJob(models.Model):
             WHERE state = 'pending'
             AND (eta IS NULL OR eta <= (now() AT TIME ZONE 'UTC'))
             ORDER BY priority, date_created
-            LIMIT 1 FOR NO KEY UPDATE SKIP LOCKED
+            FOR NO KEY UPDATE
             """
         )
-        row = self.env.cr.fetchone()
-        return self.browse(row and row[0])
+        rows = self.env.cr.fetchall()
+
+        channels = defaultdict(int)
+        for queue_job in self.search([("state", "=", "started")]):
+            if not queue_job.channel:
+                continue
+            channels[queue_job.channel] += 1
+        channels_without_capacity = set()
+        for channel_str, running in channels.items():
+            channel = runner.channel_manager.get_channel_by_name(
+                channel_str, autocreate=True
+            )
+            if channel.capacity and channel.capacity <= running:
+                channels_without_capacity.add(channel_str)
+        channels_without_capacity.discard(
+            "root"
+        )  # root must be disabled to avoid normal jobrunner
+        _logger.info(
+            "_acquire_one_job channels_without_capacity %s",
+            channels_without_capacity,
+        )
+
+        result = self.browse()
+        for row in rows:
+            queue_job = self.browse(row[0])
+            if queue_job.channel and queue_job.channel in channels_without_capacity:
+                continue
+            job = Job._load_from_db_record(queue_job)
+            job.set_started()
+            job.store()
+            _logger.info(
+                "_acquire_one_job queue.job %s[channel=%s,uuid=%s] started",
+                row[0],
+                job.channel,
+                job.uuid,
+            )
+            result = queue_job
+            break
+        self.flush()
+        if commit:  # pragma: no cover
+            self.env.cr.commit()  # pylint: disable=invalid-commit
+        return result
 
     def _process(self, commit=False):
         """Process the job"""
         self.ensure_one()
         job = Job._load_from_db_record(self)
-        # Set it as started
-        job.set_started()
-        job.store()
-        _logger.debug("%s started", job.uuid)
-        # TODO: Commit the state change so that the state can be read from the UI
-        #       while the job is processing. However, doing this will release the
-        #       lock on the db, so we need to find another way.
-        # if commit:
-        #     self.flush()
-        #     self.env.cr.commit()
-
         # Actual processing
         try:
             try:
                 with self.env.cr.savepoint():
+                    _logger.info(
+                        "perform %s[channel=%s,uuid=%s]",
+                        self.id,
+                        self.channel,
+                        self.uuid,
+                    )
                     job.perform()
+                    _logger.info(
+                        "performed %s[channel=%s,uuid=%s]",
+                        self.id,
+                        self.channel,
+                        self.uuid,
+                    )
                     job.set_done()
                     job.store()
             except OperationalError as err:
@@ -87,13 +128,18 @@ class QueueJob(models.Model):
                 msg = _("Job interrupted and set to Done: nothing to do.")
             job.set_done(msg)
             job.store()
+            _logger.info(
+                "interrupted %s[channel=%s,uuid=%s]", self.id, self.channel, self.uuid
+            )
 
         except RetryableJobError as err:
             # delay the job later, requeue
             job.postpone(result=str(err), seconds=5)
             job.set_pending(reset_retry=False)
             job.store()
-            _logger.debug("%s postponed", job)
+            _logger.info(
+                "postponed %s[channel=%s,uuid=%s]", self.id, self.channel, self.uuid
+            )
 
         except (FailedJobError, Exception):
             with StringIO() as buff:
@@ -101,6 +147,9 @@ class QueueJob(models.Model):
                 _logger.error(buff.getvalue())
                 job.set_failed(exc_info=buff.getvalue())
                 job.store()
+            _logger.info(
+                "failed %s[channel=%s,uuid=%s]", self.id, self.channel, self.uuid
+            )
 
         if commit:  # pragma: no cover
             self.env["base"].flush()
@@ -113,10 +162,10 @@ class QueueJob(models.Model):
     @api.model
     def _job_runner(self, commit=True):
         """Short-lived job runner, triggered by async crons"""
-        job = self._acquire_one_job()
+        job = self._acquire_one_job(commit=commit)
         while job:
             job._process(commit=commit)
-            job = self._acquire_one_job()
+            job = self._acquire_one_job(commit=commit)
             # TODO: If limit_time_real_cron is reached before all the jobs are done,
             #       the worker will be killed abruptly.
             #       Ideally, find a way to know if we're close to reaching this limit,
