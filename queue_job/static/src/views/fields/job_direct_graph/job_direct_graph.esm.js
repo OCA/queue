@@ -9,6 +9,7 @@ import {registry} from "@web/core/registry";
 import {standardFieldProps} from "@web/views/fields/standard_field_props";
 import {useRecordObserver} from "@web/model/relational_model/utils";
 import {useService} from "@web/core/utils/hooks";
+import {getFieldContext} from "@web/model/relational_model/utils";
 
 export class JobDirectGraph extends Component {
     setup() {
@@ -41,7 +42,7 @@ export class JobDirectGraph extends Component {
     }
 
     get context() {
-        return this.props.record.getFieldContext(this.props.name);
+        return getFieldContext(this.props.record, this.props.name);
     }
 
     get model() {
