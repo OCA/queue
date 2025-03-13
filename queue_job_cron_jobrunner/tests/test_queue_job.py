@@ -174,3 +174,20 @@ class TestQueueJob(TransactionCase):
         self.cron.nextcall = datetime(2021, 1, 21, 21, 21, 21)
         self.env["res.partner"].with_delay().create({"name": "test"})
         self.assertNotEqual(self.cron.nextcall, datetime(2022, 2, 22, 22, 22, 22))
+
+    def test_release_started_jobs(self):
+        job_known_pid = self.env["res.partner"].with_delay().create({"name": "test"})
+        job_known_pid.set_started()
+        job_known_pid.store()
+        known_pid = job_known_pid.db_record().worker_pid
+        job_unknown_pid = self.env["res.partner"].with_delay().create({"name": "test"})
+        job_unknown_pid.set_started()
+        job_unknown_pid.store()
+        job_unknown_pid.db_record().worker_pid = -1
+
+        self.env["queue.job"]._release_started_jobs(commit=False)
+
+        self.assertEqual(job_unknown_pid.db_record().state, "pending")
+        self.assertEqual(job_unknown_pid.db_record().worker_pid, 0)
+        self.assertEqual(job_known_pid.db_record().state, "started")
+        self.assertEqual(job_known_pid.db_record().worker_pid, known_pid)

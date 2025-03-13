@@ -8,6 +8,7 @@ from collections import defaultdict
 from datetime import datetime
 from io import StringIO
 
+import psutil
 from psycopg2 import OperationalError
 
 from odoo import _, api, fields, models, tools
@@ -162,6 +163,7 @@ class QueueJob(models.Model):
     @api.model
     def _job_runner(self, commit=True):
         """Short-lived job runner, triggered by async crons"""
+        self._release_started_jobs(commit=commit)
         job = self._acquire_one_job(commit=commit)
         while job:
             job._process(commit=commit)
@@ -214,6 +216,24 @@ class QueueJob(models.Model):
         delayed_etas = {rec.eta for rec in records if rec.eta}
         if delayed_etas:
             self._cron_trigger(at=list(delayed_etas))
+
+    @api.model
+    def _release_started_jobs(self, commit=False):
+        pids = [x.pid for x in psutil.process_iter()]
+        for record in self.search(
+            [("state", "=", "started"), ("worker_pid", "not in", pids)]
+        ):
+            job = Job._load_from_db_record(record)
+            job.set_pending()
+            job.store()
+            _logger.info(
+                "release started job %s[channel=%s,uuid=%s]",
+                record.id,
+                record.channel,
+                record.uuid,
+            )
+        if commit:  # pragma: no cover
+            self.env.cr.commit()  # pylint: disable=invalid-commit
 
     @api.model_create_multi
     def create(self, vals_list):
