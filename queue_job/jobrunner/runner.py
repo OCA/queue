@@ -383,6 +383,17 @@ class QueueJobRunner:
         self._stop = False
         self._stop_pipe = os.pipe()
 
+    def __del__(self):
+        # pylint: disable=except-pass
+        try:
+            os.close(self._stop_pipe[0])
+        except OSError:
+            pass
+        try:
+            os.close(self._stop_pipe[1])
+        except OSError:
+            pass
+
     @classmethod
     def from_environ_or_config(cls):
         scheme = os.environ.get("ODOO_QUEUE_JOB_SCHEME") or queue_job_config.get(
