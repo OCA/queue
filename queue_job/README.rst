@@ -428,8 +428,9 @@ allow-list.
 
 The default allow-list is ("tz", "lang", "allowed_company_ids",
 "force_company", "active_test"). It can be customized in
-``Base._job_prepare_context_before_enqueue_keys``. **Bypass jobs on
-running Odoo**
+``Base._job_prepare_context_before_enqueue_keys``.
+
+**Bypass jobs on running Odoo**
 
 When you are developing (ie: connector modules) you might want to bypass
 the queue job and run your code immediately.
