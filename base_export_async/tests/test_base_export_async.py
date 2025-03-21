@@ -98,3 +98,22 @@ class TestBaseExportAsync(common.TransactionCase):
 
         # The attachment must be deleted
         self.assertFalse(new_attachment.exists())
+
+    def test_portal_export(self):
+        """Check that we make attachments externally accessible for portal users"""
+        portal_user = self.env["res.users"].create(
+            {
+                "login": "base_export_async_portal_user",
+                "name": "base_export_async_portal_user",
+                "groups_id": self.env.ref("base.group_portal").ids,
+            }
+        )
+        params = json.loads(data_csv.get("data"))
+        params["user_ids"] = portal_user.ids
+        attachments = self.env["ir.attachment"].search([])
+        mails = self.env["mail.mail"].search([])
+        self.delay_export_obj.export(params)
+        new_attachment = self.env["ir.attachment"].search([]) - attachments
+        self.assertTrue(new_attachment.access_token)
+        new_mail = self.env["mail.mail"].search([]) - mails
+        self.assertIn("&amp;access_token=", new_mail.body)
