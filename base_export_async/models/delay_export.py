@@ -109,6 +109,10 @@ class DelayExport(models.Model):
             attachment.name,
         )
 
+        if any(user.has_group("base.group_portal") for user in users):
+            attachment.generate_access_token()
+            url += f"&access_token={attachment.access_token}"
+
         time_to_live = (
             self.env["ir.config_parameter"].sudo().get_param("attachment.ttl", 7)
         )
