@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -43,7 +43,7 @@ msgstr ""
 
 #. module: base_import_async
 #. odoo-javascript
-#: code:addons/base_import_async/static/src/xml/import.xml:0
+#: code:addons/base_import_async/static/src/xml/import_data_sidepanel.xml:0
 #, python-format
 msgid "Import in the background"
 msgstr ""
@@ -55,7 +55,7 @@ msgstr ""
 
 #. module: base_import_async
 #. odoo-javascript
-#: code:addons/base_import_async/static/src/xml/import.xml:0
+#: code:addons/base_import_async/static/src/xml/import_data_sidepanel.xml:0
 #, python-format
 msgid ""
 "When checked, the import will be executed as a background job, after "
@@ -65,14 +65,14 @@ msgstr ""
 
 #. module: base_import_async
 #. odoo-javascript
-#: code:addons/base_import_async/static/src/js/import.js:0
+#: code:addons/base_import_async/static/src/js/import_model.esm.js:0
 #, python-format
 msgid "You can check the status of this job in menu 'Queue / Jobs'."
 msgstr ""
 
 #. module: base_import_async
 #. odoo-javascript
-#: code:addons/base_import_async/static/src/js/import.js:0
+#: code:addons/base_import_async/static/src/js/import_model.esm.js:0
 #, python-format
 msgid "Your request is being processed"
 msgstr ""
