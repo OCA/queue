@@ -548,13 +548,14 @@ class TestJobModel(JobCommonCase):
         model.create({}).requeue()
         self.assertEqual(stored.state, PENDING)
 
-    def test_context_uuid(self):
+    def test_context_job_data(self):
         delayable = self.env["test.queue.job"].with_delay()
         test_job = delayable.testing_method(return_context=True)
         result = test_job.perform()
-        key_present = "job_uuid" in result
-        self.assertTrue(key_present)
+        self.assertTrue("job_uuid" in result)
         self.assertEqual(result["job_uuid"], test_job._uuid)
+        self.assertTrue("job_itself" in result)
+        self.assertIs(result["job_itself"], test_job)
 
     def test_override_channel(self):
         delayable = self.env["test.queue.job"].with_delay(channel="root.sub.sub")

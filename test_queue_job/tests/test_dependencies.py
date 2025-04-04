@@ -5,6 +5,7 @@ import odoo.tests.common as common
 
 from odoo.addons.queue_job.delay import DelayableGraph, chain, group
 from odoo.addons.queue_job.job import PENDING, WAIT_DEPENDENCIES, Job
+from odoo.addons.queue_job.tests.common import trap_jobs
 
 
 class TestJobDependencies(common.TransactionCase):
@@ -125,6 +126,38 @@ class TestJobDependencies(common.TransactionCase):
         # not in the job_a instance, here, we re-read it.
         # In practice, it won't be an issue for the jobrunner.
         self.assertEqual(Job.load(self.env, job_a.uuid).state, PENDING)
+
+    def _test_depends_on_running_job(self, job):
+        """Performs ``job`` and returns jobs spawned by its execution
+
+        Mimics RunJobController._try_perform_job()
+        """
+        job.set_started()
+        job.store()
+        with trap_jobs() as trap:
+            job.perform()
+        job.set_done()
+        job.store()
+        return trap.enqueued_jobs
+
+    def test_depends_on_running_job_from_ctx_job_uuid(self):
+        job = self.env["test.queue.job"].with_delay().child_job_from_ctx_job_uuid()
+        child_jobs = self._test_depends_on_running_job(job)
+        self.assertEqual(len(child_jobs), 1)
+        child_job = child_jobs[0]
+        self.assertEqual({job}, child_job.depends_on)
+        self.assertIsNot(job, tuple(child_job.depends_on)[0])
+        self.assertFalse(job.reverse_depends_on)
+
+    def test_depends_on_running_job_from_ctx_job_itself(self):
+        job = self.env["test.queue.job"].with_delay().child_job_from_ctx_job_itself()
+        child_jobs = self._test_depends_on_running_job(job)
+        self.assertEqual(len(child_jobs), 1)
+        child_job = child_jobs[0]
+        self.assertEqual({job}, child_job.depends_on)
+        self.assertIs(job, tuple(child_job.depends_on)[0])
+        self.assertEqual(job.reverse_depends_on, {child_job})
+        self.assertIs(tuple(job.reverse_depends_on)[0], child_job)
 
     def test_dependency_graph(self):
         job_root = Job(self.method)

@@ -756,7 +756,7 @@ class Job:
 
     @property
     def func(self):
-        recordset = self.recordset.with_context(job_uuid=self.uuid)
+        recordset = self.recordset.with_context(job_uuid=self.uuid, job_itself=self)
         return getattr(recordset, self.method_name)
 
     @property

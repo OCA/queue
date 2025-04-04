@@ -5,7 +5,7 @@ from odoo import api, fields, models
 
 from odoo.addons.queue_job.delay import chain
 from odoo.addons.queue_job.exception import RetryableJobError
-from odoo.addons.queue_job.job import identity_exact
+from odoo.addons.queue_job.job import Job, identity_exact
 
 
 class QueueJob(models.Model):
@@ -138,6 +138,18 @@ class ModelTestQueueJob(models.Model):
             self.delayable().no_description(),
         )
         delayables.delay()
+
+    def child_job_from_ctx_job_uuid(self):
+        self._add_child_job(Job.load(self.env, self.env.context["job_uuid"]))
+
+    def child_job_from_ctx_job_itself(self):
+        self._add_child_job(self.env.context["job_itself"])
+
+    def _add_child_job(self, parent_job):
+        child_job = self.with_delay().testing_method()
+        child_job.add_depends([parent_job])
+        parent_job.store()
+        child_job.store()
 
 
 class ModelTestQueueChannel(models.Model):
