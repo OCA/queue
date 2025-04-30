@@ -7,9 +7,8 @@
         </record>
         <record id="group_queue_job_manager" model="res.groups">
             <field name="name">Job Queue Manager</field>
-            <field name="category_id" ref="module_category_queue_job" />
             <field
-                name="users"
+                name="user_ids"
                 eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"
             />
         </record>
