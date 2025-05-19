@@ -58,14 +58,14 @@ class IrCron(models.Model):
                 )
         return True
 
-    def _callback(self, cron_name, server_action_id, job_id):
-        cron = self.env["ir.cron"].sudo().browse(job_id)
-        if cron.run_as_queue_job:
+    def _callback(self, cron_name, server_action_id):
+        self.ensure_one()
+        if self.run_as_queue_job:
             server_action = self.env["ir.actions.server"].browse(server_action_id)
-            return cron._delay_run_job_as_queue_job(server_action=server_action)
+            return self._delay_run_job_as_queue_job(server_action=server_action)
         else:
             return super()._callback(
-                cron_name=cron_name, server_action_id=server_action_id, job_id=job_id
+                cron_name=cron_name, server_action_id=server_action_id
             )
 
     def _delay_run_job_as_queue_job(self, server_action):
