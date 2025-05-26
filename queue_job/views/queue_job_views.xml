@@ -163,6 +163,7 @@
                 <!-- pylint: disable=duplicate-xml-fields -->
                 <field name="date_done" />
                 <field name="exec_time" />
+                <field name="priority" optional="hide" />
                 <field name="exc_name" />
                 <field name="exc_message" />
                 <field name="uuid" />
@@ -207,6 +208,7 @@
                 <field name="channel" />
                 <field name="job_function_id" />
                 <field name="model_name" />
+                <field name="priority" />
                 <field name="exc_name" />
                 <field name="exc_message" />
                 <field name="exc_info" />
@@ -278,6 +280,11 @@
                         name="group_by_state"
                         string="State"
                         context="{'group_by': 'state'}"
+                    />
+                    <filter
+                        name="group_by_priority"
+                        string="Priority"
+                        context="{'group_by': 'priority'}"
                     />
                     <filter
                         name="group_by_model_name"
