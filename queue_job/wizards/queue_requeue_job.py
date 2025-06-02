@@ -20,6 +20,7 @@ class QueueRequeueJob(models.TransientModel):
     )
 
     def requeue(self):
+        # Only jobs with state FAILED, DONE or CANCELLED will change to PENDING
         jobs = self.job_ids
         jobs.requeue()
         return {"type": "ir.actions.act_window_close"}
