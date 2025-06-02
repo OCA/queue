@@ -384,6 +384,84 @@ class TestJobsOnTestingMethod(JobCommonCase):
         job1 = Job.load(self.env, test_job_1.uuid)
         self.assertEqual(job1.identity_key, expected_key)
 
+    def test_job_cancelled_while_started(self):
+        # Job finishes successfully:
+        # if record was set to cancel in the meantime, it is overriden
+        test_job = Job(self.method, max_retries=3)
+        test_job.store()
+        test_job.set_enqueued()
+        test_job.set_started()
+        test_job.store()
+        stored = self.queue_job.search([("uuid", "=", test_job.uuid)])
+        stored.button_cancelled()
+        # Simulate successful job
+        test_job.perform()
+        datetime_path = "odoo.addons.queue_job.job.datetime"
+        with mock.patch(datetime_path, autospec=True) as mock_datetime:
+            mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
+            test_job.set_done("Job ended successfully")
+        self.assertEqual(test_job.state, DONE)
+        self.assertEqual(test_job.retry, 1)
+        test_job.store()
+        self.assertEqual(stored.state, DONE)
+        self.assertEqual(stored.date_cancelled, False)
+        self.assertEqual(stored.date_done, datetime(2015, 3, 15, 16, 41))
+        self.assertEqual(stored.retry, 1)
+        self.assertEqual(stored.result, "Job ended successfully")
+
+    def test_job_cancelled_while_started_not_retried(self):
+        # Job fails with retryable error:
+        # if record was set to cancel in the meantime, it is not retried
+        test_job = Job(self.method, kwargs={"raise_retry": True}, max_retries=3)
+        test_job.store()
+        test_job.set_enqueued()
+        test_job.set_started()
+        test_job.store()
+        stored = self.queue_job.search([("uuid", "=", test_job.uuid)])
+        datetime_path = "odoo.addons.queue_job.job.datetime"
+        with mock.patch(datetime_path, autospec=True) as mock_datetime:
+            mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
+            stored.button_cancelled()
+        # Simulate fail/retry job
+        with self.assertRaises(RetryableJobError) as cm:
+            test_job.perform()
+        test_job.set_pending(result=str(cm.exception), reset_retry=False)
+        self.assertEqual(test_job.state, PENDING)
+        self.assertEqual(test_job.retry, 1)
+        test_job.store()
+        self.assertEqual(stored.state, CANCELLED)
+        self.assertEqual(stored.date_cancelled, datetime(2015, 3, 15, 16, 41))
+        self.assertEqual(stored.date_done, False)
+        self.assertEqual(stored.retry, 1)
+        self.assertEqual(stored.result, "Must be retried later")
+
+    def test_job_cancelled_while_started_failed(self):
+        # Job fails:
+        # if record was set to cancel in the meantime, keep state cancelled
+        test_job = Job(self.method, max_retries=3)
+        test_job.store()
+        test_job.set_enqueued()
+        test_job.set_started()
+        test_job.store()
+        stored = self.queue_job.search([("uuid", "=", test_job.uuid)])
+        datetime_path = "odoo.addons.queue_job.job.datetime"
+        with mock.patch(datetime_path, autospec=True) as mock_datetime:
+            mock_datetime.now.return_value = datetime(2015, 3, 15, 16, 41, 0)
+            stored.button_cancelled()
+        # Simulate failed job
+        test_job.perform()
+        test_job.set_failed(result=False, exc_info="failed test", exc_name="FailedTest")
+        self.assertEqual(test_job.state, FAILED)
+        self.assertEqual(test_job.retry, 1)
+        test_job.store()
+        self.assertEqual(stored.state, CANCELLED)
+        self.assertEqual(stored.date_cancelled, datetime(2015, 3, 15, 16, 41))
+        self.assertEqual(stored.date_done, False)
+        self.assertEqual(stored.retry, 1)
+        self.assertEqual(stored.result, "Cancelled by OdooBot")
+        self.assertEqual(stored.exc_info, "failed test")
+        self.assertEqual(stored.exc_name, "FailedTest")
+
 
 class TestJobs(JobCommonCase):
     """Test jobs on other methods or with different job configuration"""

@@ -591,6 +591,17 @@ class Job:
 
         db_record = self.db_record()
         if db_record:
+            # If job was cancelled manually, do not revive it for a retry
+            if (
+                self.retry > 0
+                and db_record.state == CANCELLED
+                and self.state in (PENDING, FAILED)
+            ):
+                self.state = CANCELLED
+                self.date_cancelled = db_record.date_cancelled
+                if not self.result and db_record.result:
+                    self.result = db_record.result
+
             db_record.with_context(_job_edit_sentinel=edit_sentinel).write(
                 self._store_values()
             )

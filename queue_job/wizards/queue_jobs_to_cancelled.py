@@ -11,7 +11,7 @@ class SetJobsToCancelled(models.TransientModel):
 
     def set_cancelled(self):
         jobs = self.job_ids.filtered(
-            lambda x: x.state in ("pending", "failed", "enqueued")
+            lambda x: x.state in ("pending", "failed", "enqueued", "started")
         )
         jobs.button_cancelled()
         return {"type": "ir.actions.act_window_close"}
