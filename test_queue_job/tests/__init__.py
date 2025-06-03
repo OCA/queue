@@ -7,3 +7,4 @@ from . import test_job_channels
 from . import test_job_function
 from . import test_related_actions
 from . import test_delay_mocks
+from . import test_requeue_dead_job
