@@ -15,6 +15,7 @@ from odoo.addons.queue_job.exception import (
     RetryableJobError,
 )
 from odoo.addons.queue_job.job import (
+    CANCELLED,
     DONE,
     ENQUEUED,
     FAILED,
@@ -184,6 +185,47 @@ class TestJobsOnTestingMethod(JobCommonCase):
         self.assertEqual(job_a.eta, datetime(2015, 3, 15, 16, 42, 0))
         self.assertEqual(job_a.result, "test")
         self.assertFalse(job_a.exc_info)
+
+    def test_company_simple(self):
+        company = self.env.ref("base.main_company")
+        eta = datetime.now() + timedelta(hours=5)
+        test_job = Job(
+            self.env["test.queue.job"].with_company(company).testing_method,
+            args=("o", "k"),
+            kwargs={"return_context": 1},
+            priority=15,
+            eta=eta,
+            description="My description",
+        )
+        test_job.worker_pid = 99999  # normally set on "set_start"
+        test_job.store()
+        job_read = Job.load(self.env, test_job.uuid)
+        self.assertEqual(test_job.func.__func__, job_read.func.__func__)
+        result_ctx = job_read.func(*tuple(test_job.args), **test_job.kwargs)
+        self.assertEqual(result_ctx.get("allowed_company_ids"), company.ids)
+
+    def test_company_complex(self):
+        company1 = self.env.ref("base.main_company")
+        company2 = company1.create({"name": "Queue job company"})
+        companies = company1 | company2
+        self.env.user.write({"company_ids": [(6, False, companies.ids)]})
+        # Ensure the main company still the first
+        self.assertEqual(self.env.user.company_id, company1)
+        eta = datetime.now() + timedelta(hours=5)
+        test_job = Job(
+            self.env["test.queue.job"].with_company(company2).testing_method,
+            args=("o", "k"),
+            kwargs={"return_context": 1},
+            priority=15,
+            eta=eta,
+            description="My description",
+        )
+        test_job.worker_pid = 99999  # normally set on "set_start"
+        test_job.store()
+        job_read = Job.load(self.env, test_job.uuid)
+        self.assertEqual(test_job.func.__func__, job_read.func.__func__)
+        result_ctx = job_read.func(*tuple(test_job.args), **test_job.kwargs)
+        self.assertEqual(result_ctx.get("allowed_company_ids"), company2.ids)
 
     def test_store(self):
         test_job = Job(self.method)
@@ -488,6 +530,42 @@ class TestJobModel(JobCommonCase):
         self.assertEqual(
             stored.result, "Manually set to done by %s" % self.env.user.name
         )
+
+    def test_button_done_enqueue_waiting_dependencies(self):
+        job_root = Job(self.env["test.queue.job"].testing_method)
+        job_child = Job(self.env["test.queue.job"].testing_method)
+        job_child.add_depends({job_root})
+
+        DelayableGraph._ensure_same_graph_uuid([job_root, job_child])
+        job_root.store()
+        job_child.store()
+
+        self.assertEqual(job_child.state, WAIT_DEPENDENCIES)
+        record_root = job_root.db_record()
+        record_child = job_child.db_record()
+        # Trigger button done
+        record_root.button_done()
+        # Check the state
+        self.assertEqual(record_root.state, DONE)
+        self.assertEqual(record_child.state, PENDING)
+
+    def test_button_cancel_dependencies(self):
+        job_root = Job(self.env["test.queue.job"].testing_method)
+        job_child = Job(self.env["test.queue.job"].testing_method)
+        job_child.add_depends({job_root})
+
+        DelayableGraph._ensure_same_graph_uuid([job_root, job_child])
+        job_root.store()
+        job_child.store()
+
+        self.assertEqual(job_child.state, WAIT_DEPENDENCIES)
+        record_root = job_root.db_record()
+        record_child = job_child.db_record()
+        # Trigger button cancelled
+        record_root.button_cancelled()
+        # Check the state
+        self.assertEqual(record_root.state, CANCELLED)
+        self.assertEqual(record_child.state, CANCELLED)
 
     def test_requeue(self):
         stored = self._create_job()

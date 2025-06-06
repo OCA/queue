@@ -155,10 +155,12 @@ class QueueJobFunction(models.Model):
         try:
             # as json can't have integers as keys and the field is stored
             # as json, convert back to int
-            retry_pattern = {
-                int(try_count): postpone_seconds
-                for try_count, postpone_seconds in self.retry_pattern.items()
-            }
+            retry_pattern = {}
+            for try_count, postpone_value in self.retry_pattern.items():
+                if isinstance(postpone_value, int):
+                    retry_pattern[int(try_count)] = postpone_value
+                else:
+                    retry_pattern[int(try_count)] = tuple(postpone_value)
         except ValueError:
             _logger.error(
                 "Invalid retry pattern for job function %s,"
@@ -187,8 +189,9 @@ class QueueJobFunction(models.Model):
     def _retry_pattern_format_error_message(self):
         return _(
             "Unexpected format of Retry Pattern for {}.\n"
-            "Example of valid format:\n"
-            "{{1: 300, 5: 600, 10: 1200, 15: 3000}}"
+            "Example of valid formats:\n"
+            "{{1: 300, 5: 600, 10: 1200, 15: 3000}}\n"
+            "{{1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}}"
         ).format(self.name)
 
     @api.constrains("retry_pattern")
@@ -201,11 +204,19 @@ class QueueJobFunction(models.Model):
             all_values = list(retry_pattern) + list(retry_pattern.values())
             for value in all_values:
                 try:
-                    int(value)
+                    self._retry_value_type_check(value)
                 except ValueError as ex:
                     raise exceptions.UserError(
                         record._retry_pattern_format_error_message()
                     ) from ex
+
+    def _retry_value_type_check(self, value):
+        if isinstance(value, (tuple | list)):
+            if len(value) != 2:
+                raise ValueError
+            [self._retry_value_type_check(element) for element in value]
+            return
+        int(value)
 
     def _related_action_format_error_message(self):
         return _(

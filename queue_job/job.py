@@ -594,8 +594,8 @@ class Job:
 
         return self.result
 
-    def enqueue_waiting(self):
-        sql = """
+    def _get_common_dependent_jobs_query(self):
+        return """
             UPDATE queue_job
             SET state = %s
             FROM (
@@ -623,7 +623,15 @@ class Job:
             AND %s = ALL(jobs.parent_states)
             AND state = %s;
         """
+
+    def enqueue_waiting(self):
+        sql = self._get_common_dependent_jobs_query()
         self.env.cr.execute(sql, (PENDING, self.uuid, DONE, WAIT_DEPENDENCIES))
+        self.env["queue.job"].invalidate_model(["state"])
+
+    def cancel_dependent_jobs(self):
+        sql = self._get_common_dependent_jobs_query()
+        self.env.cr.execute(sql, (CANCELLED, self.uuid, CANCELLED, WAIT_DEPENDENCIES))
         self.env["queue.job"].invalidate_model(["state"])
 
     def store(self):

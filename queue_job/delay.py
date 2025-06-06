@@ -232,7 +232,7 @@ class DelayableGraph(Graph):
         elif jobs_count == 1:
             if jobs[0].graph_uuid:
                 raise ValueError(
-                    f"Job {jobs[0]} is a single job, it should not" " have a graph uuid"
+                    f"Job {jobs[0]} is a single job, it should not have a graph uuid"
                 )
         else:
             graph_uuids = {job.graph_uuid for job in jobs if job.graph_uuid}
@@ -483,11 +483,10 @@ class Delayable:
         return [self]
 
     def __repr__(self):
-        return "Delayable({}.{}({}, {}))".format(
-            self.recordset,
-            self._job_method.__name__ if self._job_method else "",
-            self._job_args,
-            self._job_kwargs,
+        return (
+            f"Delayable({self.recordset}."
+            f"{self._job_method.__name__ if self._job_method else ''}"
+            f"({self._job_args}, {self._job_kwargs}))"
         )
 
     def __del__(self):
@@ -524,6 +523,51 @@ class Delayable:
     def delay(self):
         """Delay the whole graph"""
         self._graph.delay()
+
+    def split(self, size, chain=False):
+        """Split the Delayables.
+
+        Use `DelayableGroup` or `DelayableChain`
+        if `chain` is True containing batches of size `size`
+        """
+        if not self._job_method:
+            raise ValueError("No method set on the Delayable")
+
+        total_records = len(self.recordset)
+
+        delayables = []
+        for index in range(0, total_records, size):
+            recordset = self.recordset[index : index + size]
+            delayable = Delayable(
+                recordset,
+                priority=self.priority,
+                eta=self.eta,
+                max_retries=self.max_retries,
+                description=self.description,
+                channel=self.channel,
+                identity_key=self.identity_key,
+            )
+            # Update the __self__
+            delayable._job_method = getattr(recordset, self._job_method.__name__)
+            delayable._job_args = self._job_args
+            delayable._job_kwargs = self._job_kwargs
+
+            delayables.append(delayable)
+
+        description = self.description or (
+            self._job_method.__doc__.splitlines()[0].strip()
+            if self._job_method.__doc__
+            else f"{self.recordset._name}.{self._job_method.__name__}"
+        )
+        for index, delayable in enumerate(delayables):
+            delayable.set(
+                description=f"{description} (split {index + 1}/{len(delayables)})"
+            )
+
+        # Prevent warning on deletion
+        self._generated_job = True
+
+        return (DelayableChain if chain else DelayableGroup)(*delayables)
 
     def _build_job(self):
         if self._generated_job:
@@ -611,9 +655,9 @@ class DelayableRecordset:
         return _delay_delayable
 
     def __str__(self):
-        return "DelayableRecordset({}{})".format(
-            self.delayable.recordset._name,
-            getattr(self.delayable.recordset, "_ids", ""),
+        return (
+            f"DelayableRecordset({self.delayable.recordset._name}"
+            f"{getattr(self.delayable.recordset, '_ids', '')})"
         )
 
     __repr__ = __str__

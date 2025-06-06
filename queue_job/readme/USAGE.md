@@ -108,6 +108,38 @@ is at the top of the graph. In the example above, if it was called on
 `group_a`, then `group_b` would never be delayed (but a warning would be
 shown).
 
+It is also possible to split a job into several jobs, each one processing
+a part of the work. This can be useful to avoid very long jobs, parallelize
+some task and get more specific errors. Usage is as follows:
+
+``` python
+def button_split_delayable(self):
+    (
+        self  # Can be a big recordset, let's say 1000 records
+        .delayable()
+        .generate_thumbnail((50, 50))
+        .set(priority=30)
+        .set(description=_("generate xxx"))
+        .split(50)  # Split the job in 20 jobs of 50 records each
+        .delay()
+    )
+```
+
+The `split()` method takes a `chain` boolean keyword argument. If set to
+True, the jobs will be chained, meaning that the next job will only start
+when the previous one is done:
+
+``` python
+def button_increment_var(self):
+    (
+        self
+        .delayable()
+        .increment_counter()
+        .split(1, chain=True) # Will exceute the jobs one after the other
+        .delay()
+    )
+```
+
 ### Enqueing Job Options
 
 - priority: default is 10, the closest it is to 0, the faster it will be
@@ -258,7 +290,7 @@ running Odoo**
 When you are developing (ie: connector modules) you might want to bypass
 the queue job and run your code immediately.
 
-To do so you can set QUEUE_JOB\_\_NO_DELAY=1 in your enviroment.
+To do so you can set QUEUE_JOB\_\_NO_DELAY=1 in your environment.
 
 **Bypass jobs in tests**
 

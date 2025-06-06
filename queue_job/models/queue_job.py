@@ -93,7 +93,7 @@ class QueueJob(models.Model):
     state = fields.Selection(STATES, readonly=True, required=True, index=True)
     priority = fields.Integer()
     exc_name = fields.Char(string="Exception", readonly=True)
-    exc_message = fields.Char(string="Exception Message", readonly=True)
+    exc_message = fields.Char(string="Exception Message", readonly=True, tracking=True)
     exc_info = fields.Text(string="Exception Info", readonly=True)
     result = fields.Text(readonly=True)
 
@@ -138,7 +138,7 @@ class QueueJob(models.Model):
             self._cr.execute(
                 "CREATE INDEX queue_job_identity_key_state_partial_index "
                 "ON queue_job (identity_key) WHERE state in ('pending', "
-                "'enqueued') AND identity_key IS NOT NULL;"
+                "'enqueued', 'wait_dependencies') AND identity_key IS NOT NULL;"
             )
 
     @api.depends("records")
@@ -325,6 +325,8 @@ class QueueJob(models.Model):
             elif state == CANCELLED:
                 job_.set_cancelled(result=result)
                 job_.store()
+                record.env["queue.job"].flush_model()
+                job_.cancel_dependent_jobs()
             else:
                 raise ValueError("State not supported: %s" % state)
 
