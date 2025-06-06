@@ -10,7 +10,7 @@ class SetJobsToCancelled(models.TransientModel):
     _description = "Cancel all selected jobs"
 
     def set_cancelled(self):
-        # Only jobs with state PENDING, FAILED, ENQUEUED
+        # Only jobs with state WAIT_DEPENDENCIES, PENDING, FAILED, ENQUEUED
         # will change to CANCELLED
         jobs = self.job_ids
         jobs.button_cancelled()

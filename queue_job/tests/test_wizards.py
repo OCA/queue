@@ -69,18 +69,13 @@ class TestWizards(common.TransactionCase):
     def test_05_cancel_forbidden(self):
         wizard = self._wizard("queue.jobs.to.cancelled")
 
-        # State WAIT_DEPENDENCIES is not cancelled
-        self.job.state = "wait_dependencies"
-        wizard.set_cancelled()
-        self.assertEqual(self.job.state, "wait_dependencies")
-
         # State DONE is not cancelled
         self.job.state = "done"
         wizard.set_cancelled()
         self.assertEqual(self.job.state, "done")
 
-        # State PENDING, ENQUEUED or FAILED will be cancelled
-        for test_state in ("pending", "enqueued"):
+        # State PENDING, ENQUEUED, WAIT_DEPENDENCIES or FAILED will be cancelled
+        for test_state in ("pending", "enqueued", "wait_dependencies", "failed"):
             self.job.state = test_state
             wizard.set_cancelled()
             self.assertEqual(self.job.state, "cancelled")
@@ -99,7 +94,7 @@ class TestWizards(common.TransactionCase):
         self.assertEqual(self.job.state, "cancelled")
 
         # State WAIT_DEPENDENCIES, PENDING, ENQUEUED or FAILED will be set to DONE
-        for test_state in ("wait_dependencies", "pending", "enqueued"):
+        for test_state in ("wait_dependencies", "pending", "enqueued", "failed"):
             self.job.state = test_state
             wizard.set_done()
             self.assertEqual(self.job.state, "done")
