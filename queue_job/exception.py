@@ -26,12 +26,16 @@ class RetryableJobError(JobError):
     by :const:`odoo.addons.queue_job.job.RETRY_INTERVAL` if nothing is defined.
 
     If ``ignore_retry`` is True, the retry counter will not be increased.
+
+    If ``add_depends`` is provided, the jobs will be added as dependencies to
+    the current job.
     """
 
-    def __init__(self, msg, seconds=None, ignore_retry=False):
+    def __init__(self, msg, seconds=None, ignore_retry=False, add_depends=None):
         super().__init__(msg)
         self.seconds = seconds
         self.ignore_retry = ignore_retry
+        self.add_depends = add_depends
 
 
 # TODO: remove support of NothingToDo: too dangerous

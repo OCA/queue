@@ -76,11 +76,16 @@ class RunJobController(http.Controller):
         http.request.session.db = db
         env = http.request.env(user=SUPERUSER_ID)
 
-        def retry_postpone(job, message, seconds=None):
+        def retry_postpone(job, message, seconds=None, add_depends=None):
             job.env.clear()
             with registry(job.env.cr.dbname).cursor() as new_cr:
-                job.env = api.Environment(new_cr, SUPERUSER_ID, {})
+                new_env = api.Environment(new_cr, SUPERUSER_ID, {})
+                job.env = new_env
                 job.postpone(result=message, seconds=seconds)
+                if add_depends:
+                    for dependency in add_depends:
+                        dependency.env = new_env
+                        dependency.store()
                 job.set_pending(reset_retry=False)
                 job.store()
 
@@ -126,7 +131,9 @@ class RunJobController(http.Controller):
 
         except RetryableJobError as err:
             # delay the job later, requeue
-            retry_postpone(job, str(err), seconds=err.seconds)
+            retry_postpone(
+                job, str(err), seconds=err.seconds, add_depends=err.add_depends
+            )
             _logger.debug("%s postponed", job)
             # Do not trigger the error up because we don't want an exception
             # traceback in the logs we should have the traceback when all

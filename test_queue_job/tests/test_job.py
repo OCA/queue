@@ -87,6 +87,40 @@ class TestJobsOnTestingMethod(JobCommonCase):
             test_job.perform()
         self.assertEqual(test_job.retry, 1)
 
+    def test_retryable_error_with_new_dependency(self):
+        job = Job(self.env["test.queue.job"].job_with_retry_and_new_dependency)
+        job.store()
+        with self.assertRaises(RetryableJobError):
+            job.perform()
+        job.store()
+        self.assertEqual(job.retry, 1)
+        self.assertEqual(len(job.depends_on), 1, "There's a new dependency for the job")
+        new_job = next(iter(job.depends_on))
+        self.assertEqual(
+            len(new_job.reverse_depends_on),
+            1,
+            "There's a reverse dependency for the new job",
+        )
+        self.assertEqual(
+            next(iter(new_job.reverse_depends_on)),
+            job,
+            "They are bi-directionally linked",
+        )
+        self.assertEqual(job.state, "wait_dependencies")
+        self.assertEqual(new_job.state, "pending")
+        job.store()
+        new_job.store()
+        # Now run the dependency
+        new_job.perform()
+        new_job.set_done()
+        new_job.store()
+        self.env.flush_all()
+        new_job.enqueue_waiting()
+        # Force a reload of the job from the db state
+        job = Job.load(self.env, job.uuid)
+        self.assertEqual(job.state, "pending")
+        job.perform()
+
     def test_on_instance_method(self):
         class A:
             def method(self):

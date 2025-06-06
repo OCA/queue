@@ -64,6 +64,21 @@ class ModelTestQueueJob(models.Model):
             }
         )
 
+    def job_with_retry_and_new_dependency(self):
+        logging_domain = [
+            ("name", "=", "test_queue_job"),
+            ("message", "=", "job_with_retry_and_new_dependency"),
+        ]
+        if not self.env["ir.logging"].search_count(logging_domain):
+            new_job = self.with_delay().create_ir_logging(
+                message="job_with_retry_and_new_dependency"
+            )
+            raise RetryableJobError(
+                "Must be retried after creating the logging",
+                add_depends=[new_job],
+            )
+        return True
+
     def no_description(self):
         return
 

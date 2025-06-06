@@ -576,6 +576,11 @@ class Job:
         try:
             self.result = self.func(*tuple(self.args), **self.kwargs)
         except RetryableJobError as err:
+            if err.add_depends:
+                from .delay import DelayableGraph
+
+                DelayableGraph._ensure_same_graph_uuid([self] + err.add_depends)
+                self.add_depends(err.add_depends)
             if err.ignore_retry:
                 self.retry -= 1
                 raise
