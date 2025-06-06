@@ -24,7 +24,7 @@
                     />
                     <button
                         name="button_cancelled"
-                        invisible="state not in ('pending', 'enqueued', 'failed')"
+                        invisible="state not in ('wait_dependencies', 'pending', 'enqueued', 'failed')"
                         class="oe_highlight"
                         string="Cancel job"
                         type="object"
