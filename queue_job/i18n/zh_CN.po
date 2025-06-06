@@ -104,6 +104,7 @@ msgstr "取消作业"
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__cancelled
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Cancelled"
 msgstr "已取消"
 
@@ -178,6 +179,11 @@ msgstr "创建日期"
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_uid
 msgid "Created by"
 msgstr "创建者"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Created date"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_date
@@ -483,6 +489,21 @@ msgstr "图表 %s 的作业"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__kwargs
 msgid "Kwargs"
 msgstr "关键字参数"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Last 24 hours"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Last 30 days"
+msgstr ""
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Last 7 days"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
@@ -914,11 +935,10 @@ msgstr ""
 #, python-format
 msgid ""
 "Unexpected format of Retry Pattern for {}.\n"
-"Example of valid format:\n"
-"{{1: 300, 5: 600, 10: 1200, 15: 3000}}"
+"Example of valid formats:\n"
+"{{1: 300, 5: 600, 10: 1200, 15: 3000}}\n"
+"{{1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}}"
 msgstr ""
-"对于 {}，重试模式的格式不符合预期。 有效格式的示例：\n"
-"{{1: 300, 5: 600, 10: 1200, 15: 3000}}"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__user_id
@@ -940,6 +960,15 @@ msgstr "重新排队向导所选的作业"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr "工作进程PID"
+
+#, python-format
+#~ msgid ""
+#~ "Unexpected format of Retry Pattern for {}.\n"
+#~ "Example of valid format:\n"
+#~ "{{1: 300, 5: 600, 10: 1200, 15: 3000}}"
+#~ msgstr ""
+#~ "对于 {}，重试模式的格式不符合预期。 有效格式的示例：\n"
+#~ "{{1: 300, 5: 600, 10: 1200, 15: 3000}}"
 
 #, python-format
 #~ msgid "If both parameters are 0, ALL jobs will be requeued!"
