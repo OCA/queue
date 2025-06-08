@@ -3,7 +3,7 @@
 
 {
     "name": "Scheduled Actions as Queue Jobs",
-    "version": "18.0.1.1.0",
+    "version": "18.0.1.1.1",
     "author": "ACSONE SA/NV,Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/queue",
     "license": "AGPL-3",

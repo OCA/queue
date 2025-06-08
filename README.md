@@ -24,7 +24,7 @@ addon | version | maintainers | summary
 [base_import_async](base_import_async/) | 18.0.1.0.0 |  | Import CSV files in the background
 [queue_job](queue_job/) | 18.0.1.5.0 | <a href='https://github.com/guewen'><img src='https://github.com/guewen.png' width='32' height='32' style='border-radius:50%;' alt='guewen'/></a> | Job Queue
 [queue_job_batch](queue_job_batch/) | 18.0.1.0.0 |  | Job Queue Batch
-[queue_job_cron](queue_job_cron/) | 18.0.1.1.0 |  | Scheduled Actions as Queue Jobs
+[queue_job_cron](queue_job_cron/) | 18.0.1.1.1 |  | Scheduled Actions as Queue Jobs
 [queue_job_cron_jobrunner](queue_job_cron_jobrunner/) | 18.0.1.0.0 | <a href='https://github.com/ivantodorovich'><img src='https://github.com/ivantodorovich.png' width='32' height='32' style='border-radius:50%;' alt='ivantodorovich'/></a> | Run jobs without a dedicated JobRunner
 [queue_job_subscribe](queue_job_subscribe/) | 18.0.1.0.0 |  | Control which users are subscribed to queue job notifications
 [test_queue_job](test_queue_job/) | 18.0.1.0.1 |  | Queue Job Tests
