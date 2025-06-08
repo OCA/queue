@@ -58,3 +58,27 @@ class TestQueueJobCron(TransactionCase):
         cron.method_direct_trigger()
         nb_jobs = self.env["queue.job"].search_count([("name", "=", cron.name)])
         self.assertEqual(nb_jobs, 2)
+
+    def test_queue_job_cron_callback(self):
+        nb_partners = self.env["res.partner"].search_count([])
+        nb_jobs = self.env["queue.job"].search_count([])
+        partner_model = self.env.ref("base.model_res_partner")
+        action = self.env["ir.actions.server"].create(
+            {
+                "name": "Queue job cron callback action create partner",
+                "state": "code",
+                "model_id": partner_model.id,
+                "crud_model_id": partner_model.id,
+                "code": "model.name_create('job Cron partner')",
+            }
+        )
+        cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
+        cron._callback("Test queue job cron", action.id)
+        nb_partners_after_cron = self.env["res.partner"].search_count([])
+        self.assertEqual(nb_partners_after_cron, nb_partners + 1)
+        cron.write({"run_as_queue_job": True})
+        cron._callback("Test queue job cron", action.id)
+        nb_partners_after_cron = self.env["res.partner"].search_count([])
+        self.assertEqual(nb_partners_after_cron, nb_partners + 1)
+        nb_jobs_after_cron = self.env["queue.job"].search_count([])
+        self.assertEqual(nb_jobs_after_cron, nb_jobs + 1)
