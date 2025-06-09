@@ -1,3 +1,5 @@
+/* @odoo-module */
+
 import {MailCoreWeb} from "@mail/core/web/mail_core_web_service";
 import {patch} from "@web/core/utils/patch";
 

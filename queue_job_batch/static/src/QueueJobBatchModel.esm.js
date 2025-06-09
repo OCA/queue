@@ -1,3 +1,5 @@
+/* @odoo-module */
+
 import {Record} from "@mail/core/common/record";
 import {_t} from "@web/core/l10n/translation";
 

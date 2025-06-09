@@ -4,8 +4,6 @@
 
 from odoo import api, fields, models
 
-from odoo.addons.mail.tools.discuss import Store
-
 
 class QueueJobBatch(models.Model):
     _name = "queue.job.batch"
@@ -83,7 +81,6 @@ class QueueJobBatch(models.Model):
             if rec.is_read or rec.state != "finished":
                 continue
             rec.is_read = True
-            rec.user_id._bus_send("queue.job.batch/updated", {"batch_read": True})
 
     @api.model
     def get_new_batch(self, name, **kwargs):
@@ -96,7 +93,6 @@ class QueueJobBatch(models.Model):
             }
         )
         record = self.sudo().create(vals).with_user(self.env.uid)
-        record.user_id._bus_send("queue.job.batch/updated", {"batch_created": True})
         return record
 
     @api.depends("job_ids.state")
@@ -108,21 +104,3 @@ class QueueJobBatch(models.Model):
             rec.finished_job_count = len(jobs_by_state.get("done", []))
             rec.completeness = rec.finished_job_count / max(1, rec.job_count)
             rec.failed_percentage = rec.failed_job_count / max(1, rec.job_count)
-
-    @api.model
-    def _to_store_fnames(self):
-        return (
-            "name",
-            "state",
-            "job_count",
-            "finished_job_count",
-            "failed_job_count",
-            "completeness",
-            "failed_percentage",
-        )
-
-    def _to_store(self, store: Store):
-        fnames = self._to_store_fnames()
-        for rec in self:
-            data = rec.read(fnames)[0]
-            store.add(rec, data)
