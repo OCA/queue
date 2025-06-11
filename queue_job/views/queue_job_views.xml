@@ -255,6 +255,12 @@
                 />
                 <separator />
                 <filter
+                    name="retried"
+                    string="Tried many times"
+                    domain="[('retry', '&gt;', 1)]"
+                />
+                <separator />
+                <filter
                     name="last_24_hours"
                     string="Last 24 hours"
                     domain="[('date_created', '&gt;=', (context_today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"
