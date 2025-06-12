@@ -154,23 +154,23 @@
                 decoration-muted="state == 'done'"
             >
                 <field name="name" />
-                <field name="model_name" />
+                <field name="model_name" optional="show" />
                 <field name="state" />
                 <field name="date_created" />
-                <field name="eta" />
+                <field name="eta" optional="show" />
                 <field
                     name="eta"
                     widget="remaining_days"
                     string="Remaining days to execute"
                     optional="hide"
                 /> <!-- pylint: disable=duplicate-xml-fields -->
-                <field name="date_done" />
-                <field name="exec_time" />
+                <field name="date_done" optional="show" />
+                <field name="exec_time" optional="show" />
                 <field name="priority" optional="hide" />
-                <field name="exc_name" />
-                <field name="exc_message" />
-                <field name="uuid" />
-                <field name="channel" />
+                <field name="exc_name" optional="hide" />
+                <field name="exc_message" optional="hide" />
+                <field name="uuid" optional="show" />
+                <field name="channel" optional="show" />
                 <field name="company_id" groups="base.group_multi_company" />
             </tree>
         </field>
