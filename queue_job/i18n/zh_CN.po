@@ -877,6 +877,11 @@ msgid "Time required to execute this job in seconds. Average when grouped."
 msgstr "以秒为单位执行此任务所需的时间。分组时为平均值。"
 
 #. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Tried many times"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "记录的异常活动的类型。"
