@@ -342,11 +342,11 @@ class Database(object):
             WHERE
                 id in (
                     SELECT
-                        id
+                        queue_job_id
                     FROM
-                        queue_job_locks
+                        queue_job_lock
                     WHERE
-                        id in (
+                        queue_job_id in (
                             SELECT
                                 id
                             FROM
@@ -387,10 +387,7 @@ class Database(object):
             cr.execute(query)
 
             for (uuid,) in cr.fetchall():
-                _logger.warning(
-                    "Re-queued job with uuid: %s",
-                    uuid,
-                )
+                _logger.warning("Re-queued dead job with uuid: %s", uuid)
 
 
 class QueueJobRunner:
