@@ -375,19 +375,19 @@ ul.auto-toc {
 <p>Jobs are executed in the background by a <tt class="docutils literal">Jobrunner</tt>, in their own transaction.</p>
 <p>Example:</p>
 <pre class="code python literal-block">
-<span class="kn">from</span> <span class="nn">odoo</span> <span class="kn">import</span> <span class="n">models</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">api</span><span class="w">
+<span class="kn">from</span><span class="w"> </span><span class="nn">odoo</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">api</span><span class="w">
 
-</span><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
+</span><span class="k">class</span><span class="w"> </span><span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
 </span>   <span class="n">_name</span> <span class="o">=</span> <span class="s1">'my.model'</span><span class="w">
 
-</span>   <span class="k">def</span> <span class="nf">my_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span><span class="w">
+</span>   <span class="k">def</span><span class="w"> </span><span class="nf">my_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span><span class="w">
 </span>       <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'executed with a: </span><span class="si">%s</span><span class="s1"> and k: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span><span class="w">
 
 
-</span><span class="k">class</span> <span class="nc">MyOtherModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
+</span><span class="k">class</span><span class="w"> </span><span class="nc">MyOtherModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
 </span>    <span class="n">_name</span> <span class="o">=</span> <span class="s1">'my.other.model'</span><span class="w">
 
-</span>    <span class="k">def</span> <span class="nf">button_do_stuff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+</span>    <span class="k">def</span><span class="w"> </span><span class="nf">button_do_stuff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
 </span>        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">'my.model'</span><span class="p">]</span><span class="o">.</span><span class="n">with_delay</span><span class="p">()</span><span class="o">.</span><span class="n">my_method</span><span class="p">(</span><span class="s1">'a'</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre>
 <p>In the snippet of code above, when we call <tt class="docutils literal">button_do_stuff</tt>, a job <strong>capturing
@@ -509,7 +509,7 @@ of running Odoo is obviously not for production purposes.</td></tr>
 <p>The fast way to enqueue a job for a method is to use <tt class="docutils literal">with_delay()</tt> on a record
 or model:</p>
 <pre class="code python literal-block">
-<span class="k">def</span> <span class="nf">button_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+<span class="k">def</span><span class="w"> </span><span class="nf">button_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
 </span>    <span class="bp">self</span><span class="o">.</span><span class="n">with_delay</span><span class="p">()</span><span class="o">.</span><span class="n">print_confirmation_document</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span><span class="w">
 </span>    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">({</span><span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;done&quot;</span><span class="p">})</span><span class="w">
 </span>    <span class="k">return</span> <span class="kc">True</span>
@@ -525,7 +525,7 @@ is not kept).</p>
 on a record or model. The following is the equivalent of <tt class="docutils literal">with_delay()</tt> but using the
 long form:</p>
 <pre class="code python literal-block">
-<span class="k">def</span> <span class="nf">button_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+<span class="k">def</span><span class="w"> </span><span class="nf">button_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
 </span>    <span class="n">delayable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayable</span><span class="p">()</span><span class="w">
 </span>    <span class="n">delayable</span><span class="o">.</span><span class="n">print_confirmation_document</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span><span class="w">
 </span>    <span class="n">delayable</span><span class="o">.</span><span class="n">delay</span><span class="p">()</span><span class="w">
@@ -535,7 +535,7 @@ long form:</p>
 <p>Methods of Delayable objects return itself, so it can be used as a builder pattern,
 which in some cases allow to build the jobs dynamically:</p>
 <pre class="code python literal-block">
-<span class="k">def</span> <span class="nf">button_generate_simple_with_delayable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+<span class="k">def</span><span class="w"> </span><span class="nf">button_generate_simple_with_delayable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
 </span>    <span class="bp">self</span><span class="o">.</span><span class="n">ensure_one</span><span class="p">()</span><span class="w">
 </span>    <span class="c1"># Introduction of a delayable object, using a builder pattern</span><span class="w">
 </span>    <span class="c1"># allowing to chain jobs or set properties. The delay() method</span><span class="w">
@@ -551,7 +551,7 @@ which in some cases allow to build the jobs dynamically:</p>
 </pre>
 <p>The simplest way to define a dependency is to use <tt class="docutils literal">.on_done(job)</tt> on a Delayable:</p>
 <pre class="code python literal-block">
-<span class="k">def</span> <span class="nf">button_chain_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+<span class="k">def</span><span class="w"> </span><span class="nf">button_chain_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
 </span>    <span class="bp">self</span><span class="o">.</span><span class="n">ensure_one</span><span class="p">()</span><span class="w">
 </span>    <span class="n">job1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browse</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">delayable</span><span class="p">()</span><span class="o">.</span><span class="n">generate_thumbnail</span><span class="p">((</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span><span class="w">
 </span>    <span class="n">job2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browse</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">delayable</span><span class="p">()</span><span class="o">.</span><span class="n">generate_thumbnail</span><span class="p">((</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span><span class="w">
@@ -568,9 +568,9 @@ form a graph, for instance we can group [A] of jobs, which blocks another group
 [B] of jobs. When and only when all the jobs of the group [A] are executed, the
 jobs of the group [B] are executed. The code would look like:</p>
 <pre class="code python literal-block">
-<span class="kn">from</span> <span class="nn">odoo.addons.queue_job.delay</span> <span class="kn">import</span> <span class="n">group</span><span class="p">,</span> <span class="n">chain</span><span class="w">
+<span class="kn">from</span><span class="w"> </span><span class="nn">odoo.addons.queue_job.delay</span><span class="w"> </span><span class="kn">import</span> <span class="n">group</span><span class="p">,</span> <span class="n">chain</span><span class="w">
 
-</span><span class="k">def</span> <span class="nf">button_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+</span><span class="k">def</span><span class="w"> </span><span class="nf">button_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
 </span>    <span class="n">group_a</span> <span class="o">=</span> <span class="n">group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delayable</span><span class="p">()</span><span class="o">.</span><span class="n">method_foo</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayable</span><span class="p">()</span><span class="o">.</span><span class="n">method_bar</span><span class="p">())</span><span class="w">
 </span>    <span class="n">group_b</span> <span class="o">=</span> <span class="n">group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delayable</span><span class="p">()</span><span class="o">.</span><span class="n">method_baz</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayable</span><span class="p">()</span><span class="o">.</span><span class="n">method_baz</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="w">
 </span>    <span class="n">chain</span><span class="p">(</span><span class="n">group_a</span><span class="p">,</span> <span class="n">group_b</span><span class="p">)</span><span class="o">.</span><span class="n">delay</span><span class="p">()</span><span class="w">
@@ -662,10 +662,10 @@ function:</p>
 </ul>
 <p>Example of related action code:</p>
 <pre class="code python literal-block">
-<span class="k">class</span> <span class="nc">QueueJob</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
+<span class="k">class</span><span class="w"> </span><span class="nc">QueueJob</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
 </span>    <span class="n">_inherit</span> <span class="o">=</span> <span class="s1">'queue.job'</span><span class="w">
 
-</span>    <span class="k">def</span> <span class="nf">related_action_partner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span><span class="w">
+</span>    <span class="k">def</span><span class="w"> </span><span class="nf">related_action_partner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span><span class="w">
 </span>        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_one</span><span class="p">()</span><span class="w">
 </span>        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="w">
 </span>        <span class="n">partner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="w">
@@ -707,12 +707,12 @@ a job, is transferred to the job according to an allow-list.</p>
 be customized in <tt class="docutils literal">Base._job_prepare_context_before_enqueue_keys</tt>.</p>
 <p>Example:</p>
 <pre class="code python literal-block">
-<span class="k">class</span> <span class="nc">Base</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">AbstractModel</span><span class="p">):</span><span class="w">
+<span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">AbstractModel</span><span class="p">):</span><span class="w">
 
 </span>    <span class="n">_inherit</span> <span class="o">=</span> <span class="s2">&quot;base&quot;</span><span class="w">
 
 </span>    <span class="nd">&#64;api</span><span class="o">.</span><span class="n">model</span><span class="w">
-</span>    <span class="k">def</span> <span class="nf">_job_prepare_context_before_enqueue_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_job_prepare_context_before_enqueue_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
         </span><span class="sd">&quot;&quot;&quot;Keys to keep in context of stored jobs
 
         Empty by default for backward compatibility.
@@ -730,7 +730,7 @@ you can set <cite>test_queue_job_no_delay=True</cite> in the context.</p>
 <p>Tip: you can do this at test case level like this</p>
 <pre class="code python literal-block">
 <span class="nd">&#64;classmethod</span><span class="w">
-</span><span class="k">def</span> <span class="nf">setUpClass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span><span class="w">
+</span><span class="k">def</span><span class="w"> </span><span class="nf">setUpClass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span><span class="w">
 </span>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUpClass</span><span class="p">()</span><span class="w">
 </span>    <span class="bp">cls</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">env</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="w">
 </span>        <span class="bp">cls</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">context</span><span class="p">,</span><span class="w">
@@ -770,20 +770,20 @@ even can run the jobs of its list synchronously! Details in
 <p>A very small example (more details in <tt class="docutils literal">tests/common.py</tt>):</p>
 <pre class="code python literal-block">
 <span class="c1"># code</span><span class="w">
-</span><span class="k">def</span> <span class="nf">my_job_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span><span class="w">
+</span><span class="k">def</span><span class="w"> </span><span class="nf">my_job_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span><span class="w">
 </span>    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">name</span><span class="p">]</span> <span class="o">*</span> <span class="n">count</span><span class="p">)</span><span class="w">
 
-</span><span class="k">def</span> <span class="nf">method_to_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+</span><span class="k">def</span><span class="w"> </span><span class="nf">method_to_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
 </span>    <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s2">&quot;other.model&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">search_count</span><span class="p">([])</span><span class="w">
 </span>    <span class="bp">self</span><span class="o">.</span><span class="n">with_delay</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">my_job_method</span><span class="p">(</span><span class="s2">&quot;Hi!&quot;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">)</span><span class="w">
 </span>    <span class="k">return</span> <span class="n">count</span><span class="w">
 
 </span><span class="c1"># tests</span><span class="w">
-</span><span class="kn">from</span> <span class="nn">odoo.addons.queue_job.tests.common</span> <span class="kn">import</span> <span class="n">trap_jobs</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">odoo.addons.queue_job.tests.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">trap_jobs</span><span class="w">
 
 </span><span class="c1"># first test only check the expected behavior of the method and the proper</span><span class="w">
 </span><span class="c1"># enqueuing of jobs</span><span class="w">
-</span><span class="k">def</span> <span class="nf">test_method_to_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+</span><span class="k">def</span><span class="w"> </span><span class="nf">test_method_to_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
 </span>    <span class="k">with</span> <span class="n">trap_jobs</span><span class="p">()</span> <span class="k">as</span> <span class="n">trap</span><span class="p">:</span><span class="w">
 </span>        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">method_to_test</span><span class="p">()</span><span class="w">
 </span>        <span class="n">expected_count</span> <span class="o">=</span> <span class="mi">12</span><span class="w">
@@ -799,7 +799,7 @@ even can run the jobs of its list synchronously! Details in
 
 
 </span> <span class="c1"># second test to validate the behavior of the job unitarily</span><span class="w">
-</span> <span class="k">def</span> <span class="nf">test_my_job_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_my_job_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
 </span>     <span class="n">record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">browse</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w">
 </span>     <span class="n">record</span><span class="o">.</span><span class="n">my_job_method</span><span class="p">(</span><span class="s2">&quot;Hi!&quot;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span><span class="w">
 </span>     <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi!&quot;</span><span class="p">)</span>
@@ -807,7 +807,7 @@ even can run the jobs of its list synchronously! Details in
 <p>If you prefer, you can still test the whole thing in a single test, by calling
 <tt class="docutils literal">jobs_tester.perform_enqueued_jobs()</tt> in your test.</p>
 <pre class="code python literal-block">
-<span class="k">def</span> <span class="nf">test_method_to_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
+<span class="k">def</span><span class="w"> </span><span class="nf">test_method_to_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="w">
 </span>    <span class="k">with</span> <span class="n">trap_jobs</span><span class="p">()</span> <span class="k">as</span> <span class="n">trap</span><span class="p">:</span><span class="w">
 </span>        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">method_to_test</span><span class="p">()</span><span class="w">
 </span>        <span class="n">expected_count</span> <span class="o">=</span> <span class="mi">12</span><span class="w">
@@ -842,7 +842,7 @@ do so by setting <tt class="docutils literal">test_queue_job_no_delay=True</tt> 
 <p>Tip: you can do this at test case level like this</p>
 <pre class="code python literal-block">
 <span class="nd">&#64;classmethod</span><span class="w">
-</span><span class="k">def</span> <span class="nf">setUpClass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span><span class="w">
+</span><span class="k">def</span><span class="w"> </span><span class="nf">setUpClass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span><span class="w">
 </span>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUpClass</span><span class="p">()</span><span class="w">
 </span>    <span class="bp">cls</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">env</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="w">
 </span>        <span class="bp">cls</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">context</span><span class="p">,</span><span class="w">
@@ -882,21 +882,7 @@ least one job’s env of the graph for the whole graph to be executed synchronou
 <ul class="simple">
 <li>After creating a new database or installing <tt class="docutils literal">queue_job</tt> on an
 existing database, Odoo must be restarted for the runner to detect it.</li>
-<li>When Odoo shuts down normally, it waits for running jobs to finish.
-However, when the Odoo server crashes or is otherwise force-stopped,
-running jobs are interrupted while the runner has no chance to know
-they have been aborted. In such situations, jobs may remain in
-<tt class="docutils literal">started</tt> or <tt class="docutils literal">enqueued</tt> state after the Odoo server is halted.
-Since the runner has no way to know if they are actually running or
-not, and does not know for sure if it is safe to restart the jobs,
-it does not attempt to restart them automatically. Such stale jobs
-therefore fill the running queue and prevent other jobs to start.
-You must therefore requeue them manually, either from the Jobs view,
-or by running the following SQL statement <em>before starting Odoo</em>:</li>
 </ul>
-<pre class="code sql literal-block">
-<span class="k">update</span><span class="w"> </span><span class="n">queue_job</span><span class="w"> </span><span class="k">set</span><span class="w"> </span><span class="k">state</span><span class="o">=</span><span class="s1">'pending'</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="k">state</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="p">(</span><span class="s1">'started'</span><span class="p">,</span><span class="w"> </span><span class="s1">'enqueued'</span><span class="p">)</span>
-</pre>
 </div>
 <div class="section" id="changelog">
 <h1><a class="toc-backref" href="#toc-entry-12">Changelog</a></h1>

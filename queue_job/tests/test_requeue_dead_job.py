@@ -42,7 +42,7 @@ class TestRequeueDeadJob(TransactionCase):
             SELECT
                 id
             FROM
-                queue_job_locks
+                queue_job_lock
             WHERE
                 id IN (
                     SELECT
