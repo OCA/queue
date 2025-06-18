@@ -157,7 +157,7 @@
                 <field name="model_name" optional="show" />
                 <field name="state" />
                 <field name="date_created" />
-                <field name="eta" optional="show" />
+                <field name="eta" />
                 <field
                     name="eta"
                     widget="remaining_days"
