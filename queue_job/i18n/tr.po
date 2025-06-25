@@ -392,7 +392,6 @@ msgstr "İşaretlenirse, sizi bekleyen mesajlar var."
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "İşaretlenirse, bazı mesajlar teslimat hatası içerir."
 
@@ -754,11 +753,6 @@ msgid "Retry Pattern (serialized)"
 msgstr "Deseni Yeniden Dene (serileştirilmiş)"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "SMS Teslim hatası"
-
-#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
 msgid "Set all selected jobs to done"
 msgstr "Tüm seçilen işleri tamamlandı olarak ayarla"
@@ -908,8 +902,8 @@ msgid ""
 msgstr ""
 "{} için Beklenmeyen İlgili Eylem formatı.\n"
 "Geçerli format örneği:\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" {{"
-"\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", "
+"\"kwargs\" {{\"limit\": 10}}}}"
 
 #. module: queue_job
 #. odoo-python
@@ -945,3 +939,6 @@ msgstr "Seçilen işleri yeniden sıraya almak için sihirbaz"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr "Çalışan Pid"
+
+#~ msgid "SMS Delivery error"
+#~ msgstr "SMS Teslim hatası"

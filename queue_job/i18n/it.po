@@ -392,7 +392,6 @@ msgstr "Se selezionata, nuovi messaggi richiedono attenzione."
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error
-#: model:ir.model.fields,help:queue_job.field_queue_job__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "Se selezionata, alcuni messaggi hanno un errore di consegna."
 
@@ -754,11 +753,6 @@ msgid "Retry Pattern (serialized)"
 msgstr "Riprova schema (serializzato)"
 
 #. module: queue_job
-#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "Errore consegna SMS"
-
-#. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
 msgid "Set all selected jobs to done"
 msgstr "Imposta a completati tutti i lavori selezionati"
@@ -945,6 +939,9 @@ msgstr "Procedura guidata per riaccodare una selezione di lavori"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr "PID worker"
+
+#~ msgid "SMS Delivery error"
+#~ msgstr "Errore consegna SMS"
 
 #, python-format
 #~ msgid "Cancelled by %s"
