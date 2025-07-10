@@ -663,12 +663,6 @@ msgid "Queue Job"
 msgstr "Kuyruk İşi"
 
 #. module: queue_job
-#. odoo-python
-#: code:addons/queue_job/models/queue_job.py:0
-msgid "Queue jobs must be created by calling 'with_delay()'."
-msgstr "Kuyruk işleri 'with_delay()' çağrılarak oluşturulmalıdır."
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__records
 msgid "Record(s)"
 msgstr "Kayıt(lar)"
@@ -939,6 +933,9 @@ msgstr "Seçilen işleri yeniden sıraya almak için sihirbaz"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr "Çalışan Pid"
+
+#~ msgid "Queue jobs must be created by calling 'with_delay()'."
+#~ msgstr "Kuyruk işleri 'with_delay()' çağrılarak oluşturulmalıdır."
 
 #~ msgid "SMS Delivery error"
 #~ msgstr "SMS Teslim hatası"

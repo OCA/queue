@@ -666,12 +666,6 @@ msgid "Queue Job"
 msgstr "Cola de trabajos"
 
 #. module: queue_job
-#. odoo-python
-#: code:addons/queue_job/models/queue_job.py:0
-msgid "Queue jobs must be created by calling 'with_delay()'."
-msgstr "Los trabajos en cola deben crearse llamando a 'with_delay()'."
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__records
 msgid "Record(s)"
 msgstr "Registro(s)"
@@ -940,6 +934,9 @@ msgstr "Asistente para volver a poner en cola una selección de trabajos"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr "Pid del trabajador"
+
+#~ msgid "Queue jobs must be created by calling 'with_delay()'."
+#~ msgstr "Los trabajos en cola deben crearse llamando a 'with_delay()'."
 
 #~ msgid "SMS Delivery error"
 #~ msgstr "Error de entrega del SMS"

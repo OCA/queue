@@ -661,12 +661,6 @@ msgid "Queue Job"
 msgstr "队列作业"
 
 #. module: queue_job
-#. odoo-python
-#: code:addons/queue_job/models/queue_job.py:0
-msgid "Queue jobs must be created by calling 'with_delay()'."
-msgstr "队列任务必须通过调用'with_delay()'方法来创建。"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__records
 msgid "Record(s)"
 msgstr "记录"
@@ -929,6 +923,9 @@ msgstr "重新排队向导所选的作业"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr "工作进程PID"
+
+#~ msgid "Queue jobs must be created by calling 'with_delay()'."
+#~ msgstr "队列任务必须通过调用'with_delay()'方法来创建。"
 
 #~ msgid "SMS Delivery error"
 #~ msgstr "短信传递错误"
