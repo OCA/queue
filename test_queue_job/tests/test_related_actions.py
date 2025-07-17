@@ -89,7 +89,7 @@ class TestRelatedAction(common.TransactionCase):
             "domain": [("id", "in", self.records.ids)],
             "res_model": self.record._name,
             "type": "ir.actions.act_window",
-            "view_mode": "tree,form",
+            "view_mode": "list,form",
         }
         self.assertEqual(job_.related_action(), expected)
 
