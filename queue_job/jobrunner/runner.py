@@ -123,7 +123,6 @@ Caveat
        of running Odoo is obviously not for production purposes.
 """
 
-import datetime
 import logging
 import os
 import selectors
@@ -170,15 +169,10 @@ def _channels():
     )
 
 
-def _datetime_to_epoch(dt):
+def _odoo_now():
     # important: this must return the same as postgresql
     # EXTRACT(EPOCH FROM TIMESTAMP dt)
-    return (dt - datetime.datetime(1970, 1, 1)).total_seconds()
-
-
-def _odoo_now():
-    dt = datetime.datetime.utcnow()
-    return _datetime_to_epoch(dt)
+    return time.time()
 
 
 def _connection_info_for(db_name):
