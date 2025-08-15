@@ -8,19 +8,25 @@ from odoo.tools import mute_logger
 
 class TestJobCreatePrivate(common.HttpCase):
     def test_create_error(self):
-        self.authenticate("admin", "admin")
-        with self.assertRaises(common.JsonRpcException) as cm, mute_logger("odoo.http"):
+        self.authenticate("demo", "demo")
+        with (
+            self.assertRaises(common.JsonRpcException) as cm,
+            mute_logger("odoo.http"),
+        ):
             self.make_jsonrpc_request(
                 "/web/dataset/call_kw",
                 params={
                     "model": "queue.job",
                     "method": "create",
-                    "args": [],
-                    "kwargs": {
-                        "method_name": "write",
-                        "model_name": "res.partner",
-                        "uuid": "test",
-                    },
+                    "args": [
+                        {
+                            "method_name": "write",
+                            "model_name": "res.partner",
+                            "uuid": "test",
+                            "state": "pending",
+                        },
+                    ],
+                    "kwargs": {},
                 },
                 headers={
                     "Cookie": f"session_id={self.session.sid};",

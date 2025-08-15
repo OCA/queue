@@ -432,7 +432,11 @@ class QueueJob(models.Model):
             domain.append(
                 [
                     "&",
-                    ("date_enqueued", "<=", fields.Datetime.to_string(queue_dl)),
+                    (
+                        "date_enqueued",
+                        "<=",
+                        fields.Datetime.to_string(queue_dl),
+                    ),
                     ("state", "=", "enqueued"),
                 ]
             )
@@ -441,7 +445,11 @@ class QueueJob(models.Model):
             domain.append(
                 [
                     "&",
-                    ("date_started", "<=", fields.Datetime.to_string(started_dl)),
+                    (
+                        "date_started",
+                        "<=",
+                        fields.Datetime.to_string(started_dl),
+                    ),
                     ("state", "=", "started"),
                 ]
             )
