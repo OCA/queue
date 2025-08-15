@@ -6,24 +6,26 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2025-08-15 13:18+0000\n"
+"Last-Translator: Bosd <c5e2fd43-d292-4c90-9d1f-74ff3436329a@anonaddy.me>\n"
 "Language-Team: none\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.10.4\n"
 
 #. module: base_import_async
 #. odoo-python
 #: code:addons/base_import_async/models/queue_job.py:0
 msgid "Attachment"
-msgstr ""
+msgstr "Bijlage"
 
 #. module: base_import_async
 #: model:ir.model,name:base_import_async.model_base_import_import
 msgid "Base Import"
-msgstr ""
+msgstr "Basis import"
 
 #. module: base_import_async
 #. odoo-python
@@ -32,23 +34,25 @@ msgid ""
 "Import %(model)s from file %(file_name)s - #%(chunk)s - lines %(from)s to "
 "%(to)s"
 msgstr ""
+"Importeer %(model)s vanuit bestand %(file_name)s - #%(chunk)s - regels "
+"%(from)s tot %(to)s"
 
 #. module: base_import_async
 #. odoo-python
 #: code:addons/base_import_async/models/base_import_import.py:0
 msgid "Import %(model)s from file %(from_file)s"
-msgstr ""
+msgstr "Importeer %(model)s vanuit bestand %(from_file)s"
 
 #. module: base_import_async
 #. odoo-javascript
 #: code:addons/base_import_async/static/src/xml/import_data_sidepanel.xml:0
 msgid "Import in the background"
-msgstr ""
+msgstr "Importeer op de achtergrond"
 
 #. module: base_import_async
 #: model:ir.model,name:base_import_async.model_queue_job
 msgid "Queue Job"
-msgstr ""
+msgstr "Wachtrijtaak"
 
 #. module: base_import_async
 #. odoo-javascript
@@ -58,15 +62,19 @@ msgid ""
 "splitting your file in small chunks that will be processed independently. "
 "Use this to import very large files."
 msgstr ""
+"Indien aangevinkt, wordt de import uitgevoerd als een achtergrondtaak, nadat "
+"uw bestand is opgesplitst in kleine delen die onafhankelijk van elkaar "
+"worden verwerkt. Gebruik dit voor het importeren van zeer grote bestanden."
 
 #. module: base_import_async
 #. odoo-javascript
 #: code:addons/base_import_async/static/src/js/import_model.esm.js:0
 msgid "You can check the status of this job in menu 'Queue / Jobs'."
 msgstr ""
+"U kunt de status van deze taak controleren in het menu 'Wachtrij / Taken'."
 
 #. module: base_import_async
 #. odoo-javascript
 #: code:addons/base_import_async/static/src/js/import_model.esm.js:0
 msgid "Your request is being processed"
-msgstr ""
+msgstr "Uw verzoek wordt verwerkt"
