@@ -331,6 +331,7 @@ class Database:
                     CASE
                         WHEN
                             max_retries IS NOT NULL AND
+                            max_retries != 0 AND -- infinite retries if max_retries is 0
                             retry IS NOT NULL AND
                             retry>max_retries
                         THEN 'failed'
@@ -345,6 +346,7 @@ class Database:
                     CASE
                         WHEN
                             max_retries IS NOT NULL AND
+                            max_retries != 0 AND -- infinite retries if max_retries is 0
                             retry IS NOT NULL AND
                             retry>max_retries
                         THEN 'JobFoundDead'
@@ -354,6 +356,7 @@ class Database:
                     CASE
                         WHEN
                             max_retries IS NOT NULL AND
+                            max_retries != 0 AND -- infinite retries if max_retries is 0
                             retry IS NOT NULL AND
                             retry>max_retries
                         THEN 'Job found dead after too many retries'
