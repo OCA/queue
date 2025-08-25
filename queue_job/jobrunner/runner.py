@@ -139,7 +139,7 @@ import odoo
 from odoo.tools import config
 
 from . import queue_job_config
-from .channels import ENQUEUED, NOT_DONE, ChannelManager
+from .channels import ENQUEUED, NOT_DONE, PENDING, ChannelManager
 
 SELECT_TIMEOUT = 60
 ERROR_RECOVERY_DELAY = 5
@@ -296,6 +296,13 @@ class Database(object):
         with closing(self.conn.cursor()) as cr:
             cr.execute(query)
 
+    def set_job_pending(self, uuid):
+        with closing(self.conn.cursor()) as cr:
+            cr.execute(
+                "UPDATE queue_job SET state=%s, " "date_enqueued=NULL " "WHERE uuid=%s",
+                (PENDING, uuid),
+            )
+
     def set_job_enqueued(self, uuid):
         with closing(self.conn.cursor()) as cr:
             cr.execute(
@@ -357,6 +364,19 @@ class Database(object):
                                 (now() AT TIME ZONE 'utc' - INTERVAL '10 sec')
                         )
                     FOR UPDATE SKIP LOCKED
+                )
+                OR
+                id in (
+                    SELECT
+                        id
+                    FROM
+                        queue_job
+                    WHERE
+                        state = 'started' AND NOT EXISTS (
+                            SELECT 1 FROM queue_job_lock
+                            WHERE queue_job_id = queue_job.id
+                        )
+                        FOR UPDATE SKIP LOCKED
                 )
             RETURNING uuid
             """
@@ -467,6 +487,18 @@ class QueueJobRunner:
                 self.db_by_name[db_name] = db
                 with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
                     for job_data in cr:
+                        # In case we have enqueued jobs we move them to pending,
+                        # otherwise they remain enqueued and occupy channels slots.
+                        if job_data[6] == "enqueued":
+                            try:
+                                self.db_by_name[db_name].set_job_pending(job_data[1])
+                                job_data = (*job_data[:6], "pending")
+                            except Exception:
+                                _logger.warning(
+                                    "error setting job %s to pending",
+                                    job_data[1],
+                                    exc_info=True,
+                                )
                         self.channel_manager.notify(db_name, *job_data)
                 _logger.info("queue job runner ready for db %s", db_name)
 

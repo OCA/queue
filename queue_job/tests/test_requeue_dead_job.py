@@ -131,3 +131,38 @@ class TestRequeueDeadJob(TransactionCase):
         # because we committed the cursor, the savepoint of the test method is
         # gone, and this would break TransactionCase cleanups
         self.cr.execute("SAVEPOINT test_%d" % self._savepoint_id)
+
+    def test_requeue_dead_jobs_started_before_patch(self):
+        uuid = "test_requeue_dead_jobs_before_locking"
+
+        queue_job = self.create_dummy_job(uuid)
+        job_obj = Job.load(self.env, queue_job.uuid)
+
+        job_obj.set_enqueued()
+        # simulate enqueuing was in the past
+        job_obj.date_enqueued = datetime.now() - timedelta(minutes=1)
+        job_obj.set_started()
+        # Delete the job lock to simulate job started before new implementation
+        self.env.cr.execute(
+            "DELETE FROM queue_job_lock WHERE queue_job_id=%s", (queue_job.id,)
+        )
+
+        job_obj.store()
+        self.env.cr.commit()  # pylint: disable=E8102
+
+        # requeue dead jobs using current cursor
+        query = Database(self.env.cr.dbname)._query_requeue_dead_jobs()
+        self.env.cr.execute(query)
+
+        uuids_requeued = self.env.cr.fetchall()
+
+        self.assertEqual(len(uuids_requeued), 1)
+        self.assertEqual(uuids_requeued[0][0], uuid)
+
+        # clean up
+        queue_job.unlink()
+        self.env.cr.commit()  # pylint: disable=E8102
+
+        # because we committed the cursor, the savepoint of the test method is
+        # gone, and this would break TransactionCase cleanups
+        self.cr.execute("SAVEPOINT test_%d" % self._savepoint_id)
