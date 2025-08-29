@@ -288,13 +288,24 @@ The default allow-list is ("tz", "lang", "allowed_company_ids",
 
 When the `queue_job_context_keys` context variable is set, preserve
 the given keys in addition to those normally specified by
-`_job_prepare_context_before_enqueue_keys`.
+`_job_prepare_context_before_enqueue_keys`. Examples:
+
+```python
+# existing context
+record.with_context(queue_job_context_keys=['a']).with_delay().func()
+# new context
+record.with_context(b=1, queue_job_context_keys=['b']).with_delay().func()
+```
 
 When the `queue_job_keep_context` context variable is set, always
 preserve the entire context. This honors the principle of least
 surprise, in that a developer can easily convert a record.method()
 call to record.with_delay().method() with the expectation that it will
-actually execute the same, simply at a later time.
+actually execute the same, simply at a later time. Example:
+
+```python
+record.with_context(queue_job_keep_context=True).with_delay().func()
+```
 
 **Bypass jobs on running Odoo**
 
