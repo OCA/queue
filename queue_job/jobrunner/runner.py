@@ -378,6 +378,13 @@ class QueueJobRunner:
 
         :return: tuple with the scheme and hostname of the web.base.url
         """
+        if queue_job_config.get("job_server_only"):
+            return None, None
+
+        return cls._get_web_base_url()
+
+    @classmethod
+    def _get_web_base_url(cls):
         scheme, hostname = None, None
         for db_name in cls.get_db_names():
             db = Database(db_name)
