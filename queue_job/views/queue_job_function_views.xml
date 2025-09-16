@@ -35,7 +35,7 @@
             <search string="Job Functions">
                 <field name="name" />
                 <field name="channel_id" />
-                <group expand="0" string="Group By">
+                <group>
                     <filter
                         name="group_by_channel"
                         string="Channel"

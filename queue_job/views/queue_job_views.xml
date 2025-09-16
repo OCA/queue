@@ -271,7 +271,7 @@
                     string="Last 30 days"
                     domain="[('date_created', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"
                 />
-                <group expand="0" string="Group By">
+                <group>
                     <filter
                         name="group_by_channel"
                         string="Channel"
