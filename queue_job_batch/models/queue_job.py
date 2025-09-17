@@ -30,3 +30,18 @@ class QueueJob(models.Model):
             # to work with the same batch
             batch.with_delay().check_state()
         return super().write(vals)
+
+    def autovacuum(self):
+        """Delete batches if all jobs are unlink after job autovacuum
+
+        Called from a cron.
+        """
+        super().autovacuum()
+        batches = self.env["queue.job.batch"].search([])
+
+        for batch in batches:
+            if not batch.job_ids:
+                batch.unlink()
+        self.env.cr.commit()  # pylint: disable=E8102
+
+        return True
