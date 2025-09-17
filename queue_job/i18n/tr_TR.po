@@ -164,6 +164,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_uid
@@ -177,6 +178,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_date
@@ -223,6 +225,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__display_name
@@ -353,6 +356,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__id
@@ -372,12 +376,6 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__identity_key
 msgid "Identity Key"
-msgstr ""
-
-#. module: queue_job
-#. odoo-python
-#: code:addons/queue_job/models/queue_job.py:0
-msgid "If both parameters are 0, ALL jobs will be requeued!"
 msgstr ""
 
 #. module: queue_job
@@ -457,11 +455,6 @@ msgid "Jobs"
 msgstr ""
 
 #. module: queue_job
-#: model:ir.actions.server,name:queue_job.ir_cron_queue_job_garbage_collector_ir_actions_server
-msgid "Jobs Garbage Collector"
-msgstr ""
-
-#. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "Jobs for graph %s"
@@ -489,6 +482,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_uid
@@ -497,6 +491,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
@@ -647,7 +642,13 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__queue_job_id
 msgid "Queue Job"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_job_lock
+msgid "Queue Job Lock"
 msgstr ""
 
 #. module: queue_job

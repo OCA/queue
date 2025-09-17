@@ -20,7 +20,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid ""
 "<br/>\n"
-"                            <span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number of retries is infinite.</span>"
+"                            <span class=\"oe_grey oe_inline\"> If the max. "
+"retries is 0, the number of retries is infinite.</span>"
 msgstr ""
 
 #. module: queue_job
@@ -165,6 +166,7 @@ msgstr "Aanmaakdatum"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_uid
@@ -178,6 +180,7 @@ msgstr "Aanmaakdatum"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_date
@@ -224,6 +227,7 @@ msgstr "Omschrijving"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__display_name
@@ -354,6 +358,7 @@ msgstr "Heeft bericht"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__id
@@ -374,14 +379,6 @@ msgstr "Icoon om een activiteit-uitzondering aan te geven."
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__identity_key
 msgid "Identity Key"
 msgstr "Identiteitssleutel"
-
-#. module: queue_job
-#. odoo-python
-#: code:addons/queue_job/models/queue_job.py:0
-msgid "If both parameters are 0, ALL jobs will be requeued!"
-msgstr ""
-"Als beide parameters 0 zijn, worden ALLE taken opnieuw in de wachtrij "
-"geplaatst!"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction
@@ -460,11 +457,6 @@ msgid "Jobs"
 msgstr "Taken"
 
 #. module: queue_job
-#: model:ir.actions.server,name:queue_job.ir_cron_queue_job_garbage_collector_ir_actions_server
-msgid "Jobs Garbage Collector"
-msgstr "Takenafvalverzamelaar"
-
-#. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "Jobs for graph %s"
@@ -492,6 +484,7 @@ msgstr "Afgelopen 7 dagen"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_uid
@@ -500,6 +493,7 @@ msgstr "Laatst bijgewerkt door"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
@@ -622,7 +616,10 @@ msgstr "Bovenliggend kanaal vereist."
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_retry_pattern
 msgid ""
-"Pattern expressing from the count of retries on retryable errors, the number of of seconds to postpone the next execution. Setting the number of seconds to a 2-element tuple or list will randomize the retry interval between the 2 values.\n"
+"Pattern expressing from the count of retries on retryable errors, the number "
+"of of seconds to postpone the next execution. Setting the number of seconds "
+"to a 2-element tuple or list will randomize the retry interval between the 2 "
+"values.\n"
 "Example: {1: 10, 5: 20, 10: 30, 15: 300}.\n"
 "Example: {1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}.\n"
 "See the module description for details."
@@ -654,8 +651,14 @@ msgstr "Wachtrij"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__queue_job_id
 msgid "Queue Job"
 msgstr "Wachtrijtaak"
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_job_lock
+msgid "Queue Job Lock"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__records
@@ -820,7 +823,9 @@ msgstr "Taak"
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_related_action
 msgid ""
-"The action when the button *Related Action* is used on a job. The default action is to open the view of the record related to the job. Configured as a dictionary with optional keys: enable, func_name, kwargs.\n"
+"The action when the button *Related Action* is used on a job. The default "
+"action is to open the view of the record related to the job. Configured as a "
+"dictionary with optional keys: enable, func_name, kwargs.\n"
 "See the module description for details."
 msgstr ""
 "De actie wanneer de knop *Gerelateerde actie* wordt gebruikt op een taak. De "
@@ -887,12 +892,13 @@ msgstr "UUID"
 msgid ""
 "Unexpected format of Related Action for {}.\n"
 "Example of valid format:\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" {{\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", "
+"\"kwargs\" {{\"limit\": 10}}}}"
 msgstr ""
 "Onverwacht formaat van gerelateerde actie voor {}.\n"
 "Voorbeeld van geldig formaat:\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" {{"
-"\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", "
+"\"kwargs\" {{\"limit\": 10}}}}"
 
 #. module: queue_job
 #. odoo-python
@@ -928,3 +934,11 @@ msgstr "Wizard om een selectie van taken opnieuw in de wachtrij te plaatsen"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr "Werknemer PID"
+
+#~ msgid "If both parameters are 0, ALL jobs will be requeued!"
+#~ msgstr ""
+#~ "Als beide parameters 0 zijn, worden ALLE taken opnieuw in de wachtrij "
+#~ "geplaatst!"
+
+#~ msgid "Jobs Garbage Collector"
+#~ msgstr "Takenafvalverzamelaar"
