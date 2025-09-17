@@ -28,12 +28,16 @@ class TestQueueJobAutovacuumCronJob(JobCommonCase):
         date_done = datetime.now() - timedelta(days=29)
         stored.write({"date_done": date_done})
         self.env["queue.job"].autovacuum()
-        self.assertEqual(len(self.env["queue.job"].search([])), 1)
+        self.assertEqual(
+            len(self.env["queue.job"].search([("channel", "!=", False)])), 1
+        )
 
         date_done = datetime.now() - timedelta(days=31)
         stored.write({"date_done": date_done})
         self.env["queue.job"].autovacuum()
-        self.assertEqual(len(self.env["queue.job"].search([])), 0)
+        self.assertEqual(
+            len(self.env["queue.job"].search([("channel", "!=", False)])), 0
+        )
 
     def test_autovacuum_multi_channel(self):
         root_channel = self.env.ref("queue_job.channel_root")
@@ -48,11 +52,17 @@ class TestQueueJobAutovacuumCronJob(JobCommonCase):
             {"channel": channel_60days.complete_name, "date_done": date_done}
         )
 
-        self.assertEqual(len(self.env["queue.job"].search([])), 2)
+        self.assertEqual(
+            len(self.env["queue.job"].search([("channel", "!=", False)])), 2
+        )
         self.env["queue.job"].autovacuum()
-        self.assertEqual(len(self.env["queue.job"].search([])), 1)
+        self.assertEqual(
+            len(self.env["queue.job"].search([("channel", "!=", False)])), 1
+        )
 
         date_done = datetime.now() - timedelta(days=61)
         job_60days.write({"date_done": date_done})
         self.env["queue.job"].autovacuum()
-        self.assertEqual(len(self.env["queue.job"].search([])), 0)
+        self.assertEqual(
+            len(self.env["queue.job"].search([("channel", "!=", False)])), 0
+        )
