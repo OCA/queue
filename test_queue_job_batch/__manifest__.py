@@ -12,4 +12,5 @@
         "queue_job_batch",
         "test_queue_job",
     ],
+    'installable': False,
 }

@@ -27,7 +27,7 @@
             "/queue_job/static/src/views/**/*",
         ],
     },
-    "installable": True,
+    "installable": False,
     "development_status": "Mature",
     "maintainers": ["guewen"],
     "post_init_hook": "post_init_hook",

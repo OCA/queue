@@ -29,5 +29,7 @@
             "queue_job_batch/static/src/**/*.xml",
             "queue_job_batch/static/src/**/*.scss",
         ],
-    },
+    'installable': False,
+},
+    'installable': False,
 }

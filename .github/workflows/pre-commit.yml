@@ -3,11 +3,11 @@ name: pre-commit
 on:
   pull_request:
     branches:
-      - "18.0*"
+      - "19.0*"
   push:
     branches:
-      - "18.0"
-      - "18.0-ocabot-*"
+      - "19.0"
+      - "19.0-ocabot-*"
 
 jobs:
   pre-commit:

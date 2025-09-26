@@ -1,9 +1,9 @@
 
-[![Runboat](https://img.shields.io/badge/runboat-Try%20me-875A7B.png)](https://runboat.odoo-community.org/builds?repo=OCA/queue&target_branch=18.0)
-[![Pre-commit Status](https://github.com/OCA/queue/actions/workflows/pre-commit.yml/badge.svg?branch=18.0)](https://github.com/OCA/queue/actions/workflows/pre-commit.yml?query=branch%3A18.0)
-[![Build Status](https://github.com/OCA/queue/actions/workflows/test.yml/badge.svg?branch=18.0)](https://github.com/OCA/queue/actions/workflows/test.yml?query=branch%3A18.0)
-[![codecov](https://codecov.io/gh/OCA/queue/branch/18.0/graph/badge.svg)](https://codecov.io/gh/OCA/queue)
-[![Translation Status](https://translation.odoo-community.org/widgets/queue-18-0/-/svg-badge.svg)](https://translation.odoo-community.org/engage/queue-18-0/?utm_source=widget)
+[![Runboat](https://img.shields.io/badge/runboat-Try%20me-875A7B.png)](https://runboat.odoo-community.org/builds?repo=OCA/queue&target_branch=19.0)
+[![Pre-commit Status](https://github.com/OCA/queue/actions/workflows/pre-commit.yml/badge.svg?branch=19.0)](https://github.com/OCA/queue/actions/workflows/pre-commit.yml?query=branch%3A19.0)
+[![Build Status](https://github.com/OCA/queue/actions/workflows/test.yml/badge.svg?branch=19.0)](https://github.com/OCA/queue/actions/workflows/test.yml?query=branch%3A19.0)
+[![codecov](https://codecov.io/gh/OCA/queue/branch/19.0/graph/badge.svg)](https://codecov.io/gh/OCA/queue)
+[![Translation Status](https://translation.odoo-community.org/widgets/queue-19-0/-/svg-badge.svg)](https://translation.odoo-community.org/engage/queue-19-0/?utm_source=widget)
 
 <!-- /!\ do not modify above this line -->
 
@@ -17,18 +17,7 @@ queue
 
 [//]: # (addons)
 
-Available addons
-----------------
-addon | version | maintainers | summary
---- | --- | --- | ---
-[base_import_async](base_import_async/) | 18.0.1.0.0 |  | Import CSV files in the background
-[queue_job](queue_job/) | 18.0.2.0.2 | <a href='https://github.com/guewen'><img src='https://github.com/guewen.png' width='32' height='32' style='border-radius:50%;' alt='guewen'/></a> | Job Queue
-[queue_job_batch](queue_job_batch/) | 18.0.1.0.0 |  | Job Queue Batch
-[queue_job_cron](queue_job_cron/) | 18.0.1.1.1 |  | Scheduled Actions as Queue Jobs
-[queue_job_cron_jobrunner](queue_job_cron_jobrunner/) | 18.0.1.0.1 | <a href='https://github.com/ivantodorovich'><img src='https://github.com/ivantodorovich.png' width='32' height='32' style='border-radius:50%;' alt='ivantodorovich'/></a> | Run jobs without a dedicated JobRunner
-[queue_job_subscribe](queue_job_subscribe/) | 18.0.1.0.0 |  | Control which users are subscribed to queue job notifications
-[test_queue_job](test_queue_job/) | 18.0.2.0.0 |  | Queue Job Tests
-[test_queue_job_batch](test_queue_job_batch/) | 18.0.1.0.0 |  | Test Job Queue Batch
+This part will be replaced when running the oca-gen-addons-table script from OCA/maintainer-tools.
 
 [//]: # (end addons)
 
