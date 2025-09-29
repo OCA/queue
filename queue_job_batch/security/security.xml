@@ -3,7 +3,8 @@
     <data>
         <record id="group_queue_job_batch_user" model="res.groups">
             <field name="name">Job Queue Batch User</field>
-            <field name="category_id" ref="queue_job.module_category_queue_job" />
+            <!-- Odoo 19: classify via privilege -->
+            <field name="privilege_id" ref="queue_job.privilege_queue_job" />
         </record>
         <record id="queue_job.group_queue_job_manager" model="res.groups">
             <field
