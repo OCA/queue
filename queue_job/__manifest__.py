@@ -7,7 +7,7 @@
     "website": "https://github.com/OCA/queue",
     "license": "LGPL-3",
     "category": "Generic Modules",
-    "depends": ["mail", "web"],
+    "depends": ["mail", "base_sparse_field", "web"],
     "external_dependencies": {"python": ["requests"]},
     "data": [
         "security/security.xml",
