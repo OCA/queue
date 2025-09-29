@@ -10,6 +10,8 @@ from odoo.service import server
 from odoo.tools import config
 
 try:
+    # Preferred source when available: structured [queue_job] section provided
+    # by OCA's server_environment addon.
     from odoo.addons.server_environment import serv_config
 
     if serv_config.has_section("queue_job"):
@@ -17,7 +19,34 @@ try:
     else:
         queue_job_config = {}
 except ImportError:
-    queue_job_config = config.misc.get("queue_job", {})
+    # Odoo 19: config.misc is no longer available. Build a minimal config
+    # from flat odoo.conf options so the runner works without server_environment.
+    queue_job_config = {}
+
+# Merge flat odoo.conf options as a fallback (applies regardless of whether
+# server_environment is installed). Precedence is enforced later where used:
+# - Environment variables (highest) are read directly in runner functions
+# - Then values coming from server_environment's [queue_job] section (above)
+# - Finally flat odoo.conf options below (lowest)
+#
+# Supported flat options (under the [options] section in odoo.conf):
+#   queue_job_channels = root:2,mychan:1
+#   queue_job_jobrunner_db_host = localhost
+#   queue_job_jobrunner_db_port = 5432
+#   queue_job_jobrunner_db_user = odoo_queue
+#   queue_job_jobrunner_db_password = odoo_queue
+_flat = {}
+channels = config.get("queue_job_channels")
+if channels:
+    _flat["channels"] = channels
+for p in ("host", "port", "user", "password"):
+    v = config.get(f"queue_job_jobrunner_db_{p}")
+    if v:
+        _flat[f"jobrunner_db_{p}"] = v
+
+# Do not override keys coming from server_environment if present
+for k, v in _flat.items():
+    queue_job_config.setdefault(k, v)
 
 
 from .runner import QueueJobRunner, _channels
