@@ -253,21 +253,7 @@
                     domain="[('retry', '&gt;', 1)]"
                 />
                 <separator />
-                <filter
-                    name="last_24_hours"
-                    string="Last 24 hours"
-                    domain="[('date_created', '&gt;=', (context_today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"
-                />
-                <filter
-                    name="last_7_days"
-                    string="Last 7 days"
-                    domain="[('date_created', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"
-                />
-                <filter
-                    name="last_30_days"
-                    string="Last 30 days"
-                    domain="[('date_created', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"
-                />
+                <!-- Odoo 19: avoid python in search domains; date range filters can be provided via searchpanel or custom actions -->
                 <group expand="0" string="Group By">
                     <filter
                         name="group_by_channel"
