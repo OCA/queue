@@ -95,8 +95,8 @@
                 />
                 <separator/>
                 <!-- Odoo 19: no <group expand> in search; declare group-by filters inline -->
-                <filter name="group_by_state" string="State" domain="[]" context="{'group_by': 'state'}"/>
-                <filter name="group_by_user" string="User" domain="[]" context="{'group_by': 'user_id'}"/>
+                <filter name="group_by_state" string="State" context="{'group_by': 'state'}"/>
+                <filter name="group_by_user" string="User" context="{'group_by': 'user_id'}"/>
             </search>
         </field>
     </record>
