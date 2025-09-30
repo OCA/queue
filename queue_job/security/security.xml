@@ -14,10 +14,8 @@
             <field name="name">Job Queue Manager</field>
             <!-- Odoo 19: use privilege_id instead of deprecated category_id -->
             <field name="privilege_id" ref="privilege_queue_job" />
-            <field
-                name="users"
-                eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"
-            />
+            <!-- Odoo 19: res.groups uses user_ids M2M and Command API -->
+            <field name="user_ids" eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
         </record>
     </data>
     <data noupdate="1">
