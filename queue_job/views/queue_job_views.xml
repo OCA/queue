@@ -213,11 +213,8 @@
                 <field name="exc_message" />
                 <field name="exc_info" />
                 <field name="result" />
-                <field
-                    name="company_id"
-                    groups="base.group_multi_company"
-                    widget="selection"
-                />
+                <!-- Odoo 19: no widget override in search; keep Many2one as-is -->
+                <field name="company_id" groups="base.group_multi_company"/>
                 <filter
                     name="wait_dependencies"
                     string="Wait Dependencies"
