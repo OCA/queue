@@ -253,7 +253,10 @@
                     domain="[('retry', '&gt;', 1)]"
                 />
                 <separator />
-                <!-- Odoo 19: avoid python in search domains; date range filters can be provided via searchpanel or custom actions -->
+                <!-- Odoo 19: removed date range filters.
+                     Reason: the v19 RNG forbids Python expressions in search domains
+                     (e.g., context_today() - datetime.timedelta(...)).
+                     Use custom actions or saved filters for quick date ranges. -->
                 <separator/>
                 <!-- Odoo 19: no <group expand> in search; declare group-by filters inline -->
                 <filter name="group_by_channel" string="Channel" domain="[]" context="{'group_by': 'channel'}"/>
