@@ -421,7 +421,13 @@ class OdooDocTestCase(doctest.DocTestCase, _TestCase):
     """
 
     def __init__(
-        self, doctest, optionflags=0, setUp=None, tearDown=None, checker=None, seq=0
+        self,
+        doctest,
+        optionflags=doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE,
+        setUp=None,
+        tearDown=None,
+        checker=None,
+        seq=0,
     ):
         super().__init__(
             doctest._dt_test,

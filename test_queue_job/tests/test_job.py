@@ -604,7 +604,7 @@ class TestJobModel(JobCommonCase):
         vals = {
             "name": "xx",
             "login": "xx",
-            "groups_id": [(6, 0, [group.id])],
+            "group_ids": [(6, 0, [group.id])],
             "active": False,
         }
         inactiveusr = self.user.create(vals)
@@ -666,7 +666,7 @@ class TestJobStorageMultiCompany(common.TransactionCase):
                 "company_ids": [(4, main_company.id)],
                 "login": "simple_user",
                 "name": "simple user",
-                "groups_id": [],
+                "group_ids": [],
             }
         )
 
@@ -687,7 +687,7 @@ class TestJobStorageMultiCompany(common.TransactionCase):
                 "company_ids": [(4, self.other_company_a.id)],
                 "login": "my_login a",
                 "name": "my user A",
-                "groups_id": [(4, grp_queue_job_manager)],
+                "group_ids": [(4, grp_queue_job_manager)],
             }
         )
         self.other_partner_b = Partner.create(
@@ -707,7 +707,7 @@ class TestJobStorageMultiCompany(common.TransactionCase):
                 "company_ids": [(4, self.other_company_b.id)],
                 "login": "my_login_b",
                 "name": "my user B",
-                "groups_id": [(4, grp_queue_job_manager)],
+                "group_ids": [(4, grp_queue_job_manager)],
             }
         )
 
@@ -761,7 +761,7 @@ class TestJobStorageMultiCompany(common.TransactionCase):
         stored._message_post_on_failure()
         users = (
             User.search(
-                [("groups_id", "=", self.ref("queue_job.group_queue_job_manager"))]
+                [("group_ids", "=", self.ref("queue_job.group_queue_job_manager"))]
             )
             + stored.user_id
         )
