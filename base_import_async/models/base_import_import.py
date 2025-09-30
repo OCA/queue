@@ -78,8 +78,8 @@ class BaseImportImport(models.TransientModel):
         )
         attachment.write({"res_model": "queue.job", "res_id": queue_job.id})
 
-    @api.returns("ir.attachment")
     def _create_csv_attachment(self, fields, data, options, file_name):
+        # Odoo 19: @api.returns decorator removed; just return the recordset.
         # write csv
         f = StringIO()
         writer = csv.writer(
