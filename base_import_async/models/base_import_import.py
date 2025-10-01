@@ -9,7 +9,7 @@ import csv
 from io import BytesIO, StringIO, TextIOWrapper
 from os.path import splitext
 
-from odoo import _, api, models
+from odoo import _, models
 from odoo.models import fix_import_export_id_paths
 
 from odoo.addons.base_import.models.base_import import ImportValidationError
