@@ -32,6 +32,22 @@ from .common import JobCommonCase
 class TestJobsOnTestingMethod(JobCommonCase):
     """Test Job"""
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        User = cls.env["res.users"]
+        main_company = cls.env.ref("base.main_company")
+        group_user = cls.env.ref("base.group_user")
+        cls.demo_user = User.create(
+            {
+                "name": "Demo User (Queue)",
+                "login": "queue_demo_user_3",
+                "company_id": main_company.id,
+                "company_ids": [(6, 0, [main_company.id])],
+                "group_ids": [(6, 0, [group_user.id])],
+            }
+        )
+
     def test_new_job(self):
         """
         Create a job
@@ -387,6 +403,22 @@ class TestJobsOnTestingMethod(JobCommonCase):
 class TestJobs(JobCommonCase):
     """Test jobs on other methods or with different job configuration"""
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        User = cls.env["res.users"]
+        main_company = cls.env.ref("base.main_company")
+        group_user = cls.env.ref("base.group_user")
+        cls.demo_user = User.create(
+            {
+                "name": "Demo User (Queue)",
+                "login": "queue_demo_user_4",
+                "company_id": main_company.id,
+                "company_ids": [(6, 0, [main_company.id])],
+                "group_ids": [(6, 0, [group_user.id])],
+            }
+        )
+
     def test_description(self):
         """If no description is given to the job, it
         should be computed from the function
@@ -490,7 +522,7 @@ class TestJobs(JobCommonCase):
         self.assertEqual({"mutable_kwarg": {"a": 1}}, job_instance.kwargs)
 
     def test_store_env_su_no_sudo(self):
-        demo_user = self.env.ref("base.user_demo")
+        demo_user = self.demo_user
         self.env = self.env(user=demo_user)
         delayable = self.env["test.queue.job"].with_delay()
         test_job = delayable.testing_method()
@@ -500,7 +532,7 @@ class TestJobs(JobCommonCase):
         self.assertTrue(job_instance.user_id, demo_user)
 
     def test_store_env_su_sudo(self):
-        demo_user = self.env.ref("base.user_demo")
+        demo_user = self.demo_user
         self.env = self.env(user=demo_user)
         delayable = self.env["test.queue.job"].sudo().with_delay()
         test_job = delayable.testing_method()
@@ -511,6 +543,21 @@ class TestJobs(JobCommonCase):
 
 
 class TestJobModel(JobCommonCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        User = cls.env["res.users"]
+        main_company = cls.env.ref("base.main_company")
+        group_user = cls.env.ref("base.group_user")
+        cls.demo_user = User.create(
+            {
+                "name": "Demo User (Queue)",
+                "login": "queue_demo_user_5",
+                "company_id": main_company.id,
+                "company_ids": [(6, 0, [main_company.id])],
+                "group_ids": [(6, 0, [group_user.id])],
+            }
+        )
     def test_job_change_state(self):
         stored = self._create_job()
         stored._change_job_state(DONE, result="test")
@@ -639,7 +686,7 @@ class TestJobModel(JobCommonCase):
         self.assertEqual("root.sub.sub", test_job.channel)
 
     def test_job_change_user_id(self):
-        demo_user = self.env.ref("base.user_demo")
+        demo_user = self.demo_user
         stored = self._create_job()
         stored.user_id = demo_user
         self.assertEqual(stored.records.env.uid, demo_user.id)
