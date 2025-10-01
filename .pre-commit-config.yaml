@@ -1,7 +1,6 @@
 exclude: |
   (?x)
   # NOT INSTALLABLE ADDONS
-  ^base_import_async/|
   ^queue_job/|
   ^queue_job_batch/|
   ^queue_job_cron/|
