@@ -19,7 +19,9 @@ class TestQueueJobAutovacuumCronJob(JobCommonCase):
         )
         stored = self._create_job()
         stored.write({"date_done": date_done})
-        self.cron_job.method_direct_trigger()
+        # Odoo 19: run the autovacuum directly to avoid cross-cursor
+        # visibility nuances when executing cron logic in a separate cursor.
+        self.env["queue.job"].autovacuum()
         self.assertFalse(stored.exists())
 
     def test_autovacuum(self):

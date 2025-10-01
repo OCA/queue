@@ -609,12 +609,13 @@ class TestJobModel(JobCommonCase):
         }
         inactiveusr = self.user.create(vals)
         inactiveusr.partner_id.active = True
-        self.assertFalse(inactiveusr in group.users)
+        # Odoo 19: res.groups uses 'user_ids' instead of 'users'
+        self.assertFalse(inactiveusr in group.user_ids)
         stored = self._create_job()
         stored.write({"state": "failed"})
         followers = stored.message_follower_ids.mapped("partner_id")
         self.assertFalse(inactiveusr.partner_id in followers)
-        self.assertFalse({u.partner_id for u in group.users} - set(followers))
+        self.assertFalse({u.partner_id for u in group.user_ids} - set(followers))
 
     def test_wizard_requeue(self):
         stored = self._create_job()

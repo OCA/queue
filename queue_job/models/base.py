@@ -262,9 +262,26 @@ class Base(models.AbstractModel):
 
     @classmethod
     def _patch_method(cls, name, method):
+        """Patch ``name`` with ``method`` preserving API metadata (Odoo 19).
+
+        Odoo 19 no longer exposes ``api.propagate``. We emulate the
+        propagation by using ``functools.update_wrapper`` and copying the
+        decorator metadata which Odoo relies on (see orm.decorators).
+        """
         origin = getattr(cls, name)
         method.origin = origin
-        # propagate decorators from origin to method, and apply api decorator
-        wrapped = api.propagate(origin, method)
+        # carry over wrapper attributes (name, doc, etc.)
+        wrapped = functools.update_wrapper(method, origin)
+        # propagate common decorator metadata used by the framework
+        for attr in (
+            "_constrains",
+            "_depends",
+            "_onchange",
+            "_ondelete",
+            "_api_model",
+            "_api_private",
+        ):
+            if hasattr(origin, attr):
+                setattr(wrapped, attr, getattr(origin, attr))
         wrapped.origin = origin
         setattr(cls, name, wrapped)
