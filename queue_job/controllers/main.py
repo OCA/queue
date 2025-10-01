@@ -280,7 +280,7 @@ class RunJobController(http.Controller):
                         priority=priority,
                         max_retries=max_retries,
                         channel=channel,
-                        description="%s #%d" % (description, current_count),
+                        description=f"{description} #{current_count}",
                     )._test_job(failure_rate=failure_rate)
                 )
 

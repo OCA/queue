@@ -260,11 +260,15 @@ class Base(models.AbstractModel):
             if key in self._job_prepare_context_before_enqueue_keys()
         }
 
+    # Odoo have deprecated _patch_method and api.propagate in v16
     @classmethod
     def _patch_method(cls, name, method):
         origin = getattr(cls, name)
         method.origin = origin
-        # propagate decorators from origin to method, and apply api decorator
-        wrapped = api.propagate(origin, method)
-        wrapped.origin = origin
-        setattr(cls, name, wrapped)
+
+        # propagate appeared to only deal with the returns decorator
+        # which is now, also, deprecated
+        # wrapped = api.propagate(origin, method)
+        # wrapped.origin = origin
+        # setattr(cls, name, wrapped)
+        setattr(cls, name, method)

@@ -140,7 +140,7 @@ class QueueJob(models.Model):
 
     @api.depends("dependencies")
     def _compute_dependency_graph(self):
-        jobs_groups = self.env["queue.job"].read_group(
+        jobs_groups = self.env["queue.job"]._read_group(
             [
                 (
                     "graph_uuid",
@@ -148,12 +148,10 @@ class QueueJob(models.Model):
                     [uuid for uuid in self.mapped("graph_uuid") if uuid],
                 )
             ],
-            ["graph_uuid", "ids:array_agg(id)"],
             ["graph_uuid"],
+            ["id:array_agg"],
         )
-        ids_per_graph_uuid = {
-            group["graph_uuid"]: group["ids"] for group in jobs_groups
-        }
+        ids_per_graph_uuid = {group[0]: group[1] for group in jobs_groups}
         for record in self:
             if not record.graph_uuid:
                 record.dependency_graph = {}
@@ -211,7 +209,7 @@ class QueueJob(models.Model):
         }
 
     def _compute_graph_jobs_count(self):
-        jobs_groups = self.env["queue.job"].read_group(
+        jobs_groups = self.env["queue.job"]._read_group(
             [
                 (
                     "graph_uuid",
@@ -351,7 +349,7 @@ class QueueJob(models.Model):
         if not group:
             return None
         companies = self.mapped("company_id")
-        domain = [("groups_id", "=", group.id)]
+        domain = [("group_ids", "=", group.id)]
         if companies:
             domain.append(("company_id", "in", companies.ids))
         return domain

@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from unittest import mock
 
 import odoo.tests.common as common
+from odoo import Command
 
 from odoo.addons.queue_job import identity_exact
 from odoo.addons.queue_job.delay import DelayableGraph
@@ -208,7 +209,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         company1 = self.env.ref("base.main_company")
         company2 = company1.create({"name": "Queue job company"})
         companies = company1 | company2
-        self.env.user.write({"company_ids": [(6, False, companies.ids)]})
+        self.env.user.write({"company_ids": [Command.set(companies.ids)]})
         # Ensure the main company still the first
         self.assertEqual(self.env.user.company_id, company1)
         eta = datetime.now() + timedelta(hours=5)
@@ -490,24 +491,22 @@ class TestJobs(JobCommonCase):
         self.assertEqual({"mutable_kwarg": {"a": 1}}, job_instance.kwargs)
 
     def test_store_env_su_no_sudo(self):
-        demo_user = self.env.ref("base.user_demo")
-        self.env = self.env(user=demo_user)
+        self.env = self.env(user=self.demo_user)
         delayable = self.env["test.queue.job"].with_delay()
         test_job = delayable.testing_method()
         stored = test_job.db_record()
         job_instance = Job.load(self.env, stored.uuid)
         self.assertFalse(job_instance.recordset.env.su)
-        self.assertTrue(job_instance.user_id, demo_user)
+        self.assertTrue(job_instance.user_id, self.demo_user)
 
     def test_store_env_su_sudo(self):
-        demo_user = self.env.ref("base.user_demo")
-        self.env = self.env(user=demo_user)
+        self.env = self.env(user=self.demo_user)
         delayable = self.env["test.queue.job"].sudo().with_delay()
         test_job = delayable.testing_method()
         stored = test_job.db_record()
         job_instance = Job.load(self.env, stored.uuid)
         self.assertTrue(job_instance.recordset.env.su)
-        self.assertTrue(job_instance.user_id, demo_user)
+        self.assertTrue(job_instance.user_id, self.demo_user)
 
 
 class TestJobModel(JobCommonCase):
@@ -604,17 +603,17 @@ class TestJobModel(JobCommonCase):
         vals = {
             "name": "xx",
             "login": "xx",
-            "groups_id": [(6, 0, [group.id])],
+            "group_ids": [Command.set(group.ids)],
             "active": False,
         }
         inactiveusr = self.user.create(vals)
         inactiveusr.partner_id.active = True
-        self.assertFalse(inactiveusr in group.users)
+        self.assertFalse(inactiveusr in group.user_ids)
         stored = self._create_job()
         stored.write({"state": "failed"})
         followers = stored.message_follower_ids.mapped("partner_id")
         self.assertFalse(inactiveusr.partner_id in followers)
-        self.assertFalse({u.partner_id for u in group.users} - set(followers))
+        self.assertFalse({u.partner_id for u in group.user_ids} - set(followers))
 
     def test_wizard_requeue(self):
         stored = self._create_job()
@@ -638,10 +637,9 @@ class TestJobModel(JobCommonCase):
         self.assertEqual("root.sub.sub", test_job.channel)
 
     def test_job_change_user_id(self):
-        demo_user = self.env.ref("base.user_demo")
         stored = self._create_job()
-        stored.user_id = demo_user
-        self.assertEqual(stored.records.env.uid, demo_user.id)
+        stored.user_id = self.demo_user
+        self.assertEqual(stored.records.env.uid, self.demo_user.id)
 
 
 class TestJobStorageMultiCompany(common.TransactionCase):
@@ -663,10 +661,10 @@ class TestJobStorageMultiCompany(common.TransactionCase):
         self.simple_user = User.create(
             {
                 "partner_id": self.partner_user.id,
-                "company_ids": [(4, main_company.id)],
+                "company_ids": [Command.link(main_company.id)],
                 "login": "simple_user",
                 "name": "simple user",
-                "groups_id": [],
+                "group_ids": [],
             }
         )
 
@@ -684,10 +682,10 @@ class TestJobStorageMultiCompany(common.TransactionCase):
             {
                 "partner_id": self.other_partner_a.id,
                 "company_id": self.other_company_a.id,
-                "company_ids": [(4, self.other_company_a.id)],
+                "company_ids": [Command.link(self.other_company_a.id)],
                 "login": "my_login a",
                 "name": "my user A",
-                "groups_id": [(4, grp_queue_job_manager)],
+                "group_ids": [Command.link(grp_queue_job_manager)],
             }
         )
         self.other_partner_b = Partner.create(
@@ -704,10 +702,10 @@ class TestJobStorageMultiCompany(common.TransactionCase):
             {
                 "partner_id": self.other_partner_b.id,
                 "company_id": self.other_company_b.id,
-                "company_ids": [(4, self.other_company_b.id)],
+                "company_ids": [Command.link(self.other_company_b.id)],
                 "login": "my_login_b",
                 "name": "my user B",
-                "groups_id": [(4, grp_queue_job_manager)],
+                "group_ids": [Command.link(grp_queue_job_manager)],
             }
         )
 
@@ -761,7 +759,7 @@ class TestJobStorageMultiCompany(common.TransactionCase):
         stored._message_post_on_failure()
         users = (
             User.search(
-                [("groups_id", "=", self.ref("queue_job.group_queue_job_manager"))]
+                [("group_ids", "=", self.ref("queue_job.group_queue_job_manager"))]
             )
             + stored.user_id
         )

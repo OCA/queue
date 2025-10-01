@@ -19,7 +19,8 @@ class TestQueueJobAutovacuumCronJob(JobCommonCase):
         )
         stored = self._create_job()
         stored.write({"date_done": date_done})
-        self.cron_job.method_direct_trigger()
+        with self.enter_registry_test_mode():
+            self.cron_job.method_direct_trigger()
         self.assertFalse(stored.exists())
 
     def test_autovacuum(self):
