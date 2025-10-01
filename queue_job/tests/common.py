@@ -9,7 +9,6 @@ from operator import attrgetter
 from unittest import TestCase, mock
 
 from odoo.tests.case import TestCase as _TestCase
-from odoo.tests.common import MetaCase
 
 from odoo.addons.queue_job.delay import Graph
 
@@ -414,7 +413,7 @@ def mock_with_delay():  # pylint: disable=E501
         yield delayable_cls, delayable
 
 
-class OdooDocTestCase(doctest.DocTestCase, _TestCase, MetaCase("DummyCase", (), {})):
+class OdooDocTestCase(doctest.DocTestCase, _TestCase):
     """
     We need a custom DocTestCase class in order to:
     - define test_tags to run as part of standard tests
@@ -422,7 +421,13 @@ class OdooDocTestCase(doctest.DocTestCase, _TestCase, MetaCase("DummyCase", (), 
     """
 
     def __init__(
-        self, doctest, optionflags=0, setUp=None, tearDown=None, checker=None, seq=0
+        self,
+        doctest,
+        optionflags=doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE,
+        setUp=None,
+        tearDown=None,
+        checker=None,
+        seq=0,
     ):
         super().__init__(
             doctest._dt_test,

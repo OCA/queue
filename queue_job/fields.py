@@ -9,6 +9,7 @@ import lxml
 from psycopg2.extras import Json as PsycopgJson
 
 from odoo import fields, models
+from odoo.tools.misc import SENTINEL
 from odoo.tools.func import lazy
 
 
@@ -38,7 +39,7 @@ class JobSerialized(fields.Json):
         ),
     }
 
-    def __init__(self, string=fields.SENTINEL, base_type=fields.SENTINEL, **kwargs):
+    def __init__(self, string=SENTINEL, base_type=SENTINEL, **kwargs):
         super().__init__(string=string, _base_type=base_type, **kwargs)
 
     def _setup_attrs(self, model, name):  # pylint: disable=missing-return
@@ -66,7 +67,7 @@ class JobSerialized(fields.Json):
     def convert_to_record(self, value, record):
         default = self._base_type_default_json(record.env)
         value = value or default
-        if not isinstance(value, (str | bytes | bytearray)):
+        if not isinstance(value, (str, bytes, bytearray)):
             value = json.dumps(value, cls=JobEncoder)
         return json.loads(value, cls=JobDecoder, env=record.env)
 

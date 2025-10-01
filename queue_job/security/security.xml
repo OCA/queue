@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <data>
+        <!-- New: Odoo 19 groups are classified by res.groups.privilege -->
+        <record model="res.groups.privilege" id="privilege_queue_job">
+            <field name="name">Job Queue</field>
+            <field name="sequence">20</field>
+        </record>
         <record model="ir.module.category" id="module_category_queue_job">
             <field name="name">Job Queue</field>
             <field name="sequence">20</field>
         </record>
         <record id="group_queue_job_manager" model="res.groups">
             <field name="name">Job Queue Manager</field>
-            <field name="category_id" ref="module_category_queue_job" />
-            <field
-                name="users"
-                eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"
-            />
+            <!-- Odoo 19: use privilege_id instead of deprecated category_id -->
+            <field name="privilege_id" ref="privilege_queue_job" />
+            <!-- Odoo 19: res.groups uses user_ids M2M and Command API -->
+            <field name="user_ids" eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
         </record>
     </data>
     <data noupdate="1">

@@ -9,6 +9,8 @@ from odoo.tools import mute_logger
 class TestJobCreatePrivate(common.HttpCase):
     def test_create_error(self):
         self.authenticate("admin", "admin")
+        # Odoo 19: don't override Cookie header, HttpCase's opener sets
+        # the required test cookie automatically.
         with self.assertRaises(common.JsonRpcException) as cm, mute_logger("odoo.http"):
             self.make_jsonrpc_request(
                 "/web/dataset/call_kw",
@@ -21,9 +23,6 @@ class TestJobCreatePrivate(common.HttpCase):
                         "model_name": "res.partner",
                         "uuid": "test",
                     },
-                },
-                headers={
-                    "Cookie": f"session_id={self.session.sid};",
                 },
             )
         self.assertEqual("odoo.exceptions.AccessError", str(cm.exception))
