@@ -154,20 +154,18 @@ class QueueJob(models.Model):
 
     @api.depends("dependencies")
     def _compute_dependency_graph(self):
-        jobs_groups = self.env["queue.job"].read_group(
-            [
-                (
-                    "graph_uuid",
-                    "in",
-                    [uuid for uuid in self.mapped("graph_uuid") if uuid],
-                )
-            ],
-            ["graph_uuid", "ids:array_agg(id)"],
-            ["graph_uuid"],
-        )
-        ids_per_graph_uuid = {
-            group["graph_uuid"]: group["ids"] for group in jobs_groups
-        }
+        uuids = [uuid for uuid in self.mapped("graph_uuid") if uuid]
+        ids_per_graph_uuid = {}
+        if uuids:
+            # Odoo 19: avoid ORM warning by using _read_group with 'id:recordset' aggregate
+            rows = self.env["queue.job"]._read_group(
+                [("graph_uuid", "in", uuids)],
+                groupby=["graph_uuid"],
+                aggregates=["id:recordset"],
+            )
+            # rows -> list of tuples: (graph_uuid, recordset)
+            for graph_uuid, recs in rows:
+                ids_per_graph_uuid[graph_uuid] = recs.ids
         for record in self:
             if not record.graph_uuid:
                 record.dependency_graph = {}
