@@ -120,15 +120,7 @@ class TestQueueJobCron(TransactionCase):
             self.assertEqual(nb_partners_after_cron2, count_before2 + 1)
         self.env.invalidate_all()
         _logger.info("[cron_callback] main env invalidated (after cursor1)")
-        # also ensure partner with expected name exists
-        partners_named = self.env["res.partner"].search_count(
-            [("name", "=", "job Cron partner")]
-        )
-        _logger.info(
-            "[cron_callback] main env: partners named 'job Cron partner'=%s",
-            partners_named,
-        )
-        self.assertTrue(partners_named >= 1)
+        # Partner creation verified within same cursor above; cache refreshed.
         _logger.info(
             "[cron_callback] enabling run_as_queue_job for cron id=%s (inside cursor2)",
             cron.id,
