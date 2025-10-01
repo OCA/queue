@@ -13,8 +13,8 @@ class TestQueueJobCron(TransactionCase):
         cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
         self.assertFalse(cron.run_as_queue_job)
 
-        # Use core helper enter_registry_test_mode so method_direct_trigger 
-        # runs safely under 19.0 test harness (avoids cross-cursor 
+        # Use core helper enter_registry_test_mode so method_direct_trigger
+        # runs safely under 19.0 test harness (avoids cross-cursor
         # visibility/locking quirks during tests).
         with self.enter_registry_test_mode():
             cron.method_direct_trigger()
@@ -36,7 +36,7 @@ class TestQueueJobCron(TransactionCase):
         cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
         default_channel = self.env.ref("queue_job_cron.channel_root_ir_cron")
         self.assertFalse(cron.run_as_queue_job)
-        # Write + assert in a fresh cursor to avoid ir.cron row lock 
+        # Write + assert in a fresh cursor to avoid ir.cron row lock
         # serialization under 19.0 when scheduler touches it.
         with self.registry.cursor() as cr:
             env2 = self.env(cr=cr)
@@ -52,8 +52,8 @@ class TestQueueJobCron(TransactionCase):
     def test_queue_job_no_parallelism(self):
         cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
         default_channel = self.env.ref("queue_job_cron.channel_root_ir_cron")
-        # Configure + enqueue in a fresh cursor to avoid serialization 
-        # conflicts; call _delay_run_job_as_queue_job twice to exercise 
+        # Configure + enqueue in a fresh cursor to avoid serialization
+        # conflicts; call _delay_run_job_as_queue_job twice to exercise
         # identity-based dedup under no_parallel setting.
         with self.registry.cursor() as cr:
             env2 = self.env(cr=cr)
@@ -83,8 +83,8 @@ class TestQueueJobCron(TransactionCase):
 
     def test_queue_job_cron_callback(self):
         cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
-        # Run _callback in a separate cursor because core _callback 
-        # commits/rollbacks; main test cursor forbids it. Assert within the 
+        # Run _callback in a separate cursor because core _callback
+        # commits/rollbacks; main test cursor forbids it. Assert within the
         # same cursor for deterministic visibility.
         with self.registry.cursor() as cr:
             env2 = self.env(cr=cr)
