@@ -7,7 +7,6 @@ import logging
 import os
 import sys
 import uuid
-import weakref
 from datetime import datetime, timedelta
 from functools import total_ordering
 from random import randint
@@ -438,6 +437,12 @@ class Job:
         record = model.search([("uuid", "in", tuple(job_uuids))])
         return record.with_env(env).sudo()
 
+    @staticmethod
+    def db_check_uuids_in_db(env, job_uuids):
+        model = env["queue.job"].sudo()
+        record_uuids = model.search_read([("uuid", "in", tuple(job_uuids))], ["uuid"])
+        return record_uuids
+
     def __init__(
         self,
         func,
@@ -518,7 +523,6 @@ class Job:
         self.__depends_on_uuids = set()
         self.__reverse_depends_on_uuids = set()
         self._depends_on = set()
-        self._reverse_depends_on = weakref.WeakSet()
 
         self.priority = priority
         if self.priority is None:
@@ -560,10 +564,8 @@ class Job:
         if self in jobs:
             raise ValueError("job cannot depend on itself")
         self.__depends_on_uuids |= {j.uuid for j in jobs}
-        self._depends_on.update(jobs)
         for parent in jobs:
             parent.__reverse_depends_on_uuids.add(self.uuid)
-            parent._reverse_depends_on.add(self)
         if any(j.state != DONE for j in jobs):
             self.state = WAIT_DEPENDENCIES
 
@@ -689,9 +691,15 @@ class Job:
             vals["identity_key"] = self.identity_key
 
         dependencies = {
-            "depends_on": [parent.uuid for parent in self.depends_on],
+            "depends_on": [
+                rec["uuid"]
+                for rec in Job.db_check_uuids_in_db(self.env, self.__depends_on_uuids)
+            ],
             "reverse_depends_on": [
-                children.uuid for children in self.reverse_depends_on
+                rec["uuid"]
+                for rec in Job.db_check_uuids_in_db(
+                    self.env, self.__reverse_depends_on_uuids
+                )
             ],
         }
         vals["dependencies"] = dependencies
@@ -795,14 +803,6 @@ class Job:
         if not self._depends_on:
             self._depends_on = Job.load_many(self.env, self.__depends_on_uuids)
         return self._depends_on
-
-    @property
-    def reverse_depends_on(self):
-        if not self._reverse_depends_on:
-            self._reverse_depends_on = Job.load_many(
-                self.env, self.__reverse_depends_on_uuids
-            )
-        return set(self._reverse_depends_on)
 
     @property
     def description(self):
