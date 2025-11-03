@@ -7,8 +7,9 @@ import operator
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.http import request
 
 from odoo.addons.web.controllers.export import CSVExport, ExcelExport
 
@@ -27,7 +28,7 @@ class DelayExport(models.Model):
         """Delay the export, called from js"""
         params = json.loads(data.get("data"))
         if not self.env.user.email:
-            raise UserError(_("You must set an email address to your user."))
+            raise UserError(self.env._("You must set an email address to your user."))
         self.with_delay().export(params)
 
     @api.model
@@ -59,10 +60,12 @@ class DelayExport(models.Model):
 
         if export_format == "csv":
             csv = CSVExport()
-            return csv.from_data(columns_headers, import_data)
+            return csv.from_data(field_names, columns_headers, import_data).encode(
+                "utf-8"
+            )
         else:
             xls = ExcelExport()
-            return xls.from_data(columns_headers, import_data)
+            return xls.from_data(fields_name, columns_headers, import_data)
 
     @api.model
     def export(self, params):
@@ -80,6 +83,10 @@ class DelayExport(models.Model):
         * import_compat: if the export is export/import compatible (boolean)
         * user_ids: optional list of user ids who receive the file
         """
+
+        # `ExportXlsxWriter` gets the environment from `request.env`
+        if request:
+            request.update_env(user=self.env.user)
         content = self._get_file_content(params)
 
         items = operator.itemgetter("model", "context", "format", "user_ids")(params)

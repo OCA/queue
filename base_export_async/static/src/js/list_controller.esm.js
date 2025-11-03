@@ -1,13 +1,13 @@
-import {blockUI, unblockUI} from "web.framework";
-
-import Dialog from "web.Dialog";
+import {AlertDialog} from "@web/core/confirmation_dialog/confirmation_dialog";
 import {ListController} from "@web/views/list/list_controller";
-import {_t} from "web.core";
+import {_t} from "@web/core/l10n/translation";
 import {download} from "@web/core/network/download";
 import {patch} from "@web/core/utils/patch";
 
-patch(ListController.prototype, "base_export_async", {
+patch(ListController.prototype, {
+    patchName: "base_export_async",
     async downloadExport(fields, import_compat, format, async = false) {
+        const uiService = this.env.services.ui;
         let ids = false;
         if (!this.isDomainSelected) {
             const resIds = await this.getSelectedResIds();
@@ -20,13 +20,13 @@ patch(ListController.prototype, "base_export_async", {
             type: field.field_type || field.type,
         }));
         if (import_compat) {
-            exportedFields.unshift({name: "id", label: this.env._t("External ID")});
+            exportedFields.unshift({name: "id", label: _t("External ID")});
         }
         if (async) {
             /*
                 Call the delay export if Async is checked
             */
-            blockUI();
+            uiService.block();
             const args = [
                 {
                     data: JSON.stringify({
@@ -42,14 +42,14 @@ patch(ListController.prototype, "base_export_async", {
                 },
             ];
             const orm = this.env.services.orm;
-            orm.call("delay.export", "delay_export", args).then(function () {
-                unblockUI();
-                Dialog.alert(
-                    this,
-                    _t(
+            orm.call("delay.export", "delay_export", args).then(() => {
+                uiService.unblock();
+                this.env.services.dialog.add(AlertDialog, {
+                    title: _t("Exported Files"),
+                    body: _t(
                         "You will receive the export file by email as soon as it is finished."
-                    )
-                );
+                    ),
+                });
             });
         } else {
             await download({
