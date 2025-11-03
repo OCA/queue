@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import {blockUI, unblockUI} from "web.framework";
 
 import Dialog from "web.Dialog";
