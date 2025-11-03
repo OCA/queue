@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import {ExportDataDialog} from "@web/views/view_dialogs/export_data_dialog";
 import {patch} from "@web/core/utils/patch";
 

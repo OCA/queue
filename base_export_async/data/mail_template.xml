@@ -9,12 +9,12 @@
         <field name="auto_delete" eval="True" />
         <field name="body_html" type="html">
             <p>Your export is available <a
-                    t-attf-href="{{ object.url }}"
-                    target="_blank"
-                >here</a>.</p>
+                t-attf-href="{{ object.url }}"
+                target="_blank"
+            >here</a>.</p>
             <p>It will be automatically deleted the <t
-                    t-out="object.expiration_date"
-                />.</p>
+                t-out="object.expiration_date"
+            />.</p>
             <br />
             <p>
                 <span
