@@ -99,3 +99,25 @@ class TestRequeueDeadJob(JobCommonCase):
 
         uuids_requeued = self.env.cr.fetchall()
         self.assertTrue(queue_job.uuid in j[0] for j in uuids_requeued)
+
+    def test_requeue_orphaned_jobs(self):
+        queue_job = self._get_demo_job("test_enqueued_job")
+        job_obj = Job.load(self.env, queue_job.uuid)
+
+        # Only enqueued job, don't set it to started to simulate the scenario
+        # that system shutdown before job is starting
+        job_obj.set_enqueued()
+        job_obj.date_enqueued = datetime.now() - timedelta(minutes=1)
+        job_obj.store()
+
+        # job ins't actually picked up by the first requeue attempt
+        query = Database(self.env.cr.dbname)._query_requeue_dead_jobs()
+        self.env.cr.execute(query)
+        uuids_requeued = self.env.cr.fetchall()
+        self.assertFalse(uuids_requeued)
+
+        # job is picked up by the 2nd requeue attempt
+        query = Database(self.env.cr.dbname)._query_requeue_orphaned_jobs()
+        self.env.cr.execute(query)
+        uuids_requeued = self.env.cr.fetchall()
+        self.assertTrue(queue_job.uuid in j[0] for j in uuids_requeued)
