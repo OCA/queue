@@ -131,3 +131,34 @@ class TestRequeueDeadJob(TransactionCase):
         # because we committed the cursor, the savepoint of the test method is
         # gone, and this would break TransactionCase cleanups
         self.cr.execute("SAVEPOINT test_%d" % self._savepoint_id)
+
+    def test_requeue_orphaned_jobs(self):
+        uuid = "test_enqueued_job"
+        queue_job = self.create_dummy_job(uuid)
+        job_obj = Job.load(self.env, queue_job.uuid)
+
+        # Only enqueued job, don't set it to started to simulate the scenario
+        # that system shutdown before job is starting
+        job_obj.set_enqueued()
+        job_obj.date_enqueued = datetime.now() - timedelta(minutes=1)
+        job_obj.store()
+
+        # job ins't actually picked up by the first requeue attempt
+        query = Database(self.env.cr.dbname)._query_requeue_dead_jobs()
+        self.env.cr.execute(query)
+        uuids_requeued = self.env.cr.fetchall()
+        self.assertFalse(uuids_requeued)
+
+        # job is picked up by the 2nd requeue attempt
+        query = Database(self.env.cr.dbname)._query_requeue_orphaned_jobs()
+        self.env.cr.execute(query)
+        uuids_requeued = self.env.cr.fetchall()
+        self.assertTrue(queue_job.uuid in j[0] for j in uuids_requeued)
+
+        # clean up
+        queue_job.unlink()
+        self.env.cr.commit()  # pylint: disable=E8102
+
+        # because we committed the cursor, the savepoint of the test method is
+        # gone, and this would break TransactionCase cleanups
+        self.cr.execute("SAVEPOINT test_%d" % self._savepoint_id)

@@ -386,6 +386,35 @@ class Database:
             RETURNING uuid
             """
 
+    def _query_requeue_orphaned_jobs(self):
+        """Query to requeue jobs stuck in 'enqueued' state without a lock.
+
+        This handles the edge case where the runner marks a job as 'enqueued'
+        but the HTTP request to start the job never reaches the Odoo server
+        (e.g., due to server shutdown/crash between setting enqueued and
+        the controller receiving the request). These jobs have no lock record
+        because set_started() was never called, so they are invisible to
+        _query_requeue_dead_jobs().
+        """
+        return """
+            UPDATE
+                queue_job
+            SET
+                state='pending'
+            WHERE
+                state = 'enqueued'
+                AND date_enqueued < (now() AT TIME ZONE 'utc' - INTERVAL '10 sec')
+                AND NOT EXISTS (
+                    SELECT
+                        1
+                    FROM
+                        queue_job_lock
+                    WHERE
+                        queue_job_id = queue_job.id
+                )
+            RETURNING uuid
+            """
+
     def requeue_dead_jobs(self):
         """
         Set started and enqueued jobs but not locked to pending
@@ -413,6 +442,14 @@ class Database:
 
             for (uuid,) in cr.fetchall():
                 _logger.warning("Re-queued dead job with uuid: %s", uuid)
+
+            # Requeue orphaned jobs (enqueued but never started, no lock)
+            query = self._query_requeue_orphaned_jobs()
+            cr.execute(query)
+            for (uuid,) in cr.fetchall():
+                _logger.warning(
+                    "Re-queued orphaned job (enqueued without lock) with uuid: %s", uuid
+                )
 
 
 class QueueJobRunner:
