@@ -1,0 +1,826 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* queue_job
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0-20251024\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-02 08:48+0000\n"
+"PO-Revision-Date: 2025-12-02 08:48+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid ""
+"<br/>\n"
+"                            <span class=\"oe_grey oe_inline\"> If the max. retries is 0, the number of retries is infinite.</span>"
+msgstr ""
+"<br/>\n"
+"                            <span class=\"oe_grey oe_inline\"> Si els reintents màxims és 0, el nombre de reintents serà infinit.</span>"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_needaction
+msgid "Action Needed"
+msgstr "Acció Necessària"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_ids
+msgid "Activities"
+msgstr "Activitats"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Decorador d'Excepció d'Activitat"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_state
+msgid "Activity State"
+msgstr "Estat de l'Activitat"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Icona del Tipus d'Activitat"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__args
+msgid "Args"
+msgstr "Params"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_attachment_count
+msgid "Attachment Count"
+msgstr "Quantitat d'Adjunts"
+
+#. module: queue_job
+#: model:ir.actions.server,name:queue_job.ir_cron_autovacuum_queue_jobs_ir_actions_server
+msgid "AutoVacuum Job Queue"
+msgstr "Treball de la Cua d'AutoNeteja"
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_base
+msgid "Base"
+msgstr "Base"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+msgid "Cancel"
+msgstr "Cancel·lar"
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_jobs_to_cancelled
+msgid "Cancel all selected jobs"
+msgstr "Cancel·lar tots els treballs seleccionats"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Cancel job"
+msgstr "Cancel·lar el treball"
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_set_jobs_cancelled
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
+msgid "Cancel jobs"
+msgstr "Cancel·lar els treballs"
+
+#. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__cancelled
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Cancelled"
+msgstr "Cancel·lat"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__channel
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__channel_id
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Channel"
+msgstr "Canal"
+
+#. module: queue_job
+#: model:ir.model.constraint,message:queue_job.constraint_queue_job_channel_name_uniq
+msgid "Channel complete name must be unique"
+msgstr "El canal complet ha de ser únic"
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_queue_job_channel
+#: model:ir.ui.menu,name:queue_job.menu_queue_job_channel
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_channel_form
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_channel_search
+msgid "Channels"
+msgstr "Canals"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__company_id
+msgid "Company"
+msgstr "Companyia"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__channel_method_name
+msgid "Complete Method Name"
+msgstr "Nom complet del mètode"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__complete_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__channel
+msgid "Complete Name"
+msgstr "Nom complet"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__date_created
+msgid "Created Date"
+msgstr "Data de Creació"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_uid
+msgid "Created by"
+msgstr "Creat per"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Created date"
+msgstr "Data de creació"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_date
+msgid "Created on"
+msgstr "Creat el"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__retry
+msgid "Current try"
+msgstr "Intent actual"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Current try / max. retries"
+msgstr "Intent actual / max. reintents"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__date_cancelled
+msgid "Date Cancelled"
+msgstr "Data de Cancel·lació"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__date_done
+msgid "Date Done"
+msgstr "Data Compleció"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependencies
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Dependencies"
+msgstr "Dependències"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependency_graph
+msgid "Dependency Graph"
+msgstr "Graf de dependències"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__name
+msgid "Description"
+msgstr "Descripció"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__display_name
+msgid "Display Name"
+msgstr "Nom a mostrar"
+
+#. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__done
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Done"
+msgstr "Completat"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__date_enqueued
+msgid "Enqueue Time"
+msgstr "Temps en cua"
+
+#. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__enqueued
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Enqueued"
+msgstr "En cua"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_name
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Exception"
+msgstr "Excepció"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_info
+msgid "Exception Info"
+msgstr "Info. de l'Excepció"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Exception Information"
+msgstr "Informació de l'Excepció"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__exc_message
+msgid "Exception Message"
+msgstr "Missatge d'Excepció"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Exception message"
+msgstr "Missatge d'excepció"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Exception:"
+msgstr "Excepció"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__eta
+msgid "Execute only after"
+msgstr "Només executar després de"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__exec_time
+msgid "Execution Time (avg)"
+msgstr "Temps d'execució (aprox)"
+
+#. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__failed
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Failed"
+msgstr "Fallat"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__ttype
+msgid "Field Type"
+msgstr "Tipus de Camp"
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_ir_model_fields
+msgid "Fields"
+msgstr "Camps"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_follower_ids
+msgid "Followers"
+msgstr "Seguidors"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Seguidors (Col·laboradors)"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Icona de font awesome, ex: fa-tasks"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Graph"
+msgstr "Graf"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Graph Jobs"
+msgstr "Treballs del graf"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_jobs_count
+msgid "Graph Jobs Count"
+msgstr "Comptador de treballs del graf"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_uuid
+msgid "Graph UUID"
+msgstr "UUID del graf"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Group By"
+msgstr "Agrupat per"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__has_message
+msgid "Has Message"
+msgstr "Té Missatge"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__id
+msgid "ID"
+msgstr "ID"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_exception_icon
+msgid "Icon"
+msgstr "Icona"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Icona per a indicar una excepció a l'activitat"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__identity_key
+msgid "Identity Key"
+msgstr "Clau d'identitat"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Si està marcat, hi ha nous missatges que requereixen de la vostra atenció. "
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error
+#: model:ir.model.fields,help:queue_job.field_queue_job__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Si està marcat, alguns missatges han fallat a l'intentar ser lliurats."
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_is_follower
+msgid "Is Follower"
+msgstr "És Seguidor"
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_job_channel
+msgid "Job Channels"
+msgstr "Canals de Treball"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__job_function_id
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Job Function"
+msgstr "Funció de Treball"
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_queue_job_function
+#: model:ir.model,name:queue_job.model_queue_job_function
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__job_function_ids
+#: model:ir.ui.menu,name:queue_job.menu_queue_job_function
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_form
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
+msgid "Job Functions"
+msgstr "Funcions de Treball"
+
+#. module: queue_job
+#: model:ir.module.category,name:queue_job.module_category_queue_job
+#: model:ir.ui.menu,name:queue_job.menu_queue_job_root
+msgid "Job Queue"
+msgstr "Cua de Treball"
+
+#. module: queue_job
+#: model:res.groups,name:queue_job.group_queue_job_manager
+msgid "Job Queue Manager"
+msgstr "Administrador de la Cua de Treball"
+
+#. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__ir_model_fields__ttype__job_serialized
+msgid "Job Serialized"
+msgstr "Treball Serialitzat"
+
+#. module: queue_job
+#: model:mail.message.subtype,name:queue_job.mt_job_failed
+msgid "Job failed"
+msgstr "Treball fallat"
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__job_ids
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__job_ids
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__job_ids
+#: model:ir.ui.menu,name:queue_job.menu_queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_graph
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_pivot
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Jobs"
+msgstr "Treballs"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__kwargs
+msgid "Kwargs"
+msgstr "Kwargs"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Last 24 hours"
+msgstr "Últimes 24 hores"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Last 30 days"
+msgstr "Últims 30 dies"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Last 7 days"
+msgstr "Últims 7 dies"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_uid
+msgid "Last Updated by"
+msgstr "Actualitzar recentment per"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
+msgid "Last Updated on"
+msgstr "Actualitzat recentment el"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__max_retries
+msgid "Max. retries"
+msgstr "Reintents max."
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_error
+msgid "Message Delivery error"
+msgstr "Missatge d'error de lliurament"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_ids
+msgid "Messages"
+msgstr "Missatges"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__method
+msgid "Method"
+msgstr "Mètode"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__method_name
+msgid "Method Name"
+msgstr "Nom del mètode"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__model_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__model_id
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Model"
+msgstr "Model"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Data límit de la Meva Activitat"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__name
+msgid "Name"
+msgstr "Nom"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Data límit de la Propera Activitat"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_summary
+msgid "Next Activity Summary"
+msgstr "Resum de la Propera Activitat"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_type_id
+msgid "Next Activity Type"
+msgstr "Tipus de la Propera Activitat"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Quantitat d'Accions"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_error_counter
+msgid "Number of errors"
+msgstr "Quantitat d'errors"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Quantitat de missatges que requereixen d'alguna acció"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Quantitat de missatges amb errors de lliurament"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__parent_id
+msgid "Parent Channel"
+msgstr "Antecessor del Canal"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_retry_pattern
+msgid ""
+"Pattern expressing from the count of retries on retryable errors, the number of of seconds to postpone the next execution. Setting the number of seconds to a 2-element tuple or list will randomize the retry interval between the 2 values.\n"
+"Example: {1: 10, 5: 20, 10: 30, 15: 300}.\n"
+"Example: {1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}.\n"
+"See the module description for details."
+msgstr ""
+"Patró que representa el conteig de reintents sobre errors reintentables, els segons que cal esperar per a posposar la següent execució. Establir els segons a una tupa de 2 elements o una llista, farà que s'esculli aleatòriament l'interval de reintents entre els dos valors.\n"
+"Exemple: {1: 10, 5: 20, 10: 30, 15: 300}.\n"
+"Exemple: {1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}.\n"
+"Veure la descripció del mòdul per a més detalls."
+
+#. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__pending
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Pending"
+msgstr "Pendent"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__priority
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Priority"
+msgstr "Prioritat"
+
+#. module: queue_job
+#: model:ir.ui.menu,name:queue_job.menu_queue
+msgid "Queue"
+msgstr "Cua"
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__queue_job_id
+msgid "Queue Job"
+msgstr "Cua de Treball"
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_job_lock
+msgid "Queue Job Lock"
+msgstr "Bloqueig de la Cua de Treball"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__rating_ids
+msgid "Ratings"
+msgstr "Valoracions"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__records
+msgid "Record(s)"
+msgstr "Registre(s)"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Related"
+msgstr "Relacionat"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_related_action
+msgid "Related Action"
+msgstr "Acció Relacionada"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__related_action
+msgid "Related Action (serialized)"
+msgstr "Acció Relacionada (serialitzada)"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_tree
+msgid "Remaining days to execute"
+msgstr "Dies restants fins l'execució"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__removal_interval
+msgid "Removal Interval"
+msgstr "Interval d'Eliminació"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
+msgid "Requeue"
+msgstr "Encuar de nou"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Requeue Job"
+msgstr "Encuar de nou el Treball"
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_requeue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
+msgid "Requeue Jobs"
+msgstr "Encuar de nou els Treballs"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_user_id
+msgid "Responsible User"
+msgstr "Usuari Responsable"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__result
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Result"
+msgstr "Resultat"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Results"
+msgstr "Resultats"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_retry_pattern
+msgid "Retry Pattern"
+msgstr "Patró de Reintents"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__retry_pattern
+msgid "Retry Pattern (serialized)"
+msgstr "Patró de Reintents (serialitzat)"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Error de Lliurament de SMS"
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_jobs_to_done
+msgid "Set all selected jobs to done"
+msgstr "Establir tots els treballs seleccionats a completat"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+msgid "Set jobs done"
+msgstr "Establir treballs completat"
+
+#. module: queue_job
+#: model:ir.actions.act_window,name:queue_job.action_set_jobs_done
+msgid "Set jobs to done"
+msgstr "Establir treballs a completat"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Set to 'Done'"
+msgstr "Establir a 'Completat'"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+msgid "Set to done"
+msgstr "Establir a completat"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__graph_uuid
+msgid "Single shared identifier of a Graph. Empty for a single job."
+msgstr "Únic identificador compartit d'un Graf. En blanc per a un únic treball."
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__date_started
+msgid "Start Date"
+msgstr "Data d'Inici"
+
+#. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__started
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Started"
+msgstr "Iniciat"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__state
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "State"
+msgstr "Estat"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Estat basat en les activitats\n"
+"Endarrerit: La data de venciment ja ha passat\n"
+"Avui: La data de l'activitat és avui\n"
+"Planificat: Futures activitats."
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__func_string
+msgid "Task"
+msgstr "Tasca"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_related_action
+msgid ""
+"The action when the button *Related Action* is used on a job. The default action is to open the view of the record related to the job. Configured as a dictionary with optional keys: enable, func_name, kwargs.\n"
+"See the module description for details."
+msgstr ""
+"L'acció quan s'utilitza el botó *Acció relacionada* en una tasca. L'acció per defecte és obrir la vista del registre relacionat amb la tasca. Configurat com a diccionari amb claus opcionals: enable, func_name, kwargs.\n"
+"Veure la desdescripció del mòdul per a més detalls."
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__max_retries
+msgid ""
+"The job will fail if the number of tries reach the max. retries.\n"
+"Retries are infinite when empty."
+msgstr ""
+"La tasca fallarà si el nombre d'intents arriba al màxim de reintents.\n"
+"Els intents són infinits quan està buit."
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
+msgid "The selected jobs will be cancelled."
+msgstr "Els treballs seleccionats seran cancel·lats."
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
+msgid "The selected jobs will be requeued."
+msgstr "Els treballs seleccionats seran encuats de nou."
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
+msgid "The selected jobs will be set to done."
+msgstr "Els treballs seleccionats seran marcats com a completats."
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
+msgid "Time (s)"
+msgstr "Temps (s)"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__exec_time
+msgid "Time required to execute this job in seconds. Average when grouped."
+msgstr "Temps necessari per executar aquesta tasca en segons. Mitjana quan s'agrupen."
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Tried many times"
+msgstr "Massa reintents"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Tipus d'excepció de l'activitat registrada."
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__uuid
+msgid "UUID"
+msgstr "UUID"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__user_id
+msgid "User ID"
+msgstr "ID d'Usuari"
+
+#. module: queue_job
+#: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__wait_dependencies
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Wait Dependencies"
+msgstr "Esperar Dependències"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__website_message_ids
+msgid "Website Messages"
+msgstr "Missatges del Lloc Web"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__website_message_ids
+msgid "Website communication history"
+msgstr "Històric de comunicació del lloc web"
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_requeue_job
+msgid "Wizard to requeue a selection of jobs"
+msgstr "Assistent per a encuar de nou una selecció de treballs"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
+msgid "Worker Pid"
+msgstr "Pid del treballador"
