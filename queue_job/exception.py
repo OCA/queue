@@ -14,6 +14,10 @@ class NoSuchJobError(JobError):
     """The job does not exist."""
 
 
+class UnexpectedJobStateError(JobError):
+    """Unexpected job state."""
+
+
 class FailedJobError(JobError):
     """A job had an error having to be resolved."""
 

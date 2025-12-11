@@ -13,7 +13,12 @@ from random import randint
 
 import odoo
 
-from .exception import FailedJobError, NoSuchJobError, RetryableJobError
+from .exception import (
+    FailedJobError,
+    NoSuchJobError,
+    RetryableJobError,
+    UnexpectedJobStateError,
+)
 
 WAIT_DEPENDENCIES = "wait_dependencies"
 PENDING = "pending"
@@ -243,11 +248,11 @@ class Job:
 
     def lock(self):
         """
-        Lock row of job that is being performed
+        Lock a job that is being performed.
 
-        If a job cannot be locked,
-        it means that the job wasn't started,
-        a RetryableJobError is thrown.
+        If a job cannot be locked, it means that the job was not in 'started'
+        state, or is already started and locked by another worker. In that case
+        a UnexpectedJobStateError is thrown.
         """
         self.env.cr.execute(
             """
@@ -265,16 +270,14 @@ class Job:
                         uuid = %s
                         AND state='started'
                 )
-            FOR UPDATE;
+            FOR UPDATE SKIP LOCKED;
         """,
             [self.uuid],
         )
 
         # 1 job should be locked
         if 1 != len(self.env.cr.fetchall()):
-            raise RetryableJobError(
-                f"Trying to lock job that wasn't started, uuid: {self.uuid}"
-            )
+            raise UnexpectedJobStateError("not in 'started' state or already locked")
 
     @classmethod
     def _load_from_db_record(cls, job_db_record):
@@ -856,8 +859,7 @@ class Job:
             funcname = record._default_related_action
         if not isinstance(funcname, str):
             raise ValueError(
-                "related_action must be the name of the "
-                "method on queue.job as string"
+                "related_action must be the name of the method on queue.job as string"
             )
         action = getattr(record, funcname)
         action_kwargs = self.job_config.related_action_kwargs

@@ -16,7 +16,7 @@ from odoo.modules.registry import Registry
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
 from ..delay import chain, group
-from ..exception import FailedJobError, RetryableJobError
+from ..exception import FailedJobError, RetryableJobError, UnexpectedJobStateError
 from ..job import ENQUEUED, Job
 
 _logger = logging.getLogger(__name__)
@@ -29,13 +29,16 @@ DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE = 5
 class RunJobController(http.Controller):
     def _try_perform_job(self, env, job):
         """Try to perform the job."""
+
+        # Here we expect that the job is in 'enqueued' state and protected
+        # from concurrent start by the SELECT FOR UPDATE on the job record.
+        # that was done at the beginning of the runjob method.
         job.set_started()
         job.store()
         env.cr.commit()
+
         job.lock()
-
         _logger.debug("%s started", job)
-
         job.perform()
         # Triggers any stored computed fields before calling 'set_done'
         # so that will be part of the 'exec_time'
@@ -94,15 +97,19 @@ class RunJobController(http.Controller):
                 job.set_pending(reset_retry=False)
                 job.store()
 
-        # ensure the job to run is in the correct state and lock the record
+        # Ensure the job to run is in the correct state and lock the record.
+        # Don't wait for the lock, as if something has the job locked at this
+        # point this is an abnormal condition (job starting twice for instance),
+        # so it's better to let recovery mechanisms do their work if needed.
         env.cr.execute(
-            "SELECT state FROM queue_job WHERE uuid=%s AND state=%s FOR UPDATE",
+            "SELECT state FROM queue_job WHERE uuid=%s AND state=%s "
+            "FOR UPDATE SKIP LOCKED",
             (job_uuid, ENQUEUED),
         )
         if not env.cr.fetchone():
             _logger.warning(
                 "was requested to run job %s, but it does not exist, "
-                "or is not in state %s",
+                "or is not in state %s, or is being handled by antother worker",
                 job_uuid,
                 ENQUEUED,
             )
@@ -122,6 +129,10 @@ class RunJobController(http.Controller):
 
                 _logger.debug("%s OperationalError, postponed", job)
                 raise RetryableJobError(err.pgerror, seconds=PG_RETRY) from err
+
+        except UnexpectedJobStateError as err:
+            _logger.warning("%s did not run (%s)", job, err)
+            return ""
 
         except RetryableJobError as err:
             # delay the job later, requeue
