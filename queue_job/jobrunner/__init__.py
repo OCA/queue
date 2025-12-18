@@ -4,6 +4,7 @@
 
 import logging
 from threading import Thread
+from configparser import ConfigParser
 import time
 
 from odoo.service import server
@@ -17,7 +18,13 @@ try:
     else:
         queue_job_config = {}
 except ImportError:
-    queue_job_config = config.misc.get("queue_job", {})
+
+    parser = ConfigParser()
+    parser.read(config["config"])
+    if parser.has_section("queue_job"):
+        queue_job_config = parser["queue_job"]
+    else:
+        queue_job_config = {}
 
 
 from .runner import QueueJobRunner, _channels
