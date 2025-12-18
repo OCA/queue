@@ -4,6 +4,8 @@
 import logging
 import os
 
+from .jobrunner import queue_job_config
+
 _logger = logging.getLogger(__name__)
 
 
@@ -18,4 +20,8 @@ def must_run_without_delay(env):
 
     if env.context.get("queue_job__no_delay"):
         _logger.info("`queue_job__no_delay` ctx key found. NO JOB scheduled.")
+        return True
+
+    if queue_job_config.get("queue_job__no_delay"):
+        _logger.info("`queue_job__no_delay` server config found. NO JOB scheduled.")
         return True

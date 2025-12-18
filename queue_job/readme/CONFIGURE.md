@@ -2,9 +2,15 @@
   - Adjust environment variables (optional):
     - `ODOO_QUEUE_JOB_CHANNELS=root:4` or any other channels
       configuration. The default is `root:1`
-    - if `xmlrpc_port` is not set: `ODOO_QUEUE_JOB_PORT=8069`
-  - Start Odoo with `--load=web,queue_job` and `--workers` greater than
-    1.[^1]
+    - `ODOO_QUEUE_JOB_PORT=8069`, default `--http-port`
+    - `ODOO_QUEUE_JOB_SCHEME=https`, default `http`
+    - `ODOO_QUEUE_JOB_HOST=load-balancer`, default `--http-interface`
+      or `localhost` if unset
+    - `ODOO_QUEUE_JOB_HTTP_AUTH_USER=jobrunner`, default empty
+    - `ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t`, default empty
+    - `QUEUE_JOB__NO_DELAY=1`, disables the queue for testing purposes
+    - Start Odoo with `--load=web,queue_job` and `--workers` greater than
+      1.[^1]
 - Using the Odoo configuration file:
 
 ``` ini
@@ -16,6 +22,12 @@ server_wide_modules = web,queue_job
 (...)
 [queue_job]
 channels = root:2
+scheme = https
+host = load-balancer
+port = 443
+http_auth_user = jobrunner
+http_auth_password = s3cr3t
+queue_job__no_delay=True # disables the queue
 ```
 
 - Confirm the runner is starting correctly by checking the odoo log
