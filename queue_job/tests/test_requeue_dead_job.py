@@ -143,14 +143,8 @@ class TestRequeueDeadJob(TransactionCase):
         job_obj.date_enqueued = datetime.now() - timedelta(minutes=1)
         job_obj.store()
 
-        # job ins't actually picked up by the first requeue attempt
+        # job is now picked up by the requeue query (which includes orphaned jobs)
         query = Database(self.env.cr.dbname)._query_requeue_dead_jobs()
-        self.env.cr.execute(query)
-        uuids_requeued = self.env.cr.fetchall()
-        self.assertFalse(uuids_requeued)
-
-        # job is picked up by the 2nd requeue attempt
-        query = Database(self.env.cr.dbname)._query_requeue_orphaned_jobs()
         self.env.cr.execute(query)
         uuids_requeued = self.env.cr.fetchall()
         self.assertTrue(queue_job.uuid in j[0] for j in uuids_requeued)
