@@ -16,6 +16,7 @@ from ..fields import JobSerialized
 from ..job import (
     CANCELLED,
     DONE,
+    ENQUEUED,
     FAILED,
     PENDING,
     STARTED,
@@ -324,18 +325,26 @@ class QueueJob(models.Model):
                 raise ValueError(f"State not supported: {state}")
 
     def button_done(self):
+        # If job was set to STARTED or CANCELLED, do not set it to DONE
+        states_from = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, FAILED)
         result = _("Manually set to done by {}").format(self.env.user.name)
-        self._change_job_state(DONE, result=result)
+        records = self.filtered(lambda job_: job_.state in states_from)
+        records._change_job_state(DONE, result=result)
         return True
 
     def button_cancelled(self):
+        # If job was set to DONE or WAIT_DEPENDENCIES, do not cancel it
+        states_from = (PENDING, ENQUEUED, FAILED)
         result = _("Cancelled by {}").format(self.env.user.name)
-        self._change_job_state(CANCELLED, result=result)
+        records = self.filtered(lambda job_: job_.state in states_from)
+        records._change_job_state(CANCELLED, result=result)
         return True
 
     def requeue(self):
-        jobs_to_requeue = self.filtered(lambda job_: job_.state != WAIT_DEPENDENCIES)
-        jobs_to_requeue._change_job_state(PENDING)
+        # If job is already in queue or started, do not requeue it
+        states_from = (FAILED, DONE, CANCELLED)
+        records = self.filtered(lambda job_: job_.state in states_from)
+        records._change_job_state(PENDING)
         return True
 
     def _message_post_on_failure(self):
