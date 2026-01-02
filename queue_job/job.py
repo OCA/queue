@@ -9,7 +9,6 @@ import sys
 import uuid
 import weakref
 from datetime import datetime, timedelta
-from functools import total_ordering
 from random import randint
 
 import odoo
@@ -104,7 +103,6 @@ def identity_exact_hasher(job_):
     return hasher
 
 
-@total_ordering
 class Job:
     """A Job is a task to execute. It is the in-memory representation of a job.
 
@@ -366,65 +364,6 @@ class Job:
             )
         )
         return existing
-
-    # TODO to deprecate (not called anymore)
-    @classmethod
-    def enqueue(
-        cls,
-        func,
-        args=None,
-        kwargs=None,
-        priority=None,
-        eta=None,
-        max_retries=None,
-        description=None,
-        channel=None,
-        identity_key=None,
-    ):
-        """Create a Job and enqueue it in the queue. Return the job uuid.
-
-        This expects the arguments specific to the job to be already extracted
-        from the ones to pass to the job function.
-
-        If the identity key is the same than the one in a pending job,
-        no job is created and the existing job is returned
-
-        """
-        new_job = cls(
-            func=func,
-            args=args,
-            kwargs=kwargs,
-            priority=priority,
-            eta=eta,
-            max_retries=max_retries,
-            description=description,
-            channel=channel,
-            identity_key=identity_key,
-        )
-        return new_job._enqueue_job()
-
-    # TODO to deprecate (not called anymore)
-    def _enqueue_job(self):
-        if self.identity_key:
-            existing = self.job_record_with_same_identity_key()
-            if existing:
-                _logger.debug(
-                    "a job has not been enqueued due to having "
-                    "the same identity key (%s) than job %s",
-                    self.identity_key,
-                    existing.uuid,
-                )
-                return Job._load_from_db_record(existing)
-        self.store()
-        _logger.debug(
-            "enqueued %s:%s(*%r, **%r) with uuid: %s",
-            self.recordset,
-            self.method_name,
-            self.args,
-            self.kwargs,
-            self.uuid,
-        )
-        return self
 
     @staticmethod
     def db_record_from_uuid(env, job_uuid):
@@ -748,16 +687,6 @@ class Job:
 
     def __hash__(self):
         return self.uuid.__hash__()
-
-    def sorting_key(self):
-        return self.eta, self.priority, self.date_created, self.seq
-
-    def __lt__(self, other):
-        if self.eta and not other.eta:
-            return True
-        elif not self.eta and other.eta:
-            return False
-        return self.sorting_key() < other.sorting_key()
 
     def db_record(self):
         return self.db_records_from_uuids(self.env, [self.uuid])
