@@ -49,14 +49,15 @@ class RunJobController(http.Controller):
         tries = 0
         while True:
             try:
-                job.enqueue_waiting()
+                with job.env.cr.savepoint():
+                    job.enqueue_waiting()
             except OperationalError as err:
                 # Automatically retry the typical transaction serialization
                 # errors
                 if err.pgcode not in PG_CONCURRENCY_ERRORS_TO_RETRY:
                     raise
                 if tries >= DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE:
-                    _logger.info(
+                    _logger.error(
                         "%s, maximum number of tries reached to update dependencies",
                         errorcodes.lookup(err.pgcode),
                     )
