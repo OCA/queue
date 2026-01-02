@@ -104,6 +104,7 @@ class QueueJob(models.Model):
     date_done = fields.Datetime(readonly=True)
     exec_time = fields.Float(
         string="Execution Time (avg)",
+        readonly=True,
         group_operator="avg",
         help="Time required to execute this job in seconds. Average when grouped.",
     )
