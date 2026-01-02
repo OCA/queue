@@ -354,8 +354,11 @@ class QueueJob(models.Model):
         # at every job creation
         domain = self._subscribe_users_domain()
         base_users = self.env["res.users"].search(domain)
+        suscribe_job_creator = self._subscribe_job_creator()
         for record in self:
-            users = base_users | record.user_id
+            users = base_users
+            if suscribe_job_creator:
+                users |= record.user_id
             record.message_subscribe(partner_ids=users.mapped("partner_id").ids)
             msg = record._message_failed_job()
             if msg:
@@ -371,6 +374,14 @@ class QueueJob(models.Model):
         if companies:
             domain.append(("company_id", "in", companies.ids))
         return domain
+
+    @api.model
+    def _subscribe_job_creator(self):
+        """
+        Whether the user that created the job should be subscribed to the job,
+        in addition to users determined by `_subscribe_users_domain`
+        """
+        return True
 
     def _message_failed_job(self):
         """Return a message which will be posted on the job when it is failed.
