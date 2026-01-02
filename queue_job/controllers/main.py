@@ -26,15 +26,47 @@ DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE = 5
 
 
 class RunJobController(http.Controller):
-    def _try_perform_job(self, env, job):
-        """Try to perform the job."""
+    @classmethod
+    def _acquire_job(cls, env: api.Environment, job_uuid: str) -> Job | None:
+        """Acquire a job for execution.
+
+        - make sure it is in ENQUEUED state
+        - mark it as STARTED and commit the state change
+        - acquire the job lock
+
+        If successful, return the Job instance, otherwise return None. This
+        function may fail to acquire the job is not in the expected state or is
+        already locked by another worker.
+        """
+        env.cr.execute(
+            "SELECT uuid FROM queue_job WHERE uuid=%s AND state=%s "
+            "FOR UPDATE SKIP LOCKED",
+            (job_uuid, ENQUEUED),
+        )
+        if not env.cr.fetchone():
+            _logger.warning(
+                "was requested to run job %s, but it does not exist, "
+                "or is not in state %s, or is being handled by another worker",
+                job_uuid,
+                ENQUEUED,
+            )
+            return None
+        job = Job.load(env, job_uuid)
+        assert job and job.state == ENQUEUED
         job.set_started()
         job.store()
         env.cr.commit()
-        job.lock()
+        if not job.lock():
+            _logger.warning(
+                "was requested to run job %s, but it could not be locked",
+                job_uuid,
+            )
+            return None
+        return job
 
+    def _try_perform_job(self, env, job):
+        """Try to perform the job, mark it done and commit if successful."""
         _logger.debug("%s started", job)
-
         job.perform()
         # Triggers any stored computed fields before calling 'set_done'
         # so that will be part of the 'exec_time'
@@ -94,22 +126,9 @@ class RunJobController(http.Controller):
                 job.set_pending(reset_retry=False)
                 job.store()
 
-        # ensure the job to run is in the correct state and lock the record
-        env.cr.execute(
-            "SELECT state FROM queue_job WHERE uuid=%s AND state=%s FOR UPDATE",
-            (job_uuid, ENQUEUED),
-        )
-        if not env.cr.fetchone():
-            _logger.warning(
-                "was requested to run job %s, but it does not exist, "
-                "or is not in state %s",
-                job_uuid,
-                ENQUEUED,
-            )
+        job = self._acquire_job(env, job_uuid)
+        if not job:
             return ""
-
-        job = Job.load(env, job_uuid)
-        assert job and job.state == ENQUEUED
 
         try:
             try:

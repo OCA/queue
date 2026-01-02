@@ -13,23 +13,6 @@ from .common import JobCommonCase
 
 @tagged("post_install", "-at_install")
 class TestRequeueDeadJob(JobCommonCase):
-    def _get_demo_job(self, uuid):
-        # job created during load of demo data
-        job = self.env["queue.job"].search(
-            [
-                ("uuid", "=", uuid),
-            ],
-            limit=1,
-        )
-
-        self.assertTrue(
-            job,
-            f"Demo data queue job {uuid} should be loaded in order"
-            " to make this tests work",
-        )
-
-        return job
-
     def get_locks(self, uuid, cr=None):
         """
         Retrieve lock rows
