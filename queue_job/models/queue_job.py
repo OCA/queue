@@ -106,6 +106,7 @@ class QueueJob(models.Model):
     exec_time = fields.Float(
         string="Execution Time (avg)",
         group_operator="avg",
+        readonly=True,
         help="Time required to execute this job in seconds. Average when grouped.",
     )
     date_cancelled = fields.Datetime(readonly=True)
