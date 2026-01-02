@@ -11,7 +11,7 @@ from io import StringIO
 from psycopg2 import OperationalError, errorcodes
 from werkzeug.exceptions import BadRequest, Forbidden
 
-from odoo import SUPERUSER_ID, _, api, http
+from odoo import SUPERUSER_ID, api, http
 from odoo.modules.registry import Registry
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
@@ -179,7 +179,7 @@ class RunJobController(http.Controller):
         failure_rate=0,
     ):
         if not http.request.env.user.has_group("base.group_erp_manager"):
-            raise Forbidden(_("Access Denied"))
+            raise Forbidden(http.request.env._("Access Denied"))
 
         if failure_rate is not None:
             try:
@@ -280,7 +280,7 @@ class RunJobController(http.Controller):
                         priority=priority,
                         max_retries=max_retries,
                         channel=channel,
-                        description="%s #%d" % (description, current_count),
+                        description=f"{description} #{current_count}",
                     )._test_job(failure_rate=failure_rate)
                 )
 

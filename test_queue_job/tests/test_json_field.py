@@ -3,6 +3,7 @@
 
 import json
 
+from odoo import Command
 from odoo.tests import common
 
 # pylint: disable=odoo-addons-relative-import
@@ -11,17 +12,33 @@ from odoo.addons.queue_job.fields import JobEncoder
 
 
 class TestJsonField(common.TransactionCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        User = cls.env["res.users"]
+        main_company = cls.env.ref("base.main_company")
+        group_user = cls.env.ref("base.group_user")
+        cls.demo_user = User.create(
+            {
+                "name": "Demo User (Queue)",
+                "login": "queue_demo_user_2",
+                "company_id": main_company.id,
+                "company_ids": [Command.set([main_company.id])],
+                "group_ids": [Command.set([group_user.id])],
+            }
+        )
+
     # TODO: when migrating to 16.0, adapt checks in queue_job/tests/test_json_field.py
     # to verify the context keys are encoded and remove these
     def test_encoder_recordset_store_context(self):
-        demo_user = self.env.ref("base.user_demo")
+        demo_user = self.demo_user
         user_context = {"lang": "en_US", "tz": "Europe/Brussels"}
         test_model = self.env(user=demo_user, context=user_context)["test.queue.job"]
         value_json = json.dumps(test_model, cls=JobEncoder)
         self.assertEqual(json.loads(value_json)["context"], user_context)
 
     def test_encoder_recordset_context_filter_keys(self):
-        demo_user = self.env.ref("base.user_demo")
+        demo_user = self.demo_user
         user_context = {"lang": "en_US", "tz": "Europe/Brussels"}
         tampered_context = dict(user_context, foo=object())
         test_model = self.env(user=demo_user, context=tampered_context)[

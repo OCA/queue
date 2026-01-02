@@ -158,8 +158,7 @@ class BaseImportImport(models.TransientModel):
             description = _(
                 "Import %(model)s from file %(file_name)s - "
                 "#%(chunk)s - lines %(from)s to %(to)s"
-            )
-            description = description % {
+            ) % {
                 "model": translated_model_name,
                 "file_name": file_name,
                 "chunk": chunk,

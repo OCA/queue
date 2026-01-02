@@ -455,12 +455,9 @@ class Channel:
 
     def __str__(self):
         capacity = "∞" if self.capacity is None else str(self.capacity)
-        return "%s(C:%s,Q:%d,R:%d,F:%d)" % (
-            self.fullname,
-            capacity,
-            len(self._queue),
-            len(self._running),
-            len(self._failed),
+        return (
+            f"{self.fullname}(C:{capacity},Q:{len(self._queue)},"
+            f"R:{len(self._running)},F:{len(self._failed)})"
         )
 
     def remove(self, job):
@@ -894,8 +891,7 @@ class ChannelManager:
                         )
                     if k in config:
                         raise ValueError(
-                            f"Invalid channel config {config_string}: "
-                            f"duplicate key {k}"
+                            f"Invalid channel config {config_string}: duplicate key {k}"
                         )
                     config[k] = v
             else:
@@ -996,7 +992,8 @@ class ChannelManager:
         if channel_name in self._channels_by_name:
             return self._channels_by_name[channel_name]
         if not autocreate and not parent_fallback:
-            raise ChannelNotFound(f"Channel {channel_name} not found")
+            msg = f"Channel {channel_name} not found"
+            raise ChannelNotFound(msg)
         parent = self._root_channel
         if parent_fallback:
             # Look for first direct parent w/ config.

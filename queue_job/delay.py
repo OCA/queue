@@ -496,7 +496,8 @@ class Delayable:
     def _set_from_dict(self, properties):
         for key, value in properties.items():
             if key not in self._properties:
-                raise ValueError(f"No property {key}")
+                msg = f"No property {key}"
+                raise ValueError(msg)
             setattr(self, key, value)
 
     def set(self, *args, **kwargs):

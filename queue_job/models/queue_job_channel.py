@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 
-from odoo import _, api, exceptions, fields, models
+from odoo import api, exceptions, fields, models
 
 
 class QueueJobChannel(models.Model):
@@ -26,9 +26,10 @@ class QueueJobChannel(models.Model):
         default=lambda self: self.env["queue.job"]._removal_interval, required=True
     )
 
-    _sql_constraints = [
-        ("name_uniq", "unique(complete_name)", "Channel complete name must be unique")
-    ]
+    _name_uniq = models.Constraint(
+        "UNIQUE(complete_name)",
+        "Channel complete name must be unique",
+    )
 
     @api.depends("name", "parent_id.complete_name")
     def _compute_complete_name(self):
@@ -45,7 +46,8 @@ class QueueJobChannel(models.Model):
     def parent_required(self):
         for record in self:
             if record.name != "root" and not record.parent_id:
-                raise exceptions.ValidationError(_("Parent channel required."))
+                msg = self.env._("Parent channel required.")
+                raise exceptions.ValidationError(msg)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -79,11 +81,13 @@ class QueueJobChannel(models.Model):
                 and channel.name == "root"
                 and ("name" in values or "parent_id" in values)
             ):
-                raise exceptions.UserError(_("Cannot change the root channel"))
+                msg = self.env._("Cannot change the root channel")
+                raise exceptions.UserError(msg)
         return super().write(values)
 
-    def unlink(self):
+    @api.ondelete(at_uninstall=False)
+    def _check_not_root_ondelete(self):
         for channel in self:
             if channel.name == "root":
-                raise exceptions.UserError(_("Cannot remove the root channel"))
-        return super().unlink()
+                msg = self.env._("Cannot remove the root channel")
+                raise exceptions.UserError(msg)

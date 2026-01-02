@@ -10,6 +10,7 @@ from psycopg2.extras import Json as PsycopgJson
 
 from odoo import fields, models
 from odoo.tools.func import lazy
+from odoo.tools.misc import SENTINEL
 
 
 class JobSerialized(fields.Json):
@@ -38,13 +39,14 @@ class JobSerialized(fields.Json):
         ),
     }
 
-    def __init__(self, string=fields.SENTINEL, base_type=fields.SENTINEL, **kwargs):
+    def __init__(self, string=SENTINEL, base_type=SENTINEL, **kwargs):
         super().__init__(string=string, _base_type=base_type, **kwargs)
 
     def _setup_attrs(self, model, name):  # pylint: disable=missing-return
         super()._setup_attrs(model, name)
         if self._base_type not in self._default_json_mapping:
-            raise ValueError(f"{self._base_type} is not a supported base type")
+            msg = f"{self._base_type} is not a supported base type"
+            raise ValueError(msg)
 
     def _base_type_default_json(self, env):
         default_json = self._default_json_mapping.get(self._base_type)

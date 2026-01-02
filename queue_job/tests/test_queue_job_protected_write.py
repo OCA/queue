@@ -22,9 +22,6 @@ class TestJobCreatePrivate(common.HttpCase):
                         "uuid": "test",
                     },
                 },
-                headers={
-                    "Cookie": f"session_id={self.session.sid};",
-                },
             )
         self.assertEqual("odoo.exceptions.AccessError", str(cm.exception))
 
