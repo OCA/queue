@@ -1,3 +1,4 @@
+from . import test_acquire_job
 from . import test_autovacuum
 from . import test_delayable
 from . import test_dependencies
