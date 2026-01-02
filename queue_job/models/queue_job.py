@@ -3,6 +3,7 @@
 
 import logging
 import random
+import time
 from datetime import datetime, timedelta
 
 from odoo import _, api, exceptions, fields, models
@@ -469,7 +470,9 @@ class QueueJob(models.Model):
             )
         return action
 
-    def _test_job(self, failure_rate=0):
+    def _test_job(self, failure_rate=0, job_duration=0):
         _logger.info("Running test job.")
         if random.random() <= failure_rate:
             raise JobError("Job failed")
+        if job_duration:
+            time.sleep(job_duration)

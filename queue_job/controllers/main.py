@@ -187,6 +187,7 @@ class RunJobController(http.Controller):
         description="Test job",
         size=1,
         failure_rate=0,
+        job_duration=0,
     ):
         if not http.request.env.user.has_group("base.group_erp_manager"):
             raise Forbidden(_("Access Denied"))
@@ -196,6 +197,12 @@ class RunJobController(http.Controller):
                 failure_rate = float(failure_rate)
             except (ValueError, TypeError):
                 failure_rate = 0
+
+        if job_duration is not None:
+            try:
+                job_duration = float(job_duration)
+            except (ValueError, TypeError):
+                job_duration = 0
 
         if not (0 <= failure_rate <= 1):
             raise BadRequest("failure_rate must be between 0 and 1")
@@ -225,6 +232,7 @@ class RunJobController(http.Controller):
                 channel=channel,
                 description=description,
                 failure_rate=failure_rate,
+                job_duration=job_duration,
             )
 
         if size > 1:
@@ -235,6 +243,7 @@ class RunJobController(http.Controller):
                 channel=channel,
                 description=description,
                 failure_rate=failure_rate,
+                job_duration=job_duration,
             )
         return ""
 
@@ -246,6 +255,7 @@ class RunJobController(http.Controller):
         description="Test job",
         size=1,
         failure_rate=0,
+        job_duration=0,
     ):
         delayed = (
             http.request.env["queue.job"]
@@ -255,7 +265,7 @@ class RunJobController(http.Controller):
                 channel=channel,
                 description=description,
             )
-            ._test_job(failure_rate=failure_rate)
+            ._test_job(failure_rate=failure_rate, job_duration=job_duration)
         )
         return f"job uuid: {delayed.db_record().uuid}"
 
@@ -269,6 +279,7 @@ class RunJobController(http.Controller):
         channel=None,
         description="Test job",
         failure_rate=0,
+        job_duration=0,
     ):
         model = http.request.env["queue.job"]
         current_count = 0
@@ -291,7 +302,7 @@ class RunJobController(http.Controller):
                         max_retries=max_retries,
                         channel=channel,
                         description="%s #%d" % (description, current_count),
-                    )._test_job(failure_rate=failure_rate)
+                    )._test_job(failure_rate=failure_rate, job_duration=job_duration)
                 )
 
             grouping = random.choice(possible_grouping_methods)
