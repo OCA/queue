@@ -666,6 +666,7 @@ msgstr "等待"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__priority
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Priority"
 msgstr "优先级"
 
@@ -903,6 +904,11 @@ msgstr "时间（秒）"
 #: model:ir.model.fields,help:queue_job.field_queue_job__exec_time
 msgid "Time required to execute this job in seconds. Average when grouped."
 msgstr "以秒为单位执行此任务所需的时间。分组时为平均值。"
+
+#. module: queue_job
+#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
+msgid "Tried many times"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_decoration
