@@ -4,7 +4,7 @@
 {
     "name": "Base Export Async",
     "summary": "Asynchronous export with job queue",
-    "version": "16.0.1.1.0",
+    "version": "16.0.1.2.0",
     "license": "AGPL-3",
     "author": "ACSONE SA/NV, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/queue",
