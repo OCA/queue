@@ -278,11 +278,11 @@ class Job:
                         queue_job
                     WHERE
                         uuid = %s
-                        AND state='started'
+                        AND state = %s
                 )
             FOR UPDATE;
         """,
-            [self.uuid],
+            [self.uuid, STARTED],
         )
 
         # 1 job should be locked
