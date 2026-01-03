@@ -161,6 +161,7 @@ class RunJobController(http.Controller):
 
         _logger.debug("%s enqueue depends started", job)
         cls._enqueue_dependent_jobs(env, job)
+        env.cr.commit()
         _logger.debug("%s enqueue depends done", job)
 
     @classmethod
@@ -185,13 +186,26 @@ class RunJobController(http.Controller):
         save_session=False,
         readonly=False,
     )
-    def runjob(self, db, job_uuid, **kw):
+    def runjob(self, db: str, job_uuid: str | None, **kw):
         http.request.session.db = db
         env = http.request.env(user=SUPERUSER_ID)
-        job = self._acquire_job(env, job_uuid)
-        if not job:
-            return ""
-        self._runjob(env, job)
+        run_as = env["ir.config_parameter"].get_param("queue_job.run_as")
+        if run_as == "cron":
+            crons = env["ir.cron"].search(
+                env["queue.job.executor"]._executor_cron_domain()
+            )
+            assert crons, "No queue_job executor cron found"
+            for cron in crons:
+                # TODO Awaking all of them is a bit wasteful although not very
+                # costly. Ideally we should awaken only one that is not already
+                # running.
+                cron._trigger()
+        else:
+            # Run in this http worker
+            job = self._acquire_job(env, job_uuid)
+            if not job:
+                return ""
+            self._runjob(env, job)
         return ""
 
     # flake8: noqa: C901
