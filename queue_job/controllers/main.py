@@ -64,7 +64,8 @@ class RunJobController(http.Controller):
             return None
         return job
 
-    def _try_perform_job(self, env, job):
+    @classmethod
+    def _try_perform_job(cls, env, job):
         """Try to perform the job, mark it done and commit if successful."""
         _logger.debug("%s started", job)
         job.perform()
@@ -77,7 +78,8 @@ class RunJobController(http.Controller):
         env.cr.commit()
         _logger.debug("%s done", job)
 
-    def _enqueue_dependent_jobs(self, env, job):
+    @classmethod
+    def _enqueue_dependent_jobs(cls, env, job):
         tries = 0
         while True:
             try:
@@ -107,7 +109,8 @@ class RunJobController(http.Controller):
             else:
                 break
 
-    def _runjob(self, env: api.Environment, job: Job) -> None:
+    @classmethod
+    def _runjob(cls, env: api.Environment, job: Job) -> None:
         def retry_postpone(job, message, seconds=None):
             job.env.clear()
             with registry(job.env.cr.dbname).cursor() as new_cr:
@@ -118,7 +121,7 @@ class RunJobController(http.Controller):
 
         try:
             try:
-                self._try_perform_job(env, job)
+                cls._try_perform_job(env, job)
             except OperationalError as err:
                 # Automatically retry the typical transaction serialization
                 # errors
@@ -156,17 +159,18 @@ class RunJobController(http.Controller):
             job.env.clear()
             with registry(job.env.cr.dbname).cursor() as new_cr:
                 job.env = job.env(cr=new_cr)
-                vals = self._get_failure_values(job, traceback_txt, orig_exception)
+                vals = cls._get_failure_values(job, traceback_txt, orig_exception)
                 job.set_failed(**vals)
                 job.store()
                 buff.close()
             raise
 
         _logger.debug("%s enqueue depends started", job)
-        self._enqueue_dependent_jobs(env, job)
+        cls._enqueue_dependent_jobs(env, job)
         _logger.debug("%s enqueue depends done", job)
 
-    def _get_failure_values(self, job, traceback_txt, orig_exception):
+    @classmethod
+    def _get_failure_values(cls, job, traceback_txt, orig_exception):
         """Collect relevant data from exception."""
         exception_name = orig_exception.__class__.__name__
         if hasattr(orig_exception, "__module__"):
