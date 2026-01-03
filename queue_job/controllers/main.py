@@ -28,7 +28,9 @@ DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE = 5
 
 class RunJobController(http.Controller):
     @classmethod
-    def _acquire_job(cls, env: api.Environment, job_uuid: str) -> Job | None:
+    def _acquire_job(
+        cls, env: api.Environment, job_uuid: str | None = None
+    ) -> Job | None:
         """Acquire a job for execution.
 
         - make sure it is in ENQUEUED state
@@ -38,30 +40,32 @@ class RunJobController(http.Controller):
         If successful, return the Job instance, otherwise return None. This
         function may fail to acquire the job is not in the expected state or is
         already locked by another worker.
+
+        If no job_uuid is given, acquire any available job in ENQUEUED state.
         """
-        env.cr.execute(
-            "SELECT uuid FROM queue_job WHERE uuid=%s AND state=%s "
-            "FOR UPDATE SKIP LOCKED",
-            (job_uuid, ENQUEUED),
-        )
-        if not env.cr.fetchone():
-            _logger.warning(
-                "was requested to run job %s, but it does not exist, "
-                "or is not in state %s, or is being handled by another worker",
-                job_uuid,
-                ENQUEUED,
+        if job_uuid:
+            env.cr.execute(
+                "SELECT uuid FROM queue_job WHERE uuid=%s AND state=%s "
+                "FOR UPDATE SKIP LOCKED",
+                (job_uuid, ENQUEUED),
             )
+        else:
+            env.cr.execute(
+                "SELECT uuid FROM queue_job WHERE state=%s LIMIT 1 "
+                "FOR UPDATE SKIP LOCKED",
+                (ENQUEUED,),
+            )
+        job_row = env.cr.fetchone()
+        if not job_row:
+            _logger.debug("no job to run")
             return None
-        job = Job.load(env, job_uuid)
+        job = Job.load(env, job_uuid=job_row[0])
         assert job and job.state == ENQUEUED
         job.set_started()
         job.store()
         env.cr.commit()
         if not job.lock():
-            _logger.warning(
-                "was requested to run job %s, but it could not be locked",
-                job_uuid,
-            )
+            _logger.debug("could not acquire lock for job %s", job.uuid)
             return None
         return job
 
