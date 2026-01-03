@@ -107,17 +107,7 @@ class RunJobController(http.Controller):
             else:
                 break
 
-    @http.route(
-        "/queue_job/runjob",
-        type="http",
-        auth="none",
-        save_session=False,
-        readonly=False,
-    )
-    def runjob(self, db, job_uuid, **kw):
-        http.request.session.db = db
-        env = http.request.env(user=SUPERUSER_ID)
-
+    def _runjob(self, env: api.Environment, job: Job) -> None:
         def retry_postpone(job, message, seconds=None):
             job.env.clear()
             with registry(job.env.cr.dbname).cursor() as new_cr:
@@ -125,10 +115,6 @@ class RunJobController(http.Controller):
                 job.postpone(result=message, seconds=seconds)
                 job.set_pending(reset_retry=False)
                 job.store()
-
-        job = self._acquire_job(env, job_uuid)
-        if not job:
-            return ""
 
         try:
             try:
@@ -161,7 +147,6 @@ class RunJobController(http.Controller):
             # traceback in the logs we should have the traceback when all
             # retries are exhausted
             env.cr.rollback()
-            return ""
 
         except (FailedJobError, Exception) as orig_exception:
             buff = StringIO()
@@ -181,8 +166,6 @@ class RunJobController(http.Controller):
         self._enqueue_dependent_jobs(env, job)
         _logger.debug("%s enqueue depends done", job)
 
-        return ""
-
     def _get_failure_values(self, job, traceback_txt, orig_exception):
         """Collect relevant data from exception."""
         exception_name = orig_exception.__class__.__name__
@@ -196,6 +179,22 @@ class RunJobController(http.Controller):
             "exc_name": exception_name,
             "exc_message": exc_message,
         }
+
+    @http.route(
+        "/queue_job/runjob",
+        type="http",
+        auth="none",
+        save_session=False,
+        readonly=False,
+    )
+    def runjob(self, db, job_uuid, **kw):
+        http.request.session.db = db
+        env = http.request.env(user=SUPERUSER_ID)
+        job = self._acquire_job(env, job_uuid)
+        if not job:
+            return ""
+        self._runjob(env, job)
+        return ""
 
     # flake8: noqa: C901
     @http.route("/queue_job/create_test_job", type="http", auth="user")
