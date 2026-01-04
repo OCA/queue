@@ -35,7 +35,7 @@ class TestRequeueDeadJob(JobCommonCase):
                     WHERE
                         uuid = %s
                 )
-            FOR UPDATE SKIP LOCKED
+            FOR NO KEY UPDATE SKIP LOCKED
             """,
             [uuid],
         )
