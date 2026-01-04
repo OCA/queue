@@ -209,7 +209,8 @@ class Job:
         """
         stored = cls.db_records_from_uuids(env, [job_uuid])
         if not stored:
-            raise NoSuchJobError(f"Job {job_uuid} does no longer exist in the storage.")
+            msg = f"Job {job_uuid} does no longer exist in the storage."
+            raise NoSuchJobError(msg)
         return cls._load_from_db_record(stored)
 
     @classmethod
@@ -505,7 +506,7 @@ class Job:
                 # traceback and message:
                 # http://blog.ianbicking.org/2007/09/12/re-raising-exceptions/
                 new_exc = FailedJobError(
-                    "Max. retries (%d) reached: %s" % (self.max_retries, value or type_)
+                    f"Max. retries ({self.max_retries}) reached: {value or type_}"
                 )
                 raise new_exc from err
             raise
@@ -813,7 +814,7 @@ class Job:
                 setattr(self, k, v)
 
     def __repr__(self):
-        return "<Job %s, priority:%d>" % (self.uuid, self.priority)
+        return f"<Job {self.uuid}, priority:{self.priority}>"
 
     def _get_retry_seconds(self, seconds=None):
         retry_pattern = self.job_config.retry_pattern
@@ -828,7 +829,7 @@ class Job:
                     break
         elif not seconds:
             seconds = RETRY_INTERVAL
-        if isinstance(seconds, (list | tuple)):
+        if isinstance(seconds, list | tuple):
             seconds = randint(seconds[0], seconds[1])
         return seconds
 
@@ -856,8 +857,7 @@ class Job:
             funcname = record._default_related_action
         if not isinstance(funcname, str):
             raise ValueError(
-                "related_action must be the name of the "
-                "method on queue.job as string"
+                "related_action must be the name of the method on queue.job as string"
             )
         action = getattr(record, funcname)
         action_kwargs = self.job_config.related_action_kwargs

@@ -35,13 +35,12 @@
             <search string="Job Functions">
                 <field name="name" />
                 <field name="channel_id" />
-                <group expand="0" string="Group By">
-                    <filter
-                        name="group_by_channel"
-                        string="Channel"
-                        context="{'group_by': 'channel_id'}"
-                    />
-                </group>
+                <separator />
+                <filter
+                    name="group_by_channel"
+                    string="Channel"
+                    context="{'group_by': 'channel_id'}"
+                />
             </search>
         </field>
     </record>

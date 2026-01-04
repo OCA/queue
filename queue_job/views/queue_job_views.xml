@@ -213,11 +213,7 @@
                 <field name="exc_message" />
                 <field name="exc_info" />
                 <field name="result" />
-                <field
-                    name="company_id"
-                    groups="base.group_multi_company"
-                    widget="selection"
-                />
+                <field name="company_id" groups="base.group_multi_company" />
                 <filter
                     name="wait_dependencies"
                     string="Wait Dependencies"
@@ -256,68 +252,68 @@
                     domain="[('retry', '&gt;', 1)]"
                 />
                 <separator />
+                <!-- Quick datetime ranges using dynamic macros -->
                 <filter
                     name="last_24_hours"
                     string="Last 24 hours"
-                    domain="[('date_created', '&gt;=', (context_today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"
+                    domain="[('date_created', '&gt;=', 'now -1d')]"
                 />
                 <filter
                     name="last_7_days"
                     string="Last 7 days"
-                    domain="[('date_created', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"
+                    domain="[('date_created', '&gt;=', 'now -7d')]"
                 />
                 <filter
                     name="last_30_days"
                     string="Last 30 days"
-                    domain="[('date_created', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"
+                    domain="[('date_created', '&gt;=', 'now -30d')]"
                 />
-                <group expand="0" string="Group By">
-                    <filter
-                        name="group_by_channel"
-                        string="Channel"
-                        context="{'group_by': 'channel'}"
-                    />
-                    <filter
-                        name="group_by_job_function_id"
-                        string="Job Function"
-                        context="{'group_by': 'job_function_id'}"
-                    />
-                    <filter
-                        name="group_by_state"
-                        string="State"
-                        context="{'group_by': 'state'}"
-                    />
-                    <filter
-                        name="group_by_priority"
-                        string="Priority"
-                        context="{'group_by': 'priority'}"
-                    />
-                    <filter
-                        name="group_by_model_name"
-                        string="Model"
-                        context="{'group_by': 'model_name'}"
-                    />
-                    <filter
-                        name="group_by_exc_name"
-                        string="Exception"
-                        context="{'group_by': 'exc_name'}"
-                    />
-                    <filter
-                        name="group_by_exc_message"
-                        string="Exception message"
-                        context="{'group_by': 'exc_message'}"
-                    />
-                    <filter
-                        name="group_by_graph"
-                        string="Graph"
-                        context="{'group_by': 'graph_uuid'}"
-                    />
-                    <filter
-                        name="group_by_date_created"
-                        string="Created date"
-                        context="{'group_by': 'date_created'}"
-                    />
-                </group>
+                <separator />
+                <filter
+                    name="group_by_channel"
+                    string="Channel"
+                    context="{'group_by': 'channel'}"
+                />
+                <filter
+                    name="group_by_job_function_id"
+                    string="Job Function"
+                    context="{'group_by': 'job_function_id'}"
+                />
+                <filter
+                    name="group_by_state"
+                    string="State"
+                    context="{'group_by': 'state'}"
+                />
+                <filter
+                    name="group_by_priority"
+                    string="Priority"
+                    context="{'group_by': 'priority'}"
+                />
+                <filter
+                    name="group_by_model_name"
+                    string="Model"
+                    context="{'group_by': 'model_name'}"
+                />
+                <filter
+                    name="group_by_exc_name"
+                    string="Exception"
+                    context="{'group_by': 'exc_name'}"
+                />
+                <filter
+                    name="group_by_exc_message"
+                    string="Exception message"
+                    context="{'group_by': 'exc_message'}"
+                />
+                <filter
+                    name="group_by_graph"
+                    string="Graph"
+                    context="{'group_by': 'graph_uuid'}"
+                />
+                <filter
+                    name="group_by_date_created"
+                    string="Created date"
+                    context="{'group_by': 'date_created'}"
+                />
             </search>
         </field>
     </record>

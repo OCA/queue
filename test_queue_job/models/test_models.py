@@ -1,6 +1,7 @@
 # Copyright 2016 Camptocamp SA
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+import functools
 from datetime import datetime, timedelta
 
 from odoo import api, fields, models
@@ -127,15 +128,20 @@ class ModelTestQueueJob(models.Model):
         return "ok"
 
     def _register_hook(self):
-        self._patch_method("delay_me", self._patch_job_auto_delay("delay_me"))
-        self._patch_method(
-            "delay_me_options", self._patch_job_auto_delay("delay_me_options")
+        patched = self._patch_job_auto_delay("delay_me")
+        type(self).delay_me = functools.update_wrapper(patched, type(self).delay_me)
+
+        patched = self._patch_job_auto_delay("delay_me_options")
+        type(self).delay_me_options = functools.update_wrapper(
+            patched, type(self).delay_me_options
         )
-        self._patch_method(
+
+        patched = self._patch_job_auto_delay(
             "delay_me_context_key",
-            self._patch_job_auto_delay(
-                "delay_me_context_key", context_key="auto_delay_delay_me_context_key"
-            ),
+            context_key="auto_delay_delay_me_context_key",
+        )
+        type(self).delay_me_context_key = functools.update_wrapper(
+            patched, type(self).delay_me_context_key
         )
         return super()._register_hook()
 
