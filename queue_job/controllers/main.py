@@ -40,7 +40,7 @@ class RunJobController(http.Controller):
         """
         env.cr.execute(
             "SELECT uuid FROM queue_job WHERE uuid=%s AND state=%s "
-            "FOR UPDATE SKIP LOCKED",
+            "FOR NO KEY UPDATE SKIP LOCKED",
             (job_uuid, ENQUEUED),
         )
         if not env.cr.fetchone():

@@ -369,7 +369,7 @@ class Database:
                             queue_job_lock
                         WHERE
                             queue_job_lock.queue_job_id = queue_job.id
-                        FOR UPDATE SKIP LOCKED
+                        FOR NO KEY UPDATE SKIP LOCKED
                     )
                     OR NOT EXISTS (
                         SELECT

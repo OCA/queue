@@ -278,7 +278,7 @@ class Job:
                         uuid = %s
                         AND state = %s
                 )
-            FOR UPDATE SKIP LOCKED;
+            FOR NO KEY UPDATE SKIP LOCKED;
         """,
             [self.uuid, STARTED],
         )
