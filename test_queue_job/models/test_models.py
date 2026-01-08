@@ -141,6 +141,13 @@ class ModelTestQueueJob(models.Model):
         )
         return super()._register_hook()
 
+    def _unregister_hook(self):
+        """Remove the patches installed by _register_hook()"""
+        self._revert_method("delay_me")
+        self._revert_method("delay_me_options")
+        self._revert_method("delay_me_context_key")
+        return super()._unregister_hook()
+
     def _job_store_values(self, job):
         value = "JUST_TESTING"
         if job.state == "failed":
