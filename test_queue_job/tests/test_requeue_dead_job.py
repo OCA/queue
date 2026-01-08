@@ -13,23 +13,6 @@ from .common import JobCommonCase
 
 @tagged("post_install", "-at_install")
 class TestRequeueDeadJob(JobCommonCase):
-    def _get_demo_job(self, uuid):
-        # job created during load of demo data
-        job = self.env["queue.job"].search(
-            [
-                ("uuid", "=", uuid),
-            ],
-            limit=1,
-        )
-
-        self.assertTrue(
-            job,
-            f"Demo data queue job {uuid} should be loaded in order"
-            " to make this tests work",
-        )
-
-        return job
-
     def get_locks(self, uuid, cr=None):
         """
         Retrieve lock rows
@@ -52,7 +35,7 @@ class TestRequeueDeadJob(JobCommonCase):
                     WHERE
                         uuid = %s
                 )
-            FOR UPDATE SKIP LOCKED
+            FOR NO KEY UPDATE SKIP LOCKED
             """,
             [uuid],
         )
@@ -97,5 +80,21 @@ class TestRequeueDeadJob(JobCommonCase):
         query = Database(self.env.cr.dbname)._query_requeue_dead_jobs()
         self.env.cr.execute(query)
 
+        uuids_requeued = self.env.cr.fetchall()
+        self.assertTrue(queue_job.uuid in j[0] for j in uuids_requeued)
+
+    def test_requeue_orphaned_jobs(self):
+        queue_job = self._get_demo_job("test_enqueued_job")
+        job_obj = Job.load(self.env, queue_job.uuid)
+
+        # Only enqueued job, don't set it to started to simulate the scenario
+        # that system shutdown before job is starting
+        job_obj.set_enqueued()
+        job_obj.date_enqueued = datetime.now() - timedelta(minutes=1)
+        job_obj.store()
+
+        # job is now picked up by the requeue query (which includes orphaned jobs)
+        query = Database(self.env.cr.dbname)._query_requeue_dead_jobs()
+        self.env.cr.execute(query)
         uuids_requeued = self.env.cr.fetchall()
         self.assertTrue(queue_job.uuid in j[0] for j in uuids_requeued)

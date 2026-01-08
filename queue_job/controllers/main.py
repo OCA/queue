@@ -27,15 +27,48 @@ DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE = 5
 
 
 class RunJobController(http.Controller):
-    def _try_perform_job(self, env, job):
-        """Try to perform the job."""
+    @classmethod
+    def _acquire_job(cls, env: api.Environment, job_uuid: str) -> Job | None:
+        """Acquire a job for execution.
+
+        - make sure it is in ENQUEUED state
+        - mark it as STARTED and commit the state change
+        - acquire the job lock
+
+        If successful, return the Job instance, otherwise return None. This
+        function may fail to acquire the job is not in the expected state or is
+        already locked by another worker.
+        """
+        env.cr.execute(
+            "SELECT uuid FROM queue_job WHERE uuid=%s AND state=%s "
+            "FOR NO KEY UPDATE SKIP LOCKED",
+            (job_uuid, ENQUEUED),
+        )
+        if not env.cr.fetchone():
+            _logger.warning(
+                "was requested to run job %s, but it does not exist, "
+                "or is not in state %s, or is being handled by another worker",
+                job_uuid,
+                ENQUEUED,
+            )
+            return None
+        job = Job.load(env, job_uuid)
+        assert job and job.state == ENQUEUED
         job.set_started()
         job.store()
         env.cr.commit()
-        job.lock()
+        if not job.lock():
+            _logger.warning(
+                "was requested to run job %s, but it could not be locked",
+                job_uuid,
+            )
+            return None
+        return job
 
+    @classmethod
+    def _try_perform_job(cls, env, job):
+        """Try to perform the job, mark it done and commit if successful."""
         _logger.debug("%s started", job)
-
         job.perform()
         # Triggers any stored computed fields before calling 'set_done'
         # so that will be part of the 'exec_time'
@@ -46,18 +79,20 @@ class RunJobController(http.Controller):
         env.cr.commit()
         _logger.debug("%s done", job)
 
-    def _enqueue_dependent_jobs(self, env, job):
+    @classmethod
+    def _enqueue_dependent_jobs(cls, env, job):
         tries = 0
         while True:
             try:
-                job.enqueue_waiting()
+                with job.env.cr.savepoint():
+                    job.enqueue_waiting()
             except OperationalError as err:
                 # Automatically retry the typical transaction serialization
                 # errors
                 if err.pgcode not in PG_CONCURRENCY_ERRORS_TO_RETRY:
                     raise
                 if tries >= DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE:
-                    _logger.info(
+                    _logger.error(
                         "%s, maximum number of tries reached to update dependencies",
                         errorcodes.lookup(err.pgcode),
                     )
@@ -75,17 +110,8 @@ class RunJobController(http.Controller):
             else:
                 break
 
-    @http.route(
-        "/queue_job/runjob",
-        type="http",
-        auth="none",
-        save_session=False,
-        readonly=False,
-    )
-    def runjob(self, db, job_uuid, **kw):
-        http.request.session.db = db
-        env = http.request.env(user=SUPERUSER_ID)
-
+    @classmethod
+    def _runjob(cls, env: api.Environment, job: Job) -> None:
         def retry_postpone(job, message, seconds=None):
             job.env.clear()
             with Registry(job.env.cr.dbname).cursor() as new_cr:
@@ -94,26 +120,9 @@ class RunJobController(http.Controller):
                 job.set_pending(reset_retry=False)
                 job.store()
 
-        # ensure the job to run is in the correct state and lock the record
-        env.cr.execute(
-            "SELECT state FROM queue_job WHERE uuid=%s AND state=%s FOR UPDATE",
-            (job_uuid, ENQUEUED),
-        )
-        if not env.cr.fetchone():
-            _logger.warning(
-                "was requested to run job %s, but it does not exist, "
-                "or is not in state %s",
-                job_uuid,
-                ENQUEUED,
-            )
-            return ""
-
-        job = Job.load(env, job_uuid)
-        assert job and job.state == ENQUEUED
-
         try:
             try:
-                self._try_perform_job(env, job)
+                cls._try_perform_job(env, job)
             except OperationalError as err:
                 # Automatically retry the typical transaction serialization
                 # errors
@@ -131,7 +140,6 @@ class RunJobController(http.Controller):
             # traceback in the logs we should have the traceback when all
             # retries are exhausted
             env.cr.rollback()
-            return ""
 
         except (FailedJobError, Exception) as orig_exception:
             buff = StringIO()
@@ -141,19 +149,18 @@ class RunJobController(http.Controller):
             job.env.clear()
             with Registry(job.env.cr.dbname).cursor() as new_cr:
                 job.env = job.env(cr=new_cr)
-                vals = self._get_failure_values(job, traceback_txt, orig_exception)
+                vals = cls._get_failure_values(job, traceback_txt, orig_exception)
                 job.set_failed(**vals)
                 job.store()
                 buff.close()
             raise
 
         _logger.debug("%s enqueue depends started", job)
-        self._enqueue_dependent_jobs(env, job)
+        cls._enqueue_dependent_jobs(env, job)
         _logger.debug("%s enqueue depends done", job)
 
-        return ""
-
-    def _get_failure_values(self, job, traceback_txt, orig_exception):
+    @classmethod
+    def _get_failure_values(cls, job, traceback_txt, orig_exception):
         """Collect relevant data from exception."""
         exception_name = orig_exception.__class__.__name__
         if hasattr(orig_exception, "__module__"):
@@ -167,6 +174,22 @@ class RunJobController(http.Controller):
             "exc_message": exc_message,
         }
 
+    @http.route(
+        "/queue_job/runjob",
+        type="http",
+        auth="none",
+        save_session=False,
+        readonly=False,
+    )
+    def runjob(self, db, job_uuid, **kw):
+        http.request.session.db = db
+        env = http.request.env(user=SUPERUSER_ID)
+        job = self._acquire_job(env, job_uuid)
+        if not job:
+            return ""
+        self._runjob(env, job)
+        return ""
+
     # flake8: noqa: C901
     @http.route("/queue_job/create_test_job", type="http", auth="user")
     def create_test_job(
@@ -177,6 +200,7 @@ class RunJobController(http.Controller):
         description="Test job",
         size=1,
         failure_rate=0,
+        job_duration=0,
     ):
         if not http.request.env.user.has_group("base.group_erp_manager"):
             raise Forbidden(http.request.env._("Access Denied"))
@@ -186,6 +210,12 @@ class RunJobController(http.Controller):
                 failure_rate = float(failure_rate)
             except (ValueError, TypeError):
                 failure_rate = 0
+
+        if job_duration is not None:
+            try:
+                job_duration = float(job_duration)
+            except (ValueError, TypeError):
+                job_duration = 0
 
         if not (0 <= failure_rate <= 1):
             raise BadRequest("failure_rate must be between 0 and 1")
@@ -215,6 +245,7 @@ class RunJobController(http.Controller):
                 channel=channel,
                 description=description,
                 failure_rate=failure_rate,
+                job_duration=job_duration,
             )
 
         if size > 1:
@@ -225,6 +256,7 @@ class RunJobController(http.Controller):
                 channel=channel,
                 description=description,
                 failure_rate=failure_rate,
+                job_duration=job_duration,
             )
         return ""
 
@@ -236,6 +268,7 @@ class RunJobController(http.Controller):
         description="Test job",
         size=1,
         failure_rate=0,
+        job_duration=0,
     ):
         delayed = (
             http.request.env["queue.job"]
@@ -245,7 +278,7 @@ class RunJobController(http.Controller):
                 channel=channel,
                 description=description,
             )
-            ._test_job(failure_rate=failure_rate)
+            ._test_job(failure_rate=failure_rate, job_duration=job_duration)
         )
         return f"job uuid: {delayed.db_record().uuid}"
 
@@ -259,6 +292,7 @@ class RunJobController(http.Controller):
         channel=None,
         description="Test job",
         failure_rate=0,
+        job_duration=0,
     ):
         model = http.request.env["queue.job"]
         current_count = 0
@@ -281,7 +315,7 @@ class RunJobController(http.Controller):
                         max_retries=max_retries,
                         channel=channel,
                         description=f"{description} #{current_count}",
-                    )._test_job(failure_rate=failure_rate)
+                    )._test_job(failure_rate=failure_rate, job_duration=job_duration)
                 )
 
             grouping = random.choice(possible_grouping_methods)

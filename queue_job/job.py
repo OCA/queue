@@ -222,7 +222,7 @@ class Job:
         recordset = cls.db_records_from_uuids(env, job_uuids)
         return {cls._load_from_db_record(record) for record in recordset}
 
-    def add_lock_record(self):
+    def add_lock_record(self) -> None:
         """
         Create row in db to be locked while the job is being performed.
         """
@@ -242,13 +242,11 @@ class Job:
             [self.uuid],
         )
 
-    def lock(self):
-        """
-        Lock row of job that is being performed
+    def lock(self) -> bool:
+        """Lock row of job that is being performed.
 
-        If a job cannot be locked,
-        it means that the job wasn't started,
-        a RetryableJobError is thrown.
+        Return False if a job cannot be locked: it means that the job is not in
+        STARTED state or is already locked by another worker.
         """
         self.env.cr.execute(
             """
@@ -264,18 +262,15 @@ class Job:
                         queue_job
                     WHERE
                         uuid = %s
-                        AND state='started'
+                        AND state = %s
                 )
-            FOR UPDATE;
+            FOR NO KEY UPDATE SKIP LOCKED;
         """,
-            [self.uuid],
+            [self.uuid, STARTED],
         )
 
         # 1 job should be locked
-        if 1 != len(self.env.cr.fetchall()):
-            raise RetryableJobError(
-                f"Trying to lock job that wasn't started, uuid: {self.uuid}"
-            )
+        return bool(self.env.cr.fetchall())
 
     @classmethod
     def _load_from_db_record(cls, job_db_record):
