@@ -64,11 +64,7 @@
                 <field name="name" />
                 <field name="state" />
                 <field name="user_id" />
-                <field
-                    name="company_id"
-                    groups="base.group_multi_company"
-                    widget="selection"
-                />
+                <field name="company_id" groups="base.group_multi_company" />
                 <filter
                     name="my_batches"
                     string="My batches"
@@ -96,18 +92,17 @@
                     string="Finished"
                     domain="[('state', '=', 'finished')]"
                 />
-                <group expand="0" string="Group By">
-                    <filter
-                        name="group_by_state"
-                        string="State"
-                        context="{'group_by': 'state'}"
-                    />
-                    <filter
-                        name="group_by_user"
-                        string="User"
-                        context="{'group_by': 'user_id'}"
-                    />
-                </group>
+                <separator />
+                <filter
+                    name="group_by_state"
+                    string="State"
+                    context="{'group_by': 'state'}"
+                />
+                <filter
+                    name="group_by_user"
+                    string="User"
+                    context="{'group_by': 'user_id'}"
+                />
             </search>
         </field>
     </record>
