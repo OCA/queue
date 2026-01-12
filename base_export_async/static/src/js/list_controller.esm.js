@@ -1,16 +1,21 @@
 /** @odoo-module **/
 
-import {blockUI, unblockUI} from "web.framework";
-
-import Dialog from "web.Dialog";
+import {AlertDialog} from "@web/core/confirmation_dialog/confirmation_dialog";
 import {ListController} from "@web/views/list/list_controller";
-import {_t} from "web.core";
+import {_t} from "@web/core/l10n/translation";
 import {download} from "@web/core/network/download";
 import {patch} from "@web/core/utils/patch";
+import {useService} from "@web/core/utils/hooks";
 
-patch(ListController.prototype, "base_export_async", {
+patch(ListController.prototype, {
+    setup() {
+        super.setup();
+        this.uiService = useService("ui");
+        this.orm = useService("orm");
+    },
     async downloadExport(fields, import_compat, format, async = false) {
         let ids = false;
+        var self = this;
         if (!this.isDomainSelected) {
             const resIds = await this.getSelectedResIds();
             ids = resIds.length > 0 && resIds;
@@ -22,13 +27,13 @@ patch(ListController.prototype, "base_export_async", {
             type: field.field_type || field.type,
         }));
         if (import_compat) {
-            exportedFields.unshift({name: "id", label: this.env._t("External ID")});
+            exportedFields.unshift({name: "id", label: _t("External ID")});
         }
         if (async) {
             /*
                 Call the delay export if Async is checked
             */
-            blockUI();
+            this.uiService.block();
             const args = [
                 {
                     data: JSON.stringify({
@@ -43,15 +48,13 @@ patch(ListController.prototype, "base_export_async", {
                     }),
                 },
             ];
-            const orm = this.env.services.orm;
-            orm.call("delay.export", "delay_export", args).then(function () {
-                unblockUI();
-                Dialog.alert(
-                    this,
-                    _t(
+            this.orm.call("delay.export", "delay_export", args).then(function () {
+                self.uiService.unblock();
+                self.model.dialog.add(AlertDialog, {
+                    body: _t(
                         "You will receive the export file by email as soon as it is finished."
-                    )
-                );
+                    ),
+                });
             });
         } else {
             await download({

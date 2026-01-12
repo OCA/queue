@@ -4,12 +4,15 @@
 {
     "name": "Base Export Async",
     "summary": "Asynchronous export with job queue",
-    "version": "16.0.1.2.0",
+    "version": "17.0.1.0.0",
     "license": "AGPL-3",
     "author": "ACSONE SA/NV, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/queue",
     "depends": ["web", "queue_job"],
     "data": [
+        # added this additional rule as when the export happens
+        # from queue job module there is no user is there,
+        # which was causing an issue when fetching res.currency
         "security/ir.model.access.csv",
         "security/ir_rule.xml",
         "data/config_parameter.xml",

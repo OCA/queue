@@ -7,8 +7,9 @@ import operator
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import _, api, fields, models
+from odoo import SUPERUSER_ID, _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.http import request
 
 from odoo.addons.web.controllers.export import CSVExport, ExcelExport
 
@@ -39,8 +40,10 @@ class DelayExport(models.Model):
         )(params)
         (model_name, fields_name, ids, domain, import_compat, context, user_ids) = items
 
-        model = self.env[model_name].with_context(
-            import_compat=import_compat, **context
+        model = (
+            self.env[model_name]
+            .sudo()
+            .with_context(import_compat=import_compat, **context)
         )
         records = model.browse(ids) or model.search(
             domain, offset=0, limit=False, order=False
@@ -56,6 +59,14 @@ class DelayExport(models.Model):
             columns_headers = field_names
         else:
             columns_headers = [val["label"].strip() for val in fields_name]
+
+        # Patch:
+        # ensure request.env is set with a valid uid before triggering ExportXlsxWriter
+        if export_format != "csv":
+            if not hasattr(request, "env") or request.env.uid is None:
+                request.env = api.Environment(
+                    self.env.cr, SUPERUSER_ID, self.env.context
+                )
 
         if export_format == "csv":
             csv = CSVExport()
@@ -73,7 +84,7 @@ class DelayExport(models.Model):
         * format: csv/excel
         * model: model to export
         * fields: list of fields to export, a list of dict:
-          [{'label': '', 'name': ''}]
+          [{"label": "", "name": ""}]
         * ids: list of ids to export
         * domain: domain for the export
         * context: context for the export (language, ...)
@@ -88,19 +99,15 @@ class DelayExport(models.Model):
 
         export_record = self.sudo().create({"user_ids": [(6, 0, users.ids)]})
 
-        name = "{}.{}".format(model_name, export_format)
-        attachment = (
-            self.env["ir.attachment"]
-            .sudo()
-            .create(
-                {
-                    "name": name,
-                    "datas": base64.b64encode(content),
-                    "type": "binary",
-                    "res_model": self._name,
-                    "res_id": export_record.id,
-                }
-            )
+        name = f"{model_name}.{export_format}"
+        attachment = self.env["ir.attachment"].create(
+            {
+                "name": name,
+                "datas": base64.b64encode(content),
+                "type": "binary",
+                "res_model": self._name,
+                "res_id": export_record.id,
+            }
         )
 
         url = "{}/web/content/ir.attachment/{}/datas/{}?download=true".format(
@@ -108,10 +115,6 @@ class DelayExport(models.Model):
             attachment.id,
             attachment.name,
         )
-
-        if any(user.has_group("base.group_portal") for user in users):
-            attachment.generate_access_token()
-            url += f"&access_token={attachment.access_token}"
 
         time_to_live = (
             self.env["ir.config_parameter"].sudo().get_param("attachment.ttl", 7)

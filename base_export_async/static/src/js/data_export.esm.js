@@ -2,11 +2,13 @@
 
 import {ExportDataDialog} from "@web/views/view_dialogs/export_data_dialog";
 import {patch} from "@web/core/utils/patch";
+import {useService} from "@web/core/utils/hooks";
 
-patch(ExportDataDialog.prototype, "base_export_async", {
+patch(ExportDataDialog.prototype, {
     setup() {
-        this._super();
+        super.setup();
         this.state.async = false;
+        this.notification = useService("notification");
     },
     onToggleExportAsync(value) {
         this.state.async = value;
