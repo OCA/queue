@@ -19,9 +19,9 @@ OPT_HAS_HEADER = "headers"
 OPT_SEPARATOR = "separator"
 OPT_QUOTING = "quoting"
 OPT_ENCODING = "encoding"
+OPT_CHUNK_SIZE = "limit"
 # options defined in base_import_async/import.js
 OPT_USE_QUEUE = "use_queue"
-OPT_CHUNK_SIZE = "chunk_size"
 # option not available in UI, but usable from scripts
 OPT_PRIORITY = "priority"
 
