@@ -17,7 +17,7 @@ from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
 from ..delay import chain, group
 from ..exception import FailedJobError, RetryableJobError
-from ..job import ENQUEUED, Job
+from ..job import DONE, ENQUEUED, Job
 
 _logger = logging.getLogger(__name__)
 
@@ -155,9 +155,12 @@ class RunJobController(http.Controller):
                 buff.close()
             raise
 
-        _logger.debug("%s enqueue depends started", job)
-        cls._enqueue_dependent_jobs(env, job)
-        _logger.debug("%s enqueue depends done", job)
+        if job.state == DONE:
+            # if not, then job.env.cr could be closed
+            # besides, we would not want to trigger dependent jobs anyway
+            _logger.debug("%s enqueue depends started", job)
+            cls._enqueue_dependent_jobs(env, job)
+            _logger.debug("%s enqueue depends done", job)
 
     @classmethod
     def _get_failure_values(cls, job, traceback_txt, orig_exception):
