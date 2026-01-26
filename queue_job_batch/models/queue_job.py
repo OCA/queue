@@ -3,8 +3,6 @@
 
 from odoo import api, fields, models
 
-from odoo.addons.queue_job.job import identity_exact
-
 
 class QueueJob(models.Model):
     _inherit = "queue.job"
@@ -20,13 +18,19 @@ class QueueJob(models.Model):
         return super().create(vals_list)
 
     def write(self, vals):
-        if vals.get("state", "") == "done":
+        new_state = vals.get("state", "")
+        # Trigger check_state for any terminal state (done, cancelled, failed)
+        if new_state in ("done", "cancelled", "failed"):
             batches = self.env["queue.job.batch"]
             for record in self:
-                if record.state != "done" and record.job_batch_id:
+                # Only trigger if the job wasn't already in a terminal state
+                if (
+                    record.state not in ("done", "cancelled", "failed")
+                    and record.job_batch_id
+                ):
                     batches |= record.job_batch_id
             for batch in batches:
-                # We need to make it with delay in order to prevent two jobs
-                # to work with the same batch
-                batch.with_delay(identity_key=identity_exact).check_state()
+                # Run check_state without identity_key to prevent race condition
+                # where deduplication causes the last job's check_state to be skipped
+                batch.with_delay().check_state()
         return super().write(vals)
