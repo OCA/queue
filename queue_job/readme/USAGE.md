@@ -290,7 +290,8 @@ running Odoo**
 When you are developing (ie: connector modules) you might want to bypass
 the queue job and run your code immediately.
 
-To do so you can set QUEUE_JOB\_\_NO_DELAY=1 in your environment.
+To do so you can set QUEUE_JOB\_\_NO_DELAY=1 in your environment,
+or include queue_job__no_delay=True in your Odoo server configuration.
 
 **Bypass jobs in tests**
 
@@ -407,7 +408,8 @@ def test_method_to_test(self):
 When you are developing (ie: connector modules) you might want to bypass
 the queue job and run your code immediately.
 
-To do so you can set `QUEUE_JOB__NO_DELAY=1` in your environment.
+To do so you can set `QUEUE_JOB__NO_DELAY=1` in your environment,
+or include queue_job__no_delay=True in your Odoo server configuration.
 
 Warning
 
