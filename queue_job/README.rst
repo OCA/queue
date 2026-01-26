@@ -1,7 +1,3 @@
-.. image:: https://odoo-community.org/readme-banner-image
-   :target: https://odoo-community.org/get-involved?utm_source=readme
-   :alt: Odoo Community Association
-
 =========
 Job Queue
 =========
@@ -17,7 +13,7 @@ Job Queue
 .. |badge1| image:: https://img.shields.io/badge/maturity-Mature-brightgreen.png
     :target: https://odoo-community.org/page/development-status
     :alt: Mature
-.. |badge2| image:: https://img.shields.io/badge/license-LGPL--3-blue.png
+.. |badge2| image:: https://img.shields.io/badge/licence-LGPL--3-blue.png
     :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
     :alt: License: LGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github
@@ -129,10 +125,14 @@ Configuration
 
     - ``ODOO_QUEUE_JOB_CHANNELS=root:4`` or any other channels
       configuration. The default is ``root:1``
-    - if ``xmlrpc_port`` is not set: ``ODOO_QUEUE_JOB_PORT=8069``
-
-  - Start Odoo with ``--load=web,queue_job`` and ``--workers`` greater
-    than 1. [1]_
+    - ``ODOO_QUEUE_JOB_PORT=8069``, default ``--http-port``
+    - ``ODOO_QUEUE_JOB_SCHEME=https``, default ``http``
+    - ``ODOO_QUEUE_JOB_HOST=load-balancer``, default
+      ``--http-interface`` or ``localhost`` if unset
+    - ``ODOO_QUEUE_JOB_HTTP_AUTH_USER=jobrunner``, default empty
+    - ``ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t``, default empty
+    - Start Odoo with ``--load=web,queue_job`` and ``--workers`` greater
+      than 1. [1]_
 
 - Using the Odoo configuration file:
 
@@ -146,6 +146,11 @@ Configuration
    (...)
    [queue_job]
    channels = root:2
+   scheme = https
+   host = load-balancer
+   port = 443
+   http_auth_user = jobrunner
+   http_auth_password = s3cr3t
 
 - Confirm the runner is starting correctly by checking the odoo log
   file:
@@ -657,21 +662,6 @@ Known issues / Roadmap
 
 - After creating a new database or installing ``queue_job`` on an
   existing database, Odoo must be restarted for the runner to detect it.
-- When Odoo shuts down normally, it waits for running jobs to finish.
-  However, when the Odoo server crashes or is otherwise force-stopped,
-  running jobs are interrupted while the runner has no chance to know
-  they have been aborted. In such situations, jobs may remain in
-  ``started`` or ``enqueued`` state after the Odoo server is halted.
-  Since the runner has no way to know if they are actually running or
-  not, and does not know for sure if it is safe to restart the jobs, it
-  does not attempt to restart them automatically. Such stale jobs
-  therefore fill the running queue and prevent other jobs to start. You
-  must therefore requeue them manually, either from the Jobs view, or by
-  running the following SQL statement *before starting Odoo*:
-
-.. code:: sql
-
-   update queue_job set state='pending' where state in ('started', 'enqueued')
 
 Changelog
 =========
@@ -737,10 +727,13 @@ promote its widespread use.
 .. |maintainer-guewen| image:: https://github.com/guewen.png?size=40px
     :target: https://github.com/guewen
     :alt: guewen
+.. |maintainer-sbidoul| image:: https://github.com/sbidoul.png?size=40px
+    :target: https://github.com/sbidoul
+    :alt: sbidoul
 
-Current `maintainer <https://odoo-community.org/page/maintainer-role>`__:
+Current `maintainers <https://odoo-community.org/page/maintainer-role>`__:
 
-|maintainer-guewen| 
+|maintainer-guewen| |maintainer-sbidoul| 
 
 This module is part of the `OCA/queue <https://github.com/OCA/queue/tree/17.0/queue_job>`_ project on GitHub.
 
