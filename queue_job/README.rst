@@ -1,7 +1,3 @@
-.. image:: https://odoo-community.org/readme-banner-image
-   :target: https://odoo-community.org/get-involved?utm_source=readme
-   :alt: Odoo Community Association
-
 =========
 Job Queue
 =========
@@ -17,7 +13,7 @@ Job Queue
 .. |badge1| image:: https://img.shields.io/badge/maturity-Mature-brightgreen.png
     :target: https://odoo-community.org/page/development-status
     :alt: Mature
-.. |badge2| image:: https://img.shields.io/badge/license-LGPL--3-blue.png
+.. |badge2| image:: https://img.shields.io/badge/licence-LGPL--3-blue.png
     :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
     :alt: License: LGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github
@@ -99,10 +95,14 @@ Configuration
 
     - ``ODOO_QUEUE_JOB_CHANNELS=root:4`` or any other channels
       configuration. The default is ``root:1``
-    - if ``xmlrpc_port`` is not set: ``ODOO_QUEUE_JOB_PORT=8069``
-
-  - Start Odoo with ``--load=web,queue_job`` and ``--workers`` greater
-    than 1. [1]_
+    - ``ODOO_QUEUE_JOB_PORT=8069``, default ``--http-port``
+    - ``ODOO_QUEUE_JOB_SCHEME=https``, default ``http``
+    - ``ODOO_QUEUE_JOB_HOST=load-balancer``, default
+      ``--http-interface`` or ``localhost`` if unset
+    - ``ODOO_QUEUE_JOB_HTTP_AUTH_USER=jobrunner``, default empty
+    - ``ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t``, default empty
+    - Start Odoo with ``--load=web,queue_job`` and ``--workers`` greater
+      than 1. [1]_
 
 - Using the Odoo configuration file:
 
@@ -116,6 +116,11 @@ Configuration
    (...)
    [queue_job]
    channels = root:2
+   scheme = https
+   host = load-balancer
+   port = 443
+   http_auth_user = jobrunner
+   http_auth_password = s3cr3t
 
 - Confirm the runner is starting correctly by checking the odoo log
   file:
