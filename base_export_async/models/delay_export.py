@@ -88,7 +88,7 @@ class DelayExport(models.Model):
 
         export_record = self.sudo().create({"user_ids": [(6, 0, users.ids)]})
 
-        name = "{}.{}".format(model_name, export_format)
+        name = f"{model_name}.{export_format}"
         attachment = (
             self.env["ir.attachment"]
             .sudo()
