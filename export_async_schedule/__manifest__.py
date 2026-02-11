@@ -4,8 +4,8 @@
 {
     "name": "Scheduled Asynchronous Export",
     "summary": "Generate and send exports by emails on a schedule",
-    "version": "14.0.1.0.1",
-    "author": "Camptocamp, Odoo Community Association (OCA)",
+    "version": "17.0.1.0.0",
+    "author": "Camptocamp, ACSONE SA/NV, Odoo Community Association (OCA)",
     "license": "AGPL-3",
     "website": "https://github.com/OCA/queue",
     "category": "Generic Modules",

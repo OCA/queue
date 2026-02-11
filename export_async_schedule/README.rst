@@ -90,6 +90,7 @@ Authors
 -------
 
 * Camptocamp
+* ACSONE SA/NV
 
 Contributors
 ------------
@@ -99,8 +100,15 @@ Contributors
 
   - Cuong Nguyen Mtm <cuong.nmtm@komit-consulting.com>
 
+- Stéphane Mangin (ACSONE SA/NV)
+
 Other credits
 -------------
+
+The migration of this module from 14.0 to 17.0 was financially supported
+by:
+
+- ACSONE SA/NV (https://www.acsone.eu/)
 
 The migration of this module from 13.0 to 14.0 was financially supported
 by:
