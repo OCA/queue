@@ -10,7 +10,7 @@ from odoo.tests import common
 from odoo.addons.queue_job.tests.common import mock_with_delay
 
 
-class TestExportAsyncSchedule(common.SavepointCase):
+class TestExportAsyncSchedule(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()

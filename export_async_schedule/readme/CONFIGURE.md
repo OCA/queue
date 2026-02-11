@@ -11,5 +11,5 @@ To configure a scheduled export:
 - open "Settings → Technical → Automation → Scheduled Exports"
 - create a scheduled export by filling the form
 
-A Scheduled Action named "Send Scheduled Exports" checks every hour if
-Scheduled Exports have to be executed.
+A Scheduled Action named "Send Scheduled Exports" checks every hour if Scheduled Exports
+have to be executed.
