@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+  <record id="view_export_async_schedule_tree" model="ir.ui.view">
+    <field name="name">export.async.schedule.tree</field>
+    <field name="model">export.async.schedule</field>
+    <field name="arch" type="xml">
+      <tree decoration-muted="not active" decoration-info="group_id">
+          <field
+                    name="active"
+                    widget="boolean_toggle"
+                    options='{"terminology": "archive"}'
+                />
+        <field name="display_name" />
+        <field name="group_id" optional="show" />
+        <field name="model_id" optional="show" />
+        <field name="ir_export_id" optional="show" />
+        <field name="user_ids" widget="many2many_tags" optional="hide" />
+        <field name="export_format" widget="badge" optional="hide" />
+        <field name="interval" optional="hide" />
+        <field name="interval_unit" optional="hide" />
+        <field name="next_execution" widget="remaining_days" />
+        <field name="lang" optional="hide" />
+      </tree>
+    </field>
+  </record>
+
+  <record id="view_export_async_schedule_form" model="ir.ui.view">
+    <field name="name">export.async.schedule.form</field>
+    <field name="model">export.async.schedule</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button
+                        name="action_export"
+                        type="object"
+                        string="Test Export Now"
+                        class="btn-primary"
+                        invisible="group_id"
+                        icon="fa-play-circle"
+                    />
+          <div class="alert alert-info mb-0" role="alert" invisible="not group_id">
+            <i class="fa fa-info-circle" title="Information" />
+            Execution and scheduling are controlled by the group.
+          </div>
+        </header>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button
+                            name="toggle_active"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-archive"
+                        >
+              <field
+                                name="active"
+                                widget="boolean_button"
+                                options='{"terminology": "archive"}'
+                            />
+            </button>
+          </div>
+          <div class="oe_title">
+            <h1>
+              <field name="display_name" readonly="1" class="o_text_overflow" />
+            </h1>
+            <div invisible="not group_id" class="o_row">
+              <span>Part of:</span>
+              <field name="group_id" options="{'no_create': True}" readonly="1" />
+            </div>
+          </div>
+          <group>
+            <group name="configuration" string="Export Configuration">
+              <field
+                                name="model_id"
+                                options="{'no_open': True, 'no_create_edit': True}"
+                            />
+              <field name="model_name" invisible="1" />
+              <field
+                                name="ir_export_id"
+                                options="{'no_open': True, 'no_create_edit': True}"
+                            />
+              <field name="export_format" widget="radio" />
+              <field name="import_compat" />
+              <field
+                                name="domain"
+                                widget="domain"
+                                options="{'model': 'model_name', 'in_dialog': True}"
+                            />
+            </group>
+          </group>
+          <group name="scheduling_section" invisible="group_id">
+            <group name="delivery" string="Delivery Settings">
+              <field
+                                name="user_ids"
+                                widget="many2many_tags"
+                                options="{'color_field': 'color', 'no_open': True}"
+                            />
+              <field name="lang" />
+            </group>
+            <group name="scheduling" string="Scheduling">
+              <label for="interval" />
+              <div class="o_row">
+                <field name="interval" class="oe_inline" />
+                <field name="interval_unit" class="oe_inline" />
+              </div>
+              <field name="end_of_month" invisible="interval_unit != 'months'" />
+              <field name="next_execution" />
+            </group>
+          </group>
+        </sheet>
+        <div class="oe_chatter">
+          <field name="message_follower_ids" />
+          <field name="activity_ids" />
+          <field name="message_ids" />
+        </div>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_export_async_schedule_search" model="ir.ui.view">
+    <field name="name">export.async.schedule.search</field>
+    <field name="model">export.async.schedule</field>
+    <field name="arch" type="xml">
+      <search string="Scheduled Exports">
+        <field name="display_name" string="Export" />
+        <field name="model_id" />
+        <field name="group_id" />
+        <field name="ir_export_id" />
+        <field name="user_ids" />
+        <field name="next_execution" />
+        <separator />
+        <filter string="Archived" name="inactive" domain="[('active', '=', False)]" />
+        <separator />
+        <filter
+                    string="Standalone"
+                    name="standalone"
+                    domain="[('group_id', '=', False)]"
+                    help="Exports not part of any group"
+                />
+        <group expand="0" string="Group By">
+            <filter
+                        name="groupby_group"
+                        string="Group"
+                        domain="[]"
+                        context="{'group_by': 'group_id'}"
+                    />
+          <filter
+                        string="Model"
+                        name="groupby_model"
+                        domain="[]"
+                        context="{'group_by': 'model_id'}"
+                    />
+          <filter
+                        string="Frequency"
+                        name="groupby_frequency"
+                        domain="[]"
+                        context="{'group_by': 'interval_unit'}"
+                    />
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_export_async_schedule" model="ir.actions.act_window">
+    <field name="name">Scheduled Exports</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">export.async.schedule</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'search_default_active': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Create your first scheduled export
+      </p>
+      <p>
+        Schedule exports to be automatically sent by email on a regular basis.
+        <br />
+        You can configure the frequency, recipients, and export format.
+      </p>
+    </field>
+  </record>
+
+  <menuitem
+        id="menu_export_async_schedule"
+        action="action_export_async_schedule"
+        parent="base.menu_automation"
+    />
+</odoo>

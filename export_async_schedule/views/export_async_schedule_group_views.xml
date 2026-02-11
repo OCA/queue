@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+  <!-- Simplified views for export_ids field in group form -->
+  <record id="view_export_async_schedule_simplified_tree" model="ir.ui.view">
+    <field name="name">export.async.schedule.tree.simplified</field>
+    <field name="model">export.async.schedule</field>
+    <field name="arch" type="xml">
+      <tree>
+          <field
+                    name="active"
+                    widget="boolean_toggle"
+                    options='{"terminology": "archive"}'
+                />
+        <field name="display_name" />
+        <field name="model_id" optional="show" />
+        <field name="export_format" widget="badge" />
+        <field name="import_compat" widget="boolean_toggle" optional="show" />
+        <field name="domain" optional="hide" />
+      </tree>
+    </field>
+  </record>
+
+  <record id="view_export_async_schedule_simplified_form" model="ir.ui.view">
+    <field name="name">export.async.schedule.form.simplified</field>
+    <field name="model">export.async.schedule</field>
+    <field name="arch" type="xml">
+      <form>
+        <group>
+          <field name="group_id" invisible="1" />
+          <field name="user_ids" invisible="1" />
+          <field name="model_id" options="{'no_open': True, 'no_create_edit': True}" />
+          <field name="model_name" invisible="1" />
+          <field
+                        name="ir_export_id"
+                        options="{'no_open': True, 'no_create_edit': True}"
+                    />
+          <field
+                        name="domain"
+                        widget="domain"
+                        options="{'model': 'model_name', 'in_dialog': True}"
+                    />
+          <field name="export_format" widget="radio" />
+          <field name="import_compat" />
+        </group>
+      </form>
+    </field>
+  </record>
+
+  <!-- Vue principale du groupe -->
+  <record id="view_export_async_schedule_group_tree" model="ir.ui.view">
+    <field name="name">export.async.schedule.group.tree</field>
+    <field name="model">export.async.schedule.group</field>
+    <field name="arch" type="xml">
+      <tree decoration-muted="not active">
+          <field
+                    name="active"
+                    widget="boolean_toggle"
+                    options='{"terminology": "archive"}'
+                />
+        <field name="name" />
+        <field name="company_id" groups="base.group_multi_company" optional="show" />
+        <field name="export_ids" widget="many2many_tags" optional="show" />
+        <field name="user_ids" widget="many2many_tags" optional="hide" />
+        <field name="lang" optional="hide" />
+        <field name="interval" string="Every" />
+        <field name="interval_unit" />
+        <field name="next_execution" widget="remaining_days" />
+      </tree>
+    </field>
+  </record>
+
+  <record id="view_export_async_schedule_group_form" model="ir.ui.view">
+    <field name="name">export.async.schedule.group.form</field>
+    <field name="model">export.async.schedule.group</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button
+                        name="action_test_export"
+                        type="object"
+                        string="Send Test Email Now"
+                        class="btn-primary"
+                        icon="fa-paper-plane"
+                    />
+        </header>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button
+                            name="toggle_active"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-archive"
+                        >
+              <field
+                                name="active"
+                                widget="boolean_button"
+                                options='{"terminology": "archive"}'
+                            />
+            </button>
+          </div>
+          <div class="oe_title">
+            <h1>
+              <field name="name" placeholder="Export Group Name" />
+            </h1>
+          </div>
+          <group>
+            <group name="general" string="Email Delivery">
+              <field name="company_id" groups="base.group_multi_company" />
+              <field
+                                name="mail_template_id"
+                                options="{'no_open': True, 'no_create_edit': True}"
+                            />
+              <field name="user_ids_required" invisible="1" />
+              <field
+                                name="user_ids"
+                                widget="many2many_tags"
+                                options="{'color_field': 'color', 'no_open': True}"
+                                required="user_ids_required"
+                            />
+              <field name="lang" />
+            </group>
+            <group name="scheduling" string="Schedule">
+              <label for="interval" />
+              <div class="o_row">
+                <field name="interval" class="oe_inline" />
+                <field name="interval_unit" class="oe_inline" />
+              </div>
+              <field name="end_of_month" invisible="interval_unit != 'months'" />
+              <field name="next_execution" />
+            </group>
+          </group>
+          <notebook>
+            <page name="exports" string="Exports to Include">
+              <field
+                                name="export_ids"
+                                widget="many2many"
+                                nolabel="1"
+                                domain="['|', ('group_id', '=', False), ('group_id', '=', id)]"
+                                context="{
+                    'default_group_id': id,
+                    'default_user_ids': user_ids,
+                    'tree_view_ref': 'export_async_schedule.view_export_async_schedule_simplified_tree',
+                    'form_view_ref': 'export_async_schedule.view_export_async_schedule_simplified_form',
+                  }"
+                            />
+            </page>
+          </notebook>
+        </sheet>
+        <div class="oe_chatter">
+          <field name="message_follower_ids" />
+          <field name="activity_ids" />
+          <field name="message_ids" />
+        </div>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_export_async_schedule_group_search" model="ir.ui.view">
+    <field name="name">export.async.schedule.group.search</field>
+    <field name="model">export.async.schedule.group</field>
+    <field name="arch" type="xml">
+      <search string="Export Groups">
+        <field name="name" />
+        <field name="company_id" />
+        <field name="user_ids" />
+        <field name="export_ids" />
+        <separator />
+        <filter string="Archived" name="inactive" domain="[('active', '=', False)]" />
+        <separator />
+        <group expand="0" string="Group By">
+          <filter
+                        string="Company"
+                        name="groupby_company"
+                        domain="[]"
+                        context="{'group_by': 'company_id'}"
+                    />
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_export_async_schedule_group" model="ir.actions.act_window">
+    <field name="name">Grouped Exports</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">export.async.schedule.group</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'search_default_active': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Create your first export group
+      </p>
+      <p>
+        Group multiple scheduled exports together to send them in a single email.
+        <br />
+        Perfect for consolidating reports that need to be sent together.
+      </p>
+    </field>
+  </record>
+
+  <menuitem
+        id="menu_export_async_schedule_group"
+        name="Grouped Scheduled Exports"
+        action="action_export_async_schedule_group"
+        parent="base.menu_automation"
+        sequence="20"
+    />
+</odoo>

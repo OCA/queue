@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+  <record id="mail_template_export_group" model="mail.template">
+    <field name="name">Export Group - Scheduled Reporting</field>
+    <field name="subject">Scheduled Export - {{ object.display_name }}</field>
+    <field name="model_id" ref="model_export_async_schedule_group" />
+    <field name="auto_delete" eval="False" />
+    <field name="body_html" type="html">
+      <p>Please find attached the scheduled reports: <strong>
+        <t t-out="object.display_name" />
+      </strong>.</p>
+      <p>This email contains the following exports:</p>
+      <ul>
+        <t t-foreach="object.export_ids" t-as="export">
+          <li>
+            <t t-out="export.ir_export_id.name or export.model_id.name" />
+          </li>
+        </t>
+      </ul>
+      <br />
+      <p>
+        <span
+                    style="color: #808080;"
+                >This is an automated message, please do not reply.</span>
+      </p>
+    </field>
+  </record>
+</odoo>

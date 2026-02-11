@@ -1,0 +1,2 @@
+odoo-addon-export_async_schedule @ git+https://github.com/OCA/queue.git@refs/pull/893/head#subdirectory=export_async_schedule
+odoo-addon-base_export_async @ git+https://github.com/OCA/queue.git@refs/pull/894/head#subdirectory=base_export_async
