@@ -65,7 +65,7 @@ class ExportAsyncSchedule(models.Model):
     def name_get(self):
         result = []
         for record in self:
-            name = "{}: {}".format(record.model_id.name, record.ir_export_id.name)
+            name = f"{record.model_id.name}: {record.ir_export_id.name}"
             result.append((record.id, name))
         return result
 
