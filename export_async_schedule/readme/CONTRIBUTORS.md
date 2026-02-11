@@ -1,0 +1,3 @@
+- Guewen Baconnier (Camptocamp)
+- [Komit](https://komit-consulting.com):
+  - Cuong Nguyen Mtm \<cuong.nmtm@komit-consulting.com\>
