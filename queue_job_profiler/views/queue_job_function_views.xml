@@ -8,11 +8,7 @@
             <xpath expr="//form/group" position="after">
                 <group name="profiler" string="Profiler">
                     <field name="profiling_enabled" />
-                    <field
-                        name="profiling_user_id"
-                        required="profiling_enabled"
-                        invisible="not profiling_enabled"
-                    />
+                    <field name="profiling_user_id" invisible="not profiling_enabled" />
                     <field
                         name="profiling_until"
                         required="profiling_enabled"

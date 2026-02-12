@@ -29,8 +29,7 @@ class TestJobFunction(common.TransactionCase):
     def test_func_constraint(self):
         with self.assertRaisesRegex(
             exceptions.ValidationError,
-            "A profiling user and a profiling until date "
-            "must be set when profiling is enabled.",
+            "A profiling until date must be set when profiling is enabled.",
         ):
             self.user_func1.profiling_enabled = True
 

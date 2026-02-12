@@ -26,20 +26,17 @@ class QueueJobFunction(models.Model):
         self.ensure_one()
         return (
             self.profiling_enabled
-            and self.profiling_user_id == self.env.user
             and (self.profiling_until and self.profiling_until >= fields.Datetime.now())
+            and (not self.profiling_user_id or self.profiling_user_id == self.env.user)
         )
 
     @api.constrains("profiling_enabled")
     def _check_profiling_setup(self):
         for record in self:
-            if record.profiling_enabled and (
-                not record.profiling_user_id or not record.profiling_until
-            ):
+            if record.profiling_enabled and not record.profiling_until:
                 raise exceptions.ValidationError(
                     self.env._(
-                        "A profiling user and a profiling until date "
-                        "must be set when profiling is enabled."
+                        "A profiling until date must be set when profiling is enabled."
                     )
                 )
 
