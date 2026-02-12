@@ -373,9 +373,10 @@ ul.auto-toc {
 <p>This addon adds profiling controls to queue job functions and wraps
 queue job execution in an Odoo profiler session when enabled.</p>
 <p>When profiling is enabled for a job function and the executing user
-matches the configured profiling user, the queue job runner records SQL
-and async stack traces via <tt class="docutils literal">odoo.tools.profiler.Profiler</tt> and saves
-the results into <tt class="docutils literal">ir_profile</tt>.</p>
+matches one of the configured profiling users (or no users are set), the
+queue job runner records SQL and async stack traces via
+<tt class="docutils literal">odoo.tools.profiler.Profiler</tt> and saves the results into
+<tt class="docutils literal">ir_profile</tt>.</p>
 <p><strong>Table of contents</strong></p>
 <div class="contents local topic" id="contents">
 <ul class="simple">
@@ -394,8 +395,8 @@ the results into <tt class="docutils literal">ir_profile</tt>.</p>
 <ol class="arabic simple">
 <li>Open the Queue Job Functions menu.</li>
 <li>Open the job function you want to profile.</li>
-<li>In the Profiler group, enable Profiling and set the Profiling user
-and Profiling until.</li>
+<li>In the Profiler group, enable Profiling and set the Profiling users
+(optional) and Profiling until.</li>
 <li>Run the job with the selected user (the queue job runner usually
 executes as the superuser).</li>
 <li>Inspect the generated entries in <tt class="docutils literal">ir_profile</tt> to review the

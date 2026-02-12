@@ -11,10 +11,10 @@ class QueueJobFunction(models.Model):
         string="Profiling enabled",
         help="Indicates whether profiling is enabled for this job function.",
     )
-    profiling_user_id = fields.Many2one(
+    profiling_user_ids = fields.Many2many(
         "res.users",
-        string="Profiling user",
-        help="The user allowed to perform profiling for this job function.",
+        string="Profiling users",
+        help="The users allowed to perform profiling for this job function.",
     )
     profiling_until = fields.Datetime(
         string="Profiling until",
@@ -27,7 +27,9 @@ class QueueJobFunction(models.Model):
         return (
             self.profiling_enabled
             and (self.profiling_until and self.profiling_until >= fields.Datetime.now())
-            and (not self.profiling_user_id or self.profiling_user_id == self.env.user)
+            and (
+                not self.profiling_user_ids or self.env.user in self.profiling_user_ids
+            )
         )
 
     @api.constrains("profiling_enabled")

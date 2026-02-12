@@ -33,8 +33,8 @@ class TestJobFunction(common.TransactionCase):
         ):
             self.user_func1.profiling_enabled = True
 
-    def _enable_profiling(self, job_function, user, delta=timedelta(hours=1)):
-        job_function.profiling_user_id = user
+    def _enable_profiling(self, job_function, users=None, delta=timedelta(hours=1)):
+        job_function.profiling_user_ids = users
         job_function.profiling_until = fields.Datetime.now() + delta
         job_function.profiling_enabled = True
 
@@ -42,13 +42,19 @@ class TestJobFunction(common.TransactionCase):
         # By default, profiling should be disabled for all users
         for user in (self.env.user, self.user1, self.user2):
             self.assertFalse(self.user_func1.with_user(user).is_profiling_enabled())
-        # Enable it for user1 and check that it's only enabled for that user only
-        self._enable_profiling(self.user_func1, self.user1)
+        # Enable for all users (no profiling users set)
+        self._enable_profiling(self.user_func1)
+        for user in (self.env.user, self.user1, self.user2):
+            self.assertTrue(self.user_func1.with_user(user).is_profiling_enabled())
+        # Enable it for user1 and user2
+        self._enable_profiling(self.user_func1, users=self.user1 + self.user2)
         self.assertTrue(self.user_func1.with_user(self.user1).is_profiling_enabled())
-        for user in (self.env.user, self.user2):
-            self.assertFalse(self.user_func1.with_user(user).is_profiling_enabled())
+        self.assertTrue(self.user_func1.with_user(self.user2).is_profiling_enabled())
+        self.assertFalse(
+            self.user_func1.with_user(self.env.user).is_profiling_enabled()
+        )
         # Check for another job function and user
-        self._enable_profiling(self.user_func2, self.user2)
+        self._enable_profiling(self.user_func2, users=self.user2)
         self.assertTrue(self.user_func2.with_user(self.user2).is_profiling_enabled())
         for user in (self.env.user, self.user1):
             self.assertFalse(self.user_func2.with_user(user).is_profiling_enabled())
@@ -102,7 +108,7 @@ class TestJobFunction(common.TransactionCase):
 
     def test_controller(self):
         job = self.env.user.with_delay().read(["id"])
-        self._enable_profiling(self.user_func1, self.user1)
+        self._enable_profiling(self.user_func1, [self.user1.id])
         # TODO @simahawk: I'd like to look for new `ir_profile` records
         # but somehow looks very hard to find them
         # since `Profiler` creates them in a separated db connection.

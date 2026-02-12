@@ -32,9 +32,10 @@ This addon adds profiling controls to queue job functions and wraps
 queue job execution in an Odoo profiler session when enabled.
 
 When profiling is enabled for a job function and the executing user
-matches the configured profiling user, the queue job runner records SQL
-and async stack traces via ``odoo.tools.profiler.Profiler`` and saves
-the results into ``ir_profile``.
+matches one of the configured profiling users (or no users are set), the
+queue job runner records SQL and async stack traces via
+``odoo.tools.profiler.Profiler`` and saves the results into
+``ir_profile``.
 
 **Table of contents**
 
@@ -46,8 +47,8 @@ Usage
 
 1. Open the Queue Job Functions menu.
 2. Open the job function you want to profile.
-3. In the Profiler group, enable Profiling and set the Profiling user
-   and Profiling until.
+3. In the Profiler group, enable Profiling and set the Profiling users
+   (optional) and Profiling until.
 4. Run the job with the selected user (the queue job runner usually
    executes as the superuser).
 5. Inspect the generated entries in ``ir_profile`` to review the
