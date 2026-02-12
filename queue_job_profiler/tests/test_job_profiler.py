@@ -137,3 +137,6 @@ class TestJobFunction(common.TransactionCase):
         self.assertEqual(
             profiler.description, f"queue.job {job.uuid} - {job.job_function_name}"
         )
+        self.assertEqual(
+            profiler.profile_session, f"{self.env.user.name} (uid={self.env.user.id})"
+        )

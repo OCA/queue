@@ -25,4 +25,7 @@ class RunJobController(BaseController):
     def _profiler_get(self, env, job):
         func_id = job.job_config.job_function_id
         job_function = env["queue.job.function"].browse(func_id)
-        return Profiler(description=job_function._profile_make_name(job))
+        return Profiler(
+            description=job_function._profile_make_name(job),
+            profile_session=f"{env.user.name} (uid={env.user.id})",
+        )
