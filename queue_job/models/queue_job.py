@@ -453,9 +453,11 @@ class QueueJob(models.Model):
             )
         return action
 
-    def _test_job(self, failure_rate=0, job_duration=0):
+    def _test_job(self, failure_rate=0, job_duration=0, commit_within_job=False):
         _logger.info("Running test job.")
         if random.random() <= failure_rate:
             raise JobError("Job failed")
         if job_duration:
             time.sleep(job_duration)
+        if commit_within_job:
+            self.env.cr.commit()  # pylint: disable=invalid-commit
