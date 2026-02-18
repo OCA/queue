@@ -9,6 +9,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.http import request
 
 from odoo.addons.web.controllers.export import CSVExport, ExcelExport
 
@@ -80,6 +81,9 @@ class DelayExport(models.Model):
         * import_compat: if the export is export/import compatible (boolean)
         * user_ids: optional list of user ids who receive the file
         """
+        # `ExportXlsxWriter` gets the environment from `request.env`
+        if request:
+            request.update_env(user=self.env.user)
         content = self._get_file_content(params)
 
         items = operator.itemgetter("model", "context", "format", "user_ids")(params)
