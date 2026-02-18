@@ -2,7 +2,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import json
-from unittest import mock
 from unittest.mock import patch
 
 import freezegun
@@ -11,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 import odoo.tests.common as common
 from odoo import fields
 
-from odoo.addons.web.controllers.export import ExcelExport
+from ..export import ExcelExport
 
 data_csv = {
     "data": """{"format": "csv", "model": "res.partner",
@@ -47,10 +46,6 @@ class TestBaseExportAsync(common.TransactionCase):
         super().setUp()
         self.delay_export_obj = self.env["delay.export"]
         self.job_obj = self.env["queue.job"]
-        with patch("odoo.http._request_stack") as mock_request_stack:
-            mock_request = mock.Mock(env=self.env)
-            mock_request_stack.push(mock_request)
-            self.addCleanup(mock_request_stack.pop)
 
     def test_delay_export(self):
         """Check that the call create a new JOB"""
@@ -81,6 +76,7 @@ class TestBaseExportAsync(common.TransactionCase):
         new_attachment = self.env["ir.attachment"].search([]) - attachments
         self.assertEqual(len(new_mail), 1)
         self.assertEqual(new_attachment.name, "res.partner.xls")
+        self.assertTrue(new_attachment.datas)
 
     def test_cron_delete(self):
         """Check that cron delete attachment after TTL"""

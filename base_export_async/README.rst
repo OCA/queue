@@ -68,6 +68,15 @@ Contributors
 
 - Arnaud Pineux (ACSONE SA/NV) authored the initial prototype.
 - Guewen Baconnier (Camptocamp)
+- Stéphane Mangin (ACSONE SA/NV)
+
+Other credits
+-------------
+
+The migration of this module from 16.0 to 17.0 was financially supported
+by:
+
+- ACSONE SA/NV (https://www.acsone.eu/)
 
 Maintainers
 -----------

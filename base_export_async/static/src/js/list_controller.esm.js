@@ -1,14 +1,9 @@
 /** @odoo-module **/
-
-import {blockUI, unblockUI} from "web.framework";
-
-import Dialog from "web.Dialog";
 import {ListController} from "@web/views/list/list_controller";
-import {_t} from "web.core";
+import {_t} from "@web/core/l10n/translation";
 import {download} from "@web/core/network/download";
 import {patch} from "@web/core/utils/patch";
-
-patch(ListController.prototype, "base_export_async", {
+patch(ListController.prototype, {
     async downloadExport(fields, import_compat, format, async = false) {
         let ids = false;
         if (!this.isDomainSelected) {
@@ -28,7 +23,7 @@ patch(ListController.prototype, "base_export_async", {
             /*
                 Call the delay export if Async is checked
             */
-            blockUI();
+            this.env.services.ui.block();
             const args = [
                 {
                     data: JSON.stringify({
@@ -44,13 +39,16 @@ patch(ListController.prototype, "base_export_async", {
                 },
             ];
             const orm = this.env.services.orm;
-            orm.call("delay.export", "delay_export", args).then(function () {
-                unblockUI();
-                Dialog.alert(
-                    this,
+            orm.call("delay.export", "delay_export", args).then(() => {
+                this.env.services.ui.unblock();
+                this.env.services.notification.add(
                     _t(
                         "You will receive the export file by email as soon as it is finished."
-                    )
+                    ),
+                    {
+                        title: _t("Export Scheduled"),
+                        type: "success",
+                    }
                 );
             });
         } else {

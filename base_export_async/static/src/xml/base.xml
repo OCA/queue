@@ -7,7 +7,7 @@
         t-inherit-mode="extension"
     >
     <xpath expr="//div[hasclass('o_import_compat')]" position="after">
-        <CheckBox
+      <CheckBox
                 id="async_export"
                 value="state.async"
                 onChange.bind="onToggleExportAsync"
@@ -15,6 +15,6 @@
             <strong>Asynchronous export </strong> (You will receive the export by email)
         </CheckBox>
     </xpath>
-</t>
+  </t>
 
 </templates>
