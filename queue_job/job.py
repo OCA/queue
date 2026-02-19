@@ -537,6 +537,9 @@ class Job:
             AND state = %s;
         """
 
+    def should_check_dependents(self):
+        return any(self.__reverse_depends_on_uuids)
+
     def enqueue_waiting(self):
         sql = self._get_common_dependent_jobs_query()
         self.env.cr.execute(sql, (PENDING, self.uuid, DONE, WAIT_DEPENDENCIES))

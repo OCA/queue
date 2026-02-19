@@ -287,3 +287,16 @@ class TestJobDependencies(common.TransactionCase):
         self.assertTrue(jobs[0].graph_uuid)
         self.assertTrue(jobs[1].graph_uuid)
         self.assertEqual(jobs[0].graph_uuid, jobs[1].graph_uuid)
+
+    def test_should_check_dependents(self):
+        job_root = Job(self.method)
+        job_a = Job(self.method)
+        job_a.add_depends({job_root})
+
+        DelayableGraph._ensure_same_graph_uuid([job_root, job_a])
+
+        job_root.store()
+        job_a.store()
+
+        self.assertTrue(job_root.should_check_dependents())
+        self.assertFalse(job_a.should_check_dependents())
