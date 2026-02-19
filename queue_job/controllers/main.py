@@ -107,6 +107,10 @@ class RunJobController(http.Controller):
 
     @classmethod
     def _enqueue_dependent_jobs(cls, env, job):
+        if not job.should_check_dependents():
+            return
+
+        _logger.debug("%s enqueue depends started", job)
         tries = 0
         while True:
             try:
@@ -135,6 +139,7 @@ class RunJobController(http.Controller):
                 time.sleep(wait_time)
             else:
                 break
+        _logger.debug("%s enqueue depends done", job)
 
     @classmethod
     def _runjob(cls, env: api.Environment, job: Job) -> None:
@@ -192,9 +197,7 @@ class RunJobController(http.Controller):
                 buff.close()
             raise
 
-        _logger.debug("%s enqueue depends started", job)
         cls._enqueue_dependent_jobs(env, job)
-        _logger.debug("%s enqueue depends done", job)
 
     @classmethod
     def _get_failure_values(cls, job, traceback_txt, orig_exception):
