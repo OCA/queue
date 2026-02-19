@@ -10,6 +10,7 @@
                     <field name="model_id" required="1" />
                     <field name="method" required="1" />
                     <field name="channel_id" />
+                    <field name="allow_commit" />
                     <field name="edit_retry_pattern" widget="ace" />
                     <field name="edit_related_action" widget="ace" />
                 </group>
@@ -24,6 +25,7 @@
             <list>
                 <field name="name" />
                 <field name="channel_id" />
+                <field name="allow_commit" />
             </list>
         </field>
     </record>
