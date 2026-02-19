@@ -21,6 +21,7 @@
         "views/queue_job_menus.xml",
         "data/queue_data.xml",
         "data/queue_job_function_data.xml",
+        "data/ir_config_parameter_data.xml",
     ],
     "assets": {
         "web.assets_backend": [
