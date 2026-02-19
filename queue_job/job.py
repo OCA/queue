@@ -16,6 +16,16 @@ import odoo
 
 from .exception import FailedJobError, NoSuchJobError, RetryableJobError
 
+try:
+    from contextlib import contextmanager, nullcontext
+except ImportError:  # Python 3.6
+    from contextlib import contextmanager
+
+    @contextmanager
+    def nullcontext():
+        yield
+
+
 WAIT_DEPENDENCIES = "wait_dependencies"
 PENDING = "pending"
 ENQUEUED = "enqueued"
@@ -491,10 +501,6 @@ class Job:
         self.method_name = func.__name__
         self.recordset = recordset
 
-        self.env = env
-        self.job_model = self.env["queue.job"]
-        self.job_model_name = "queue.job"
-
         self.job_config = (
             self.env["queue.job.function"].sudo().job_config(self.job_function_name)
         )
@@ -572,7 +578,12 @@ class Job:
         """
         self.retry += 1
         try:
-            self.result = self.func(*tuple(self.args), **self.kwargs)
+            if self.job_config.allow_commit:
+                env_context_manager = self._with_temporary_env()
+            else:
+                env_context_manager = nullcontext()
+            with env_context_manager:
+                self.result = self.func(*tuple(self.args), **self.kwargs)
         except RetryableJobError as err:
             if err.ignore_retry:
                 self.retry -= 1
@@ -591,6 +602,16 @@ class Job:
             raise
 
         return self.result
+
+    @contextmanager
+    def _with_temporary_env(self):
+        with self.env.registry.cursor() as new_cr:
+            env = self.recordset.env
+            self.recordset = self.recordset.with_env(env(cr=new_cr))
+            try:
+                yield
+            finally:
+                self.recordset = self.recordset.with_env(env)
 
     def _get_common_dependent_jobs_query(self):
         return """
@@ -762,6 +783,10 @@ class Job:
 
     def db_record(self):
         return self.db_records_from_uuids(self.env, [self.uuid])
+
+    @property
+    def env(self):
+        return self.recordset.env
 
     @property
     def func(self):
