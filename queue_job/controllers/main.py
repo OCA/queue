@@ -38,8 +38,9 @@ def _prevent_commit(cr):
     def forbidden_commit(*args, **kwargs):
         raise RuntimeError(
             "Commit is forbidden in queue jobs. "
-            "If the current job is a cron running as queue job, "
-            "modify it to run as a normal cron."
+            'You may want to enable the "Allow Commit" option on the Job '
+            "Function. Alternatively, if the current job is a cron running as "
+            "queue job, you can modify it to run as a normal cron."
         )
 
     original_commit = cr.commit
