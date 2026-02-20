@@ -7,7 +7,6 @@ import re
 from collections import namedtuple
 
 from odoo import _, api, exceptions, fields, models, tools
-from odoo.tools import str2bool
 
 from ..fields import JobSerialized
 
@@ -82,7 +81,6 @@ class QueueJobFunction(models.Model):
         "See the module description for details.",
     )
     allow_commit = fields.Boolean(
-        default=lambda self: self._default_allow_commit_by_default(),
         help="Allows the job to commit transactions during execution. "
         "Under the hood, this executes the job in a new database cursor, "
         "which incurs a slight overhead.",
@@ -157,19 +155,7 @@ class QueueJobFunction(models.Model):
             related_action_func_name=None,
             related_action_kwargs={},
             job_function_id=None,
-            allow_commit=self._default_allow_commit_by_default(),
-        )
-
-    @api.model
-    def _default_allow_commit_by_default(self):
-        # We shoud not allow commit by default on job functions, this parameter
-        # is here for backward compatibility, a migration sets it by default on
-        # existing databases, but new databases will have it set to False by
-        # default.
-        return str2bool(
-            self.env["ir.config_parameter"]
-            .sudo()
-            .get_param("queue_job.allow_commit_by_default")
+            allow_commit=False,
         )
 
     def _parse_retry_pattern(self):

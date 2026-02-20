@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<odoo noupdate="1">
-    <record id="allow_commit_by_default" model="ir.config_parameter">
-        <field name="key">queue_job.allow_commit_by_default</field>
-        <field name="value">False</field>
-    </record>
-</odoo>
