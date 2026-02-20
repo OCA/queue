@@ -94,7 +94,7 @@ def trap_jobs():
     with mock.patch(
         "odoo.addons.queue_job.delay.Job",
         name="Job Class",
-        auto_spec=True,
+        unsafe=True,
     ) as job_cls_mock:
         with JobsTrap(job_cls_mock) as trap:
             yield trap
