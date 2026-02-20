@@ -1,4 +1,7 @@
 
+[![Support the OCA](https://odoo-community.org/readme-banner-image)](https://odoo-community.org/get-involved?utm_source=repo-readme)
+
+# Queue Job
 [![Runboat](https://img.shields.io/badge/runboat-Try%20me-875A7B.png)](https://runboat.odoo-community.org/builds?repo=OCA/queue&target_branch=15.0)
 [![Pre-commit Status](https://github.com/OCA/queue/actions/workflows/pre-commit.yml/badge.svg?branch=15.0)](https://github.com/OCA/queue/actions/workflows/pre-commit.yml?query=branch%3A15.0)
 [![Build Status](https://github.com/OCA/queue/actions/workflows/test.yml/badge.svg?branch=15.0)](https://github.com/OCA/queue/actions/workflows/test.yml?query=branch%3A15.0)
@@ -6,8 +9,6 @@
 [![Translation Status](https://translation.odoo-community.org/widgets/queue-15-0/-/svg-badge.svg)](https://translation.odoo-community.org/engage/queue-15-0/?utm_source=widget)
 
 <!-- /!\ do not modify above this line -->
-
-# Odoo Queue Job
 
 Asynchronous Job Queue. Delay Model methods in asynchronous jobs, executed in the background as soon as possible or on a schedule. Support Channels to segregates jobs in different queues with different capacities. Unlike scheduled tasks, a job captures arguments for later processing.
 
