@@ -83,7 +83,8 @@ class QueueJobFunction(models.Model):
     allow_commit = fields.Boolean(
         help="Allows the job to commit transactions during execution. "
         "Under the hood, this executes the job in a new database cursor, "
-        "which incurs a slight overhead.",
+        "which incurs an overhead as it requires an extra connection to "
+        "the database. "
     )
 
     @api.depends("model_id.model", "method")
