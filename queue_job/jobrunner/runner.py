@@ -33,6 +33,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import odoo
 from odoo.tools import config
 
+from ..job import PG_ADVISORY_EXECUTION_LOCK_ID
 from . import queue_job_config
 from .channels import ENQUEUED, NOT_DONE, ChannelManager
 
@@ -213,7 +214,8 @@ class Database:
             )
 
     def _query_requeue_dead_jobs(self):
-        return """
+        return [
+            """
             UPDATE
                 queue_job
             SET
@@ -255,27 +257,18 @@ class Database:
             WHERE
                 state IN ('enqueued','started')
                 AND date_enqueued < (now() AT TIME ZONE 'utc' - INTERVAL '10 sec')
-                AND (
-                    id in (
-                        SELECT
-                            queue_job_id
-                        FROM
-                            queue_job_lock
-                        WHERE
-                            queue_job_lock.queue_job_id = queue_job.id
-                        FOR NO KEY UPDATE SKIP LOCKED
-                    )
-                    OR NOT EXISTS (
-                        SELECT
-                            1
-                        FROM
-                            queue_job_lock
-                        WHERE
-                            queue_job_lock.queue_job_id = queue_job.id
-                    )
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM pg_locks
+                    WHERE locktype = 'advisory'
+                      AND classid = %s
+                      AND objid = (queue_job.id %% 2147483647)::integer
+                      AND granted = true
                 )
             RETURNING uuid
-            """
+            """,
+            (PG_ADVISORY_EXECUTION_LOCK_ID,),
+        ]
 
     def requeue_dead_jobs(self):
         """
@@ -304,9 +297,9 @@ class Database:
         """
 
         with closing(self.conn.cursor()) as cr:
-            query = self._query_requeue_dead_jobs()
+            query, query_args = self._query_requeue_dead_jobs()
 
-            cr.execute(query)
+            cr.execute(query, query_args)
 
             for (uuid,) in cr.fetchall():
                 _logger.warning("Re-queued dead job with uuid: %s", uuid)

@@ -37,6 +37,8 @@ DEFAULT_PRIORITY = 10  # used by the PriorityQueue to sort the jobs
 DEFAULT_MAX_RETRIES = 5
 RETRY_INTERVAL = 10 * 60  # seconds
 
+PG_ADVISORY_EXECUTION_LOCK_ID = 965655780
+
 _logger = logging.getLogger(__name__)
 
 
@@ -221,55 +223,30 @@ class Job:
         recordset = cls.db_records_from_uuids(env, job_uuids)
         return {cls._load_from_db_record(record) for record in recordset}
 
-    def add_lock_record(self) -> None:
-        """
-        Create row in db to be locked while the job is being performed.
-        """
-        self.env.cr.execute(
-            """
-            INSERT INTO
-                queue_job_lock (id, queue_job_id)
-            SELECT
-                id, id
-            FROM
-                queue_job
-            WHERE
-                uuid = %s
-            ON CONFLICT(id)
-            DO NOTHING;
-        """,
-            [self.uuid],
-        )
-
     def lock(self) -> bool:
-        """Lock row of job that is being performed.
+        """Lock job that is being performed using a session-level advisory lock.
 
         Return False if a job cannot be locked: it means that the job is not in
         STARTED state or is already locked by another worker.
         """
+        # 2147483647 is the max value for int, which is the max value accepted
+        # by pg_try_advisory_lock when using two arguments, as the job id might
+        # be higher than that, we use a modulo to be sure to never exceed the limit.
+        # A collision is highly unlikely because ids are sequential so a modulo
+        # should not cause two different jobs to have the same lock id at the
+        # same time. Even then, they would run one after the other.
         self.env.cr.execute(
-            """
-            SELECT
-                *
-            FROM
-                queue_job_lock
-            WHERE
-                queue_job_id in (
-                    SELECT
-                        id
-                    FROM
-                        queue_job
-                    WHERE
-                        uuid = %s
-                        AND state = %s
-                )
-            FOR NO KEY UPDATE SKIP LOCKED;
-        """,
-            [self.uuid, STARTED],
+            "SELECT pg_try_advisory_lock(%s, (%s %% 2147483647)::integer)",
+            (PG_ADVISORY_EXECUTION_LOCK_ID, self._record_id),
         )
-
-        # 1 job should be locked
         return bool(self.env.cr.fetchall())
+
+    def unlock(self) -> None:
+        """Release the session-level advisory lock."""
+        self.env.cr.execute(
+            "SELECT pg_advisory_unlock(%s, (%s %% 2147483647)::integer)",
+            (PG_ADVISORY_EXECUTION_LOCK_ID, self._record_id),
+        )
 
     @classmethod
     def _load_from_db_record(cls, job_db_record):
@@ -297,6 +274,8 @@ class Job:
             channel=stored.channel,
             identity_key=stored.identity_key,
         )
+
+        job_._record_id = stored.id
 
         if stored.date_created:
             job_.date_created = stored.date_created
@@ -424,6 +403,7 @@ class Job:
 
         self._uuid = job_uuid
         self.graph_uuid = None
+        self._record_id = None
 
         self.args = args
         self.kwargs = kwargs
@@ -788,7 +768,6 @@ class Job:
         self.state = STARTED
         self.date_started = datetime.now()
         self.worker_pid = os.getpid()
-        self.add_lock_record()
 
     def set_done(self, result=None):
         self.state = DONE

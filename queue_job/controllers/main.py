@@ -78,15 +78,15 @@ class RunJobController(http.Controller):
             return None
         job = Job.load(env, job_uuid)
         assert job and job.state == ENQUEUED
-        job.set_started()
-        job.store()
-        env.cr.commit()
         if not job.lock():
             _logger.warning(
                 "was requested to run job %s, but it could not be locked",
                 job_uuid,
             )
             return None
+        job.set_started()
+        job.store()
+        env.cr.commit()
         return job
 
     @classmethod
@@ -218,7 +218,10 @@ class RunJobController(http.Controller):
         job = self._acquire_job(env, job_uuid)
         if not job:
             return ""
-        self._runjob(env, job)
+        try:
+            self._runjob(env, job)
+        finally:
+            job.unlock()
         return ""
 
     # flake8: noqa: C901
