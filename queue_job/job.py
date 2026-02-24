@@ -424,7 +424,6 @@ class Job:
             raise TypeError("Job accepts only methods of Models")
 
         recordset = func.__self__
-        env = recordset.env
         self.method_name = func.__name__
         self.recordset = recordset
 
@@ -477,10 +476,10 @@ class Job:
         self.exc_message = None
         self.exc_info = None
 
-        if "company_id" in env.context:
-            company_id = env.context["company_id"]
+        if "company_id" in self.env.context:
+            company_id = self.env.context["company_id"]
         else:
-            company_id = env.company.id
+            company_id = self.env.company.id
         self.company_id = company_id
         self._eta = None
         self.eta = eta
@@ -704,6 +703,10 @@ class Job:
     @property
     def env(self):
         return self.recordset.env
+
+    @env.setter
+    def env(self, env):
+        self.recordset = self.recordset.with_env(env)
 
     @property
     def func(self):
