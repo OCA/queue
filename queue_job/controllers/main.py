@@ -252,6 +252,7 @@ class RunJobController(http.Controller):
         size=1,
         failure_rate=0,
         commit_within_job=False,
+        failure_retry_seconds=0,
     ):
         """Create test jobs
 
@@ -293,6 +294,12 @@ class RunJobController(http.Controller):
             except ValueError:
                 max_retries = None
 
+        if failure_retry_seconds is not None:
+            try:
+                failure_retry_seconds = int(failure_retry_seconds)
+            except ValueError:
+                failure_retry_seconds = 0
+
         if size == 1:
             return self._create_single_test_job(
                 priority=priority,
@@ -301,6 +308,7 @@ class RunJobController(http.Controller):
                 description=description,
                 failure_rate=failure_rate,
                 commit_within_job=commit_within_job,
+                failure_retry_seconds=failure_retry_seconds,
             )
 
         if size > 1:
@@ -312,6 +320,7 @@ class RunJobController(http.Controller):
                 description=description,
                 failure_rate=failure_rate,
                 commit_within_job=commit_within_job,
+                failure_retry_seconds=failure_retry_seconds,
             )
         return ""
 
@@ -324,6 +333,7 @@ class RunJobController(http.Controller):
         size=1,
         failure_rate=0,
         commit_within_job=False,
+        failure_retry_seconds=0,
     ):
         delayed = (
             http.request.env["queue.job"]
@@ -336,6 +346,7 @@ class RunJobController(http.Controller):
             ._test_job(
                 failure_rate=failure_rate,
                 commit_within_job=commit_within_job,
+                failure_retry_seconds=failure_retry_seconds,
             )
         )
         return "job uuid: %s" % (delayed.db_record().uuid,)
@@ -352,6 +363,7 @@ class RunJobController(http.Controller):
         description="Test job",
         failure_rate=0,
         commit_within_job=False,
+        failure_retry_seconds=0,
     ):
         model = http.request.env["queue.job"]
         current_count = 0
@@ -377,6 +389,7 @@ class RunJobController(http.Controller):
                     )._test_job(
                         failure_rate=failure_rate,
                         commit_within_job=commit_within_job,
+                        failure_retry_seconds=failure_retry_seconds,
                     )
                 )
 

@@ -11,7 +11,7 @@ from odoo.tools import config, html_escape, index_exists
 from odoo.addons.base_sparse_field.models.fields import Serialized
 
 from ..delay import Graph
-from ..exception import JobError
+from ..exception import JobError, RetryableJobError
 from ..fields import JobSerialized
 from ..job import (
     CANCELLED,
@@ -454,9 +454,21 @@ class QueueJob(models.Model):
             )
         return action
 
-    def _test_job(self, failure_rate=0, commit_within_job=False):
+    def _test_job(
+        self,
+        failure_rate=0,
+        commit_within_job=False,
+        failure_retry_seconds=0,
+    ):
         _logger.info("Running test job.")
         if random.random() <= failure_rate:
-            raise JobError("Job failed")
+            if failure_retry_seconds:
+                raise RetryableJobError(
+                    f"Retryable job failed, will be retried in "
+                    f"{failure_retry_seconds} seconds",
+                    seconds=failure_retry_seconds,
+                )
+            else:
+                raise JobError("Job failed")
         if commit_within_job:
             self.env.cr.commit()  # pylint: disable=invalid-commit
