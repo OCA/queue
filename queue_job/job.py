@@ -484,7 +484,7 @@ class Job:
         self.retry += 1
         try:
             if self.job_config.allow_commit:
-                env_context_manager = self._with_temporary_env()
+                env_context_manager = self.in_temporary_env()
             else:
                 env_context_manager = nullcontext()
             with env_context_manager:
@@ -509,14 +509,14 @@ class Job:
         return self.result
 
     @contextmanager
-    def _with_temporary_env(self):
+    def in_temporary_env(self):
         with self.env.registry.cursor() as new_cr:
-            env = self.recordset.env
-            self.recordset = self.recordset.with_env(env(cr=new_cr))
+            env = self.env
+            self._env = env(cr=new_cr)
             try:
                 yield
             finally:
-                self.recordset = self.recordset.with_env(env)
+                self._env = env
 
     def _get_common_dependent_jobs_query(self):
         return """
@@ -681,7 +681,7 @@ class Job:
         return self.recordset.env
 
     @env.setter
-    def env(self, env):
+    def _env(self, env):
         self.recordset = self.recordset.with_env(env)
 
     @property
@@ -748,7 +748,7 @@ class Job:
 
     @property
     def user_id(self):
-        return self.recordset.env.uid
+        return self.env.uid
 
     @property
     def eta(self):
