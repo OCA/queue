@@ -15,6 +15,7 @@ from werkzeug.exceptions import BadRequest, Forbidden
 from odoo import SUPERUSER_ID, _, api, http
 from odoo.modules.registry import Registry
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
+from odoo.tools import config
 
 from ..delay import chain, group
 from ..exception import FailedJobError, RetryableJobError
@@ -105,7 +106,8 @@ class RunJobController(http.Controller):
             job.set_done()
             job.store()
             env.flush_all()
-        env.cr.commit()
+        if not config["test_enable"]:
+            env.cr.commit()
         _logger.debug("%s done", job)
 
     @classmethod
