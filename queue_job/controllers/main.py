@@ -9,13 +9,11 @@ import traceback
 from contextlib import contextmanager
 from io import StringIO
 
-from psycopg2 import OperationalError, errorcodes
-from werkzeug.exceptions import BadRequest, Forbidden
-
 from odoo import SUPERUSER_ID, api, http
-from odoo.modules.registry import Registry
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 from odoo.tools import config
+from psycopg2 import OperationalError, errorcodes
+from werkzeug.exceptions import BadRequest, Forbidden
 
 from ..delay import chain, group
 from ..exception import FailedJobError, RetryableJobError
@@ -150,8 +148,7 @@ class RunJobController(http.Controller):
     def _runjob(cls, env: api.Environment, job: Job) -> None:
         def retry_postpone(job, message, seconds=None):
             job.env.clear()
-            with Registry(job.env.cr.dbname).cursor() as new_cr:
-                job.env = api.Environment(new_cr, SUPERUSER_ID, {})
+            with job.in_temporary_env():
                 job.postpone(result=message, seconds=seconds)
                 job.set_pending(reset_retry=False)
                 job.store()
@@ -184,8 +181,7 @@ class RunJobController(http.Controller):
             traceback_txt = buff.getvalue()
             _logger.error(traceback_txt)
             job.env.clear()
-            with Registry(job.env.cr.dbname).cursor() as new_cr:
-                job.env = job.env(cr=new_cr)
+            with job.in_temporary_env():
                 vals = cls._get_failure_values(job, traceback_txt, orig_exception)
                 job.set_failed(**vals)
                 job.store()
