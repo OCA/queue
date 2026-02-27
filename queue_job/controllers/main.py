@@ -42,7 +42,7 @@ def _prevent_commit(cr):
             'You may want to enable the "Allow Commit" option on the Job '
             "Function. Alternatively, if the current job is a cron running as "
             "queue job, you can modify it to run as a normal cron. More details on: "
-            "https://github.com/OCA/queue/wiki/%5BDRAFT%5D-Upgrade-warning:-commits-inside-jobs"
+            "https://github.com/OCA/queue/wiki/Upgrade-warning:-commits-inside-jobs"
         )
 
     original_commit = cr.commit
