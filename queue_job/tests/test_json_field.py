@@ -28,9 +28,13 @@ class TestJson(common.TransactionCase):
             "model": "res.partner",
             "ids": [partner.id],
             "su": False,
-            "context": expected_context,
         }
-        self.assertEqual(json.loads(value_json), expected)
+        result_dict = json.loads(value_json)
+        result_context = result_dict.pop("context")
+        self.assertEqual(result_dict, expected)
+        # context is tested separately as the order/amount of keys is not guaranteed
+        for key in result_context:
+            self.assertEqual(result_context[key], expected_context[key])
 
     def test_encoder_recordset_list(self):
         demo_user = self.env.ref("base.user_demo")
@@ -52,7 +56,20 @@ class TestJson(common.TransactionCase):
                 "context": expected_context,
             },
         ]
-        self.assertEqual(json.loads(value_json), expected)
+        result_dict = json.loads(value_json)
+        for result_value, expected_value in zip(result_dict, expected, strict=False):
+            if isinstance(expected_value, dict):
+                for key in result_value:
+                    if key == "context":
+                        for context_key in result_value["context"]:
+                            self.assertEqual(
+                                result_value["context"][context_key],
+                                expected_value["context"][context_key],
+                            )
+                    else:
+                        self.assertEqual(result_value[key], expected_value[key])
+            else:
+                self.assertEqual(result_value, expected_value)
 
     def test_decoder_recordset(self):
         demo_user = self.env.ref("base.user_demo")
