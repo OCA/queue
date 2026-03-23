@@ -1,0 +1,8 @@
+{
+  "pull_requests": {
+    "OCA/queue#701": "only 18.0",
+    "OCA/queue#715": "already in 17.0",
+    "OCA/queue#726": "since 18.0",
+    "OCA/queue#804": "since 18.0"
+  }
+}
