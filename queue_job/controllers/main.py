@@ -9,11 +9,12 @@ import traceback
 from contextlib import contextmanager
 from io import StringIO
 
+from psycopg2 import OperationalError, errorcodes
+from werkzeug.exceptions import BadRequest, Forbidden
+
 from odoo import SUPERUSER_ID, api, http
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 from odoo.tools import config
-from psycopg2 import OperationalError, errorcodes
-from werkzeug.exceptions import BadRequest, Forbidden
 
 from ..delay import chain, group
 from ..exception import FailedJobError, RetryableJobError

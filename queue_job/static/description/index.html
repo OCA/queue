@@ -460,11 +460,16 @@ record concerned by the job</li>
 <li>Adjust environment variables (optional):<ul>
 <li><tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS=root:4</tt> or any other channels
 configuration. The default is <tt class="docutils literal">root:1</tt></li>
-<li>if <tt class="docutils literal">xmlrpc_port</tt> is not set: <tt class="docutils literal">ODOO_QUEUE_JOB_PORT=8069</tt></li>
-</ul>
-</li>
+<li><tt class="docutils literal">ODOO_QUEUE_JOB_PORT=8069</tt>, default <tt class="docutils literal"><span class="pre">--http-port</span></tt></li>
+<li><tt class="docutils literal">ODOO_QUEUE_JOB_SCHEME=https</tt>, default <tt class="docutils literal">http</tt></li>
+<li><tt class="docutils literal"><span class="pre">ODOO_QUEUE_JOB_HOST=load-balancer</span></tt>, default
+<tt class="docutils literal"><span class="pre">--http-interface</span></tt> or <tt class="docutils literal">localhost</tt> if unset</li>
+<li><tt class="docutils literal">ODOO_QUEUE_JOB_HTTP_AUTH_USER=jobrunner</tt>, default empty</li>
+<li><tt class="docutils literal">ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t</tt>, default empty</li>
 <li>Start Odoo with <tt class="docutils literal"><span class="pre">--load=web,queue_job</span></tt> and <tt class="docutils literal"><span class="pre">--workers</span></tt> greater
 than 1. <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li>Using the Odoo configuration file:</li>
@@ -477,7 +482,12 @@ than 1. <a class="footnote-reference" href="#footnote-1" id="footnote-reference-
 
 </span><span class="na">(...)</span><span class="w">
 </span><span class="k">[queue_job]</span><span class="w">
-</span><span class="na">channels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">root:2</span>
+</span><span class="na">channels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">root:2</span><span class="w">
+</span><span class="na">scheme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">https</span><span class="w">
+</span><span class="na">host</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">load-balancer</span><span class="w">
+</span><span class="na">port</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">443</span><span class="w">
+</span><span class="na">http_auth_user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">jobrunner</span><span class="w">
+</span><span class="na">http_auth_password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">s3cr3t</span>
 </pre>
 <ul class="simple">
 <li>Confirm the runner is starting correctly by checking the odoo log
