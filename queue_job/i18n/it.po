@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2025-09-18 15:42+0000\n"
+"PO-Revision-Date: 2026-03-24 11:45+0000\n"
 "Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: none\n"
 "Language: it\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.10.4\n"
+"X-Generator: Weblate 5.15.2\n"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -61,7 +61,7 @@ msgstr "Icona tipo attività"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__allow_commit
 msgid "Allow Commit"
-msgstr ""
+msgstr "Consenti conferma"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__allow_commit
@@ -70,6 +70,10 @@ msgid ""
 "executes the job in a new database cursor, which incurs an overhead as it "
 "requires an extra connection to the database. "
 msgstr ""
+"Consente al lavoro di confermare le transazioni durante l'esecuzione. In "
+"pratica, questo esegue il lavoro in un nuovo cursore del database, il che "
+"comporta un sovraccarico poiché richiede una connessione aggiuntiva al "
+"database. "
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__args
