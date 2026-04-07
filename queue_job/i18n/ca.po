@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-04-07 16:45+0000\n"
+"PO-Revision-Date: 2026-04-07 19:45+0000\n"
 "Last-Translator: Fher <porrino.fernando@gmail.com>\n"
 "Language-Team: none\n"
 "Language: ca\n"
@@ -354,23 +354,23 @@ msgstr "Graf de les Tasques"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_jobs_count
 msgid "Graph Jobs Count"
-msgstr ""
+msgstr "Graf de Quantitat de Tasques"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__graph_uuid
 msgid "Graph UUID"
-msgstr ""
+msgstr "Graf UUID"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Group By"
-msgstr ""
+msgstr "Agrupar Per"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__has_message
 msgid "Has Message"
-msgstr ""
+msgstr "Té Missatge"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__id
@@ -381,54 +381,54 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_exception_icon
 msgid "Icon"
-msgstr ""
+msgstr "Icona"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "Icona per a indicar una excepció en l'activitat."
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__identity_key
 msgid "Identity Key"
-msgstr ""
+msgstr "Clau d'Identitat"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr ""
+msgstr "Si està marcat, nous missatges requereixen la vostra atenció."
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "Si està marcat, alguns missatges tenen errors de lliurament."
 
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 msgid "Invalid job function: {}"
-msgstr ""
+msgstr "Funció de tasca invàlida: {}"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_is_follower
 msgid "Is Follower"
-msgstr ""
+msgstr "És Seguidor"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job_channel
 msgid "Job Channels"
-msgstr ""
+msgstr "Canals de la Tasca"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__job_function_id
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Job Function"
-msgstr ""
+msgstr "Funció de la Tasca"
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_queue_job_function
@@ -438,28 +438,28 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_form
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
 msgid "Job Functions"
-msgstr ""
+msgstr "Funcions de la Tasca"
 
 #. module: queue_job
 #: model:ir.module.category,name:queue_job.module_category_queue_job
 #: model:ir.ui.menu,name:queue_job.menu_queue_job_root
 msgid "Job Queue"
-msgstr ""
+msgstr "Cua de la Tasca"
 
 #. module: queue_job
 #: model:res.groups,name:queue_job.group_queue_job_manager
 msgid "Job Queue Manager"
-msgstr ""
+msgstr "Administrador de la Cua de la Tasca"
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__ir_model_fields__ttype__job_serialized
 msgid "Job Serialized"
-msgstr ""
+msgstr "Tasca Serialitzada"
 
 #. module: queue_job
 #: model:mail.message.subtype,name:queue_job.mt_job_failed
 msgid "Job failed"
-msgstr ""
+msgstr "Tasca fallida"
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_queue_job
@@ -472,33 +472,33 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_pivot
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Jobs"
-msgstr ""
+msgstr "Tasques"
 
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "Jobs for graph %s"
-msgstr ""
+msgstr "Tasques pel graf %s"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__kwargs
 msgid "Kwargs"
-msgstr ""
+msgstr "Kwargs"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Last 24 hours"
-msgstr ""
+msgstr "Últimes 24 hores"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Last 30 days"
-msgstr ""
+msgstr "Últims 30 dies"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Last 7 days"
-msgstr ""
+msgstr "Últims 7 dies"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
@@ -507,7 +507,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "Última Actualització per"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_date
@@ -516,120 +516,120 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "Última Actualització el"
 
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "Manually set to done by {}"
-msgstr ""
+msgstr "Establit a fet manualment per {}"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__max_retries
 msgid "Max. retries"
-msgstr ""
+msgstr "Reintents max."
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "Missatge d'error de Lliurament"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_ids
 msgid "Messages"
-msgstr ""
+msgstr "Missatges"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__method
 msgid "Method"
-msgstr ""
+msgstr "Mètode"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__method_name
 msgid "Method Name"
-msgstr ""
+msgstr "Nom del mètode"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__model_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__model_id
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Model"
-msgstr ""
+msgstr "Model"
 
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 msgid "Model {} not found"
-msgstr ""
+msgstr "Model {} no trobat"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr ""
+msgstr "Data límit de la Meva Activitat"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__name
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr ""
+msgstr "Data límit de la Següent Activitat"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_summary
 msgid "Next Activity Summary"
-msgstr ""
+msgstr "Resum de la Següent Activitat"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_type_id
 msgid "Next Activity Type"
-msgstr ""
+msgstr "Tipus de la Següent Activitat"
 
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "No action available for this job"
-msgstr ""
+msgstr "No hi ha cap acció disponible per a aquesta tasca"
 
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "Not allowed to change field(s): {}"
-msgstr ""
+msgstr "No es permet modificar el(s) camp(s): {}"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_needaction_counter
 msgid "Number of Actions"
-msgstr ""
+msgstr "Nombre d'Accions"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_has_error_counter
 msgid "Number of errors"
-msgstr ""
+msgstr "Nombre d'errors"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "Nombre de missatges que requereixen alguna acció"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "Nombre de missatges amb error de lliurament"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__parent_id
 msgid "Parent Channel"
-msgstr ""
+msgstr "Canal Pare"
 
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job_channel.py:0
 msgid "Parent channel required."
-msgstr ""
+msgstr "Es requereix un canal pare."
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_retry_pattern
@@ -639,148 +639,155 @@ msgid ""
 "Example: {1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}.\n"
 "See the module description for details."
 msgstr ""
+"Patró que representa com es compten els reintents sobre errors que es poden "
+"reintentar, el nombre de segons a posposar la següent execució. Establir el "
+"nombre de segons a una tupla de 2 elements o a una llista, farà servir un "
+"nombre aleatori dins l'interval dels 2 valors.\n"
+"Exemple: {1: 10, 5: 20, 10: 30, 15: 300}.\n"
+"Exemple: {1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}.\n"
+"Veure la descripció del mòdul per a més detalls."
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__pending
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Pending"
-msgstr ""
+msgstr "Pendent"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__priority
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Priority"
-msgstr ""
+msgstr "Prioritat"
 
 #. module: queue_job
 #: model:ir.ui.menu,name:queue_job.menu_queue
 msgid "Queue"
-msgstr ""
+msgstr "Cua"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__queue_job_id
 msgid "Queue Job"
-msgstr ""
+msgstr "Cua de Tasques"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job_lock
 msgid "Queue Job Lock"
-msgstr ""
+msgstr "Bloqueig de la Cua de Tasques"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__records
 msgid "Record(s)"
-msgstr ""
+msgstr "Registre(s)"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Related"
-msgstr ""
+msgstr "Relacionat"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_related_action
 msgid "Related Action"
-msgstr ""
+msgstr "Acció Relacionada"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__related_action
 msgid "Related Action (serialized)"
-msgstr ""
+msgstr "Acció Relacionada (serialitzat)"
 
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "Related Record"
-msgstr ""
+msgstr "Registre Relacionat"
 
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "Related Records"
-msgstr ""
+msgstr "Registres Relacionats"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_tree
 msgid "Remaining days to execute"
-msgstr ""
+msgstr "Dies que falten fins a l'execució"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__removal_interval
 msgid "Removal Interval"
-msgstr ""
+msgstr "Interval d'Eliminació"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
 msgid "Requeue"
-msgstr ""
+msgstr "Tornar a afegir a la cua"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Requeue Job"
-msgstr ""
+msgstr "Tornar a afegir la tasca a la cua"
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_requeue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
 msgid "Requeue Jobs"
-msgstr ""
+msgstr "Tornar a afegir les tasques a la cua"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__activity_user_id
 msgid "Responsible User"
-msgstr ""
+msgstr "Usuari Responsable"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__result
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Result"
-msgstr ""
+msgstr "Resultat"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Results"
-msgstr ""
+msgstr "Resultats"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__edit_retry_pattern
 msgid "Retry Pattern"
-msgstr ""
+msgstr "Patró de Reintents"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__retry_pattern
 msgid "Retry Pattern (serialized)"
-msgstr ""
+msgstr "Patró de Reintents (serialitzat)"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_jobs_to_done
 msgid "Set all selected jobs to done"
-msgstr ""
+msgstr "Establir totes les tasques seleccionades a fet"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Set jobs done"
-msgstr ""
+msgstr "Establir tasques a fet"
 
 #. module: queue_job
 #: model:ir.actions.act_window,name:queue_job.action_set_jobs_done
 msgid "Set jobs to done"
-msgstr ""
+msgstr "Establir tasques a fet"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Set to 'Done'"
-msgstr ""
+msgstr "Establir a 'Fet'"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "Set to done"
-msgstr ""
+msgstr "Establir a fet"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__graph_uuid
 msgid "Single shared identifier of a Graph. Empty for a single job."
-msgstr ""
+msgstr "Identificador únic i compartit d'un graf. Buit per a una única tasca."
 
 #. module: queue_job
 #. odoo-python
@@ -789,23 +796,25 @@ msgid ""
 "Something bad happened during the execution of the job. More details in the "
 "'Exception Information' section."
 msgstr ""
+"Ha succeït algun problema durant l'execució de la tasca. Més detalls dins la "
+"secció 'Informació de l'Excepció'."
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__date_started
 msgid "Start Date"
-msgstr ""
+msgstr "Data d'Inici"
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__started
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Started"
-msgstr ""
+msgstr "Iniciat"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__state
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "State"
-msgstr ""
+msgstr "Estat"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_state
@@ -815,11 +824,15 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
+"Estat basat en activitats\n"
+"Endarrerit: Ja ha passat la data límit\n"
+"Avui: La data de l'activitat és avui\n"
+"Planificat: Futures activitats."
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__func_string
 msgid "Task"
-msgstr ""
+msgstr "Tasca"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__edit_related_action
@@ -827,6 +840,11 @@ msgid ""
 "The action when the button *Related Action* is used on a job. The default action is to open the view of the record related to the job. Configured as a dictionary with optional keys: enable, func_name, kwargs.\n"
 "See the module description for details."
 msgstr ""
+"L'acció quan es prem el botó *Acció Relacionada* en una tasca. L'acció "
+"predeterminada és obrir la vista del registre relacionat a la tasca. "
+"Configurat com un diccionari amb claus opcionals: enable, func_name, "
+"kwargs.\n"
+"Veure la descripció del mòdul per a més detalls."
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__max_retries
@@ -834,46 +852,50 @@ msgid ""
 "The job will fail if the number of tries reach the max. retries.\n"
 "Retries are infinite when empty."
 msgstr ""
+"La tasca fallarà si el nombre de reintents arriba al màxim de reintents "
+"establerts.\n"
+"Els reintents seran infinits si està buit."
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_cancelled
 msgid "The selected jobs will be cancelled."
-msgstr ""
+msgstr "La tasca seleccionada serà cancel·lada."
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_requeue_job
 msgid "The selected jobs will be requeued."
-msgstr ""
+msgstr "Les tasques seleccionades seran afegides de nou a la cua."
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_set_jobs_done
 msgid "The selected jobs will be set to done."
-msgstr ""
+msgstr "Les tasques seleccionades seran establides a fet."
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
 msgid "Time (s)"
-msgstr ""
+msgstr "Temps (s)"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__exec_time
 msgid "Time required to execute this job in seconds. Average when grouped."
 msgstr ""
+"Temps en segons requerit per a executar aquesta tasca. Mitja si agrupat."
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Tried many times"
-msgstr ""
+msgstr "Massa reintents"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr ""
+msgstr "Tipus de l'excepció d'activitat d'un registre."
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__uuid
 msgid "UUID"
-msgstr ""
+msgstr "UUID"
 
 #. module: queue_job
 #. odoo-python
@@ -883,6 +905,10 @@ msgid ""
 "Example of valid format:\n"
 "{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" {{\"limit\": 10}}}}"
 msgstr ""
+"Format inesperat d'Acció Relacionada per {}.\n"
+"Exemples de format vàlid:\n"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" {"
+"{\"limit\": 10}}}}"
 
 #. module: queue_job
 #. odoo-python
@@ -893,24 +919,28 @@ msgid ""
 "{{1: 300, 5: 600, 10: 1200, 15: 3000}}\n"
 "{{1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}}"
 msgstr ""
+"Format inesperat del Patró de Reintent per {}.\n"
+"Exemples de formats vàlids:\n"
+"{{1: 300, 5: 600, 10: 1200, 15: 3000}}\n"
+"{{1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}}"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__user_id
 msgid "User ID"
-msgstr ""
+msgstr "ID d'Usuari"
 
 #. module: queue_job
 #: model:ir.model.fields.selection,name:queue_job.selection__queue_job__state__wait_dependencies
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Wait Dependencies"
-msgstr ""
+msgstr "Dependències d'Espera"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_requeue_job
 msgid "Wizard to requeue a selection of jobs"
-msgstr ""
+msgstr "Assistent per a afegir de nou a la cua les tasques seleccionades"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
-msgstr ""
+msgstr "Pid del Procés"
