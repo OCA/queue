@@ -64,6 +64,18 @@ class TestJobFunction(common.TransactionCase):
                 self.assertFalse(self.user_func1.with_user(user).is_profiling_enabled())
                 self.assertFalse(self.user_func2.with_user(user).is_profiling_enabled())
 
+    def test_job_without_function(self):
+        # if a job has no function, it cannot be profiled
+        self.user_func1.sudo().unlink()
+        self.user_func2.sudo().unlink()
+        job1 = self.env.user.with_delay().read(["id"])
+        job1.store()
+        job_rec1 = job1.db_record()
+        self.assertFalse(job_rec1.job_function_id)
+        self.assertFalse(job_rec1.job_is_profiled)
+        with self.assertRaises(ValueError):
+            self.env["queue.job.function"]._profile_make_name(job_rec1)
+
     def test_job_is_profiled(self):
         job1 = self.env.user.with_delay().read(["id"])
         job1.store()

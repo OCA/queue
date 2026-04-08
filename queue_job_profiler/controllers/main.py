@@ -14,6 +14,8 @@ class RunJobController(BaseController):
 
     def _profiler_is_enabled(self, env, job):
         func_id = job.job_config.job_function_id
+        if not func_id:
+            return False
         job_function = env["queue.job.function"].browse(func_id)
         return job_function.is_profiling_enabled()
 
@@ -24,6 +26,8 @@ class RunJobController(BaseController):
 
     def _profiler_get(self, env, job):
         func_id = job.job_config.job_function_id
+        if not func_id:
+            return None
         job_function = env["queue.job.function"].browse(func_id)
         return Profiler(
             description=job_function._profile_make_name(job),
