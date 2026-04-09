@@ -15,3 +15,9 @@ class TestRunJobController(TransactionCase):
         self.assertEqual(
             rslt, {"exc_info": "info", "exc_name": "Exception", "exc_message": "zero"}
         )
+
+    def test_runjob_success(self):
+        job = self.env["queue.job"].with_delay()._test_job()
+        RunJobController._runjob(self.env, job)
+        self.assertEqual(job.state, "done")
+        self.assertEqual(job.db_record().state, "done")

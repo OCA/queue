@@ -85,6 +85,36 @@ Features:
 .. contents::
    :local:
 
+Use Cases / Context
+===================
+
+Odoo treats task synchronously, like when you import a list of products
+it will treat each line in one big task. "Queue job" gives you the
+ability to detail big tasks in many smaller ones.
+
+Imagine you have a lot of data to change for thousand orders, you can do
+it in one step and cause a heavy load on the server, and this may affect
+the performance of Odoo. With queue_job you can divide the work in jobs
+and run thousand jobs (one job for each orders). An other benefit is if
+one line failed it doesn't block the processing of the others, as the
+jobs are independent. Plus you can schedule the jobs and set a number of
+retries.
+
+Here are some community usage examples:
+
+- Mass sending invoices:
+  `account_invoice_mass_sending <https://github.com/OCA/account-invoicing/tree/17.0/account_invoice_mass_sending>`__
+- Import data in the background:
+  `base_import_async <https://github.com/OCA/queue/tree/17.0/base_import_async>`__
+- Export data in the background:
+  `base_export_async <https://github.com/OCA/queue/tree/17.0/base_export_async>`__
+- Generate contract invoices with jobs:
+  `contract_queue_job <https://github.com/OCA/contract/tree/17.0/contract_queue_job>`__
+- Generate partner invoices with
+  jobs:`partner_invoicing_mode <https://github.com/OCA/account-invoicing/tree/17.0/partner_invoicing_mode>`__
+- Process the Sales Automatic Workflow actions with jobs:
+  `sale_automatic_workflow_job <https://github.com/OCA/sale-workflow/tree/17.0/sale_automatic_workflow_job>`__
+
 Installation
 ============
 
@@ -99,10 +129,14 @@ Configuration
 
     - ``ODOO_QUEUE_JOB_CHANNELS=root:4`` or any other channels
       configuration. The default is ``root:1``
-    - if ``xmlrpc_port`` is not set: ``ODOO_QUEUE_JOB_PORT=8069``
-
-  - Start Odoo with ``--load=web,queue_job`` and ``--workers`` greater
-    than 1. [1]_
+    - ``ODOO_QUEUE_JOB_PORT=8069``, default ``--http-port``
+    - ``ODOO_QUEUE_JOB_SCHEME=https``, default ``http``
+    - ``ODOO_QUEUE_JOB_HOST=load-balancer``, default
+      ``--http-interface`` or ``localhost`` if unset
+    - ``ODOO_QUEUE_JOB_HTTP_AUTH_USER=jobrunner``, default empty
+    - ``ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t``, default empty
+    - Start Odoo with ``--load=web,queue_job`` and ``--workers`` greater
+      than 1. [1]_
 
 - Using the Odoo configuration file:
 
@@ -116,6 +150,11 @@ Configuration
    (...)
    [queue_job]
    channels = root:2
+   scheme = https
+   host = load-balancer
+   port = 443
+   http_auth_user = jobrunner
+   http_auth_password = s3cr3t
 
 - Confirm the runner is starting correctly by checking the odoo log
   file:
