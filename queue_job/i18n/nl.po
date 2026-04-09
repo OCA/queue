@@ -54,6 +54,19 @@ msgid "Activity Type Icon"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__allow_commit
+msgid "Allow Commit"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job_function__allow_commit
+msgid ""
+"Allows the job to commit transactions during execution. Under the hood, this "
+"executes the job in a new database cursor, which incurs an overhead as it "
+"requires an extra connection to the database. "
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__args
 msgid "Args"
 msgstr ""
@@ -105,7 +118,7 @@ msgstr ""
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
-msgid "Cancelled by {}"
+msgid "Cancelled by %s"
 msgstr ""
 
 #. module: queue_job
@@ -222,6 +235,7 @@ msgid "Description"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
@@ -342,17 +356,12 @@ msgid "Graph UUID"
 msgstr ""
 
 #. module: queue_job
-#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
-#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
-msgid "Group By"
-msgstr ""
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__has_message
 msgid "Has Message"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
@@ -391,7 +400,7 @@ msgstr ""
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
-msgid "Invalid job function: {}"
+msgid "Invalid job function: %s"
 msgstr ""
 
 #. module: queue_job
@@ -423,6 +432,7 @@ msgstr ""
 #. module: queue_job
 #: model:ir.module.category,name:queue_job.module_category_queue_job
 #: model:ir.ui.menu,name:queue_job.menu_queue_job_root
+#: model:res.groups.privilege,name:queue_job.privilege_queue_job
 msgid "Job Queue"
 msgstr ""
 
@@ -501,7 +511,7 @@ msgstr ""
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
-msgid "Manually set to done by {}"
+msgid "Manually set to done by %s"
 msgstr ""
 
 #. module: queue_job
@@ -539,7 +549,7 @@ msgstr ""
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
-msgid "Model {} not found"
+msgid "Model %s not found"
 msgstr ""
 
 #. module: queue_job
@@ -577,7 +587,7 @@ msgstr ""
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
-msgid "Not allowed to change field(s): {}"
+msgid "Not allowed to change field(s): %s"
 msgstr ""
 
 #. module: queue_job
@@ -864,17 +874,17 @@ msgstr ""
 #. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 msgid ""
-"Unexpected format of Related Action for {}.\n"
+"Unexpected format of Related Action for %s.\n"
 "Example of valid format:\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", "
-"\"kwargs\" {{\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" "
+"{{\"limit\": 10}}}}"
 msgstr ""
 
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 msgid ""
-"Unexpected format of Retry Pattern for {}.\n"
+"Unexpected format of Retry Pattern for %s.\n"
 "Example of valid formats:\n"
 "{{1: 300, 5: 600, 10: 1200, 15: 3000}}\n"
 "{{1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}}"
@@ -899,4 +909,10 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
+msgstr ""
+
+#. module: queue_job
+#. odoo-python
+#: code:addons/queue_job/models/queue_job.py:0
+msgid "id"
 msgstr ""

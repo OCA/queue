@@ -59,6 +59,19 @@ msgid "Activity Type Icon"
 msgstr "Icono de tipo de actividad"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__allow_commit
+msgid "Allow Commit"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job_function__allow_commit
+msgid ""
+"Allows the job to commit transactions during execution. Under the hood, this "
+"executes the job in a new database cursor, which incurs an overhead as it "
+"requires an extra connection to the database. "
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__args
 msgid "Args"
 msgstr "Argumentos"
@@ -110,8 +123,8 @@ msgstr "Cancelada"
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
-msgid "Cancelled by {}"
-msgstr ""
+msgid "Cancelled by %s"
+msgstr "Cancelado por %s"
 
 #. module: queue_job
 #. odoo-python
@@ -227,6 +240,7 @@ msgid "Description"
 msgstr "Descripción"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
@@ -347,17 +361,12 @@ msgid "Graph UUID"
 msgstr "UUID del Gráfico"
 
 #. module: queue_job
-#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_function_search
-#: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
-msgid "Group By"
-msgstr "Agrupar por"
-
-#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__has_message
 msgid "Has Message"
 msgstr "Tiene un mensaje"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_ir_model_fields__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
@@ -397,8 +406,8 @@ msgstr "Si se encuentra seleccionado, algunos mensajes tienen error de envío."
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
-msgid "Invalid job function: {}"
-msgstr "Función del trabajo no válida: {}"
+msgid "Invalid job function: %s"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_is_follower
@@ -429,6 +438,7 @@ msgstr "Funciones de los trabajos"
 #. module: queue_job
 #: model:ir.module.category,name:queue_job.module_category_queue_job
 #: model:ir.ui.menu,name:queue_job.menu_queue_job_root
+#: model:res.groups.privilege,name:queue_job.privilege_queue_job
 msgid "Job Queue"
 msgstr "Cola de trabajos"
 
@@ -507,8 +517,8 @@ msgstr "Última actualización el"
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
-msgid "Manually set to done by {}"
-msgstr ""
+msgid "Manually set to done by %s"
+msgstr "Marcado como hecho a mano por %s"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__max_retries
@@ -545,8 +555,8 @@ msgstr "Modelo"
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
-msgid "Model {} not found"
-msgstr "No se ha encontrado el modelo {}"
+msgid "Model %s not found"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__my_activity_date_deadline
@@ -583,8 +593,8 @@ msgstr "No hay ninguna acción disponible para este trabajo"
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
-msgid "Not allowed to change field(s): {}"
-msgstr "No se permite cambiar los campos: {}"
+msgid "Not allowed to change field(s): %s"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_needaction_counter
@@ -893,21 +903,17 @@ msgstr "UUID"
 #. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 msgid ""
-"Unexpected format of Related Action for {}.\n"
+"Unexpected format of Related Action for %s.\n"
 "Example of valid format:\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", "
-"\"kwargs\" {{\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" "
+"{{\"limit\": 10}}}}"
 msgstr ""
-"Formato inesperado en la acción relacionada con {}.\n"
-"Ejemplo de un formato válido:\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", "
-"\"kwargs\" {{\"limit\": 10}}}}"
 
 #. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 msgid ""
-"Unexpected format of Retry Pattern for {}.\n"
+"Unexpected format of Retry Pattern for %s.\n"
 "Example of valid formats:\n"
 "{{1: 300, 5: 600, 10: 1200, 15: 3000}}\n"
 "{{1: (1, 10), 5: (11, 20), 10: (21, 30), 15: (100, 300)}}"
@@ -934,6 +940,35 @@ msgstr "Asistente para volver a poner en cola una selección de trabajos"
 msgid "Worker Pid"
 msgstr "Pid del trabajador"
 
+#. module: queue_job
+#. odoo-python
+#: code:addons/queue_job/models/queue_job.py:0
+msgid "id"
+msgstr ""
+
+#~ msgid "Group By"
+#~ msgstr "Agrupar por"
+
+#~ msgid "Invalid job function: {}"
+#~ msgstr "Función del trabajo no válida: {}"
+
+#~ msgid "Model {} not found"
+#~ msgstr "No se ha encontrado el modelo {}"
+
+#~ msgid "Not allowed to change field(s): {}"
+#~ msgstr "No se permite cambiar los campos: {}"
+
+#~ msgid ""
+#~ "Unexpected format of Related Action for {}.\n"
+#~ "Example of valid format:\n"
+#~ "{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" "
+#~ "{{\"limit\": 10}}}}"
+#~ msgstr ""
+#~ "Formato inesperado en la acción relacionada con {}.\n"
+#~ "Ejemplo de un formato válido:\n"
+#~ "{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" "
+#~ "{{\"limit\": 10}}}}"
+
 #~ msgid "If both parameters are 0, ALL jobs will be requeued!"
 #~ msgstr ""
 #~ "Si ambos parámetros son 0, ¡TODOS los trabajos se volverán a poner en la "
@@ -949,16 +984,8 @@ msgstr "Pid del trabajador"
 #~ msgstr "Error de entrega del SMS"
 
 #, python-format
-#~ msgid "Cancelled by %s"
-#~ msgstr "Cancelado por %s"
-
-#, python-format
 #~ msgid "Job interrupted and set to Done: nothing to do."
 #~ msgstr "Trabajo interrumpido y marcado como hecho: nada que hacer."
-
-#, python-format
-#~ msgid "Manually set to done by %s"
-#~ msgstr "Marcado como hecho a mano por %s"
 
 #~ msgid "Record"
 #~ msgstr "Registro"
