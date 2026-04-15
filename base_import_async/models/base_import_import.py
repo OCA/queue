@@ -91,9 +91,8 @@ class BaseImportImport(models.TransientModel):
         for row in data:
             cleaned_row = []
             for cell in row:
-                if isinstance(cell, bytes):
-                    # bytes from base64.b64encode() -> decode to base64 string
-                    cell = cell.decode('ascii')
+                if isinstance(cell, (bytes, bytearray)):
+                    cell = cell.decode("utf-8")
                 cleaned_row.append(cell)
             writer.writerow(cleaned_row)
         # create attachment. Remove default values from context
