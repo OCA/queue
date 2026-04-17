@@ -72,10 +72,10 @@ class TestRunner(BaseCase):
             self.assertEqual(
                 (
                     "https",
-                    "getbasher-jigglebee-web-staging-30747585.dev.odoo.com",
+                    "example-staging-db-12345678.dev.odoo.com",
                     443,
                 ),
-                runner._jobrunner_target("getbasher-jigglebee-web-staging-30747585"),
+                runner._jobrunner_target("example-staging-db-12345678"),
             )
 
     def test_jobrunner_target_uses_odoo_sh_production_domain(self):
@@ -90,7 +90,7 @@ class TestRunner(BaseCase):
             self.assertEqual(
                 ("https", "custom.example.com", 8443),
                 runner._jobrunner_target(
-                    "getbasher-jigglebee-web-staging-30747585",
+                    "example-staging-db-12345678",
                     scheme="https",
                     host="custom.example.com",
                     port=8443,
