@@ -3,6 +3,7 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import logging
+import os
 from threading import Thread
 import time
 from configparser import ConfigParser
@@ -98,6 +99,40 @@ runner_thread = None
 
 def _is_runner_enabled():
     return not _channels().strip().startswith("root:0")
+
+
+def _should_start_runner_thread_lazily(
+    *,
+    stage=None,
+    stop_after_init=None,
+    http_enable=None,
+    server_wide_modules=None,
+):
+    if stage is None:
+        stage = os.environ.get("ODOO_STAGE")
+    if stop_after_init is None:
+        stop_after_init = config["stop_after_init"]
+    if http_enable is None:
+        http_enable = config["http_enable"]
+    if server_wide_modules is None:
+        server_wide_modules = config["server_wide_modules"]
+    return bool(
+        stage
+        and not stop_after_init
+        and http_enable
+        and "queue_job" not in server_wide_modules
+        and _is_runner_enabled()
+    )
+
+
+def maybe_start_runner_thread(server_type):
+    global runner_thread
+    if runner_thread or not _should_start_runner_thread_lazily():
+        return False
+    _logger.info("starting jobrunner thread (in %s)", server_type)
+    runner_thread = QueueJobRunnerThread()
+    runner_thread.start()
+    return True
 
 
 def _start_runner_thread(server_type):

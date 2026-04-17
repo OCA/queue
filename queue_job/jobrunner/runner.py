@@ -71,6 +71,34 @@ def _odoo_now():
     return time.time()
 
 
+def _odoo_sh_stage():
+    return os.environ.get("ODOO_STAGE")
+
+
+def _odoo_sh_host(db_name, stage=None):
+    stage = stage or _odoo_sh_stage()
+    if not stage:
+        return None
+    if stage == "production":
+        return f"{db_name}.odoo.com"
+    return f"{db_name}.dev.odoo.com"
+
+
+def _jobrunner_target(db_name, scheme=None, host=None, port=None):
+    stage = _odoo_sh_stage()
+    if stage:
+        return (
+            scheme or "https",
+            host or _odoo_sh_host(db_name, stage=stage),
+            port or 443,
+        )
+    return (
+        scheme or "http",
+        host or config["http_interface"] or "localhost",
+        port or config["http_port"] or 8069,
+    )
+
+
 def _connection_info_for(db_name):
     db_or_uri, connection_info = odoo.sql_db.connection_info_for(db_name)
 
@@ -315,9 +343,9 @@ class Database:
 class QueueJobRunner:
     def __init__(
         self,
-        scheme="http",
-        host="localhost",
-        port=8069,
+        scheme=None,
+        host=None,
+        port=None,
         user=None,
         password=None,
         channel_config_string=None,
@@ -351,16 +379,8 @@ class QueueJobRunner:
         scheme = os.environ.get("ODOO_QUEUE_JOB_SCHEME") or queue_job_config.get(
             "scheme"
         )
-        host = (
-            os.environ.get("ODOO_QUEUE_JOB_HOST")
-            or queue_job_config.get("host")
-            or config["http_interface"]
-        )
-        port = (
-            os.environ.get("ODOO_QUEUE_JOB_PORT")
-            or queue_job_config.get("port")
-            or config["http_port"]
-        )
+        host = os.environ.get("ODOO_QUEUE_JOB_HOST") or queue_job_config.get("host")
+        port = os.environ.get("ODOO_QUEUE_JOB_PORT") or queue_job_config.get("port")
         user = os.environ.get("ODOO_QUEUE_JOB_HTTP_AUTH_USER") or queue_job_config.get(
             "http_auth_user"
         )
@@ -368,13 +388,21 @@ class QueueJobRunner:
             "ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD"
         ) or queue_job_config.get("http_auth_password")
         runner = cls(
-            scheme=scheme or "http",
-            host=host or "localhost",
-            port=port or 8069,
+            scheme=scheme,
+            host=host,
+            port=port,
             user=user,
             password=password,
         )
         return runner
+
+    def _target_for_db(self, db_name):
+        return _jobrunner_target(
+            db_name,
+            scheme=self.scheme,
+            host=self.host,
+            port=self.port,
+        )
 
     def get_db_names(self):
         db_names = config["db_name"]
@@ -417,10 +445,11 @@ class QueueJobRunner:
                 break
             _logger.info("asking Odoo to run job %s on db %s", job.uuid, job.db_name)
             self.db_by_name[job.db_name].set_job_enqueued(job.uuid)
+            scheme, host, port = self._target_for_db(job.db_name)
             _async_http_get(
-                self.scheme,
-                self.host,
-                self.port,
+                scheme,
+                host,
+                port,
                 self.user,
                 self.password,
                 job.db_name,

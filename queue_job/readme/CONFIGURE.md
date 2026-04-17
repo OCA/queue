@@ -8,11 +8,14 @@
       or `localhost` if unset
     - `ODOO_QUEUE_JOB_HTTP_AUTH_USER=jobrunner`, default empty
     - `ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t`, default empty
-    - Start Odoo with `--load=web,queue_job` and `--workers` greater than
-      1.[^1]
+    - Start Odoo with `--load=web,queue_job` and `--workers` greater than 1.[^1]
+    - On Odoo.sh, if no explicit queue job host is configured and `ODOO_STAGE`
+      is present, the runner derives the host from the database name:
+      `<db_name>.dev.odoo.com` for non-production stages and
+      `<db_name>.odoo.com` for production.
 - Using the Odoo configuration file:
 
-``` ini
+```ini
 [options]
 (...)
 workers = 6
@@ -31,7 +34,7 @@ http_auth_password = s3cr3t
 - Confirm the runner is starting correctly by checking the odoo log
   file:
 
-``` 
+```
 ...INFO...queue_job.jobrunner.runner: starting
 ...INFO...queue_job.jobrunner.runner: initializing database connections
 ...INFO...queue_job.jobrunner.runner: queue job runner ready for db <dbname>
@@ -43,8 +46,9 @@ http_auth_password = s3cr3t
 - Tip: to enable debug logging for the queue job, use
   `--log-handler=odoo.addons.queue_job:DEBUG`
 
-[^1]: It works with the threaded Odoo server too, although this way of
+[^1]:
+    It works with the threaded Odoo server too, although this way of
     running Odoo is obviously not for production purposes.
 
-* Jobs that remain in `enqueued` or `started` state (because, for instance,
+- Jobs that remain in `enqueued` or `started` state (because, for instance,
   their worker has been killed) will be automatically re-queued.

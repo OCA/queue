@@ -137,6 +137,10 @@ Configuration
     - ``ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t``, default empty
     - Start Odoo with ``--load=web,queue_job`` and ``--workers`` greater
       than 1. [1]_
+    - On Odoo.sh, if no explicit queue job host is configured and
+      ``ODOO_STAGE`` is present, the runner derives the host from the
+      database name: ``<db_name>.dev.odoo.com`` for non-production stages
+      and ``<db_name>.odoo.com`` for production.
 
 - Using the Odoo configuration file:
 
