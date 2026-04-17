@@ -9,7 +9,7 @@ import csv
 from io import BytesIO, StringIO, TextIOWrapper
 from os.path import splitext
 
-from odoo import _, api, models
+from odoo import _, models
 from odoo.models import fix_import_export_id_paths
 
 from odoo.addons.base_import.models.base_import import ImportValidationError
@@ -34,6 +34,7 @@ class BaseImportImport(models.TransientModel):
     _inherit = "base_import.import"
 
     def execute_import(self, fields, columns, options, dryrun=False):
+        self.ensure_one()
         if dryrun or not options.get(OPT_USE_QUEUE):
             # normal import
             return super().execute_import(fields, columns, options, dryrun=dryrun)
@@ -41,8 +42,15 @@ class BaseImportImport(models.TransientModel):
         # asynchronous import
         try:
             data, import_fields = self._convert_import_data(fields, options)
+            if errors := self._parse_datetime_data(import_fields, data):
+                return {"messages": errors}
             # Parse date and float field
             data = self._parse_import_data(data, import_fields, options)
+            import_fields, data = self._handle_multi_mapping(import_fields, data)
+            if options.get("fallback_values"):
+                data = self._handle_fallback_values(
+                    import_fields, data, options["fallback_values"]
+                )
         except (ImportValidationError, ValueError) as e:
             return {"messages": [e.__dict__]}
 
@@ -78,7 +86,6 @@ class BaseImportImport(models.TransientModel):
         )
         attachment.write({"res_model": "queue.job", "res_id": queue_job.id})
 
-    @api.returns("ir.attachment")
     def _create_csv_attachment(self, fields, data, options, file_name):
         # write csv
         f = StringIO()
@@ -182,7 +189,16 @@ class BaseImportImport(models.TransientModel):
             priority += 1
 
     def _import_one_chunk(self, model_name, attachment, options):
-        model_obj = self.env[model_name]
+        load_context = {
+            "import_file": True,
+            "tracking_disable": options.get("tracking_disable"),
+            "name_create_enabled_fields": options.get(
+                "name_create_enabled_fields", {}
+            ),
+            "import_set_empty_fields": options.get("import_set_empty_fields", []),
+            "import_skip_records": options.get("import_skip_records", []),
+        }
+        model_obj = self.env[model_name].with_context(**load_context)
         fields, data = self._read_csv_attachment(attachment, options)
         result = model_obj.load(fields, data)
         error_message = [

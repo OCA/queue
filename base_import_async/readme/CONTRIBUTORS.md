@@ -23,3 +23,5 @@ Other contributors include:
   - Do Anh Duy \<<duyda@trobz.com>\>
 
 - Daniel Duque (FactorLibre)
+
+- Youssef Egla

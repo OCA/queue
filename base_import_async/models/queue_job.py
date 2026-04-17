@@ -10,10 +10,16 @@ class QueueJob(models.Model):
     _inherit = "queue.job"
 
     def _related_action_attachment(self):
+        attachment = self.env["ir.attachment"].search(
+            [("res_model", "=", "queue.job"), ("res_id", "=", self.id)],
+            limit=1,
+        )
+        if not attachment:
+            return None
         return {
             "name": _("Attachment"),
             "type": "ir.actions.act_window",
             "res_model": "ir.attachment",
             "view_mode": "form",
-            "res_id": self.kwargs.get("att_id"),
+            "res_id": attachment.id,
         }
