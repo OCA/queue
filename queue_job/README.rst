@@ -141,6 +141,9 @@ Configuration
       ``ODOO_STAGE`` is present, the runner derives the host from the
       database name: ``<db_name>.dev.odoo.com`` for non-production stages
       and ``<db_name>.odoo.com`` for production.
+    - That canonical Odoo.sh hostname must remain reachable from the Odoo
+      workers. If your setup must use another host, set
+      ``ODOO_QUEUE_JOB_HOST`` explicitly.
 
 - Using the Odoo configuration file:
 

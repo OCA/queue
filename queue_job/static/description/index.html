@@ -497,6 +497,9 @@ configuration. The default is <tt class="docutils literal">root:1</tt></li>
 <li><tt class="docutils literal">ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t</tt>, default empty</li>
 <li>Start Odoo with <tt class="docutils literal"><span class="pre">--load=web,queue_job</span></tt> and <tt class="docutils literal"><span class="pre">--workers</span></tt> greater
 than 1. <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a></li>
+<li>That canonical Odoo.sh hostname must remain reachable from the Odoo
+workers. If your setup must use another host, set
+<tt class="docutils literal"><span class="pre">ODOO_QUEUE_JOB_HOST</span></tt> explicitly.</li>
 </ul>
 </li>
 </ul>
