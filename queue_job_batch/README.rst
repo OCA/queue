@@ -120,6 +120,8 @@ Contributors
   - Maksym Yankin <maksym.yankin@camptocamp.com>
   - Iván Todorovich <ivan.todorovich@camptocamp.com>
 
+- Youssef Egla <youssefegla@gmail.com>
+
 Other credits
 -------------
 
