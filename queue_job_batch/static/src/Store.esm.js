@@ -11,12 +11,4 @@ patch(Store.prototype, {
     hasQueueJobBatchUserGroup: false,
     queueJobBatchCounterBusId: 0,
     queueJobBatchCounter: 0,
-
-    /** @override */
-    get initMessagingParams() {
-        return {
-            ...super.initMessagingParams,
-            systray_get_queue_job_batches: true,
-        };
-    },
 });

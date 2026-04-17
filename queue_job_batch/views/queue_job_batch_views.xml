@@ -96,7 +96,7 @@
                     string="Finished"
                     domain="[('state', '=', 'finished')]"
                 />
-                <group expand="0" string="Group By">
+                <group>
                     <filter
                         name="group_by_state"
                         string="State"

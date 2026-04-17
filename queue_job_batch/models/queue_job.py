@@ -12,6 +12,7 @@ class QueueJob(models.Model):
     job_batch_id = fields.Many2one("queue.job.batch")
 
     @api.model_create_multi
+    @api.private
     def create(self, vals_list):
         batch = self.env.context.get("job_batch")
         if batch and isinstance(batch, models.Model):

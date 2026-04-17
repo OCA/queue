@@ -10,13 +10,18 @@ class Users(models.Model):
 
     def _init_store_data(self, store):
         res = super()._init_store_data(store)
-        store.add(
-            {
-                "hasQueueJobBatchUserGroup": self.env.user.has_group(
-                    "queue_job_batch.group_queue_job_batch_user"
-                ),
-            }
+        has_batch_group = self.env.user.has_group(
+            "queue_job_batch.group_queue_job_batch_user"
         )
+        values = {"hasQueueJobBatchUserGroup": has_batch_group}
+        if has_batch_group and self.env.user._is_internal():
+            batches = self.env.user._get_queue_job_batches()
+            # sudo: bus.bus: reading non-sensitive last id
+            values.update(
+                queueJobBatchCounter=len(batches),
+                queueJobBatchCounterBusId=self.env["bus.bus"].sudo()._bus_last_id(),
+            )
+        store.add_global_values(**values)
         return res
 
     def _get_queue_job_batches(self):
