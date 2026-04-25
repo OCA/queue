@@ -90,7 +90,7 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
     #       if this was python3 I would be doing this with
     #       asyncio, aiohttp and aiopg
     def urlopen():
-        url = f"{scheme}://{host}:{port}/queue_job/runjob?db={db_name}&job_uuid={job_uuid}"
+        url = f"{scheme}://{host}:{port}/queue_job/runjob?job_uuid={job_uuid}"
         # pylint: disable=except-pass
         try:
             auth = None
@@ -98,7 +98,9 @@ def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
                 auth = (user, password)
             # we are not interested in the result, so we set a short timeout
             # but not too short so we trap and log hard configuration errors
-            response = requests.get(url, timeout=1, auth=auth)
+            response = requests.get(
+                url, timeout=1, auth=auth, headers={"X-Odoo-Database": db_name}
+            )
 
             # raise_for_status will result in either nothing, a Client Error
             # for HTTP Response codes between 400 and 500 or a Server Error
