@@ -1,5 +1,7 @@
 # Copyright 2019 ACSONE SA/NV (<http://acsone.eu>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+from unittest.mock import patch
+
 from odoo.tests.common import TransactionCase
 
 
@@ -73,7 +75,14 @@ class TestQueueJobCron(TransactionCase):
             }
         )
         cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
-        cron._callback("Test queue job cron", action.id)
+        # In Odoo 19 the base `_callback` commits/rolls back the cursor, which
+        # is forbidden inside a TransactionCase; bypass that on the
+        # super-delegating path so we can still assert it ran the action.
+        with (
+            patch.object(self.env.cr, "commit"),
+            patch.object(self.env.cr, "rollback"),
+        ):
+            cron._callback("Test queue job cron", action.id)
         nb_partners_after_cron = self.env["res.partner"].search_count([])
         self.assertEqual(nb_partners_after_cron, nb_partners + 1)
         cron.write({"run_as_queue_job": True})
