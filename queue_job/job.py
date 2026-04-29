@@ -13,8 +13,26 @@ from datetime import datetime, timedelta
 from random import randint
 
 import odoo
+from odoo.models import BaseModel
 
 from .exception import FailedJobError, NoSuchJobError, RetryableJobError
+
+
+def _rebind_to_env(value, new_env):
+    """Rebind any BaseModel inside `value` to ``new_env``'s cursor.
+
+    Recurses into lists, tuples and dicts. Preserves uid/su/context of each
+    inner env - only the cursor is swapped. Non-recordset values pass through
+    untouched.
+    """
+    if isinstance(value, BaseModel):
+        return value.with_env(value.env(cr=new_env.cr))
+    if isinstance(value, (list, tuple)):
+        return type(value)(_rebind_to_env(v, new_env) for v in value)
+    if isinstance(value, dict):
+        return {k: _rebind_to_env(v, new_env) for k, v in value.items()}
+    return value
+
 
 WAIT_DEPENDENCIES = "wait_dependencies"
 PENDING = "pending"
@@ -533,11 +551,19 @@ class Job:
     def in_temporary_env(self):
         with self.env.registry.cursor() as new_cr:
             env = self.env
-            self._env = env(cr=new_cr)
+            original_args = self.args
+            original_kwargs = self.kwargs
             try:
+                self._env = env(cr=new_cr)
+                self.args = tuple(_rebind_to_env(a, self.env) for a in self.args)
+                self.kwargs = {
+                    k: _rebind_to_env(v, self.env) for k, v in self.kwargs.items()
+                }
                 yield
             finally:
                 self._env = env
+                self.args = original_args
+                self.kwargs = original_kwargs
 
     def _get_common_dependent_jobs_query(self):
         return """
