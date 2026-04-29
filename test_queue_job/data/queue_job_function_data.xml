@@ -21,6 +21,14 @@
         <field name="retry_pattern" eval="{3: 180}" />
     </record>
     <record
+        id="job_function_test_queue_job_job_commit_with_arg_records"
+        model="queue.job.function"
+    >
+        <field name="model_id" ref="test_queue_job.model_test_queue_job" />
+        <field name="method">job_commit_with_arg_records</field>
+        <field name="allow_commit" eval="True" />
+    </record>
+    <record
         id="job_function_test_queue_channel_job_sub_channel"
         model="queue.job.function"
     >

@@ -8,6 +8,7 @@ from unittest import mock
 import odoo.tests.common as common
 
 from odoo.addons.queue_job import identity_exact
+from odoo.addons.queue_job.controllers.main import RunJobController
 from odoo.addons.queue_job.delay import DelayableGraph
 from odoo.addons.queue_job.exception import (
     FailedJobError,
@@ -67,6 +68,17 @@ class TestJobsOnTestingMethod(JobCommonCase):
         test_job = Job(self.method, args=("o", "k"), kwargs={"c": "!"})
         result = test_job.perform()
         self.assertEqual(result, (("o", "k"), {"c": "!"}))
+
+    def test_allow_commit_rebinds_recordsets_in_args(self):
+        record = self.env.user.partner_id
+        job = (
+            self.env["test.queue.job"]
+            .with_delay()
+            .job_commit_with_arg_records(record, [record], {"record": record}, "ok")
+        )
+        RunJobController._runjob(self.env, job)
+        self.assertEqual(job.state, DONE)
+        self.assertEqual(job.result, "ok")
 
     def test_retryable_error(self):
         test_job = Job(self.method, kwargs={"raise_retry": True}, max_retries=3)
