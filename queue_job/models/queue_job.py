@@ -424,7 +424,7 @@ class QueueJob(models.Model):
                     limit=1000,
                 )
                 if jobs:
-                    jobs.unlink()
+                    jobs.sudo().unlink()
                     if not config["test_enable"]:
                         self.env.cr.commit()  # pylint: disable=E8102
                 else:
