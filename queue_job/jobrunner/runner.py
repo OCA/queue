@@ -354,7 +354,7 @@ class QueueJobRunner:
         host = (
             os.environ.get("ODOO_QUEUE_JOB_HOST")
             or queue_job_config.get("host")
-            or config["http_interface"]
+            or config["http_interface"] if config["http_interface"] != "0.0.0.0" else "localhost"
         )
         port = (
             os.environ.get("ODOO_QUEUE_JOB_PORT")
