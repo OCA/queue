@@ -25,7 +25,7 @@ class QueueJob(models.Model):
             for record in self:
                 if record.state != "done" and record.job_batch_id:
                     batches |= record.job_batch_id
-            for batch in batches:
+            for batch in batches.with_context(job_batch=None):
                 # We need to make it with delay in order to prevent two jobs
                 # to work with the same batch
                 batch.with_delay(identity_key=identity_exact).check_state()
