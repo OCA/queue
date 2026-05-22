@@ -6,10 +6,18 @@ from itertools import groupby
 from operator import attrgetter
 from unittest import TestCase, mock
 
+from odoo.tests.common import SETATTR_SOURCES
+
 from odoo.addons.queue_job.delay import Graph
 
 # pylint: disable=odoo-addons-relative-import
 from odoo.addons.queue_job.job import Job
+
+# Register queue_job patcher as a known path to prevent verbose warning
+# in tests when methods are patched.
+SETATTR_SOURCES["_patch_method"] = tuple(
+    list(SETATTR_SOURCES.get("_patch_method", [])) + ["/queue_job/models/base.py"],
+)
 
 
 @contextmanager
@@ -206,7 +214,7 @@ class JobsTrap:
 
         if expected_call not in actual_calls:
             raise AssertionError(
-                "Job {} was not enqueued.\n" "Actual enqueued jobs:\n{}".format(
+                "Job {} was not enqueued.\nActual enqueued jobs:\n{}".format(
                     self._format_job_call(expected_call),
                     "\n".join(
                         f" * {self._format_job_call(call)}" for call in actual_calls
