@@ -1,12 +1,13 @@
 [project]
 name = "odoo-addons-oca-queue"
-version = "18.0.20250415.0"
+version = "18.0.20260526.0"
 dependencies = [
     "odoo-addon-base_import_async==18.0.*",
     "odoo-addon-queue_job==18.0.*",
     "odoo-addon-queue_job_batch==18.0.*",
     "odoo-addon-queue_job_cron==18.0.*",
     "odoo-addon-queue_job_cron_jobrunner==18.0.*",
+    "odoo-addon-queue_job_profiler==18.0.*",
     "odoo-addon-queue_job_subscribe==18.0.*",
     "odoo-addon-test_queue_job==18.0.*",
     "odoo-addon-test_queue_job_batch==18.0.*",
