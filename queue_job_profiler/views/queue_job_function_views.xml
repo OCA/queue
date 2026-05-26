@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="queue_job_function_form_profiler" model="ir.ui.view">
+        <field name="name">queue.job.function.form.profiler</field>
+        <field name="model">queue.job.function</field>
+        <field name="inherit_id" ref="queue_job.view_queue_job_function_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//form/group" position="after">
+                <group name="profiler" string="Profiler">
+                    <field name="profiling_enabled" />
+                    <field
+                        name="profiling_user_ids"
+                        invisible="not profiling_enabled"
+                    />
+                    <field
+                        name="profiling_until"
+                        required="profiling_enabled"
+                        invisible="not profiling_enabled"
+                    />
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
