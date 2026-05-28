@@ -2,6 +2,7 @@
 name = "odoo-addons-oca-queue"
 version = "19.0.20260104.0"
 dependencies = [
+    "odoo-addon-base_import_async==19.0.*",
     "odoo-addon-queue_job==19.0.*",
     "odoo-addon-test_queue_job==19.0.*",
 ]
