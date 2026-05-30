@@ -4,8 +4,10 @@ import logging
 from unittest import mock
 
 from odoo.tests import tagged
+from odoo.tests.common import mute_logger
 
 from odoo.addons.queue_job.controllers.main import RunJobController
+from odoo.addons.queue_job.job import Job
 
 from .common import JobCommonCase
 
@@ -49,3 +51,41 @@ class TestRequeueDeadJob(JobCommonCase):
                 "was requested to run job test_started_job, but it does not exist",
                 logs.output[0],
             )
+
+    def _create_non_existing_method_job(self):
+        test_job = Job(self.method)
+        test_job.store()
+        self.env.cr.execute(
+            """
+            UPDATE queue_job SET state = 'enqueued', method_name = %s
+            WHERE uuid = %s
+            """,
+            ("nonexistent_xyz", test_job.uuid),
+        )
+        self.env["queue.job"].invalidate_model()
+        return test_job.uuid
+
+    def test_acquire_returns_none_when_method_missing(self):
+        uuid = self._create_non_existing_method_job()
+        with (
+            mock.patch.object(
+                self.env.cr, "commit", mock.Mock(side_effect=self.env.flush_all)
+            ),
+            mute_logger("odoo.addons.queue_job.controllers.main"),
+        ):
+            job = RunJobController._acquire_job(self.env, uuid)
+        self.assertIsNone(job)
+
+    def test_acquire_marks_job_failed_when_method_missing(self):
+        uuid = self._create_non_existing_method_job()
+        with (
+            mock.patch.object(
+                self.env.cr, "commit", mock.Mock(side_effect=self.env.flush_all)
+            ),
+            mute_logger("odoo.addons.queue_job.controllers.main"),
+        ):
+            RunJobController._acquire_job(self.env, uuid)
+        self.env["queue.job"].invalidate_model()
+        job_record = self.env["queue.job"].search([("uuid", "=", uuid)])
+        self.assertEqual(job_record.state, "failed")
+        self.assertIn("nonexistent_xyz", job_record.exc_message)

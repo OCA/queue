@@ -6,11 +6,13 @@ from datetime import datetime, timedelta
 from unittest import mock
 
 import odoo.tests.common as common
+from odoo.tests.common import mute_logger
 
 from odoo.addons.queue_job import identity_exact
 from odoo.addons.queue_job.delay import DelayableGraph
 from odoo.addons.queue_job.exception import (
     FailedJobError,
+    JobMethodNotFound,
     NoSuchJobError,
     RetryableJobError,
 )
@@ -304,6 +306,33 @@ class TestJobsOnTestingMethod(JobCommonCase):
         with self.assertRaises(NoSuchJobError):
             Job.load(self.env, test_job.uuid)
 
+    def _create_non_existing_method_job(self):
+        test_job = Job(self.method)
+        test_job.store()
+        self.env.cr.execute(
+            "UPDATE queue_job SET method_name = %s WHERE uuid = %s",
+            ("nonexistent_xyz", test_job.uuid),
+        )
+        self.env["queue.job"].invalidate_model()
+        return test_job.uuid
+
+    def test_load_missing_method(self):
+        """Job.load raises JobMethodNotFound when the method is missing."""
+        uuid = self._create_non_existing_method_job()
+        with self.assertRaises(JobMethodNotFound):
+            Job.load(self.env, uuid)
+
+    def test_load_many_skips_missing_method(self):
+        """load_many skips a broken job — other jobs still load."""
+        good = Job(self.method)
+        good.store()
+        bad_uuid = self._create_non_existing_method_job()
+        with mute_logger("odoo.addons.queue_job.job"):
+            loaded = Job.load_many(self.env, [good.uuid, bad_uuid])
+        loaded_uuids = {j.uuid for j in loaded}
+        self.assertIn(good.uuid, loaded_uuids)
+        self.assertNotIn(bad_uuid, loaded_uuids)
+
     def test_unicode(self):
         test_job = Job(
             self.method,
@@ -570,6 +599,16 @@ class TestJobModel(JobCommonCase):
         stored.write({"state": "failed"})
         stored.requeue()
         self.assertEqual(stored.state, PENDING)
+
+    def test_change_state_skips_missing_method(self):
+        """_change_job_state does not crash when the method is missing."""
+        stored = self._create_job()
+        self.env.cr.execute(
+            "UPDATE queue_job SET method_name = %s WHERE uuid = %s",
+            ("vanished_xyz", stored.uuid),
+        )
+        self.env["queue.job"].invalidate_model()
+        stored.button_done()
 
     def test_requeue_wait_dependencies_not_touched(self):
         job_root = Job(self.env["test.queue.job"].testing_method)

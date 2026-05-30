@@ -14,7 +14,12 @@ from random import randint
 
 import odoo
 
-from .exception import FailedJobError, NoSuchJobError, RetryableJobError
+from .exception import (
+    FailedJobError,
+    JobMethodNotFound,
+    NoSuchJobError,
+    RetryableJobError,
+)
 
 WAIT_DEPENDENCIES = "wait_dependencies"
 PENDING = "pending"
@@ -217,10 +222,20 @@ class Job:
     def load_many(cls, env, job_uuids):
         """Read jobs in batch from the Database
 
-        Jobs not found are ignored.
+        Jobs not found are ignored. Jobs whose method no longer exists are also
+        skipped with a warning.
         """
         recordset = cls.db_records_from_uuids(env, job_uuids)
-        return {cls._load_from_db_record(record) for record in recordset}
+        jobs = set()
+        for record in recordset:
+            try:
+                jobs.add(cls._load_from_db_record(record))
+            except JobMethodNotFound:
+                _logger.warning(
+                    "Skipping job %s as method no longer exists",
+                    record.uuid,
+                )
+        return jobs
 
     def add_lock_record(self) -> None:
         """
@@ -281,7 +296,9 @@ class Job:
         method_name = stored.method_name
 
         recordset = stored.records
-        method = getattr(recordset, method_name)
+        method = getattr(recordset, method_name, None)
+        if method is None:
+            raise JobMethodNotFound(recordset._name, method_name)
 
         eta = None
         if stored.eta:
