@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2024-04-04 16:36+0000\n"
+"PO-Revision-Date: 2026-06-03 09:46+0000\n"
 "Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: none\n"
 "Language: it\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.17\n"
+"X-Generator: Weblate 5.15.2\n"
 
 #. module: queue_job_web_notify
 #: model:ir.model.fields,help:queue_job_web_notify.field_queue_job_function__is_web_notify_failure_enabled
@@ -25,7 +25,7 @@ msgstr ""
 #. module: queue_job_web_notify
 #: model:ir.model,name:queue_job_web_notify.model_queue_job_function
 msgid "Job Functions"
-msgstr "Funzioni lavoro"
+msgstr "Funzioni lavorative"
 
 #. module: queue_job_web_notify
 #. odoo-python
