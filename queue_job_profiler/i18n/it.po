@@ -6,77 +6,85 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2026-06-03 09:46+0000\n"
+"Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: none\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.15.2\n"
 
 #. module: queue_job_profiler
 #. odoo-python
 #: code:addons/queue_job_profiler/models/queue_job_function.py:0
 msgid "A profiling until date must be set when profiling is enabled."
 msgstr ""
+"Quando la profilazione è abilitata deve essere impostata una data limite."
 
 #. module: queue_job_profiler
 #: model:ir.model.fields,help:queue_job_profiler.field_queue_job_function__profiling_enabled
 msgid "Indicates whether profiling is enabled for this job function."
 msgstr ""
+"Indica quando la profilazione è abilitata per questa funzione lavorativa."
 
 #. module: queue_job_profiler
 #: model:ir.model,name:queue_job_profiler.model_queue_job_function
 msgid "Job Functions"
-msgstr ""
+msgstr "Funzioni lavorative"
 
 #. module: queue_job_profiler
 #: model:ir.model.fields,field_description:queue_job_profiler.field_queue_job__job_is_profiled
 msgid "Profiled"
-msgstr ""
+msgstr "Profilato"
 
 #. module: queue_job_profiler
 #: model_terms:ir.ui.view,arch_db:queue_job_profiler.queue_job_function_form_profiler
 msgid "Profiler"
-msgstr ""
+msgstr "Profilatore"
 
 #. module: queue_job_profiler
 #: model:ir.model.fields,field_description:queue_job_profiler.field_queue_job_function__profiling_enabled
 msgid "Profiling enabled"
-msgstr ""
+msgstr "Profilazione abilitata"
 
 #. module: queue_job_profiler
 #: model:ir.model.fields,field_description:queue_job_profiler.field_queue_job_function__profiling_until
 msgid "Profiling until"
-msgstr ""
+msgstr "Profilare fino a"
 
 #. module: queue_job_profiler
 #: model:ir.model.fields,field_description:queue_job_profiler.field_queue_job_function__profiling_user_ids
 msgid "Profiling users"
-msgstr ""
+msgstr "Utenti profilazione"
 
 #. module: queue_job_profiler
 #: model:ir.model,name:queue_job_profiler.model_queue_job
 msgid "Queue Job"
-msgstr ""
+msgstr "Lavoro in coda"
 
 #. module: queue_job_profiler
 #: model:ir.model.fields,help:queue_job_profiler.field_queue_job_function__profiling_until
 msgid ""
 "The date and time until which profiling is enabled for this job function."
 msgstr ""
+"Data e ora entro cui la profilazione è abilitata per questa funzione "
+"lavorativa."
 
 #. module: queue_job_profiler
 #: model:ir.model.fields,help:queue_job_profiler.field_queue_job_function__profiling_user_ids
 msgid "The users allowed to perform profiling for this job function."
 msgstr ""
+"Gli utenti abilitati ad applicare la profilazione per questa funzione "
+"lavorativa."
 
 #. module: queue_job_profiler
 #: model_terms:ir.ui.view,arch_db:queue_job_profiler.queue_job_form_profiler
 msgid "View profiler"
-msgstr ""
+msgstr "Visualizza profilatore"
 
 #. module: queue_job_profiler
 #: model:ir.model.fields,help:queue_job_profiler.field_queue_job__job_is_profiled
 msgid "Whether this job has been profiled or not."
-msgstr ""
+msgstr "Se questo incarico è stato profilato o meno."
