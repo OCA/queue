@@ -111,12 +111,8 @@ class TestJobFunction(common.TransactionCase):
         self.assertEqual(action["res_id"], prof.id)
 
     def _run_controller(self, job, user=None):
-        controller = RunJobController()
         env = self.env(user=user) if user else self.env
-        with (
-            patch.object(self.env.cr, "commit"),
-        ):
-            controller._try_perform_job(env, job)
+        RunJobController._try_perform_job(env, job)
 
     def test_controller(self):
         job = self.env.user.with_delay().read(["id"])
