@@ -7,24 +7,28 @@ from odoo.addons.queue_job.controllers.main import RunJobController as BaseContr
 
 
 class RunJobController(BaseController):
-    def _try_perform_job(self, env, job):
-        if self._profiler_is_enabled(env, job):
-            return self._profiler_perform_job(env, job)
+    @classmethod
+    def _try_perform_job(cls, env, job):
+        if cls._profiler_is_enabled(env, job):
+            return cls._profiler_perform_job(env, job)
         return super()._try_perform_job(env, job)
 
-    def _profiler_is_enabled(self, env, job):
+    @classmethod
+    def _profiler_is_enabled(cls, env, job):
         func_id = job.job_config.job_function_id
         if not func_id:
             return False
         job_function = env["queue.job.function"].browse(func_id)
         return job_function.is_profiling_enabled()
 
-    def _profiler_perform_job(self, env, job):
-        with self._profiler_get(env, job):
+    @classmethod
+    def _profiler_perform_job(cls, env, job):
+        with cls._profiler_get(env, job):
             result = super()._try_perform_job(env, job)
         return result
 
-    def _profiler_get(self, env, job):
+    @classmethod
+    def _profiler_get(cls, env, job):
         func_id = job.job_config.job_function_id
         if not func_id:
             return None
