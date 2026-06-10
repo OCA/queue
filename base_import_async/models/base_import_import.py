@@ -89,7 +89,12 @@ class BaseImportImport(models.TransientModel):
         encoding = options.get(OPT_ENCODING) or "utf-8"
         writer.writerow(fields)
         for row in data:
-            writer.writerow(row)
+            cleaned_row = []
+            for cell in row:
+                if isinstance(cell, (bytes, bytearray)):
+                    cell = cell.decode("utf-8")
+                cleaned_row.append(cell)
+            writer.writerow(cleaned_row)
         # create attachment. Remove default values from context
         context = self.env.context
         context_copy = {}
