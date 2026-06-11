@@ -6,13 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2026-06-11 16:46+0000\n"
+"Last-Translator: Yann Papouin <ypa@decgroupe.com>\n"
 "Language-Team: none\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 5.15.2\n"
 
 #. module: queue_job_cron
 #: model:ir.model.fields,help:queue_job_cron.field_ir_cron__no_parallel_queue_job_run
@@ -21,28 +23,34 @@ msgid ""
 "skipped. By default, odoo never runs the same cron job in parallel. This "
 "option is therefore set to True by default when job is run as a queue job."
 msgstr ""
+"Évitez l'exécution en parallèle. Si la tâche cron est déjà en cours "
+"d'exécution, la nouvelle sera ignorée. Par défaut, Odoo n'exécute jamais la "
+"même tâche cron en parallèle. Cette option est donc définie sur « True » par "
+"défaut lorsque la tâche est exécutée en tant que tâche de file d'attente."
 
 #. module: queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__channel_id
 msgid "Channel"
-msgstr ""
+msgstr "Canal"
 
 #. module: queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__no_parallel_queue_job_run
 msgid "No Parallel Queue Job Run"
-msgstr ""
+msgstr "Aucune exécution de tâche en file d'attente parallèle"
 
 #. module: queue_job_cron
 #: model:ir.model.fields,field_description:queue_job_cron.field_ir_cron__run_as_queue_job
 msgid "Run As Queue Job"
-msgstr ""
+msgstr "Exécuté en tant que tâche sur file d'attente"
 
 #. module: queue_job_cron
 #: model:ir.model,name:queue_job_cron.model_ir_cron
 msgid "Scheduled Actions"
-msgstr ""
+msgstr "Actions planifiées"
 
 #. module: queue_job_cron
 #: model:ir.model.fields,help:queue_job_cron.field_ir_cron__run_as_queue_job
 msgid "Specify if this cron should be ran as a queue job"
 msgstr ""
+"Spécifie si cette tâche cron doit être exécutée en tant que tâche en file "
+"d'attente"
