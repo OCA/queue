@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-06-11 14:31+0000\n"
+"PO-Revision-Date: 2026-06-11 14:32+0000\n"
 "Last-Translator: Yann Papouin <ypa@decgroupe.com>\n"
 "Language-Team: none\n"
 "Language: fr\n"
@@ -77,7 +77,7 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__args
 msgid "Args"
-msgstr "Arguments"
+msgstr "Args"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__message_attachment_count
