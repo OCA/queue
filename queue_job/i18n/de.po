@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-01-14 14:42+0000\n"
+"PO-Revision-Date: 2026-06-17 16:46+0000\n"
 "Last-Translator: Bastian Günther <mail@bastian-guenther.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.10.4\n"
+"X-Generator: Weblate 5.15.2\n"
 
 #. module: queue_job
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_form
@@ -63,7 +63,7 @@ msgstr "Icon für Aktivitätstyp"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__allow_commit
 msgid "Allow Commit"
-msgstr ""
+msgstr "Commit zulassen"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job_function__allow_commit
@@ -72,6 +72,10 @@ msgid ""
 "executes the job in a new database cursor, which incurs an overhead as it "
 "requires an extra connection to the database. "
 msgstr ""
+"Ermöglicht dem Job, Transaktionen während der Ausführung festzuschreiben. Im "
+"Hintergrund wird der Job in einem neuen Datenbank-Cursor ausgeführt, was "
+"einen Mehraufwand verursacht, da eine zusätzliche Verbindung zur Datenbank "
+"erforderlich ist. "
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__args
