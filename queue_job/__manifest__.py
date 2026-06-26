@@ -31,5 +31,4 @@
     "development_status": "Mature",
     "maintainers": ["guewen", "sbidoul"],
     "post_init_hook": "post_init_hook",
-    "post_load": "post_load",
 }
