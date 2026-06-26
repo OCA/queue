@@ -1,15 +1,10 @@
 # Copyright 2019 Camptocamp
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
-import doctest
-import logging
 import typing
 from contextlib import contextmanager
 from itertools import groupby
 from operator import attrgetter
 from unittest import TestCase, mock
-
-from odoo.tests.case import TestCase as _TestCase
-from odoo.tests.common import MetaCase
 
 from odoo.addons.queue_job.delay import Graph
 
@@ -411,51 +406,3 @@ def mock_with_delay():  # pylint: disable=E501
         delayable = mock.MagicMock(name="DelayableBinding")
         delayable_cls.return_value = delayable
         yield delayable_cls, delayable
-
-
-class OdooDocTestCase(doctest.DocTestCase, _TestCase, MetaCase("DummyCase", (), {})):
-    """
-    We need a custom DocTestCase class in order to:
-    - define test_tags to run as part of standard tests
-    - output a more meaningful test name than default "DocTestCase.runTest"
-    """
-
-    def __init__(
-        self, doctest, optionflags=0, setUp=None, tearDown=None, checker=None, seq=0
-    ):
-        super().__init__(
-            doctest._dt_test,
-            optionflags=optionflags,
-            setUp=setUp,
-            tearDown=tearDown,
-            checker=checker,
-        )
-        self.test_sequence = seq
-
-    def setUp(self):
-        """Log an extra statement which test is started."""
-        super().setUp()
-        logging.getLogger(__name__).info("Running tests for %s", self._dt_test.name)
-
-
-def load_doctests(module):
-    """
-    Generates a tests loading method for the doctests of the given module
-    https://docs.python.org/3/library/unittest.html#load-tests-protocol
-    """
-
-    def load_tests(loader, tests, ignore):
-        """
-        Apply the 'test_tags' attribute to each DocTestCase found by the DocTestSuite.
-        Also extend the DocTestCase class trivially to fit the class teardown
-        that Odoo backported for its own test classes from Python 3.8.
-        """
-
-        for idx, test in enumerate(doctest.DocTestSuite(module)):
-            odoo_test = OdooDocTestCase(test, seq=idx)
-            odoo_test.test_tags = {"standard", "at_install", "queue_job", "doctest"}
-            tests.addTest(odoo_test)
-
-        return tests
-
-    return load_tests
