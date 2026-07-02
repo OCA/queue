@@ -9,7 +9,7 @@ from odoo.addons.queue_job.job import identity_exact
 class QueueJob(models.Model):
     _inherit = "queue.job"
 
-    job_batch_id = fields.Many2one("queue.job.batch")
+    job_batch_id = fields.Many2one("queue.job.batch", index="btree_not_null")
 
     @api.model_create_multi
     def create(self, vals_list):

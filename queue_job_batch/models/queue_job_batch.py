@@ -62,9 +62,11 @@ class QueueJobBatch(models.Model):
         compute="_compute_job_count",
     )
 
-    def _get_state(self):
-        self.ensure_one()
-        job_states = set(self.job_ids.grouped("state").keys())
+    def _get_state(self, job_states):
+        """Determine the batch state from a set of job states.
+
+        :param job_states: set of state strings for all jobs in this batch
+        """
         if all(state in ("done", "cancelled", "failed") for state in job_states):
             return "finished"
         elif {"done", "started"} & job_states:
@@ -74,8 +76,20 @@ class QueueJobBatch(models.Model):
         return "pending"
 
     def check_state(self):
+        grouped = self.env["queue.job"].read_group(
+            [("job_batch_id", "in", self.ids)],
+            ["job_batch_id", "state"],
+            ["job_batch_id", "state"],
+            lazy=False,
+        )
+        states_by_batch = {}
+        for g in grouped:
+            batch_id = g["job_batch_id"][0]
+            states_by_batch.setdefault(batch_id, set()).add(g["state"])
+
         for rec in self:
-            if (state := rec._get_state()) != rec.state:
+            job_states = states_by_batch.get(rec.id, set())
+            if (state := rec._get_state(job_states)) != rec.state:
                 rec.state = state
 
     def set_read(self):
@@ -101,13 +115,29 @@ class QueueJobBatch(models.Model):
 
     @api.depends("job_ids.state")
     def _compute_job_count(self):
+        grouped = self.env["queue.job"].read_group(
+            [("job_batch_id", "in", self.ids)],
+            ["job_batch_id", "state"],
+            ["job_batch_id", "state"],
+            lazy=False,
+        )
+        counts = {}
+        for g in grouped:
+            batch_id = g["job_batch_id"][0]
+            counts.setdefault(batch_id, {})
+            counts[batch_id][g["state"]] = g["__count"]
+
         for rec in self:
-            jobs_by_state = rec.job_ids.grouped("state")
-            rec.job_count = len(rec.job_ids)
-            rec.failed_job_count = len(jobs_by_state.get("failed", []))
-            rec.finished_job_count = len(jobs_by_state.get("done", []))
-            rec.completeness = rec.finished_job_count / max(1, rec.job_count)
-            rec.failed_percentage = rec.failed_job_count / max(1, rec.job_count)
+            by_state = counts.get(rec.id, {})
+            total = sum(by_state.values())
+            done = by_state.get("done", 0)
+            failed = by_state.get("failed", 0)
+
+            rec.job_count = total
+            rec.failed_job_count = failed
+            rec.finished_job_count = done
+            rec.completeness = done / max(1, total)
+            rec.failed_percentage = failed / max(1, total)
 
     @api.model
     def _to_store_fnames(self):
