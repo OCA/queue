@@ -148,6 +148,12 @@ class RunJobController(http.Controller):
             # traceback in the logs we should have the traceback when all
             # retries are exhausted
             env.cr.rollback()
+            # A postponed job is not done: it must not release its dependent
+            # jobs. Returning here also avoids calling _enqueue_dependent_jobs
+            # with job.env pointing to the now-closed cursor that
+            # retry_postpone() opened and closed, which would raise
+            # "Unable to use a closed cursor".
+            return ""
 
         except (FailedJobError, Exception) as orig_exception:
             buff = StringIO()
