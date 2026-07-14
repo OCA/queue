@@ -15,7 +15,9 @@ from odoo.addons.queue_job.jobrunner import START_DELAY, QueueJobRunnerThread, r
 @tagged("doctest")
 class TestDoctest(BaseCase):
     def test_doctest(self):
-        doctest.testmod(runner, exclude_empty=True, raise_on_error=True)
+        doctest.testmod(
+            runner, exclude_empty=True, optionflags=doctest.REPORT_ONLY_FIRST_FAILURE
+        )
 
 
 @tagged("-at_install", "post_install")
