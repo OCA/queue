@@ -216,6 +216,14 @@ class RunJobController(http.Controller):
     def runjob(self, db, job_uuid, **kw):
         http.request.session.db = db
         env = http.request.env(user=SUPERUSER_ID)
+        # `IrHttp._auth_method_none()` (this route's auth method) forces
+        # `transaction.default_env` to an environment with `uid=None`,
+        # bypassing the truthy-uid guard in `Environment.__new__`. Any
+        # `env.user` access during a savepoint-triggered flush inside the
+        # job (e.g. a recompute/constrain calling `has_group`) then raises
+        # "Expected singleton: res.users()" because `browse(None)` is
+        # empty. Repair it to the real job-running user.
+        env.transaction.default_env = env
         job = self._acquire_job(env, job_uuid)
         if not job:
             return ""
