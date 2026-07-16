@@ -24,6 +24,7 @@ from ..job import (
     STATES,
     WAIT_DEPENDENCIES,
     Job,
+    JobStore,
 )
 
 _logger = logging.getLogger(__name__)
@@ -279,8 +280,11 @@ class QueueJob(models.Model):
     def open_related_action(self):
         """Open the related action associated to the job"""
         self.ensure_one()
-        job = Job.load(self.env, self.uuid)
-        action = job.related_action()
+        func_model = self.env["queue.job.function"].sudo()
+        job_config = func_model.job_config(
+            func_model.job_function_name(self.model_name, self.method_name)
+        )
+        action = job_config.related_action(self)
         if action is None:
             raise exceptions.UserError(_("No action available for this job"))
         return action
@@ -308,26 +312,28 @@ class QueueJob(models.Model):
         Changing the state of the Job will automatically change some fields
         (date, result, ...).
         """
+        store = JobStore(self.env)
         for record in self:
             job_ = Job.load(record.env, record.uuid)
+            state_when_loaded = job_.state
             if state == DONE:
                 job_.set_done(result=result)
-                job_.store()
-                record.env["queue.job"].flush_model()
-                job_.enqueue_waiting()
+                store.save_state(job_, (state_when_loaded,))
+                store.enqueue_waiting(job_)
             elif state == PENDING:
                 job_.set_pending(result=result)
-                job_.store()
+                store.save_state(job_, (state_when_loaded,))
             elif state == CANCELLED:
                 job_.set_cancelled(result=result)
-                job_.store()
-                record.env["queue.job"].flush_model()
-                job_.cancel_dependent_jobs()
+                store.save_state(job_, (state_when_loaded,))
+                store.cancel_dependent_jobs(job_)
             else:
                 raise ValueError(f"State not supported: {state}")
 
     def button_done(self):
         # If job was set to STARTED or CANCELLED, do not set it to DONE
+
+        # TODO: harmonize transitions stnate machine
         states_from = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, FAILED)
         result = _("Manually set to done by {}").format(self.env.user.name)
         records = self.filtered(lambda job_: job_.state in states_from)

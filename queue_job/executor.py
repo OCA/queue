@@ -7,6 +7,7 @@ import logging
 import random
 import time
 import traceback
+from collections.abc import Sequence
 from contextlib import contextmanager
 from io import StringIO
 
@@ -16,8 +17,8 @@ from odoo import api
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 from odoo.tools import config
 
-from .exception import FailedJobError, RetryableJobError
-from .job import ENQUEUED, Job
+from .exception import RetryableJobError
+from .job import ENQUEUED, Job, JobStore
 
 _logger = logging.getLogger(__name__)
 
@@ -54,7 +55,7 @@ def _prevent_commit(cr):
 class JobExecutor:
     def __init__(self, env: api.Environment, job_uuid: str):
         self.job_uuid = job_uuid
-        self.env = env
+        self.control_env = env
 
     def run(self):
         job = self.acquire()
@@ -73,12 +74,12 @@ class JobExecutor:
         function may fail to acquire the job is not in the expected state or is
         already locked by another worker.
         """
-        self.env.cr.execute(
+        self.control_env.cr.execute(
             "SELECT uuid FROM queue_job WHERE uuid=%s AND state=%s "
             "FOR NO KEY UPDATE SKIP LOCKED",
             (self.job_uuid, ENQUEUED),
         )
-        if not self.env.cr.fetchone():
+        if not self.control_env.cr.fetchone():
             _logger.warning(
                 "was requested to run job %s, but it does not exist, "
                 "or is not in state %s, or is being handled by another worker",
@@ -87,12 +88,17 @@ class JobExecutor:
             )
             return None
         # TODO: lazy-load recordset, args, kwargs etc.
-        job = Job.load(self.env, self.job_uuid)
+        job = Job.load(self.control_env, self.job_uuid)
         assert job and job.state == ENQUEUED
         job.set_started()
-        job.store()
-        self.env.cr.commit()  # pylint: disable=invalid-commit
-        if not job.lock():
+        job_store = JobStore(self.control_env)
+        job_store.add_lock_record(job)
+        job_store.save_state(job, expected_states=(ENQUEUED,))
+        if not config["test_enable"]:
+            self.control_env.cr.commit()  # pylint: disable=invalid-commit
+        else:
+            self.control_env.cr.flush()
+        if not job_store.lock(job):
             _logger.warning(
                 "was requested to run job %s, but it could not be locked",
                 self.job_uuid,
@@ -101,13 +107,7 @@ class JobExecutor:
         return job
 
     def run_job(self, job):
-        def retry_postpone(job, message, seconds=None):
-            job.env.clear()
-            with job.in_temporary_env():
-                job.postpone(result=message, seconds=seconds)
-                job.set_pending(reset_retry=False)
-                job.store()
-
+        initial_state = job.state
         try:
             try:
                 self.try_perform_job(job)
@@ -122,25 +122,12 @@ class JobExecutor:
 
         except RetryableJobError as err:
             # delay the job later, requeue
-            retry_postpone(job, str(err), seconds=err.seconds)
+            self._record_retry(job, err, (initial_state,))
             _logger.debug("%s postponed", job)
-            # Do not trigger the error up because we don't want an exception
-            # traceback in the logs we should have the traceback when all
-            # retries are exhausted
-            self.env.cr.rollback()
             return
 
-        except (FailedJobError, Exception) as orig_exception:
-            buff = StringIO()
-            traceback.print_exc(file=buff)
-            traceback_txt = buff.getvalue()
-            _logger.error(traceback_txt)
-            job.env.clear()
-            with job.in_temporary_env():
-                vals = self._get_failure_values(traceback_txt, orig_exception)
-                job.set_failed(**vals)
-                job.store()
-                buff.close()
+        except Exception as orig_exception:
+            self._record_failure(job, orig_exception, (initial_state,))
             raise
 
         self._enqueue_dependent_jobs(job)
@@ -150,18 +137,70 @@ class JobExecutor:
         _logger.debug("%s started", job)
         # TODO: clarify which env has "control" over the job state and
         # which env "executes" the job method
-        assert self.env.cr is job.env.cr
-        with _prevent_commit(self.env.cr):
-            job.perform()
-            # Triggers any stored computed fields before calling 'set_done'
-            # so that will be part of the 'exec_time'
-            job.env.flush_all()
-            job.set_done()
-            job.store()
-            job.env.flush_all()
+        # We can use a JobStore with the env that changes the job state,
+        # that will be the "control" env, and use an "execution" env
+        # for the actual run of the job.
+        #
+        # TODO: implement the normal execution mode and the "isolated"
+        # (allowing commits) execution mode
+        execution_env = self.control_env
+        job_store = JobStore(execution_env)
+        initial_state = job.state
+
+        savepoint = self.control_env.cr.savepoint(flush=False)
+        try:
+            with _prevent_commit(execution_env.cr):
+                job.perform(execution_env)
+                # Triggers any stored computed fields before calling 'set_done'
+                # so that will be part of the 'exec_time'
+                execution_env.flush_all()
+                job.set_done()
+                # when job happens without failure, the done state change is
+                # done by the execution env, so it is transactional
+                job_store.save_state(job, (initial_state,))
+                execution_env.flush_all()
+        except Exception:
+            # Rollback to the savepoint so we can register the failure state
+            # in the same transaction
+            savepoint.close(rollback=True)
+            self.control_env.clear()
+            raise
+        savepoint.close(rollback=False)
+
         if not config["test_enable"]:
-            self.env.cr.commit()  # pylint: disable=invalid-commit
+            self.control_env.cr.commit()  # pylint: disable=invalid-commit
         _logger.debug("%s done", job)
+
+    def _record_retry(
+        self,
+        job: Job,
+        err: RetryableJobError,
+        expected_states: Sequence[str],
+    ) -> None:
+        """Postpone the job for a later retry"""
+        job.set_postpone(result=str(err), seconds=err.seconds)
+        job_store = JobStore(self.control_env)
+        job_store.save_state(job, expected_states)
+        if not config["test_enable"]:
+            self.control_env.cr.commit()
+
+    def _record_failure(
+        self,
+        job: Job,
+        orig_exception: Exception,
+        expected_states: Sequence[str],
+    ) -> None:
+        """Record the failure of the job with the exception details."""
+        buff = StringIO()
+        traceback.print_exc(file=buff)
+        traceback_txt = buff.getvalue()
+        _logger.error(traceback_txt)
+        job_store = JobStore(self.control_env)
+        job.set_failed(**self._get_failure_values(traceback_txt, orig_exception))
+        job_store.save_state(job, expected_states)
+        buff.close()
+        if not config["test_enable"]:
+            self.control_env.cr.commit()
 
     def _enqueue_dependent_jobs(self, job):
         """Set the dependent jobs of a done job to pending."""
@@ -172,8 +211,9 @@ class JobExecutor:
         tries = 0
         while True:
             try:
-                with job.env.cr.savepoint():
-                    job.enqueue_waiting()
+                with self.control_env.cr.savepoint():
+                    job_store = JobStore(self.control_env)
+                    job_store.enqueue_waiting(job)
             except OperationalError as err:
                 # Automatically retry the typical transaction serialization
                 # errors

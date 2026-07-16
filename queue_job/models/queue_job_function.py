@@ -5,10 +5,13 @@ import ast
 import logging
 import re
 from collections import namedtuple
+from random import randint
 
+import odoo
 from odoo import _, api, exceptions, fields, models, tools
 
 from ..fields import JobSerialized
+from ..job import RETRY_INTERVAL
 
 _logger = logging.getLogger(__name__)
 
@@ -16,12 +19,8 @@ _logger = logging.getLogger(__name__)
 regex_job_function_name = re.compile(r"^<([0-9a-z_\.]+)>\.([0-9a-zA-Z_]+)$")
 
 
-class QueueJobFunction(models.Model):
-    _name = "queue.job.function"
-    _description = "Job Functions"
-    _log_access = False
-
-    JobConfig = namedtuple(
+class JobConfig(
+    namedtuple(
         "JobConfig",
         "channel "
         "retry_pattern "
@@ -31,6 +30,48 @@ class QueueJobFunction(models.Model):
         "job_function_id "
         "allow_commit",
     )
+):
+    """Configuration of a job function, cached once per registry."""
+
+    def retry_seconds(self, retry: int, seconds: int | None = None) -> int:
+        """Seconds to postpone the given retry, from the retry pattern."""
+        retry_pattern = self.retry_pattern
+        if not seconds and retry_pattern:
+            # ordered from higher to lower count of retries
+            patt = sorted(retry_pattern.items(), key=lambda t: t[0])
+            seconds = RETRY_INTERVAL
+            for retry_count, postpone_seconds in patt:
+                if retry >= retry_count:
+                    seconds = postpone_seconds
+                else:
+                    break
+        if not seconds:
+            seconds = RETRY_INTERVAL
+        if isinstance(seconds, (list | tuple)):
+            seconds = randint(seconds[0], seconds[1])
+        return seconds
+
+    def related_action(self, job_record: odoo.models.BaseModel):
+        """Execute the configured related action on the job's record."""
+        if not self.related_action_enable:
+            return None
+
+        funcname = self.related_action_func_name or job_record._default_related_action
+        if not isinstance(funcname, str):
+            raise ValueError(
+                "related_action must be the name of the "
+                "method on queue.job as string"
+            )
+        action = getattr(job_record, funcname)
+        return action(**self.related_action_kwargs)
+
+
+class QueueJobFunction(models.Model):
+    _name = "queue.job.function"
+    _description = "Job Functions"
+    _log_access = False
+
+    JobConfig = JobConfig
 
     def _default_channel(self):
         return self.env.ref("queue_job.channel_root")
