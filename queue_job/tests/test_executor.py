@@ -7,7 +7,7 @@ from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger
 
 from ..exception import JobError, RetryableJobError
-from ..executor import JobExecutor
+from ..executor import JobExecutor, TestTransactionPolicy
 from ..job import DONE, FAILED, PENDING, STARTED, Job, JobStore
 
 
@@ -21,6 +21,10 @@ class TestJobExecutor(TransactionCase):
         # on its own connection.
         self.env.flush_all()
         return job
+
+    def test_select_policy_in_tests(self):
+        executor = JobExecutor(self.env, "uuid")
+        self.assertIsInstance(executor.control.policy, TestTransactionPolicy)
 
     def test_acquire_marks_started_and_locks(self):
         job = self._create_enqueued_job()

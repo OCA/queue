@@ -332,8 +332,7 @@ class QueueJob(models.Model):
 
     def button_done(self):
         # If job was set to STARTED or CANCELLED, do not set it to DONE
-
-        # TODO: harmonize transitions stnate machine
+        # TODO: harmonize transitions with a state machine
         states_from = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, FAILED)
         result = _("Manually set to done by {}").format(self.env.user.name)
         records = self.filtered(lambda job_: job_.state in states_from)
