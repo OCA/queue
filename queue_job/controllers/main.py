@@ -214,7 +214,8 @@ class RunJobController(http.Controller):
         readonly=False,
     )
     def runjob(self, job_uuid, **kw):
-        env = http.request.env(user=SUPERUSER_ID)
+        http.request.update_env(user=SUPERUSER_ID)
+        env = http.request.env
         job = self._acquire_job(env, job_uuid)
         if not job:
             return ""
