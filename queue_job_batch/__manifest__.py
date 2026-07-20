@@ -4,7 +4,7 @@
 
 {
     "name": "Job Queue Batch",
-    "version": "18.0.1.1.0",
+    "version": "18.0.1.1.1",
     "author": "Creu Blanca,Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/queue",
     "license": "AGPL-3",
