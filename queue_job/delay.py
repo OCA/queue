@@ -7,7 +7,7 @@ import logging
 import uuid
 from collections import defaultdict, deque
 
-from .job import Job
+from .job import PENDING, WAIT_DEPENDENCIES, Job, JobSpec, JobStore
 from .utils import must_run_without_delay
 
 _logger = logging.getLogger(__name__)
@@ -224,55 +224,68 @@ class DelayableGraph(Graph):
         return False
 
     @staticmethod
-    def _ensure_same_graph_uuid(jobs):
+    def _ensure_same_graph_uuid(vertices):
         """Set the same graph uuid on all jobs of the same graph"""
-        jobs_count = len(jobs)
-        if jobs_count == 0:
+        count = len(vertices)
+        if count == 0:
             raise ValueError("Expecting jobs")
-        elif jobs_count == 1:
-            if jobs[0].graph_uuid:
+        elif count == 1:
+            if vertices[0]._graph_uuid:
                 raise ValueError(
-                    f"Job {jobs[0]} is a single job, it should not have a graph uuid"
+                    f"Delayable {vertices[0]} is a single job, "
+                    "it should not have a graph uuid"
                 )
         else:
-            graph_uuids = {job.graph_uuid for job in jobs if job.graph_uuid}
+            graph_uuids = {
+                vertex._graph_uuid for vertex in vertices if vertex._graph_uuid
+            }
             if len(graph_uuids) > 1:
                 raise ValueError("Jobs cannot have dependencies between several graphs")
             elif len(graph_uuids) == 1:
                 graph_uuid = graph_uuids.pop()
             else:
                 graph_uuid = str(uuid.uuid4())
-            for job in jobs:
-                job.graph_uuid = graph_uuid
+            for vertex in vertices:
+                vertex._graph_uuid = graph_uuid
 
     def delay(self):
         """Build the whole graph, creates jobs and delay them"""
         graph = self._connect_graphs()
 
-        vertices = graph.vertices()
+        vertices = list(graph.vertices())
 
         for vertex in vertices:
-            vertex._build_job()
+            if vertex._job_uuid is None:
+                vertex._job_uuid = str(uuid.uuid4())
 
-        self._ensure_same_graph_uuid([vertex._generated_job for vertex in vertices])
+        self._ensure_same_graph_uuid(vertices)
 
         if self._has_to_execute_directly(vertices):
             self._execute_graph_direct(graph)
             return
 
+        depends = defaultdict(set)
+        reverse = defaultdict(set)
         for vertex, neighbour in graph.edges():
-            neighbour._generated_job.add_depends({vertex._generated_job})
+            # neighbour depends on vertex
+            depends[neighbour].add(vertex._job_uuid)
+            reverse[vertex].add(neighbour._job_uuid)
 
         # If all the jobs of the graph have another job with the same identity,
         # we do not create them. Maybe we should check that the found jobs are
         # part of the same graph, but not sure it's really required...
         # Also, maybe we want to check only the root jobs.
-        existing_mapping = {}
+        identity_keys = {}
         for vertex in vertices:
             if not vertex.identity_key:
                 continue
-            generated_job = vertex._generated_job
-            existing = generated_job.job_record_with_same_identity_key()
+            identity_keys[vertex] = JobSpec.from_call(
+                vertex._job_method, vertex._job_args, vertex._job_kwargs
+            ).compute_identity_key(vertex.identity_key)
+        existing_mapping = {}
+        for vertex, key in identity_keys.items():
+            # TODO: bulk search
+            existing = JobStore(vertex.recordset.env).record_with_same_identity_key(key)
             if not existing:
                 # at least one does not exist yet, we'll delay the whole graph
                 existing_mapping.clear()
@@ -283,12 +296,41 @@ class DelayableGraph(Graph):
         # can retrieve the existing job in "_generated_job".
         # existing_mapping contains something only if *all* the job with an
         # identity have an existing one.
-        for vertex, existing in existing_mapping.items():
-            vertex._generated_job = existing
+        if existing_mapping:
+            for vertex, existing in existing_mapping.items():
+                vertex._generated_job = Job(existing)
             return
 
         for vertex in vertices:
-            vertex._generated_job.store()
+            existing_job = vertex._generated_job
+            if isinstance(existing_job, Job):
+                # TODO: test this
+                # the delayable was already delayed on its own and is now
+                # attached to a graph
+                existing_job.graph_uuid = vertex._graph_uuid
+                existing_job._depends_on_uuids.update(depends[vertex])
+                existing_job._reverse_depends_on_uuids.update(reverse[vertex])
+                if depends[vertex]:
+                    existing_job.state = WAIT_DEPENDENCIES
+                JobStore(vertex.recordset.env).save(existing_job)
+                continue
+            # the enqueue env/transaction is the one of the delayed recordset
+            vertex._generated_job = JobStore(vertex.recordset.env).enqueue(
+                vertex._job_method,
+                vertex._job_args,
+                vertex._job_kwargs,
+                priority=vertex.priority,
+                max_retries=vertex.max_retries,
+                eta=vertex.eta,
+                description=vertex.description,
+                channel=vertex.channel,
+                identity_key=vertex.identity_key,
+                job_uuid=vertex._job_uuid,
+                graph_uuid=vertex._graph_uuid,
+                depends_on_uuids=depends[vertex],
+                reverse_depends_on_uuids=reverse[vertex],
+                state=WAIT_DEPENDENCIES if depends[vertex] else PENDING,
+            )
 
     def _execute_graph_direct(self, graph):
         for delayable in graph.topological_sort():
@@ -445,6 +487,8 @@ class Delayable:
         "_job_method",
         "_job_args",
         "_job_kwargs",
+        "_job_uuid",
+        "_graph_uuid",
         "_generated_job",
     )
 
@@ -473,6 +517,8 @@ class Delayable:
         self._job_method = None
         self._job_args = ()
         self._job_kwargs = {}
+        self._job_uuid = None
+        self._graph_uuid = None
 
         self._generated_job = None
 
@@ -569,22 +615,6 @@ class Delayable:
 
         return (DelayableChain if chain else DelayableGroup)(*delayables)
 
-    def _build_job(self):
-        if self._generated_job:
-            return self._generated_job
-        self._generated_job = Job(
-            self._job_method,
-            args=self._job_args,
-            kwargs=self._job_kwargs,
-            priority=self.priority,
-            max_retries=self.max_retries,
-            eta=self.eta,
-            description=self.description,
-            channel=self.channel,
-            identity_key=self.identity_key,
-        )
-        return self._generated_job
-
     def _store_args(self, *args, **kwargs):
         self._job_args = args
         self._job_kwargs = kwargs
@@ -603,7 +633,8 @@ class Delayable:
 
     def _execute_direct(self):
         assert self._generated_job
-        self._generated_job.perform()
+        # TODO
+        # self._generated_job.perform()
 
 
 class DelayableRecordset:
