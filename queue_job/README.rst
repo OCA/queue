@@ -143,6 +143,11 @@ Configuration
 
 * Jobs that remain in `enqueued` or `started` state (because, for instance, their worker has been killed) will be automatically re-queued.
 
+* By default, a worker will defer (not execute) a job if its own installed
+  module code no longer matches what the database expects (e.g. it hasn't yet
+  picked up a rolling deployment's update). Disable with the
+  ``queue_job.check_modules_up_to_date`` system parameter set to ``False``.
+
 Usage
 =====
 

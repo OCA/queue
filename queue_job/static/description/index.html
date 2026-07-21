@@ -503,6 +503,10 @@ of running Odoo is obviously not for production purposes.</td></tr>
 </table>
 <ul class="simple">
 <li>Jobs that remain in <cite>enqueued</cite> or <cite>started</cite> state (because, for instance, their worker has been killed) will be automatically re-queued.</li>
+<li>By default, a worker will defer (not execute) a job if its own installed
+module code no longer matches what the database expects (e.g. it hasn’t yet
+picked up a rolling deployment’s update). Disable with the
+<tt class="docutils literal">queue_job.check_modules_up_to_date</tt> system parameter set to <tt class="docutils literal">False</tt>.</li>
 </ul>
 </div>
 <div class="section" id="usage">

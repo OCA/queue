@@ -14,6 +14,7 @@ from psycopg2 import OperationalError, errorcodes
 from werkzeug.exceptions import BadRequest, Forbidden
 
 from odoo import SUPERUSER_ID, _, api, http, tools
+from odoo.modules.module import get_manifest
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 from odoo.tools import config
 
@@ -26,6 +27,14 @@ _logger = logging.getLogger(__name__)
 PG_RETRY = 5  # seconds
 
 DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE = 5
+
+MODULES_OUTDATED_POSTPONE_SECONDS = 15
+
+# How long a "is this worker's module code up to date" verdict is cached before
+# being recomputed, per database (a single process can serve several). Keeps a
+# busy jobrunner from re-querying ir.module.module on every single job dispatch.
+MODULES_UP_TO_DATE_CACHE_SECONDS = 5
+_modules_up_to_date_cache = {}  # dbname -> (checked_at, outdated: bool)
 
 
 @contextmanager
@@ -111,6 +120,64 @@ class RunJobController(http.Controller):
         _logger.debug("%s done", job)
 
     @classmethod
+    def _worker_is_outdated(cls, env):
+        """True if this worker's own on-disk module code no longer matches
+        what the database considers the currently installed version, for at
+        least one installed module.
+
+        ir.module.module.installed_version is a non-stored compute that reads
+        the manifest fresh from *this process's* addons_path (get_manifest()
+        is lru_cached per process, so this is cheap after the first call).
+        ir.module.module.latest_version is what the module loader persisted to
+        the database the last time this module was actually
+        installed/upgraded (see odoo/modules/loading.py). A mismatch means
+        some other process has since upgraded this module past what this
+        worker is currently running -- most commonly, one worker in a
+        multi-process or multi-host deployment has picked up new code and run
+        an upgrade, while this one is still serving requests with the old
+        code, in the window before it gets restarted (a rolling-deployment
+        race). Running a job in that state risks acting on stale files/logic
+        that no longer match the database.
+
+        The result is cached briefly, per database, so a busy queue doesn't
+        re-run this on every single job (see MODULES_UP_TO_DATE_CACHE_SECONDS).
+
+        Disable via the ``queue_job.check_modules_up_to_date`` system
+        parameter (set to ``"False"``); enabled by default.
+        """
+        icp = env["ir.config_parameter"].sudo()
+        if icp.get_param("queue_job.check_modules_up_to_date", "True") == "False":
+            return False
+
+        dbname = env.cr.dbname
+        now = time.monotonic()
+        cached = _modules_up_to_date_cache.get(dbname)
+        if cached and now - cached[0] < MODULES_UP_TO_DATE_CACHE_SECONDS:
+            return cached[1]
+
+        outdated = False
+        modules = env["ir.module.module"].sudo().search([("state", "=", "installed")])
+        for module in modules:
+            manifest = get_manifest(module.name)
+            if not manifest:
+                # Can't read this module's manifest from this process's
+                # addons_path (e.g. a module removed from disk but still
+                # marked installed in the database) -- skip it rather than
+                # treat an unreadable manifest as evidence of staleness.
+                continue
+            on_disk_version = manifest.get("version")
+            if (
+                on_disk_version
+                and module.latest_version
+                and on_disk_version != module.latest_version
+            ):
+                outdated = True
+                break
+
+        _modules_up_to_date_cache[dbname] = (now, outdated)
+        return outdated
+
+    @classmethod
     def _enqueue_dependent_jobs(cls, env, job):
         tries = 0
         while True:
@@ -149,6 +216,21 @@ class RunJobController(http.Controller):
                 job.postpone(result=message, seconds=seconds)
                 job.set_pending(reset_retry=False)
                 job.store()
+
+        if cls._worker_is_outdated(env):
+            _logger.info(
+                "%s: this worker's module code is outdated relative to the "
+                "database (likely a rolling deployment in progress); "
+                "postponing %ss",
+                job,
+                MODULES_OUTDATED_POSTPONE_SECONDS,
+            )
+            retry_postpone(
+                job, "worker outdated", seconds=MODULES_OUTDATED_POSTPONE_SECONDS
+            )
+            if not config["test_enable"]:
+                env.cr.rollback()
+            return
 
         try:
             try:
