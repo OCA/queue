@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils: https://docutils.sourceforge.io/" />
-<title>README.rst</title>
+<title>Job Queue</title>
 <style type="text/css">
 
 /*
@@ -967,6 +967,9 @@ arguments to the job, without intermediary models.</li>
 <ul class="simple">
 <li>After creating a new database or installing <tt class="docutils literal">queue_job</tt> on an
 existing database, Odoo must be restarted for the runner to detect it.</li>
+<li>Reload runner configuration on SIGHUP</li>
+<li><tt class="docutils literal">eval_capacity</tt> <tt class="docutils literal">workers</tt> should evaluate to sum of all workers
+across all containers</li>
 </ul>
 </div>
 <div class="section" id="changelog">
