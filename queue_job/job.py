@@ -14,7 +14,7 @@ from random import randint
 
 import odoo
 
-from .exception import FailedJobError, NoSuchJobError, RetryableJobError
+from .exception import MaxRetryJobError, NoSuchJobError, RetryableJobError
 
 WAIT_DEPENDENCIES = "wait_dependencies"
 PENDING = "pending"
@@ -500,7 +500,7 @@ class Job:
                 # change the exception type but keep the original
                 # traceback and message:
                 # http://blog.ianbicking.org/2007/09/12/re-raising-exceptions/
-                new_exc = FailedJobError(
+                new_exc = MaxRetryJobError(
                     "Max. retries (%d) reached: %s" % (self.max_retries, value or type_)
                 )
                 raise new_exc from err

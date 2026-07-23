@@ -10,7 +10,7 @@ import odoo.tests.common as common
 from odoo.addons.queue_job import identity_exact
 from odoo.addons.queue_job.delay import DelayableGraph
 from odoo.addons.queue_job.exception import (
-    FailedJobError,
+    MaxRetryJobError,
     NoSuchJobError,
     RetryableJobError,
 )
@@ -77,7 +77,7 @@ class TestJobsOnTestingMethod(JobCommonCase):
         with self.assertRaises(RetryableJobError):
             test_job.perform()
         self.assertEqual(test_job.retry, 2)
-        with self.assertRaises(FailedJobError):
+        with self.assertRaises(MaxRetryJobError):
             test_job.perform()
         self.assertEqual(test_job.retry, 3)
 
