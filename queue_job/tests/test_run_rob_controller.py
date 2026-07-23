@@ -19,6 +19,15 @@ class TestRunJobController(TransactionCase):
         # not per-transaction -- TransactionCase's rollback between tests has
         # no way to clear it, so each test must start from a clean cache.
         main_module._modules_up_to_date_cache.clear()
+        # When this suite runs as part of installing several modules at once
+        # (e.g. -i queue_job,test_queue_job), a module later in the batch can
+        # genuinely still be 'to install' while queue_job's own tests run --
+        # that's real, unrelated to anything under test here. Normalize to a
+        # clean baseline; individual tests set up their own pending state.
+        self.env.cr.execute(
+            "UPDATE ir_module_module SET state = 'installed' "
+            "WHERE state IN ('to install', 'to upgrade', 'to remove')"
+        )
 
     def test_get_failure_values(self):
         method = self.env["res.users"].mapped
@@ -45,6 +54,18 @@ class TestRunJobController(TransactionCase):
         job = self.env["queue.job"].with_delay()._test_job()
         self.addCleanup(self._delete_committed_job, job.uuid)
         with patch.object(RunJobController, "_worker_is_outdated", return_value=True):
+            with patch.object(RunJobController, "_try_perform_job") as mock_perform:
+                RunJobController._runjob(self.env, job)
+        mock_perform.assert_not_called()
+        self.assertEqual(job.state, "pending")
+        self.assertEqual(job.db_record().state, "pending")
+
+    def test_runjob_postpones_when_install_in_progress(self):
+        """When modules are being installed/upgraded, the job is postponed
+        instead of executed, and _try_perform_job is never reached."""
+        job = self.env["queue.job"].with_delay()._test_job()
+        self.addCleanup(self._delete_committed_job, job.uuid)
+        with patch.object(RunJobController, "_install_in_progress", return_value=True):
             with patch.object(RunJobController, "_try_perform_job") as mock_perform:
                 RunJobController._runjob(self.env, job)
         mock_perform.assert_not_called()
@@ -115,3 +136,53 @@ class TestRunJobController(TransactionCase):
         dbname = self.env.cr.dbname
         main_module._modules_up_to_date_cache[dbname] = (0.0, True)
         self.assertFalse(RunJobController._worker_is_outdated(self.env))
+
+    def test_install_in_progress_false_by_default(self):
+        """A freshly installed test DB has no module pending install/upgrade/
+        removal -- no setup needed."""
+        self.assertFalse(RunJobController._install_in_progress(self.env))
+
+    def test_install_in_progress_true_when_module_pending(self):
+        """A module marked 'to upgrade' (or 'to install'/'to remove'), with a
+        recent write_date, is detected as an install in progress."""
+        self.env.cr.execute(
+            "UPDATE ir_module_module SET state = 'to upgrade', "
+            "write_date = (now() AT TIME ZONE 'UTC') WHERE name = 'base'"
+        )
+        self.assertTrue(RunJobController._install_in_progress(self.env))
+
+    def test_install_in_progress_ignores_stale_pending_states(self):
+        """A module that has been pending for longer than the configured
+        timeout is treated as an abandoned operation, not an active one."""
+        self.env.cr.execute(
+            "UPDATE ir_module_module SET state = 'to upgrade', "
+            "write_date = (now() AT TIME ZONE 'UTC') - interval '61 minutes' "
+            "WHERE name = 'base'"
+        )
+        with self.assertLogs("odoo.addons.queue_job.controllers.main", level="WARNING"):
+            self.assertFalse(RunJobController._install_in_progress(self.env))
+
+    def test_install_in_progress_disabled_via_config_param(self):
+        """Setting queue_job.check_install_in_progress to False skips the
+        check entirely, even with a module genuinely pending."""
+        self.env.cr.execute(
+            "UPDATE ir_module_module SET state = 'to upgrade', "
+            "write_date = (now() AT TIME ZONE 'UTC') WHERE name = 'base'"
+        )
+        self.env["ir.config_parameter"].sudo().set_param(
+            "queue_job.check_install_in_progress", "False"
+        )
+        self.assertFalse(RunJobController._install_in_progress(self.env))
+
+    def test_install_in_progress_busts_outdated_cache(self):
+        """Detecting an active install clears any cached _worker_is_outdated
+        verdict, so the first job dispatched once the install completes
+        recomputes it freshly instead of reusing a pre-install answer."""
+        dbname = self.env.cr.dbname
+        main_module._modules_up_to_date_cache[dbname] = (0.0, False)
+        self.env.cr.execute(
+            "UPDATE ir_module_module SET state = 'to upgrade', "
+            "write_date = (now() AT TIME ZONE 'UTC') WHERE name = 'base'"
+        )
+        self.assertTrue(RunJobController._install_in_progress(self.env))
+        self.assertNotIn(dbname, main_module._modules_up_to_date_cache)

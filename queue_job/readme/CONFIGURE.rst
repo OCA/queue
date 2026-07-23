@@ -53,3 +53,14 @@
   module code no longer matches what the database expects (e.g. it hasn't yet
   picked up a rolling deployment's update). Disable with the
   ``queue_job.check_modules_up_to_date`` system parameter set to ``False``.
+
+* By default, a worker will also defer any job while modules are being
+  installed/upgraded/removed anywhere in the cluster (the same condition core
+  Odoo already uses to skip scheduled actions, see ``ir_cron``), since a job
+  committed early in an install (e.g. from a ``post_init_hook``) may reference
+  code that doesn't match the database until the install fully completes.
+  Pending states older than ``queue_job.install_in_progress_timeout_minutes``
+  (default ``60``) are treated as abandoned and ignored, with a warning
+  logged, rather than blocking jobs forever. Disable the check entirely with
+  the ``queue_job.check_install_in_progress`` system parameter set to
+  ``False``.

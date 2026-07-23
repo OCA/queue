@@ -29,6 +29,7 @@ PG_RETRY = 5  # seconds
 DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE = 5
 
 MODULES_OUTDATED_POSTPONE_SECONDS = 15
+INSTALL_IN_PROGRESS_POSTPONE_SECONDS = 15
 
 # How long a "is this worker's module code up to date" verdict is cached before
 # being recomputed, per database (a single process can serve several). Keeps a
@@ -118,6 +119,75 @@ class RunJobController(http.Controller):
         if not config["test_enable"]:
             env.cr.commit()
         _logger.debug("%s done", job)
+
+    @classmethod
+    def _install_in_progress(cls, env):
+        """True while any module is marked to be installed/upgraded/removed.
+
+        Same guard core already applies to cron jobs
+        (ir_cron._check_modules_state): while an install/upgrade is running
+        anywhere in the cluster, module states sit at 'to install'/'to
+        upgrade'/'to remove' in the database, and only flip back once the
+        operation completes (or core's reset_modules_state() clears them on
+        failure). Jobs executed during that window may run with code that
+        does not yet match what the database will end up recording -- a
+        module's own 'installed' state and latest_version are only committed
+        near the end of its install, but data/hooks that ran earlier in the
+        same install (e.g. a post_init_hook enqueuing a job) may already be
+        committed and dispatchable. _worker_is_outdated() has nothing to
+        compare against in that window (the module isn't even marked
+        installed yet); this check covers exactly that gap.
+
+        Deliberately not cached like _worker_is_outdated(): the whole point
+        is that a job committed by a post_init_hook becomes visible in the
+        same commit as the pending module state, so a fresh read makes this
+        check exact. A TTL would reopen the race for its duration. The query
+        is one cheap aggregate over ir_module_module.
+
+        Pending states older than
+        queue_job.install_in_progress_timeout_minutes (default 60) are
+        treated as abandoned (e.g. modules left marked by a crashed/killed
+        process) and ignored, with a warning logged, rather than freezing
+        job processing forever. Disable the whole check with the
+        queue_job.check_install_in_progress system parameter.
+        """
+        icp = env["ir.config_parameter"].sudo()
+        if icp.get_param("queue_job.check_install_in_progress", "True") == "False":
+            return False
+
+        timeout_minutes = int(
+            icp.get_param("queue_job.install_in_progress_timeout_minutes", "60")
+        )
+        env.cr.execute(
+            """
+            SELECT COUNT(*),
+                   MAX(COALESCE(write_date, create_date))
+                       >= (now() AT TIME ZONE 'UTC') - %s * interval '1 minute'
+            FROM ir_module_module
+            WHERE state IN ('to install', 'to upgrade', 'to remove')
+            """,
+            (timeout_minutes,),
+        )
+        pending, fresh = env.cr.fetchone()
+        if not pending:
+            return False
+        if not fresh:
+            _logger.warning(
+                "%d module(s) have been marked to install/upgrade/remove for "
+                "more than %d minutes; assuming an abandoned operation and "
+                "resuming job processing",
+                pending,
+                timeout_minutes,
+            )
+            return False
+        # Only reached while an install is ACTIVELY in progress (pending &
+        # fresh) -- the common no-install case already returned False above.
+        # Bust the version-check cache so the first job dispatched after the
+        # install completes recomputes _worker_is_outdated() freshly instead
+        # of reusing a pre-install verdict for up to
+        # MODULES_UP_TO_DATE_CACHE_SECONDS.
+        _modules_up_to_date_cache.pop(env.cr.dbname, None)
+        return True
 
     @classmethod
     def _worker_is_outdated(cls, env):
@@ -216,6 +286,22 @@ class RunJobController(http.Controller):
                 job.postpone(result=message, seconds=seconds)
                 job.set_pending(reset_retry=False)
                 job.store()
+
+        if cls._install_in_progress(env):
+            _logger.info(
+                "%s: modules are being installed/upgraded somewhere in the "
+                "cluster; postponing %ss",
+                job,
+                INSTALL_IN_PROGRESS_POSTPONE_SECONDS,
+            )
+            retry_postpone(
+                job,
+                "modules install in progress",
+                seconds=INSTALL_IN_PROGRESS_POSTPONE_SECONDS,
+            )
+            if not config["test_enable"]:
+                env.cr.rollback()
+            return
 
         if cls._worker_is_outdated(env):
             _logger.info(

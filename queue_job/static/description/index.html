@@ -507,6 +507,16 @@ of running Odoo is obviously not for production purposes.</td></tr>
 module code no longer matches what the database expects (e.g. it hasn’t yet
 picked up a rolling deployment’s update). Disable with the
 <tt class="docutils literal">queue_job.check_modules_up_to_date</tt> system parameter set to <tt class="docutils literal">False</tt>.</li>
+<li>By default, a worker will also defer any job while modules are being
+installed/upgraded/removed anywhere in the cluster (the same condition core
+Odoo already uses to skip scheduled actions, see <tt class="docutils literal">ir_cron</tt>), since a job
+committed early in an install (e.g. from a <tt class="docutils literal">post_init_hook</tt>) may reference
+code that doesn’t match the database until the install fully completes.
+Pending states older than <tt class="docutils literal">queue_job.install_in_progress_timeout_minutes</tt>
+(default <tt class="docutils literal">60</tt>) are treated as abandoned and ignored, with a warning
+logged, rather than blocking jobs forever. Disable the check entirely with
+the <tt class="docutils literal">queue_job.check_install_in_progress</tt> system parameter set to
+<tt class="docutils literal">False</tt>.</li>
 </ul>
 </div>
 <div class="section" id="usage">
