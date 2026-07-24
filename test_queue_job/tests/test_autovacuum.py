@@ -51,7 +51,6 @@ class TestQueueJobAutovacuumCronJob(JobCommonCase):
         job_60days.write(
             {"channel": channel_60days.complete_name, "date_done": date_done}
         )
-
         self.assertEqual(
             len(self.env["queue.job"].search([("channel", "!=", False)])), 2
         )
