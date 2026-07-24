@@ -186,6 +186,7 @@ class RunJobController(http.Controller):
                 vals = cls._get_failure_values(job, traceback_txt, orig_exception)
                 job.set_failed(**vals)
                 job.store()
+                job.on_fail(vals)
                 buff.close()
             raise
 

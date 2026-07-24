@@ -35,6 +35,7 @@ class TestJobFunction(common.TransactionCase):
             {
                 "model_id": self.env.ref("base.model_res_users").id,
                 "method": "read",
+                "on_fail_method": "search_read",
                 "channel_id": channel.id,
                 "edit_retry_pattern": "{1: 2, 3: 4}",
                 "edit_related_action": (
@@ -55,5 +56,6 @@ class TestJobFunction(common.TransactionCase):
                 related_action_kwargs={"b": 1},
                 job_function_id=job_function.id,
                 allow_commit=True,
+                on_fail_method_name="search_read",
             ),
         )
