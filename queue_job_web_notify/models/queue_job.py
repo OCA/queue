@@ -1,7 +1,7 @@
 # Copyright 2024 ACSONE SA/NV
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from odoo import _, models
+from odoo import models
 
 
 class QueueJob(models.Model):
@@ -9,7 +9,7 @@ class QueueJob(models.Model):
 
     def _get_web_notify_failure_title(self):
         self.ensure_one()
-        return _("Job failed")
+        return self.env._("Job failed")
 
     def _get_web_notify_failure_message(self):
         self.ensure_one()
