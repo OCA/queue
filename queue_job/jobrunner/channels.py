@@ -10,6 +10,7 @@ from weakref import WeakValueDictionary
 from ..exception import ChannelNotFound
 from ..job import CANCELLED, DONE, ENQUEUED, FAILED, PENDING, STARTED, WAIT_DEPENDENCIES
 
+RELOAD_PAYLOAD = "reload"
 NOT_DONE = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, STARTED, FAILED)
 JobSortingKey = namedtuple("SortingKey", "eta priority date_created seq")
 

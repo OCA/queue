@@ -19,6 +19,12 @@
                     <field name="complete_name" />
                     <field name="removal_interval" />
                 </group>
+                <group string="Job Runner">
+                    <field name="capacity" />
+                    <field name="sequential" />
+                    <field name="throttle" />
+                    <field name="paused" />
+                </group>
                 <group>
                     <field name="job_function_ids" widget="many2many_tags" />
                 </group>
@@ -32,6 +38,8 @@
         <field name="arch" type="xml">
             <list>
                 <field name="complete_name" />
+                <field name="capacity" />
+                <field name="paused" widget="boolean_toggle" />
             </list>
         </field>
     </record>
@@ -44,6 +52,11 @@
                 <field name="name" />
                 <field name="complete_name" />
                 <field name="parent_id" />
+                <filter
+                    string="Paused"
+                    name="paused"
+                    domain="[('paused', '=', True)]"
+                />
             </search>
         </field>
     </record>
