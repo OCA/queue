@@ -5,23 +5,66 @@
         <field name="model">queue.job.channel</field>
         <field name="arch" type="xml">
             <form string="Channels">
-                <group>
-                    <field
-                        name="name"
-                        required="name != 'root'"
-                        readonly="name == 'root'"
+                <header>
+                    <button
+                        name="action_pause"
+                        type="object"
+                        string="Pause"
+                        class="oe_highlight"
+                        invisible="paused"
                     />
-                    <field
-                        name="parent_id"
-                        required="name != 'root'"
-                        readonly="name == 'root'"
+                    <button
+                        name="action_resume"
+                        type="object"
+                        string="Resume"
+                        class="oe_highlight"
+                        invisible="not paused"
                     />
-                    <field name="complete_name" />
-                    <field name="removal_interval" />
-                </group>
-                <group>
-                    <field name="job_function_ids" widget="many2many_tags" />
-                </group>
+                </header>
+                <sheet>
+                    <widget
+                        name="web_ribbon"
+                        text="Paused"
+                        bg_color="text-bg-danger"
+                        invisible="not paused"
+                    />
+                    <group>
+                        <field
+                            name="name"
+                            required="name != 'root'"
+                            readonly="name == 'root'"
+                        />
+                        <field
+                            name="parent_id"
+                            required="name != 'root'"
+                            readonly="name == 'root'"
+                        />
+                        <field name="complete_name" />
+                        <field name="removal_interval" />
+                    </group>
+                    <group string="Job Functions">
+                        <field
+                            name="job_function_ids"
+                            widget="many2many_tags"
+                            nolabel="1"
+                        />
+                    </group>
+                    <group string="Job Runner">
+                        <p class="text-muted" colspan="2">
+                            These properties will be used only if the server-side
+                            channels configuration is not used.
+                        </p>
+                        <group>
+                            <field name="capacity" />
+                            <field name="sequential" />
+                            <field name="throttle" />
+                        </group>
+                        <group>
+                            <field name="capacity_default" />
+                            <field name="sequential_default" />
+                        </group>
+                    </group>
+                </sheet>
             </form>
         </field>
     </record>
@@ -32,6 +75,8 @@
         <field name="arch" type="xml">
             <list>
                 <field name="complete_name" />
+                <field name="capacity" />
+                <field name="paused" widget="boolean_toggle" />
             </list>
         </field>
     </record>
@@ -44,6 +89,11 @@
                 <field name="name" />
                 <field name="complete_name" />
                 <field name="parent_id" />
+                <filter
+                    string="Paused"
+                    name="paused"
+                    domain="[('paused', '=', True)]"
+                />
             </search>
         </field>
     </record>
