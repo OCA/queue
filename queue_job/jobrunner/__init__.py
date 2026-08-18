@@ -20,7 +20,7 @@ except ImportError:
     queue_job_config = config.misc.get("queue_job", {})
 
 
-from .runner import QueueJobRunner, _channels
+from .runner import QueueJobRunner, _channels, _max_capacity
 
 _logger = logging.getLogger(__name__)
 
@@ -87,7 +87,9 @@ runner_thread = None
 
 
 def _is_runner_enabled():
-    return not _channels().strip().startswith("root:0")
+    if _channels().strip().startswith("root:0"):
+        return False
+    return _max_capacity() != 0
 
 
 def _start_runner_thread(server_type):
@@ -100,7 +102,8 @@ def _start_runner_thread(server_type):
         else:
             _logger.info(
                 "jobrunner thread (in %s) NOT started, "
-                "because the root channel's capacity is set to 0",
+                "because the root channel's capacity or the max capacity "
+                "is set to 0",
                 server_type,
             )
 
