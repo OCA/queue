@@ -3,6 +3,7 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 import logging
 from collections import namedtuple
+from dataclasses import asdict, dataclass
 from functools import total_ordering
 from heapq import heappop, heappush
 from weakref import WeakValueDictionary
@@ -15,6 +16,19 @@ NOT_DONE = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, STARTED, FAILED)
 JobSortingKey = namedtuple("SortingKey", "eta priority date_created seq")
 
 _logger = logging.getLogger(__name__)
+
+
+@dataclass
+class ChannelConfig:
+    """Configuration of a channel"""
+
+    name: str
+    capacity: int = 0
+    sequential: bool = False
+    throttle: int = 0
+    paused: bool = False
+    capacity_default: int = 0
+    sequential_default: bool = False
 
 
 class PriorityQueue:
@@ -1024,6 +1038,11 @@ class ChannelManager:
         for config in ChannelManager.parse_simple_config(config_string):
             self.get_channel_from_config(config)
 
+    def configure(self, configs):
+        """Configure the channel manager from list of :class:`ChannelConfig`"""
+        for config in configs:
+            self.get_channel_from_config(asdict(config))
+
     def get_channel_from_config(self, config):
         """Return a Channel object from a parsed configuration.
 
@@ -1174,3 +1193,8 @@ class ChannelManager:
 
     def get_wakeup_time(self):
         return self._root_channel.get_wakeup_time()
+
+    @property
+    def running_count(self) -> int:
+        """Number of jobs currently running"""
+        return len(self._root_channel._running)

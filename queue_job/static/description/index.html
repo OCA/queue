@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils: https://docutils.sourceforge.io/" />
-<title>README.rst</title>
+<title>Job Queue</title>
 <style type="text/css">
 
 /*
@@ -484,24 +484,87 @@ jobs:<a class="reference external" href="https://github.com/OCA/account-invoicin
 </div>
 <div class="section" id="configuration">
 <h2><a class="toc-backref" href="#toc-entry-3">Configuration</a></h2>
+<p>There are two ways to configure the job runner:</p>
+<p>Set <tt class="docutils literal">channels</tt> (or <tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS</tt>) and every database
+shares the same channel tree (we will call it server-side channels):</p>
+<pre class="code ini literal-block">
+<span class="k">[queue_job]</span><span class="w">
+</span><span class="na">channels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">root:10,root.priority:3,root.slow:1</span>
+</pre>
+<p>Leave <tt class="docutils literal">channels</tt> unset and set <tt class="docutils literal">max_capacity</tt> instead. The job
+runner then builds a separate channel tree for each database, based on
+the <em>Job Channels</em> configured on each database (we will call it
+per-database channels).</p>
+<pre class="code ini literal-block">
+<span class="k">[queue_job]</span><span class="w">
+</span><span class="na">max_capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">10</span>
+</pre>
+<p><tt class="docutils literal">channels</tt> always has precedence over <tt class="docutils literal">max_capacity</tt>. If
+<tt class="docutils literal">channels</tt> is set, the per-database configuration is not used. If
+neither <tt class="docutils literal">channels</tt> nor <tt class="docutils literal">max_capacity</tt> are set, the default execution
+mode is per-database channels with a <tt class="docutils literal">max_capacity</tt> of 1.</p>
+<p>In the per-database mode, channels are configured from the <em>Job
+Channels</em> menu (or by XML data, see the Usage) instead of a global
+configuration string.</p>
+<p>Alongside <tt class="docutils literal">max_capacity</tt>, a global configuration <tt class="docutils literal">db_max_capacity</tt>
+can be set. It represents the max number of jobs executed at the same
+time for a single database (capped by the <tt class="docutils literal">max_capacity</tt> anyway):</p>
+<pre class="code ini literal-block">
+<span class="k">[queue_job]</span><span class="w">
+</span><span class="na">max_capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">10</span><span class="w">
+</span><span class="na">db_max_capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3</span><span class="w">  </span><span class="c1"># no more than 3 simultaneous jobs per database</span>
+</pre>
+<p><tt class="docutils literal">db_max_capacity</tt> may be an integer or a pattern such as
+<tt class="docutils literal"><span class="pre">prod_*:20,staging:2,*:5</span></tt>, where the first match wins. When using a
+pattern, unmatched databases can be configured by a global pattern at
+the end (<tt class="docutils literal">*:n</tt>), otherwise they will use the <tt class="docutils literal">max_capacity</tt>.</p>
+<p>The root channel capacity of a database can still be set independently,
+however, will in any case be capped by the global <tt class="docutils literal">max_capacity</tt> and
+<tt class="docutils literal">db_max_capacity</tt> parameters.</p>
+<p>When set to 0, <tt class="docutils literal">max_capacity</tt> or <tt class="docutils literal">db_max_capacity</tt> means there is no
+jobs executed.</p>
+<p>Editing a channel’s capacity, sequential flag, throttle or set it to
+pause from the <em>Job Channels</em> menu <strong>is applied live on the job
+runner</strong>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">A new database still needs the jobrunner to be restarted.</p>
+</div>
+<p>When using the server-side channels, the configuration is static and
+loaded at startup of the jobrunner.</p>
+<p>The execution of channels by the job runner is defined by:</p>
 <ul class="simple">
-<li>Using environment variables and command line:<ul>
+<li><tt class="docutils literal">capacity</tt>: max number of jobs running at once in the channel (<tt class="docutils literal">0</tt>
+means no limit of its own, the parent channel and <tt class="docutils literal">max_capacity</tt> or
+<tt class="docutils literal">db_max_capacity</tt> still apply)</li>
+<li><tt class="docutils literal">sequential</tt>: jobs run one after the other, and a failed job blocks
+the channel (requires a capacity of 1)</li>
+<li><tt class="docutils literal">throttle</tt>: minimum delay, in seconds, between the start of two jobs</li>
+<li><tt class="docutils literal">paused</tt>: stop running jobs in this channel and its sub-channels</li>
+</ul>
+<p><strong>Job Runner Configuration Parameters</strong></p>
+<ul class="simple">
+<li>Using environment variables:<ul>
 <li>Adjust environment variables (optional):<ul>
-<li><tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS=root:4</tt> or any other channels
-configuration. The default is <tt class="docutils literal">root:1</tt></li>
+<li><tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS=root:4</tt> or any other channels for
+server-side channels</li>
+<li><tt class="docutils literal">ODOO_QUEUE_JOB_MAX_CAPACITY=4</tt>, max number of concurrent jobs
+(not used if <tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS</tt> is set) for per-database
+channels</li>
+<li><tt class="docutils literal">ODOO_QUEUE_JOB_DB_MAX_CAPACITY=2</tt>, max number of concurrent
+jobs per DB (not used if <tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS</tt> is set)</li>
 <li><tt class="docutils literal">ODOO_QUEUE_JOB_PORT=8069</tt>, default <tt class="docutils literal"><span class="pre">--http-port</span></tt></li>
 <li><tt class="docutils literal">ODOO_QUEUE_JOB_SCHEME=https</tt>, default <tt class="docutils literal">http</tt></li>
 <li><tt class="docutils literal"><span class="pre">ODOO_QUEUE_JOB_HOST=load-balancer</span></tt>, default
 <tt class="docutils literal"><span class="pre">--http-interface</span></tt> or <tt class="docutils literal">localhost</tt> if unset</li>
 <li><tt class="docutils literal">ODOO_QUEUE_JOB_HTTP_AUTH_USER=jobrunner</tt>, default empty</li>
 <li><tt class="docutils literal">ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t</tt>, default empty</li>
-<li>Start Odoo with <tt class="docutils literal"><span class="pre">--load=web,queue_job</span></tt> and <tt class="docutils literal"><span class="pre">--workers</span></tt> greater
-than 1. <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li>Using the Odoo configuration file:</li>
+<li>Using the Odoo configuration file (set either <tt class="docutils literal">channels</tt>, either
+<tt class="docutils literal">max_capacity</tt> and/or <tt class="docutils literal">db_max_capacity</tt>)</li>
 </ul>
 <pre class="code ini literal-block">
 <span class="k">[options]</span><span class="w">
@@ -512,11 +575,25 @@ than 1. <a class="footnote-reference" href="#footnote-1" id="footnote-reference-
 </span><span class="na">(...)</span><span class="w">
 </span><span class="k">[queue_job]</span><span class="w">
 </span><span class="na">channels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">root:2</span><span class="w">
+</span><span class="na">max_capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">8</span><span class="w">
+</span><span class="na">db_max_capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3</span><span class="w">
 </span><span class="na">scheme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">https</span><span class="w">
 </span><span class="na">host</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">load-balancer</span><span class="w">
 </span><span class="na">port</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">443</span><span class="w">
 </span><span class="na">http_auth_user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">jobrunner</span><span class="w">
 </span><span class="na">http_auth_password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">s3cr3t</span>
+</pre>
+<ul class="simple">
+<li>Odoo has to be started with <tt class="docutils literal">queue_job</tt> as server-wide module,
+either using the command line option <tt class="docutils literal"><span class="pre">--load=web,queue_job</span></tt>, either
+by setting it in the Odoo configuration file, and <tt class="docutils literal"><span class="pre">--workers</span></tt>
+greater than 1. <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a></li>
+</ul>
+<pre class="code ini literal-block">
+<span class="k">[options]</span><span class="w">
+</span><span class="na">(...)</span><span class="w">
+</span><span class="na">workers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">6</span><span class="w">
+</span><span class="na">server_wide_modules</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">web,queue_job</span>
 </pre>
 <ul class="simple">
 <li>Confirm the runner is starting correctly by checking the odoo log
@@ -529,14 +606,24 @@ file:</li>
 ...INFO...queue_job.jobrunner.runner: database connections ready
 </pre>
 <ul class="simple">
-<li>Create jobs (eg using <tt class="docutils literal">base_import_async</tt>) and observe they start
-immediately and in parallel.</li>
+<li>Create jobs (you can create test jobs by opening
+<tt class="docutils literal"><span class="pre">https://yourodoourl/queue_job/create_test_job</span></tt>) and observe they
+start immediately and in parallel.</li>
 <li>Tip: to enable debug logging for the queue job, use
 <tt class="docutils literal"><span class="pre">--log-handler=odoo.addons.queue_job:DEBUG</span></tt></li>
-<li>Jobs that remain in <tt class="docutils literal">enqueued</tt> or <tt class="docutils literal">started</tt> state (because, for
-instance, their worker has been killed) will be automatically
-re-queued.</li>
 </ul>
+<p><strong>Migrating from server-side channels to per-database channels</strong></p>
+<p>As long as <tt class="docutils literal">channels</tt> (or <tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS</tt>) is set, the job
+runner keeps using the server-side channels.</p>
+<p>To move to channels per database:</p>
+<ol class="arabic simple">
+<li>Configure the channels you need on each database, from the <em>Job
+Channels</em> menu: capacity, sequential, throttle, pause</li>
+<li>Once this configuration is done, remove the <tt class="docutils literal">channels</tt> options and
+set <tt class="docutils literal">max_capacity</tt> (and optionally <tt class="docutils literal">db_max_capacity</tt>) instead (or
+their corresponding environment variables)</li>
+<li>Restart the job runner</li>
+</ol>
 <table class="docutils footnote" frame="void" id="footnote-1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
