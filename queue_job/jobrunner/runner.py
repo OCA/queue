@@ -19,6 +19,7 @@ How does it work?
   anonymous ``/queue_job/runjob`` HTTP request.
 """
 
+import fnmatch
 import logging
 import os
 import selectors
@@ -57,6 +58,12 @@ class MasterElectionLost(Exception):
 # so we check it in addition to the environment variables.
 
 
+def _server_side_channels_configured():
+    return bool(
+        os.environ.get("ODOO_QUEUE_JOB_CHANNELS") or queue_job_config.get("channels")
+    )
+
+
 def _root_capacity_from_channels_config(config_string):
     """Capacity of the root channel from the channels string
 
@@ -73,34 +80,88 @@ def _root_capacity_from_channels_config(config_string):
     return 1
 
 
-def _max_capacity(channel_config_string=None):
+def _max_capacity(channel_config_string: str | None = None) -> int:
     """Maximum number of jobs running at the same time across all databases
 
     When not configured, fallbacks on the channels server-side configuration
     string.
     """
+    if _server_side_channels_configured():
+        if channel_config_string is None:
+            channel_config_string = _channels()
+        return _root_capacity_from_channels_config(channel_config_string)
+
     value = os.environ.get("ODOO_QUEUE_JOB_MAX_CAPACITY") or queue_job_config.get(
         "max_capacity"
     )
     if value:
         return int(value)
-    if channel_config_string is None:
-        channel_config_string = _channels()
-    return _root_capacity_from_channels_config(channel_config_string)
+    return 0
 
 
-def _db_max_capacity():
-    return int(
+def _db_max_capacity() -> str:
+    return (
         os.environ.get("ODOO_QUEUE_JOB_DB_MAX_CAPACITY")
         or queue_job_config.get("db_max_capacity")
-        or _max_capacity()
+        or ""
     )
 
 
-def _server_side_channels_configured():
-    return bool(
-        os.environ.get("ODOO_QUEUE_JOB_CHANNELS") or queue_job_config.get("channels")
-    )
+def parse_db_max_capacity(spec):
+    """Parse a per-database max capacity configuration string
+
+    The string is a comma-separated list of ``pattern:capacity`` items, where
+    ``pattern`` matches database names with fnmatch wildcards.
+
+    The first matching pattern wins, so specific patterns must be first in the
+    string.
+
+    A single integer is applied to all databases, as a shorthand for
+    ``*:capacity``.
+
+    >>> parse_db_max_capacity('prod_*:20,staging:2,*:5')
+    [('prod_*', 20), ('staging', 2), ('*', 5)]
+    >>> parse_db_max_capacity('8')
+    [('*', 8)]
+    >>> parse_db_max_capacity('')
+    []
+    >>> parse_db_max_capacity(None)
+    []
+    """
+    rules = []
+    if not spec:
+        return rules
+    for item in spec.replace("\n", ",").split(","):
+        item = item.strip()
+        if not item:
+            continue
+        pattern, sep, capacity = item.rpartition(":")
+        if not sep:
+            pattern = "*"
+        try:
+            rules.append((pattern.strip(), int(capacity)))
+        except ValueError as ex:
+            raise ValueError(f"Invalid db max capacity {spec}: {capacity}") from ex
+    return rules
+
+
+def db_max_capacity_for(db_name, rules, default=None):
+    """Max capacity of a database, first match wins
+
+    >>> rules = parse_db_max_capacity('prod_*:20,staging:2,*:5')
+    >>> db_max_capacity_for('prod_foo', rules)
+    20
+    >>> db_max_capacity_for('staging', rules)
+    2
+    >>> db_max_capacity_for('dev', rules)
+    5
+    >>> db_max_capacity_for('dev', [], default=7)
+    7
+    """
+    for pattern, capacity in rules:
+        if fnmatch.fnmatch(db_name, pattern):
+            return capacity
+    return default
 
 
 def _channels():
@@ -391,6 +452,8 @@ class QueueJobRunner:
         user=None,
         password=None,
         channel_config_string=None,
+        max_capacity=None,
+        db_max_capacity=None,
     ):
         self.scheme = scheme
         self.host = host
@@ -407,9 +470,17 @@ class QueueJobRunner:
             channel_manager.simple_configure(channel_config_string)
             self._server_side_channel_manager = channel_manager
 
-        self.max_capacity = _max_capacity()
+        if max_capacity is None:
+            max_capacity = _max_capacity()
+        self.max_capacity = max_capacity
+
+        if db_max_capacity is None:
+            db_max_capacity = _db_max_capacity()
+        self.db_max_capacity_rules = parse_db_max_capacity(db_max_capacity)
 
         self.channel_manager_by_db = {}
+
+        self._round_robin_offset = 0
 
         self.db_by_name = {}
         self._stop = False
@@ -475,8 +546,9 @@ class QueueJobRunner:
 
     def _build_channel_manager(self, db):
         """Build and configure the channel manager of a database"""
-        # TODO: parse string "capacity per database with pattern"
-        db_max = _db_max_capacity()
+        db_max = db_max_capacity_for(
+            db.db_name, self.db_max_capacity_rules, default=self.max_capacity
+        )
         channels_config = db.load_channels_config()
         channel_manager = ChannelManager()
 
@@ -529,6 +601,14 @@ class QueueJobRunner:
             if db.has_queue_job:
                 db.requeue_dead_jobs()
 
+    def _all_running_count(self) -> int:
+        if self._server_side_channel_manager:
+            return self._server_side_channel_manager.running_count
+        return sum(
+            channel_manager.running_count
+            for channel_manager in self.channel_manager_by_db.values()
+        )
+
     def _dispatch_job(self, job):
         _logger.info("asking Odoo to run job %s on db %s", job.uuid, job.db_name)
         self.db_by_name[job.db_name].set_job_enqueued(job.uuid)
@@ -549,14 +629,27 @@ class QueueJobRunner:
 
         now = _odoo_now()
 
-        # TODO: round robin
-        for db_name in db_names:
+        round_robin_offset = self._round_robin_offset % len(db_names)
+        self._round_robin_offset += 1
+
+        # rotate the databases order so that each database gets a chance to enqueue jobs
+        # under contention
+        for db_name in db_names[round_robin_offset:] + db_names[:round_robin_offset]:
             jobs = self.channel_manager_by_db[db_name].get_jobs_to_run(now)
             while True:
                 if self._stop:
                     break
-                # TODO: check if max capacity for db reached so another db
-                # can dispatch jobs
+                # TODO: think about server-side vs per multi channel manager behaviors
+                if self.max_capacity and self._all_running_count() >= self.max_capacity:
+                    # we trigger a round-robin only when the global max
+                    # capacity is reached, before that, databases already can
+                    # enqueue jobs
+                    _logger.debug(
+                        "max capacity of %s reached for db %s, round-robin to next db",
+                        self.max_capacity,
+                        db_name,
+                    )
+                    return
                 job = next(jobs, None)
                 if job is None:
                     break
@@ -609,7 +702,6 @@ class QueueJobRunner:
         conns = [db.conn for db in self.db_by_name.values()]
         conns.append(self._stop_pipe[0])
         # look if the channels specify a wakeup time
-        # TODO: get min wakeup time?
         wakeup_time = self.next_wakeup_time()
         if not wakeup_time:
             # this could very well be no timeout at all, because

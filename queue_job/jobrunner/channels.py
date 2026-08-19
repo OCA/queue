@@ -1133,3 +1133,8 @@ class ChannelManager:
 
     def get_wakeup_time(self):
         return self._root_channel.get_wakeup_time()
+
+    @property
+    def running_count(self) -> int:
+        """Number of jobs currently running"""
+        return len(self._root_channel._running)
