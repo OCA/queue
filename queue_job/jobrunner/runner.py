@@ -470,6 +470,9 @@ class QueueJobRunner:
             channel_manager.simple_configure(channel_config_string)
             self._server_side_channel_manager = channel_manager
 
+        self._channel_manager_by_db = {}
+        self._channel_managers = []
+
         if max_capacity is None:
             max_capacity = _max_capacity()
         self.max_capacity = max_capacity
@@ -477,8 +480,6 @@ class QueueJobRunner:
         if db_max_capacity is None:
             db_max_capacity = _db_max_capacity()
         self.db_max_capacity_rules = parse_db_max_capacity(db_max_capacity)
-
-        self.channel_manager_by_db = {}
 
         self._round_robin_offset = 0
 
@@ -538,11 +539,23 @@ class QueueJobRunner:
         for db_name, db in self.db_by_name.items():
             try:
                 if remove_jobs:
-                    self.channel_manager_by_db[db_name].remove_db(db_name)
+                    self._channel_manager_by_db[db_name].remove_db(db_name)
                 db.close()
             except Exception:
                 _logger.warning("error closing database %s", db_name, exc_info=True)
         self.db_by_name = {}
+        self._channel_manager_by_db = {}
+        self._channel_managers = []
+
+    @staticmethod
+    def _unique_channel_managers(channel_managers):
+        seen = set()
+        result = []
+        for channel_manager in channel_managers:
+            if id(channel_manager) not in seen:
+                seen.add(id(channel_manager))
+                result.append(channel_manager)
+        return result
 
     def _build_channel_manager(self, db):
         """Build and configure the channel manager of a database"""
@@ -582,7 +595,10 @@ class QueueJobRunner:
         with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
             for job_data in cr:
                 channel_manager.notify(db_name, *job_data)
-        self.channel_manager_by_db[db_name] = channel_manager
+        self._channel_manager_by_db[db_name] = channel_manager
+        self._channel_managers = self._unique_channel_managers(
+            self._channel_manager_by_db.values()
+        )
         _logger.info("channels configuration loaded for db %s", db_name)
 
     def initialize_databases(self):
@@ -602,11 +618,8 @@ class QueueJobRunner:
                 db.requeue_dead_jobs()
 
     def _all_running_count(self) -> int:
-        if self._server_side_channel_manager:
-            return self._server_side_channel_manager.running_count
         return sum(
-            channel_manager.running_count
-            for channel_manager in self.channel_manager_by_db.values()
+            channel_manager.running_count for channel_manager in self._channel_managers
         )
 
     def _dispatch_job(self, job):
@@ -623,31 +636,32 @@ class QueueJobRunner:
         )
 
     def run_jobs(self):
-        db_names = list(self.channel_manager_by_db)
-        if not db_names:
+        channel_managers = self._channel_managers
+        if not channel_managers:
             return
 
         now = _odoo_now()
 
-        round_robin_offset = self._round_robin_offset % len(db_names)
+        round_robin_offset = self._round_robin_offset % len(channel_managers)
         self._round_robin_offset += 1
 
-        # rotate the databases order so that each database gets a chance to enqueue jobs
-        # under contention
-        for db_name in db_names[round_robin_offset:] + db_names[:round_robin_offset]:
-            jobs = self.channel_manager_by_db[db_name].get_jobs_to_run(now)
+        # rotate the channel managers order so that each database gets a chance
+        # to enqueue jobs under contention
+        for channel_manager in (
+            channel_managers[round_robin_offset:]
+            + channel_managers[:round_robin_offset]
+        ):
+            jobs = channel_manager.get_jobs_to_run(now)
             while True:
                 if self._stop:
                     break
-                # TODO: think about server-side vs per multi channel manager behaviors
                 if self.max_capacity and self._all_running_count() >= self.max_capacity:
                     # we trigger a round-robin only when the global max
-                    # capacity is reached, before that, databases already can
-                    # enqueue jobs
+                    # capacity is reached, before that, all channel managers can
+                    # already enqueue jobs
                     _logger.debug(
-                        "max capacity of %s reached for db %s, round-robin to next db",
+                        "max capacity of %s reached, round-robin to next db",
                         self.max_capacity,
-                        db_name,
                     )
                     return
                 job = next(jobs, None)
@@ -674,7 +688,7 @@ class QueueJobRunner:
                     continue
 
                 uuid = payload
-                channel_manager = self.channel_manager_by_db[db.db_name]
+                channel_manager = self._channel_manager_by_db[db.db_name]
                 with db.select_jobs("uuid = %s", (uuid,)) as cr:
                     job_datas = cr.fetchone()
                     if job_datas:
@@ -688,7 +702,7 @@ class QueueJobRunner:
     def next_wakeup_time(self):
         wakeup_times = [
             channel_manager.get_wakeup_time()
-            for channel_manager in self.channel_manager_by_db.values()
+            for channel_manager in self._channel_managers
         ]
         return min(wakeup_times, default=0)
 
