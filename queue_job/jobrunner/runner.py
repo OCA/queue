@@ -83,8 +83,14 @@ def _root_capacity_from_channels_config(config_string):
 def _max_capacity(channel_config_string: str | None = None) -> int:
     """Maximum number of jobs running at the same time across all databases
 
-    When not configured, fallbacks on the channels server-side configuration
-    string.
+    If a channels server-side configuration exists, it is equivalent to the
+    capacity of the root channel.
+
+    Otherwise, it comes from the ``ODOO_QUEUE_JOB_MAX_CAPACITY`` environment
+    variable, then ``max_capacity`` in the ``[queue_job]`` section of the
+    configuration file.
+
+    If none is configured, the max capacity is 0.
     """
     if _server_side_channels_configured():
         if channel_config_string is None:
@@ -588,7 +594,6 @@ class QueueJobRunner:
         if db is None:
             return
         if self._server_side_channel_manager:
-            # fallback on server-side configuration with a unique channel manager
             channel_manager = self._server_side_channel_manager
         else:
             channel_manager = self._build_channel_manager(db)
