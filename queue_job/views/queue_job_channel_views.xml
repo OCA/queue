@@ -20,6 +20,10 @@
                     <field name="removal_interval" />
                 </group>
                 <group string="Job Runner">
+                    <p class="text-muted" colspan="2">
+                        These properties will be used only if the server-side
+                        channels configuration is not used.
+                    </p>
                     <field name="capacity" />
                     <field name="sequential" />
                     <field name="throttle" />
