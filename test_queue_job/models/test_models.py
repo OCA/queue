@@ -113,6 +113,19 @@ class ModelTestQueueJob(models.Model):
         mutable_kwarg["b"] = 2
         return mutable_arg, mutable_kwarg
 
+    def job_commit_with_arg_records(
+        self, record, record_list=None, record_dict=None, token=None
+    ):
+        assert record.env.cr is self.env.cr, "record argument cursor was not rebound"
+        assert not record_list or record_list[0].env.cr is self.env.cr, (
+            "record list argument cursor was not rebound"
+        )
+        assert not record_dict or record_dict["record"].env.cr is self.env.cr, (
+            "record dict argument cursor was not rebound"
+        )
+        record.env.cr.commit()  # pylint: disable=invalid-commit
+        return token
+
     def delay_me(self, arg, kwarg=None):
         return arg, kwarg
 
