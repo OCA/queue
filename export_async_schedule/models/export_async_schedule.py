@@ -62,7 +62,7 @@ class ExportAsyncSchedule(models.Model):
     )
     end_of_month = fields.Boolean()
 
-    @api.depends("model_id", "ir_export_id")
+    @api.depends("model_id.name", "ir_export_id.name")
     def _compute_display_name(self):
         for record in self:
             record.display_name = f"{record.model_id.name}: {record.ir_export_id.name}"
