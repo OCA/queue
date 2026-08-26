@@ -2,6 +2,7 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 import doctest
 import os
+from unittest import mock
 
 from odoo.tests import BaseCase, tagged
 
@@ -61,3 +62,53 @@ class TestRunner(BaseCase):
 
         self.assertFalse(self._is_open_file_descriptor(read_fd))
         self.assertFalse(self._is_open_file_descriptor(write_fd))
+
+    def test_max_capacity_from_env_channels(self):
+        with (
+            mock.patch.dict(
+                os.environ, {"ODOO_QUEUE_JOB_CHANNELS": "root:7,sub:2"}, clear=True
+            ),
+            mock.patch.object(runner, "queue_job_config", {}),
+        ):
+            self.assertEqual(runner._max_capacity(), 7)
+
+    def test_max_capacity_from_env_channels_without_root(self):
+        with (
+            mock.patch.dict(
+                os.environ, {"ODOO_QUEUE_JOB_CHANNELS": "sub:2"}, clear=True
+            ),
+            mock.patch.object(runner, "queue_job_config", {}),
+        ):
+            self.assertEqual(runner._max_capacity(), 1)
+
+    def test_max_capacity_from_env(self):
+        with (
+            mock.patch.dict(
+                os.environ, {"ODOO_QUEUE_JOB_MAX_CAPACITY": "5"}, clear=True
+            ),
+            mock.patch.object(runner, "queue_job_config", {}),
+        ):
+            self.assertEqual(runner._max_capacity(), 5)
+
+    def test_max_capacity_from_odoo_config(self):
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(runner, "queue_job_config", {"max_capacity": "3"}),
+        ):
+            self.assertEqual(runner._max_capacity(), 3)
+
+    def test_max_capacity_env_priority_over_odoo_config(self):
+        with (
+            mock.patch.dict(
+                os.environ, {"ODOO_QUEUE_JOB_MAX_CAPACITY": "5"}, clear=True
+            ),
+            mock.patch.object(runner, "queue_job_config", {"max_capacity": "3"}),
+        ):
+            self.assertEqual(runner._max_capacity(), 5)
+
+    def test_max_capacity_default(self):
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(runner, "queue_job_config", {}),
+        ):
+            self.assertEqual(runner._max_capacity(), 0)
