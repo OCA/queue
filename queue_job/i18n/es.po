@@ -559,6 +559,12 @@ msgid "Model %s not found"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job_function__on_fail_method
+msgid ""
+"Model function to be called if the job is failed and will not be retried."
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__my_activity_date_deadline
 msgid "My Activity Deadline"
 msgstr "Mi fecha límite de actividad"
@@ -615,6 +621,11 @@ msgstr "Número de mensajes que requieren una acción"
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr "Número de mensajes con error de envío"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__on_fail_method
+msgid "On Fail Method"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__parent_id
