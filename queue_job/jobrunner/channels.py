@@ -402,9 +402,14 @@ class Channel:
     with a capacity of 1. It is also possible to dedicate a channel with a
     limited capacity for application-autocreated subchannels
     without risking to overflow the system.
+
+    A paused channel does not process any job until it is resumed. All subchannels
+    are blocked with their parent channel.
     """
 
-    def __init__(self, name, parent, capacity=None, sequential=False, throttle=0):
+    def __init__(
+        self, name, parent, capacity=None, sequential=False, throttle=0, paused=False
+    ):
         self.name = name
         self.parent = parent
         if self.parent:
@@ -417,6 +422,7 @@ class Channel:
         self.capacity = capacity
         self.throttle = throttle  # seconds
         self.sequential = sequential
+        self.paused = paused
 
     @property
     def sequential(self):
@@ -434,11 +440,13 @@ class Channel:
         * capacity
         * sequential
         * throttle
+        * paused
         """
         assert self.fullname.endswith(config["name"])
         self.capacity = config.get("capacity", None)
         self.sequential = bool(config.get("sequential", False))
         self.throttle = int(config.get("throttle", 0))
+        self.paused = bool(config.get("paused", False))
         if self.sequential and self.capacity != 1:
             raise ValueError("A sequential channel must have a capacity of 1")
 
@@ -455,12 +463,13 @@ class Channel:
 
     def __str__(self):
         capacity = "∞" if self.capacity is None else str(self.capacity)
-        return "%s(C:%s,Q:%d,R:%d,F:%d)" % (
+        return "%s(C:%s,Q:%d,R:%d,F:%d%s)" % (
             self.fullname,
             capacity,
             len(self._queue),
             len(self._running),
             len(self._failed),
+            ",paused" if self.paused else "",
         )
 
     def remove(self, job):
@@ -517,6 +526,8 @@ class Channel:
             _logger.debug("job %s marked failed in channel %s", job.uuid, self)
 
     def has_capacity(self):
+        if self.paused:
+            return False
         if self.sequential and self._failed:
             # a sequential queue blocks on failed jobs
             return False
@@ -799,6 +810,31 @@ class ChannelManager:
     >>> cm.notify(db, 'S', 'S3', 3, 0, 10, None, 'done')
     >>> pp(list(cm.get_jobs_to_run(now=105)))
     []
+
+    Test pausing a channel
+
+    >>> cm = ChannelManager()
+    >>> cm.simple_configure('root:4,P:2:paused,P.sub:1')
+    >>> cm.notify(db, 'P', 'P1', 1, 0, 10, None, 'pending')
+    >>> cm.notify(db, 'P.sub', 'PS1', 2, 0, 10, None, 'pending')
+
+    Paused channel yields no job
+
+    >>> pp(list(cm.get_jobs_to_run(now=100)))
+    []
+
+    Resuming the channel yields the pending jobs
+
+    >>> cm.simple_configure('root:4,P:2')
+    >>> pp(list(cm.get_jobs_to_run(now=100)))
+    [<ChannelJob P1>, <ChannelJob PS1>]
+
+    Pausing the root channel blocks everything
+
+    >>> cm.simple_configure('root:4:paused')
+    >>> cm.notify(db, 'P', 'P3', 4, 0, 10, None, 'pending')
+    >>> pp(list(cm.get_jobs_to_run(now=106)))
+    []
     """
 
     def __init__(self):
@@ -894,8 +930,7 @@ class ChannelManager:
                         )
                     if k in config:
                         raise ValueError(
-                            f"Invalid channel config {config_string}: "
-                            f"duplicate key {k}"
+                            f"Invalid channel config {config_string}: duplicate key {k}"
                         )
                     config[k] = v
             else:
