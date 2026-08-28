@@ -25,6 +25,7 @@ import os
 import selectors
 import threading
 import time
+from collections import deque
 from contextlib import closing, contextmanager
 
 import psycopg2
@@ -664,39 +665,50 @@ class QueueJobRunner:
             job.uuid,
         )
 
+    def _round_robin_jobs(self, channel_managers, now):
+        managers_count = len(channel_managers)
+        # Ensure the channel managers are ordered in way that all have
+        # equal chances to enqueue jobs. The manager that was last last
+        # time will be first the next time and so on.
+        job_generators = deque(
+            (
+                # store the actual position of the channel manager in the channel
+                # managers list
+                index % managers_count,
+                channel_managers[index % managers_count].get_jobs_to_run(now),
+            )
+            for index in range(
+                self._round_robin_offset, self._round_robin_offset + managers_count
+            )
+        )
+        while job_generators:
+            index, job_generator = job_generators.popleft()
+            job = next(job_generator, None)
+            if job is None:
+                # generator exhausted for this tick, remove from the deque
+                # it will come back next time
+                continue
+            job_generators.append((index, job_generator))
+            self._round_robin_offset = index + 1
+            yield job
+
     def run_jobs(self):
         channel_managers = self._channel_managers
         if not channel_managers:
             return
 
-        now = _odoo_now()
-
-        round_robin_offset = self._round_robin_offset % len(channel_managers)
-        self._round_robin_offset += 1
-
-        # rotate the channel managers order so that each database gets a chance
-        # to enqueue jobs under contention
-        for channel_manager in (
-            channel_managers[round_robin_offset:]
-            + channel_managers[:round_robin_offset]
-        ):
-            jobs = channel_manager.get_jobs_to_run(now)
-            while True:
-                if self._stop:
-                    break
-                if self.max_capacity and self._all_running_count() >= self.max_capacity:
-                    # we trigger a round-robin only when the global max
-                    # capacity is reached, before that, all channel managers can
-                    # already enqueue jobs
-                    _logger.debug(
-                        "max capacity of %s reached, round-robin to next db",
-                        self.max_capacity,
-                    )
-                    return
-                job = next(jobs, None)
-                if job is None:
-                    break
-                self._dispatch_job(job)
+        jobs = self._round_robin_jobs(channel_managers, _odoo_now())
+        while not self._stop:
+            if self.max_capacity and self._all_running_count() >= self.max_capacity:
+                _logger.debug(
+                    "max capacity of %s reached, waiting for capacity",
+                    self.max_capacity,
+                )
+                return
+            job = next(jobs, None)
+            if job is None:
+                return
+            self._dispatch_job(job)
 
     def process_notifications(self):
         reload_db_names = set()
