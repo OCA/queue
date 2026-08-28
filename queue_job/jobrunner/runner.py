@@ -234,9 +234,11 @@ class Database:
         try:
             self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
             self.has_queue_job = self._has_queue_job()
+            self.has_channel_config_columns = False
             if self.has_queue_job:
                 self._acquire_master_lock()
                 self._initialize()
+                self.has_channel_config_columns = self._has_channel_config_columns()
         except BaseException:
             self.close()
             raise
@@ -293,8 +295,23 @@ class Database:
         with closing(self.conn.cursor()) as cr:
             cr.execute("LISTEN queue_job")
 
+    def _has_channel_config_columns(self):
+        with closing(self.conn.cursor()) as cr:
+            cr.execute(
+                """
+                SELECT count(*)
+                FROM information_schema.columns
+                WHERE table_name = %s
+                AND column_name IN ('capacity', 'sequential', 'throttle', 'paused')
+                """,
+                ("queue_job_channel",),
+            )
+            return cr.fetchone()[0] == 4
+
     def load_channels_config(self):
         """Return the channels configuration stored in the database"""
+        if not self.has_channel_config_columns:
+            return None
         with closing(self.conn.cursor()) as cr:
             cr.execute(
                 "SELECT complete_name, "
@@ -566,8 +583,17 @@ class QueueJobRunner:
         db_max = db_max_capacity_for(
             db.db_name, self.db_max_capacity_rules, default=self.max_capacity
         )
-        channels_config = db.load_channels_config()
         channel_manager = ChannelManager()
+
+        channels_config = db.load_channels_config()
+        if channels_config is None:
+            # database not updated to the proper schema,
+            # no job execution until it is properly upgraded
+            _logger.error(
+                "database %s schema is outdated, -u queue_job required", db.db_name
+            )
+            channel_manager.simple_configure("root:0")
+            return channel_manager
 
         root_config = next(
             (config for config in channels_config if config.name == "root"), None
