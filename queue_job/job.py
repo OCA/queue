@@ -432,10 +432,11 @@ class Job:
             self.env["queue.job.function"].sudo().job_config(self.job_function_name)
         )
         on_fail_method_name = self.job_config.on_fail_method_name
-        if on_fail_method_name:
-            if not _is_model_method(getattr(self.recordset, on_fail_method_name, None)):
-                raise TypeError("Job accepts only methods of Models")
-            self.on_fail_method_name = on_fail_method_name
+        if on_fail_method_name and not _is_model_method(
+            getattr(self.recordset, on_fail_method_name, None)
+        ):
+            raise TypeError("Job accepts only methods of Models")
+        self.on_fail_method_name = on_fail_method_name
 
         self.state = PENDING
 
@@ -875,6 +876,8 @@ class Job:
                 setattr(self, k, v)
 
     def on_fail(self, fail_vals):
+        if not self.on_fail_method_name:
+            return
         on_fail_func = getattr(self.recordset, self.on_fail_method_name, None)
         if on_fail_func:
             on_fail_func(**fail_vals)
