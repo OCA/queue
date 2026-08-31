@@ -4,8 +4,6 @@
 
 from odoo import api, fields, models
 
-from odoo.addons.mail.tools.discuss import Store
-
 
 class QueueJobBatch(models.Model):
     _name = "queue.job.batch"
@@ -109,9 +107,8 @@ class QueueJobBatch(models.Model):
             rec.completeness = rec.finished_job_count / max(1, rec.job_count)
             rec.failed_percentage = rec.failed_job_count / max(1, rec.job_count)
 
-    @api.model
-    def _to_store_fnames(self):
-        return (
+    def _to_store_defaults(self, target):
+        return [
             "name",
             "state",
             "job_count",
@@ -119,10 +116,4 @@ class QueueJobBatch(models.Model):
             "failed_job_count",
             "completeness",
             "failed_percentage",
-        )
-
-    def _to_store(self, store: Store):
-        fnames = self._to_store_fnames()
-        for rec in self:
-            data = rec.read(fnames)[0]
-            store.add(rec, data)
+        ]
