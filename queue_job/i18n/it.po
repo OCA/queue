@@ -559,6 +559,12 @@ msgid "Model"
 msgstr "Modello"
 
 #. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job_function__on_fail_method
+msgid ""
+"Model function to be called if the job is failed and will not be retried."
+msgstr ""
+
+#. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job_function.py:0
 msgid "Model {} not found"
@@ -621,6 +627,11 @@ msgstr "Numero di messaggi che richiedono un'azione"
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr "Numero di messaggi con errore di consegna"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__on_fail_method
+msgid "On Fail Method"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__parent_id
