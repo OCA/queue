@@ -1,0 +1,201 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* export_async_schedule
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 14.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__active
+msgid "Active"
+msgstr ""
+
+#. module: export_async_schedule
+#: model_terms:ir.ui.view,arch_db:export_async_schedule.view_export_async_schedule_search
+msgid "All"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields.selection,name:export_async_schedule.selection__export_async_schedule__export_format__csv
+msgid "CSV"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields.selection,name:export_async_schedule.selection__export_async_schedule__interval_unit__days
+msgid "Day(s)"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__end_of_month
+msgid "End Of Month"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields.selection,name:export_async_schedule.selection__export_async_schedule__export_format__excel
+msgid "Excel"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model,name:export_async_schedule.model_export_async_schedule
+msgid "Export Async Schedule"
+msgstr ""
+
+#. module: export_async_schedule
+#: model_terms:ir.ui.view,arch_db:export_async_schedule.view_export_async_schedule_form
+msgid "Export Configuration"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__domain
+msgid "Export Domain"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__export_format
+msgid "Export Format"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__ir_export_id
+msgid "Export List"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,help:export_async_schedule.field_export_async_schedule__lang
+msgid "Exports will be translated in this language."
+msgstr ""
+
+#. module: export_async_schedule
+#: model_terms:ir.ui.view,arch_db:export_async_schedule.view_export_async_schedule_search
+msgid "Group By"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields.selection,name:export_async_schedule.selection__export_async_schedule__interval_unit__hours
+msgid "Hour(s)"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__id
+msgid "ID"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__import_compat
+msgid "Import-compatible Export"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__interval
+msgid "Interval"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__lang
+msgid "Language"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__model_id
+#: model_terms:ir.ui.view,arch_db:export_async_schedule.view_export_async_schedule_search
+msgid "Model"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__model_name
+msgid "Model Name"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields.selection,name:export_async_schedule.selection__export_async_schedule__interval_unit__months
+msgid "Month(s)"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__next_execution
+#: model_terms:ir.ui.view,arch_db:export_async_schedule.view_export_async_schedule_search
+msgid "Next Execution"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__user_ids
+msgid "Recipients"
+msgstr ""
+
+#. module: export_async_schedule
+#: model_terms:ir.actions.act_window,help:export_async_schedule.action_export_async_schedule
+msgid "Schedule Exports to send by email"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.actions.act_window,name:export_async_schedule.action_export_async_schedule
+#: model:ir.ui.menu,name:export_async_schedule.menu_export_async_schedule
+#: model_terms:ir.ui.view,arch_db:export_async_schedule.view_export_async_schedule_search
+msgid "Scheduled Exports"
+msgstr ""
+
+#. module: export_async_schedule
+#: model_terms:ir.ui.view,arch_db:export_async_schedule.view_export_async_schedule_form
+msgid "Scheduling"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.actions.server,name:export_async_schedule.ir_cron_export_async_schedule_ir_actions_server
+#: model:ir.cron,cron_name:export_async_schedule.ir_cron_export_async_schedule
+#: model:ir.cron,name:export_async_schedule.ir_cron_export_async_schedule
+msgid "Send Scheduled Exports"
+msgstr ""
+
+#. module: export_async_schedule
+#: model_terms:ir.ui.view,arch_db:export_async_schedule.view_export_async_schedule_form
+msgid "Test Export"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields,field_description:export_async_schedule.field_export_async_schedule__interval_unit
+msgid "Unit"
+msgstr ""
+
+#. module: export_async_schedule
+#: model:ir.model.fields.selection,name:export_async_schedule.selection__export_async_schedule__interval_unit__weeks
+msgid "Week(s)"
+msgstr ""
