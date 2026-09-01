@@ -10,13 +10,13 @@ from ..job import Job
 
 
 class TestRunJobController(TransactionCase):
-    def setUp(cls):
+    def setUp(self):
         super().setUp()
 
         def _clean_queue_job():
-            cls.env["queue.job"].search([]).unlink()
+            self.env["queue.job"].search([]).unlink()
 
-        cls.addCleanup(_clean_queue_job)
+        self.addCleanup(_clean_queue_job)
 
     def test_get_failure_values(self):
         method = self.env["res.users"].mapped
