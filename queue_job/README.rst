@@ -128,7 +128,10 @@ Configuration
   - Adjust environment variables (optional):
 
     - ``ODOO_QUEUE_JOB_CHANNELS=root:4`` or any other channels
-      configuration. The default is ``root:1``
+    - ``ODOO_QUEUE_JOB_MAX_CAPACITY=4``, max number of concurrent jobs
+      (not used if ``ODOO_QUEUE_JOB_CHANNELS`` is set)
+    - ``ODOO_QUEUE_JOB_DB_MAX_CAPACITY=2``, max number of concurrent
+      jobs per DB (not used if ``ODOO_QUEUE_JOB_CHANNELS`` is set)
     - ``ODOO_QUEUE_JOB_PORT=8069``, default ``--http-port``
     - ``ODOO_QUEUE_JOB_SCHEME=https``, default ``http``
     - ``ODOO_QUEUE_JOB_HOST=load-balancer``, default
@@ -138,7 +141,8 @@ Configuration
     - Start Odoo with ``--load=web,queue_job`` and ``--workers`` greater
       than 1. [1]_
 
-- Using the Odoo configuration file:
+- Using the Odoo configuration file (set either ``channels``, either
+  ``max_capacity`` and ``db_max_capacity``)
 
 .. code:: ini
 
@@ -150,11 +154,16 @@ Configuration
    (...)
    [queue_job]
    channels = root:2
+   max_capacity = 8
+   db_max_capacity = 3
    scheme = https
    host = load-balancer
    port = 443
    http_auth_user = jobrunner
    http_auth_password = s3cr3t
+
+``db_max_capacity`` may be an integer or a pattern such as
+``prod_*:20,staging:2,*:5``
 
 - Confirm the runner is starting correctly by checking the odoo log
   file:

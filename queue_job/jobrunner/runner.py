@@ -59,43 +59,15 @@ class MasterElectionLost(Exception):
 # so we check it in addition to the environment variables.
 
 
-def _server_side_channels_configured():
-    return bool(
-        os.environ.get("ODOO_QUEUE_JOB_CHANNELS") or queue_job_config.get("channels")
-    )
-
-
-def _root_capacity_from_channels_config(config_string):
-    """Capacity of the root channel from the channels string
-
-    >>> _root_capacity_from_channels_config('root:4,sub:2')
-    4
-    >>> _root_capacity_from_channels_config('sub:2')
-    1
-    >>> _root_capacity_from_channels_config('root:0')
-    0
-    """
-    for channel_config in ChannelManager.parse_simple_config(config_string):
-        if channel_config["name"] == "root":
-            return channel_config.get("capacity", 1)
-    return 1
-
-
 def _max_capacity() -> int:
     """Maximum number of jobs running at the same time across all databases
 
-    If a channels server-side configuration exists, it is equivalent to the
-    capacity of the root channel.
-
-    Otherwise, it comes from the ``ODOO_QUEUE_JOB_MAX_CAPACITY`` environment
+    It comes from the ``ODOO_QUEUE_JOB_MAX_CAPACITY`` environment
     variable, then ``max_capacity`` in the ``[queue_job]`` section of the
     configuration file.
 
     If none is configured, the max capacity is 0.
     """
-    if _server_side_channels_configured():
-        return _root_capacity_from_channels_config(_channels())
-
     value = os.environ.get("ODOO_QUEUE_JOB_MAX_CAPACITY") or queue_job_config.get(
         "max_capacity"
     )
@@ -170,11 +142,7 @@ def db_max_capacity_for(db_name, rules, default=None):
 
 
 def _channels():
-    return (
-        os.environ.get("ODOO_QUEUE_JOB_CHANNELS")
-        or queue_job_config.get("channels")
-        or "root:1"
-    )
+    return os.environ.get("ODOO_QUEUE_JOB_CHANNELS") or queue_job_config.get("channels")
 
 
 def _odoo_now():
@@ -487,13 +455,13 @@ class QueueJobRunner:
             channel_config_string = _channels()
 
         self._server_side_channel_manager = None
-        if _server_side_channels_configured():
+        if channel_config_string:
             channel_manager = ChannelManager()
             channel_manager.simple_configure(channel_config_string)
             self._server_side_channel_manager = channel_manager
-
-        self._channel_manager_by_db = {}
-        self._channel_managers = []
+            # max_capacity is always equal to the root channel in server-side
+            # configuration
+            max_capacity = channel_manager.get_channel_by_name("root").capacity
 
         if max_capacity is None:
             max_capacity = _max_capacity()
@@ -502,6 +470,9 @@ class QueueJobRunner:
         if db_max_capacity is None:
             db_max_capacity = _db_max_capacity()
         self.db_max_capacity_rules = parse_db_max_capacity(db_max_capacity)
+
+        self._channel_manager_by_db = {}
+        self._channel_managers = []
 
         self._round_robin_offset = 0
 
@@ -593,7 +564,7 @@ class QueueJobRunner:
             _logger.error(
                 "database %s schema is outdated, -u queue_job required", db.db_name
             )
-            channel_manager.simple_configure("root:0")
+            channel_manager.configure([ChannelConfig(name="root", capacity=0)])
             return channel_manager
 
         root_config = next(
@@ -625,11 +596,14 @@ class QueueJobRunner:
         with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
             for job_data in cr:
                 channel_manager.notify(db_name, *job_data)
+        self._register_channel_manager(db_name, channel_manager)
+        _logger.info("channels configuration loaded for db %s", db_name)
+
+    def _register_channel_manager(self, db_name, channel_manager):
         self._channel_manager_by_db[db_name] = channel_manager
         self._channel_managers = self._unique_channel_managers(
             self._channel_manager_by_db.values()
         )
-        _logger.info("channels configuration loaded for db %s", db_name)
 
     def initialize_databases(self):
         for db_name in sorted(self.get_db_names()):

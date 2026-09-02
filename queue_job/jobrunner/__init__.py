@@ -87,8 +87,11 @@ runner_thread = None
 
 
 def _is_runner_enabled():
-    if _channels().strip().startswith("root:0"):
+    channel_config = _channels()
+    if channel_config and channel_config.strip().startswith("root:0"):
         return False
+    elif channel_config:
+        return True
     return _max_capacity() != 0
 
 

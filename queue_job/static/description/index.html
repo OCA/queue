@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils: https://docutils.sourceforge.io/" />
-<title>README.rst</title>
+<title>Job Queue</title>
 <style type="text/css">
 
 /*
@@ -487,8 +487,11 @@ jobs:<a class="reference external" href="https://github.com/OCA/account-invoicin
 <ul class="simple">
 <li>Using environment variables and command line:<ul>
 <li>Adjust environment variables (optional):<ul>
-<li><tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS=root:4</tt> or any other channels
-configuration. The default is <tt class="docutils literal">root:1</tt></li>
+<li><tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS=root:4</tt> or any other channels</li>
+<li><tt class="docutils literal">ODOO_QUEUE_JOB_MAX_CAPACITY=4</tt>, max number of concurrent jobs
+(not used if <tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS</tt> is set)</li>
+<li><tt class="docutils literal">ODOO_QUEUE_JOB_DB_MAX_CAPACITY=2</tt>, max number of concurrent
+jobs per DB (not used if <tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS</tt> is set)</li>
 <li><tt class="docutils literal">ODOO_QUEUE_JOB_PORT=8069</tt>, default <tt class="docutils literal"><span class="pre">--http-port</span></tt></li>
 <li><tt class="docutils literal">ODOO_QUEUE_JOB_SCHEME=https</tt>, default <tt class="docutils literal">http</tt></li>
 <li><tt class="docutils literal"><span class="pre">ODOO_QUEUE_JOB_HOST=load-balancer</span></tt>, default
@@ -501,7 +504,8 @@ than 1. <a class="footnote-reference" href="#footnote-1" id="footnote-reference-
 </li>
 </ul>
 </li>
-<li>Using the Odoo configuration file:</li>
+<li>Using the Odoo configuration file (set either <tt class="docutils literal">channels</tt>, either
+<tt class="docutils literal">max_capacity</tt> and <tt class="docutils literal">db_max_capacity</tt>)</li>
 </ul>
 <pre class="code ini literal-block">
 <span class="k">[options]</span><span class="w">
@@ -512,12 +516,16 @@ than 1. <a class="footnote-reference" href="#footnote-1" id="footnote-reference-
 </span><span class="na">(...)</span><span class="w">
 </span><span class="k">[queue_job]</span><span class="w">
 </span><span class="na">channels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">root:2</span><span class="w">
+</span><span class="na">max_capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">8</span><span class="w">
+</span><span class="na">db_max_capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3</span><span class="w">
 </span><span class="na">scheme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">https</span><span class="w">
 </span><span class="na">host</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">load-balancer</span><span class="w">
 </span><span class="na">port</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">443</span><span class="w">
 </span><span class="na">http_auth_user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">jobrunner</span><span class="w">
 </span><span class="na">http_auth_password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">s3cr3t</span>
 </pre>
+<p><tt class="docutils literal">db_max_capacity</tt> may be an integer or a pattern such as
+<tt class="docutils literal"><span class="pre">prod_*:20,staging:2,*:5</span></tt></p>
 <ul class="simple">
 <li>Confirm the runner is starting correctly by checking the odoo log
 file:</li>
