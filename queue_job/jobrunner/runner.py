@@ -19,11 +19,13 @@ How does it work?
   anonymous ``/queue_job/runjob`` HTTP request.
 """
 
+import fnmatch
 import logging
 import os
 import selectors
 import threading
 import time
+from collections import deque
 from contextlib import closing, contextmanager
 
 import psycopg2
@@ -34,7 +36,7 @@ import odoo
 from odoo.tools import config
 
 from . import queue_job_config
-from .channels import ENQUEUED, NOT_DONE, ChannelManager
+from .channels import ENQUEUED, NOT_DONE, RELOAD_PAYLOAD, ChannelConfig, ChannelManager
 
 SELECT_TIMEOUT = 60
 ERROR_RECOVERY_DELAY = 5
@@ -57,12 +59,90 @@ class MasterElectionLost(Exception):
 # so we check it in addition to the environment variables.
 
 
-def _channels():
-    return (
-        os.environ.get("ODOO_QUEUE_JOB_CHANNELS")
-        or queue_job_config.get("channels")
-        or "root:1"
+def _max_capacity() -> int:
+    """Maximum number of jobs running at the same time across all databases
+
+    It comes from the ``ODOO_QUEUE_JOB_MAX_CAPACITY`` environment
+    variable, then ``max_capacity`` in the ``[queue_job]`` section of the
+    configuration file.
+
+    If none is configured, the max capacity is 0.
+    """
+    value = os.environ.get("ODOO_QUEUE_JOB_MAX_CAPACITY") or queue_job_config.get(
+        "max_capacity"
     )
+    if value:
+        return int(value)
+    return 0
+
+
+def _db_max_capacity() -> str:
+    return (
+        os.environ.get("ODOO_QUEUE_JOB_DB_MAX_CAPACITY")
+        or queue_job_config.get("db_max_capacity")
+        or ""
+    )
+
+
+def parse_db_max_capacity(spec):
+    """Parse a per-database max capacity configuration string
+
+    The string is a comma-separated list of ``pattern:capacity`` items, where
+    ``pattern`` matches database names with fnmatch wildcards.
+
+    The first matching pattern wins, so specific patterns must be first in the
+    string.
+
+    A single integer is applied to all databases, as a shorthand for
+    ``*:capacity``.
+
+    >>> parse_db_max_capacity('prod_*:20,staging:2,*:5')
+    [('prod_*', 20), ('staging', 2), ('*', 5)]
+    >>> parse_db_max_capacity('8')
+    [('*', 8)]
+    >>> parse_db_max_capacity('')
+    []
+    >>> parse_db_max_capacity(None)
+    []
+    """
+    rules = []
+    if not spec:
+        return rules
+    for item in spec.replace("\n", ",").split(","):
+        item = item.strip()
+        if not item:
+            continue
+        pattern, sep, capacity = item.rpartition(":")
+        if not sep:
+            pattern = "*"
+        try:
+            rules.append((pattern.strip(), int(capacity)))
+        except ValueError as ex:
+            raise ValueError(f"Invalid db max capacity {spec}: {capacity}") from ex
+    return rules
+
+
+def db_max_capacity_for(db_name, rules, default=None):
+    """Max capacity of a database, first match wins
+
+    >>> rules = parse_db_max_capacity('prod_*:20,staging:2,*:5')
+    >>> db_max_capacity_for('prod_foo', rules)
+    20
+    >>> db_max_capacity_for('staging', rules)
+    2
+    >>> db_max_capacity_for('dev', rules)
+    5
+    >>> db_max_capacity_for('dev', [], default=7)
+    7
+    """
+    for pattern, capacity in rules:
+        if fnmatch.fnmatch(db_name, pattern):
+            return capacity
+    return default
+
+
+def _channels():
+    return os.environ.get("ODOO_QUEUE_JOB_CHANNELS") or queue_job_config.get("channels")
 
 
 def _odoo_now():
@@ -123,9 +203,11 @@ class Database:
         try:
             self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
             self.has_queue_job = self._has_queue_job()
+            self.has_channel_config_columns = False
             if self.has_queue_job:
                 self._acquire_master_lock()
                 self._initialize()
+                self.has_channel_config_columns = self._has_channel_config_columns()
         except BaseException:
             self.close()
             raise
@@ -181,6 +263,45 @@ class Database:
     def _initialize(self):
         with closing(self.conn.cursor()) as cr:
             cr.execute("LISTEN queue_job")
+
+    def _has_channel_config_columns(self):
+        with closing(self.conn.cursor()) as cr:
+            cr.execute(
+                """
+                SELECT count(*)
+                FROM information_schema.columns
+                WHERE table_name = %s
+                AND column_name IN ('capacity', 'sequential', 'throttle', 'paused')
+                """,
+                ("queue_job_channel",),
+            )
+            return cr.fetchone()[0] == 4
+
+    def load_channels_config(self):
+        """Return the channels configuration stored in the database"""
+        if not self.has_channel_config_columns:
+            return None
+        with closing(self.conn.cursor()) as cr:
+            cr.execute(
+                "SELECT complete_name, "
+                "COALESCE(capacity, 0), "
+                "COALESCE(sequential, false), "
+                "COALESCE(throttle, 0), "
+                "COALESCE(paused, false) "
+                "FROM queue_job_channel "
+            )
+            rows = cr.fetchall()
+            configs = [
+                ChannelConfig(
+                    name=name,
+                    capacity=capacity,
+                    sequential=sequential,
+                    throttle=throttle,
+                    paused=paused,
+                )
+                for name, capacity, sequential, throttle, paused in rows
+            ]
+            return configs
 
     @contextmanager
     def select_jobs(self, where, args):
@@ -321,16 +442,40 @@ class QueueJobRunner:
         user=None,
         password=None,
         channel_config_string=None,
+        max_capacity=None,
+        db_max_capacity=None,
     ):
         self.scheme = scheme
         self.host = host
         self.port = port
         self.user = user
         self.password = password
-        self.channel_manager = ChannelManager()
+
         if channel_config_string is None:
             channel_config_string = _channels()
-        self.channel_manager.simple_configure(channel_config_string)
+
+        self._server_side_channel_manager = None
+        if channel_config_string:
+            channel_manager = ChannelManager()
+            channel_manager.simple_configure(channel_config_string)
+            self._server_side_channel_manager = channel_manager
+            # max_capacity is always equal to the root channel in server-side
+            # configuration
+            max_capacity = channel_manager.get_channel_by_name("root").capacity
+
+        if max_capacity is None:
+            max_capacity = _max_capacity()
+        self.max_capacity = max_capacity
+
+        if db_max_capacity is None:
+            db_max_capacity = _db_max_capacity()
+        self.db_max_capacity_rules = parse_db_max_capacity(db_max_capacity)
+
+        self._channel_manager_by_db = {}
+        self._channel_managers = []
+
+        self._round_robin_offset = 0
+
         self.db_by_name = {}
         self._stop = False
         self._stop_pipe = os.pipe()
@@ -387,11 +532,78 @@ class QueueJobRunner:
         for db_name, db in self.db_by_name.items():
             try:
                 if remove_jobs:
-                    self.channel_manager.remove_db(db_name)
+                    self._channel_manager_by_db[db_name].remove_db(db_name)
                 db.close()
             except Exception:
                 _logger.warning("error closing database %s", db_name, exc_info=True)
         self.db_by_name = {}
+        self._channel_manager_by_db = {}
+        self._channel_managers = []
+
+    @staticmethod
+    def _unique_channel_managers(channel_managers):
+        seen = set()
+        result = []
+        for channel_manager in channel_managers:
+            if id(channel_manager) not in seen:
+                seen.add(id(channel_manager))
+                result.append(channel_manager)
+        return result
+
+    def _build_channel_manager(self, db):
+        """Build and configure the channel manager of a database"""
+        db_max = db_max_capacity_for(
+            db.db_name, self.db_max_capacity_rules, default=self.max_capacity
+        )
+        channel_manager = ChannelManager()
+
+        channels_config = db.load_channels_config()
+        if channels_config is None:
+            # database not updated to the proper schema,
+            # no job execution until it is properly upgraded
+            _logger.error(
+                "database %s schema is outdated, -u queue_job required", db.db_name
+            )
+            channel_manager.configure([ChannelConfig(name="root", capacity=0)])
+            return channel_manager
+
+        root_config = next(
+            (config for config in channels_config if config.name == "root"), None
+        )
+        if root_config is None:
+            root_config = ChannelConfig("root")
+            channels_config.insert(0, root_config)
+
+        if not db_max:
+            # if a database is set at 0, it does not run any jobs, pause it
+            root_config.paused = True
+        elif not root_config.capacity:
+            root_config.capacity = db_max
+        else:
+            root_config.capacity = min(root_config.capacity, db_max)
+        channel_manager.configure(channels_config)
+        return channel_manager
+
+    def _reconfigure_db(self, db_name):
+        """Rebuild the channel manager for a database and reload its jobs"""
+        db = self.db_by_name.get(db_name)
+        if db is None:
+            return
+        if self._server_side_channel_manager:
+            channel_manager = self._server_side_channel_manager
+        else:
+            channel_manager = self._build_channel_manager(db)
+        with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
+            for job_data in cr:
+                channel_manager.notify(db_name, *job_data)
+        self._register_channel_manager(db_name, channel_manager)
+        _logger.info("channels configuration loaded for db %s", db_name)
+
+    def _register_channel_manager(self, db_name, channel_manager):
+        self._channel_manager_by_db[db_name] = channel_manager
+        self._channel_managers = self._unique_channel_managers(
+            self._channel_manager_by_db.values()
+        )
 
     def initialize_databases(self):
         for db_name in sorted(self.get_db_names()):
@@ -399,9 +611,7 @@ class QueueJobRunner:
             db = Database(db_name)
             if db.has_queue_job:
                 self.db_by_name[db_name] = db
-                with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
-                    for job_data in cr:
-                        self.channel_manager.notify(db_name, *job_data)
+                self._reconfigure_db(db_name)
                 _logger.info("queue job runner ready for db %s", db_name)
             else:
                 db.close()
@@ -411,24 +621,71 @@ class QueueJobRunner:
             if db.has_queue_job:
                 db.requeue_dead_jobs()
 
-    def run_jobs(self):
-        now = _odoo_now()
-        for job in self.channel_manager.get_jobs_to_run(now):
-            if self._stop:
-                break
-            _logger.info("asking Odoo to run job %s on db %s", job.uuid, job.db_name)
-            self.db_by_name[job.db_name].set_job_enqueued(job.uuid)
-            _async_http_get(
-                self.scheme,
-                self.host,
-                self.port,
-                self.user,
-                self.password,
-                job.db_name,
-                job.uuid,
+    def _all_running_count(self) -> int:
+        return sum(
+            channel_manager.running_count for channel_manager in self._channel_managers
+        )
+
+    def _dispatch_job(self, job):
+        _logger.info("asking Odoo to run job %s on db %s", job.uuid, job.db_name)
+        self.db_by_name[job.db_name].set_job_enqueued(job.uuid)
+        _async_http_get(
+            self.scheme,
+            self.host,
+            self.port,
+            self.user,
+            self.password,
+            job.db_name,
+            job.uuid,
+        )
+
+    def _round_robin_jobs(self, channel_managers, now):
+        managers_count = len(channel_managers)
+        # Ensure the channel managers are ordered in way that all have
+        # equal chances to enqueue jobs. The manager that was last last
+        # time will be first the next time and so on.
+        job_generators = deque(
+            (
+                # store the actual position of the channel manager in the channel
+                # managers list
+                index % managers_count,
+                channel_managers[index % managers_count].get_jobs_to_run(now),
             )
+            for index in range(
+                self._round_robin_offset, self._round_robin_offset + managers_count
+            )
+        )
+        while job_generators:
+            index, job_generator = job_generators.popleft()
+            job = next(job_generator, None)
+            if job is None:
+                # generator exhausted for this tick, remove from the deque
+                # it will come back next time
+                continue
+            job_generators.append((index, job_generator))
+            self._round_robin_offset = index + 1
+            yield job
+
+    def run_jobs(self):
+        channel_managers = self._channel_managers
+        if not channel_managers:
+            return
+
+        jobs = self._round_robin_jobs(channel_managers, _odoo_now())
+        while not self._stop:
+            if self.max_capacity and self._all_running_count() >= self.max_capacity:
+                _logger.debug(
+                    "max capacity of %s reached, waiting for capacity",
+                    self.max_capacity,
+                )
+                return
+            job = next(jobs, None)
+            if job is None:
+                return
+            self._dispatch_job(job)
 
     def process_notifications(self):
+        reload_db_names = set()
         for db in self.db_by_name.values():
             if not db.conn.notifies:
                 # If there are no activity in the queue_job table it seems that
@@ -440,13 +697,29 @@ class QueueJobRunner:
                 if self._stop:
                     break
                 notification = db.conn.notifies.pop()
-                uuid = notification.payload
+                payload = notification.payload
+                if payload == RELOAD_PAYLOAD and not self._server_side_channel_manager:
+                    reload_db_names.add(db.db_name)
+                    continue
+
+                uuid = payload
+                channel_manager = self._channel_manager_by_db[db.db_name]
                 with db.select_jobs("uuid = %s", (uuid,)) as cr:
                     job_datas = cr.fetchone()
                     if job_datas:
-                        self.channel_manager.notify(db.db_name, *job_datas)
+                        channel_manager.notify(db.db_name, *job_datas)
                     else:
-                        self.channel_manager.remove_job(uuid)
+                        channel_manager.remove_job(uuid)
+
+        for db_name in reload_db_names:
+            self._reconfigure_db(db_name)
+
+    def next_wakeup_time(self):
+        wakeup_times = [
+            channel_manager.get_wakeup_time()
+            for channel_manager in self._channel_managers
+        ]
+        return min(wakeup_times, default=0)
 
     def wait_notification(self):
         for db in self.db_by_name.values():
@@ -458,7 +731,7 @@ class QueueJobRunner:
         conns = [db.conn for db in self.db_by_name.values()]
         conns.append(self._stop_pipe[0])
         # look if the channels specify a wakeup time
-        wakeup_time = self.channel_manager.get_wakeup_time()
+        wakeup_time = self.next_wakeup_time()
         if not wakeup_time:
             # this could very well be no timeout at all, because
             # any activity in the job queue will wake us up, but

@@ -1,9 +1,12 @@
 # copyright 2018 Camptocamp
 # license lgpl-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+from unittest import mock
+
 from psycopg2 import IntegrityError
 
 import odoo
+from odoo import exceptions
 from odoo.tests import common
 
 
@@ -57,3 +60,83 @@ class TestJobChannel(common.TransactionCase):
             {"name": "test", "parent_id": self.root_channel.id}
         )
         self.assertEqual(channel.display_name, channel.complete_name)
+
+    def test_capacity_should_not_be_negative(self):
+        with self.assertRaisesRegex(
+            exceptions.ValidationError,
+            "The capacity of a channel cannot be negative.",
+        ):
+            self.Channel.create(
+                {
+                    "name": "test_capacity",
+                    "parent_id": self.root_channel.id,
+                    "capacity": -1,
+                }
+            )
+
+    def test_throttle_should_not_be_negative(self):
+        with self.assertRaisesRegex(
+            exceptions.ValidationError,
+            "The throttle of a channel cannot be negative.",
+        ):
+            self.Channel.create(
+                {
+                    "name": "test_throttle",
+                    "parent_id": self.root_channel.id,
+                    "throttle": -1,
+                }
+            )
+
+    def test_sequential_should_have_capacity_one(self):
+        with self.assertRaisesRegex(
+            exceptions.ValidationError,
+            "A sequential channel must have a capacity of 1.",
+        ):
+            self.Channel.create(
+                {
+                    "name": "test_sequential",
+                    "parent_id": self.root_channel.id,
+                    "sequential": True,
+                    "capacity": 2,
+                }
+            )
+
+    def _patch_notify(self):
+        return mock.patch.object(
+            type(self.Channel), "_notify_channel_config_changed", autospec=True
+        )
+
+    def test_notify_create_channel(self):
+        with self._patch_notify() as notify:
+            self.Channel.create(
+                {
+                    "name": "create_notify",
+                    "parent_id": self.root_channel.id,
+                    "capacity": 2,
+                }
+            )
+        notify.assert_called_once()
+
+    def test_notify_write_jobrunner_config(self):
+        channel = self.Channel.create(
+            {"name": "write_notify", "parent_id": self.root_channel.id}
+        )
+        with self._patch_notify() as notify:
+            channel.capacity = 3
+        notify.assert_called_once()
+
+        with self._patch_notify() as notify:
+            channel.paused = True
+        notify.assert_called_once()
+
+        with self._patch_notify() as notify:
+            channel.removal_interval = 60
+        notify.assert_not_called()
+
+    def test_notify_unlink_channel(self):
+        channel = self.Channel.create(
+            {"name": "unlink_notify", "parent_id": self.root_channel.id}
+        )
+        with self._patch_notify() as notify:
+            channel.unlink()
+        notify.assert_called_once()
