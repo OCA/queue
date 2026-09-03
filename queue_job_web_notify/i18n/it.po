@@ -1,0 +1,45 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* queue_job_web_notify
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2024-04-04 16:36+0000\n"
+"Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
+"Language-Team: none\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.17\n"
+
+#. module: queue_job_web_notify
+#: model:ir.model.fields,help:queue_job_web_notify.field_queue_job_function__is_web_notify_failure_enabled
+msgid "Display a notification in the user interface when the job fails."
+msgstr ""
+"Visualizza una notifica nell'interfaccia utente quando il lavoro fallisce."
+
+#. module: queue_job_web_notify
+#: model:ir.model,name:queue_job_web_notify.model_queue_job_function
+msgid "Job Functions"
+msgstr "Funzioni lavoro"
+
+#. module: queue_job_web_notify
+#. odoo-python
+#: code:addons/queue_job_web_notify/models/queue_job.py:0
+#, python-format
+msgid "Job failed"
+msgstr "Lavro fallito"
+
+#. module: queue_job_web_notify
+#: model:ir.model.fields,field_description:queue_job_web_notify.field_queue_job_function__is_web_notify_failure_enabled
+msgid "Notify on failure"
+msgstr "Notifica al fallimento"
+
+#. module: queue_job_web_notify
+#: model:ir.model,name:queue_job_web_notify.model_queue_job
+msgid "Queue Job"
+msgstr "Lavoro in coda"
