@@ -32,7 +32,7 @@ export class QueueJobBatchMenu extends Component {
     }
 
     onBeforeOpen() {
-        this.store.fetchData({systray_get_queue_job_batches: true});
+        this.store.fetchStoreData("systray_get_queue_job_batches");
     }
 
     getGroupInfo(batch) {

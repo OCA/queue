@@ -4,3 +4,6 @@
 
 - [Trobz](https://trobz.com):  
   - Hoang Diep \<<hoang@trobz.com>\>
+
+- [NextPro](https://www.nextpro.pe):
+  - Victor Pincay \<<desarrollo@nextpro.pe>\>
