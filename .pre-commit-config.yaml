@@ -4,7 +4,6 @@ exclude: |
   ^base_import_async/|
   ^queue_job_batch/|
   ^queue_job_cron/|
-  ^queue_job_cron_jobrunner/|
   ^queue_job_subscribe/|
   ^test_queue_job_batch/|
   # END NOT INSTALLABLE ADDONS
