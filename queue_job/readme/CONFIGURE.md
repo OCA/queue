@@ -8,6 +8,7 @@
       or `localhost` if unset
     - `ODOO_QUEUE_JOB_HTTP_AUTH_USER=jobrunner`, default empty
     - `ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t`, default empty
+    - `QUEUE_JOB__NO_DELAY=1`, disables the queue for testing purposes
     - Start Odoo with `--load=web,queue_job` and `--workers` greater than
       1.[^1]
 - Using the Odoo configuration file:
@@ -26,6 +27,7 @@ host = load-balancer
 port = 443
 http_auth_user = jobrunner
 http_auth_password = s3cr3t
+queue_job__no_delay=True # disables the queue
 ```
 
 - Confirm the runner is starting correctly by checking the odoo log

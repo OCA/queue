@@ -135,6 +135,7 @@ Configuration
       ``--http-interface`` or ``localhost`` if unset
     - ``ODOO_QUEUE_JOB_HTTP_AUTH_USER=jobrunner``, default empty
     - ``ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t``, default empty
+    - ``QUEUE_JOB__NO_DELAY=1``, disables the queue for testing purposes
     - Start Odoo with ``--load=web,queue_job`` and ``--workers`` greater
       than 1. [1]_
 
@@ -155,6 +156,7 @@ Configuration
    port = 443
    http_auth_user = jobrunner
    http_auth_password = s3cr3t
+   queue_job__no_delay=True # disables the queue
 
 - Confirm the runner is starting correctly by checking the odoo log
   file:
@@ -481,7 +483,8 @@ running Odoo**
 When you are developing (ie: connector modules) you might want to bypass
 the queue job and run your code immediately.
 
-To do so you can set QUEUE_JOB\__NO_DELAY=1 in your environment.
+To do so you can set QUEUE_JOB\__NO_DELAY=1 in your environment, or
+include queue_job\__no_delay=True in your Odoo server configuration.
 
 **Bypass jobs in tests**
 
@@ -599,7 +602,8 @@ calling ``jobs_tester.perform_enqueued_jobs()`` in your test.
 When you are developing (ie: connector modules) you might want to bypass
 the queue job and run your code immediately.
 
-To do so you can set ``QUEUE_JOB__NO_DELAY=1`` in your environment.
+To do so you can set ``QUEUE_JOB__NO_DELAY=1`` in your environment, or
+include queue_job\__no_delay=True in your Odoo server configuration.
 
 Warning
 
