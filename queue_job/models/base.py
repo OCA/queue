@@ -245,15 +245,23 @@ class Base(models.AbstractModel):
 
     @api.model
     def _job_prepare_context_before_enqueue_keys(self):
-        """Keys to keep in context of stored jobs
-        Empty by default for backward compatibility.
-        """
-        return ("tz", "lang", "allowed_company_ids", "force_company", "active_test")
+        """Keys to keep in context of stored jobs"""
+        keys = self.env.context.get("queue_job_context_keys")
+        return (
+            "tz",
+            "lang",
+            "allowed_company_ids",
+            "force_company",
+            "active_test",
+            *(keys or ()),
+        )
 
     def _job_prepare_context_before_enqueue(self):
         """Return the context to store in the jobs
         Can be used to keep only safe keys.
         """
+        if self.env.context.get("queue_job_keep_context"):
+            return self.env.context
         return {
             key: value
             for key, value in self.env.context.items()
