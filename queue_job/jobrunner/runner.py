@@ -572,14 +572,16 @@ class QueueJobRunner:
         return result
 
     @staticmethod
-    def _create_paused_root_channel_manager():
+    def _create_paused_root_channel_manager(db_name=None):
         """Create a channel manager with a single root and paused channel
 
         It is used when the channels configuration cannot be used because
         of a misconfiguration or because a database schema is outdated.
         """
         channel_manager = ChannelManager()
-        channel_manager.configure([ChannelConfig(name="root", capacity=0, paused=True)])
+        channel_manager.configure(
+            [ChannelConfig(name="root", capacity=0, paused=True)], db_name=db_name
+        )
         return channel_manager
 
     def _build_channel_manager(self, db):
@@ -598,7 +600,7 @@ class QueueJobRunner:
             _logger.error(
                 "database %s schema is outdated, -u queue_job required", db.db_name
             )
-            return self._create_paused_root_channel_manager()
+            return self._create_paused_root_channel_manager(db_name=db.db_name)
 
         root_config = next(
             (config for config in channels_config if config.name == "root"), None
@@ -617,7 +619,7 @@ class QueueJobRunner:
 
         channel_manager = ChannelManager()
         try:
-            channel_manager.configure(channels_config)
+            channel_manager.configure(channels_config, db_name=db.db_name)
         except ValueError:
             # A bad channel configuration on a single database
             # (e.g. sequential with a capacity != 1) should not
@@ -629,7 +631,7 @@ class QueueJobRunner:
                 db.db_name,
                 exc_info=True,
             )
-            return self._create_paused_root_channel_manager()
+            return self._create_paused_root_channel_manager(db_name=db.db_name)
         return channel_manager
 
     def _reconfigure_db(self, db_name):

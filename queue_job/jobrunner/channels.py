@@ -1038,12 +1038,16 @@ class ChannelManager:
         for config in ChannelManager.parse_simple_config(config_string):
             self.get_channel_from_config(config)
 
-    def configure(self, configs):
-        """Configure the channel manager from list of :class:`ChannelConfig`"""
-        for config in configs:
-            self.get_channel_from_config(asdict(config))
+    def configure(self, configs, db_name=None):
+        """Configure the channel manager from list of :class:`ChannelConfig`
 
-    def get_channel_from_config(self, config):
+        :param db_name: used to show the database name in the
+        logs when using per-database channels
+        """
+        for config in configs:
+            self.get_channel_from_config(asdict(config), db_name=db_name)
+
+    def get_channel_from_config(self, config, db_name=None):
         """Return a Channel object from a parsed configuration.
 
         If the channel does not exist it is created.
@@ -1055,7 +1059,10 @@ class ChannelManager:
         """
         channel = self.get_channel_by_name(config["name"], autocreate=True)
         channel.configure(config)
-        _logger.info("Configured channel: %s", channel)
+        if db_name:
+            _logger.info("Configured channel: %s (db: %s)", channel, db_name)
+        else:
+            _logger.info("Configured channel: %s", channel)
         return channel
 
     def get_channel_by_name(
