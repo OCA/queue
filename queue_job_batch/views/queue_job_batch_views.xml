@@ -14,6 +14,7 @@
                     options="{'current_value': 'finished_job_count', 'max_value': 'job_count'}"
                 />
                 <field name="state" />
+                <field name="execution_time" />
             </list>
         </field>
     </record>
