@@ -5,7 +5,7 @@
 {
     "name": "Asynchronous Import",
     "summary": "Import CSV files in the background",
-    "version": "18.0.1.0.0",
+    "version": "19.0.1.0.0",
     "author": "Akretion, ACSONE SA/NV, Odoo Community Association (OCA)",
     "license": "AGPL-3",
     "website": "https://github.com/OCA/queue",
@@ -20,6 +20,6 @@
             "base_import_async/static/src/xml/import_data_sidepanel.xml",
         ],
     },
-    "installable": False,
+    "installable": True,
     "development_status": "Production/Stable",
 }
