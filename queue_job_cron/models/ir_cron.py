@@ -24,6 +24,13 @@ class IrCron(models.Model):
     run_as_queue_job = fields.Boolean(
         help="Specify if this cron should be ran as a queue job"
     )
+    allow_commit = fields.Boolean(
+        help="Run this cron's server action in a dedicated database cursor "
+        "when executed as a queue job, allowing it to commit partial "
+        "progress during execution. Incurs the overhead of an extra "
+        "database connection. Only effective when 'Run as Queue Job' is "
+        "enabled.",
+    )
     channel_id = fields.Many2one(
         comodel_name="queue.job.channel",
         compute="_compute_run_as_queue_job",
@@ -42,8 +49,18 @@ class IrCron(models.Model):
             else:
                 cron.channel_id = False
 
+    @api.onchange("run_as_queue_job")
+    def _onchange_run_as_queue_job(self):
+        if not self.run_as_queue_job:
+            self.allow_commit = False
+
     def _run_job_as_queue_job(self, server_action):
-        return server_action.run()
+        if not self.allow_commit:
+            return server_action.run()
+        with self.env.registry.cursor() as new_cr:
+            new_env = self.env(cr=new_cr)
+            server_action.with_env(new_env).run()
+        return True
 
     def method_direct_trigger(self):
         for cron in self:
