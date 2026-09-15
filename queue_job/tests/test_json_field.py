@@ -11,7 +11,7 @@ from odoo.tests import common
 
 # pylint: disable=odoo-addons-relative-import
 # we are testing, we want to test as we were an external consumer of the API
-from odoo.addons.queue_job.fields import JobDecoder, JobEncoder
+from odoo.addons.queue_job.fields import JobDecoder, JobEncoder, JobSerialized
 
 
 class TestJson(common.TransactionCase):
@@ -195,3 +195,9 @@ class TestJson(common.TransactionCase):
         value = json.loads(value_json, cls=JobDecoder, env=self.env)
         value[2] = etree.tostring(value[2])
         self.assertEqual(value, expected)
+
+    def test_job_serialized_base_type_is_validated(self):
+        model_class = type(self.env["queue.job"])
+        JobSerialized(base_type=dict)._setup_attrs__(model_class, "supported")
+        with self.assertRaisesRegex(ValueError, "is not a supported base type"):
+            JobSerialized(base_type=int)._setup_attrs__(model_class, "unsupported")
