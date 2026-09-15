@@ -10,3 +10,6 @@
 - [Camptocamp](https://camptocamp.com):
   - Maksym Yankin \<<maksym.yankin@camptocamp.com>\>
   - Iván Todorovich \<<ivan.todorovich@camptocamp.com>\>
+
+- [NextPro](https://www.nextpro.pe):
+  - Victor Pincay \<<desarrollo@nextpro.pe>\>
