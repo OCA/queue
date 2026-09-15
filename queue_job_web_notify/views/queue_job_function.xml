@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2024 ACSONE SA/NV
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+<odoo>
+    <record model="ir.ui.view" id="queue_job_function_form_view">
+        <field name="model">queue.job.function</field>
+        <field name="inherit_id" ref="queue_job.view_queue_job_function_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']/.." position="after">
+                <group name="group_web_notify">
+                    <field name="is_web_notify_failure_enabled" />
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
