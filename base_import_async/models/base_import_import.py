@@ -9,7 +9,7 @@ import csv
 from io import BytesIO, StringIO, TextIOWrapper
 from os.path import splitext
 
-from odoo import _, api, models
+from odoo import models
 from odoo.models import fix_import_export_id_paths
 
 from odoo.addons.base_import.models.base_import import ImportValidationError
@@ -30,6 +30,7 @@ INIT_PRIORITY = 100
 DEFAULT_CHUNK_SIZE = 100
 
 
+# pylint: disable=no-wizard-in-models
 class BaseImportImport(models.TransientModel):
     _inherit = "base_import.import"
 
@@ -55,10 +56,11 @@ class BaseImportImport(models.TransientModel):
             translated_model_name = search_result[0][1]
         else:
             translated_model_name = self._description
-        description = _("Import %(model)s from file %(from_file)s") % {
-            "model": translated_model_name,
-            "from_file": self.file_name,
-        }
+        description = self.env._(
+            "Import %(model)s from file %(from_file)s",
+            model=translated_model_name,
+            from_file=self.file_name,
+        )
         attachment = self._create_csv_attachment(
             import_fields, data, options, self.file_name
         )
@@ -78,7 +80,6 @@ class BaseImportImport(models.TransientModel):
         )
         attachment.write({"res_model": "queue.job", "res_id": queue_job.id})
 
-    @api.returns("ir.attachment")
     def _create_csv_attachment(self, fields, data, options, file_name):
         # write csv
         f = StringIO()
@@ -155,16 +156,15 @@ class BaseImportImport(models.TransientModel):
             model_obj, fields, data, chunk_size
         ):
             chunk = str(priority - INIT_PRIORITY).zfill(padding)
-            description = _(
+            description = self.env._(
                 "Import %(model)s from file %(file_name)s - "
-                "#%(chunk)s - lines %(from)s to %(to)s"
-            ) % {
-                "model": translated_model_name,
-                "file_name": file_name,
-                "chunk": chunk,
-                "from": row_from + 1 + header_offset,
-                "to": row_to + 1 + header_offset,
-            }
+                "#%(chunk)s - lines %(row_from)s to %(row_to)s",
+                model=translated_model_name,
+                file_name=file_name,
+                chunk=chunk,
+                row_from=row_from + 1 + header_offset,
+                row_to=row_to + 1 + header_offset,
+            )
             # create a CSV attachment and enqueue the job
             root, ext = splitext(file_name)
             attachment = self._create_csv_attachment(
