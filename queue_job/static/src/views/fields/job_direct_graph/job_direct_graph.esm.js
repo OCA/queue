@@ -21,8 +21,10 @@ class JobDirectGraph extends Component {
         this.network = null;
         this.forceRender = false;
         onWillStart(async () => {
-            await loadJS("/queue_job/static/lib/vis/vis-network.min.js");
-            loadCSS("/queue_job/static/lib/vis/vis-network.min.css");
+            await Promise.all([
+                loadJS("/queue_job/static/lib/vis/vis-network.min.js"),
+                loadCSS("/queue_job/static/lib/vis/vis-network.min.css"),
+            ]);
         });
         useEffect(
             () => {

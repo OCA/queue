@@ -6,5 +6,17 @@
     div.root_vis {
         height: 100%;
         width: 100%;
+
+        // style vis-network tooltip matching odoo styling
+        // as the default style does not really match...
+        .vis-tooltip {
+            background-color: $white;
+            border: 1px solid $border-color;
+            border-radius: $border-radius;
+            box-shadow: $box-shadow-sm;
+            color: $body-color;
+            font-family: $font-family-base;
+            font-size: $font-size-sm;
+        }
     }
 }

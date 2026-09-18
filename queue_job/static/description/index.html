@@ -405,10 +405,9 @@ instantaneous if no other job is running.</p>
 <li>Views for jobs, jobs are stored in PostgreSQL</li>
 <li>Jobrunner: execute the jobs, highly efficient thanks to PostgreSQL’s
 NOTIFY</li>
-<li>Channels: give a capacity for the root channel and its sub-channels
-and segregate jobs in them. Allow for instance to restrict heavy jobs
-to be executed one at a time while little ones are executed 4 at a
-times.</li>
+<li>Channels: give a capacity for the root channel and its subchannels and
+segregate jobs in them. Allow for instance to restrict heavy jobs to
+be executed one at a time while little ones are executed 4 at a times.</li>
 <li>Retries: Ability to retry jobs by raising a type of exception</li>
 <li>Retry Pattern: the 3 first tries, retry after 10 seconds, the 5 next
 tries, retry after 1 minutes, …</li>
@@ -540,7 +539,7 @@ means no limit of its own, the parent channel and <tt class="docutils literal">m
 <li><tt class="docutils literal">sequential</tt>: jobs run one after the other, and a failed job blocks
 the channel (requires a capacity of 1)</li>
 <li><tt class="docutils literal">throttle</tt>: minimum delay, in seconds, between the start of two jobs</li>
-<li><tt class="docutils literal">paused</tt>: stop running jobs in this channel and its sub-channels</li>
+<li><tt class="docutils literal">paused</tt>: stop running jobs in this channel and its subchannels</li>
 </ul>
 <p><strong>Job Runner Configuration Parameters</strong></p>
 <ul class="simple">

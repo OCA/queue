@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="queue_job.ChannelTree">
+        <div class="o_queue_job_channel_tree">
+            <div class="o_queue_job_channel_tree_header">
+                The properties shown here are only relevant when the
+                per-database channels are used, not when server-wide channels
+                configuration is used.
+            </div>
+            <div t-ref="root_vis" class="o_queue_job_channel_tree_canvas" />
+        </div>
+    </t>
+
+</templates>

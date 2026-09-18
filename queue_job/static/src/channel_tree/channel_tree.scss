@@ -1,0 +1,28 @@
+.o_queue_job_channel_tree {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+
+    .o_queue_job_channel_tree_header {
+        padding: 8px 16px;
+        border-bottom: 1px solid $border-color;
+    }
+
+    .o_queue_job_channel_tree_canvas {
+        flex: 1 1 auto;
+        min-height: 0;
+
+        // style vis-network tooltip matching odoo styling
+        // as the default style does not really match...
+        .vis-tooltip {
+            background-color: $white;
+            border: 1px solid $border-color;
+            border-radius: $border-radius;
+            box-shadow: $box-shadow-sm;
+            color: $body-color;
+            font-family: $font-family-base;
+            font-size: $font-size-sm;
+        }
+    }
+}
