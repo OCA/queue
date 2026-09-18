@@ -68,10 +68,9 @@ Features:
 - Views for jobs, jobs are stored in PostgreSQL
 - Jobrunner: execute the jobs, highly efficient thanks to PostgreSQL's
   NOTIFY
-- Channels: give a capacity for the root channel and its sub-channels
-  and segregate jobs in them. Allow for instance to restrict heavy jobs
-  to be executed one at a time while little ones are executed 4 at a
-  times.
+- Channels: give a capacity for the root channel and its subchannels and
+  segregate jobs in them. Allow for instance to restrict heavy jobs to
+  be executed one at a time while little ones are executed 4 at a times.
 - Retries: Ability to retry jobs by raising a type of exception
 - Retry Pattern: the 3 first tries, retry after 10 seconds, the 5 next
   tries, retry after 1 minutes, ...
@@ -193,7 +192,7 @@ The execution of channels by the job runner is defined by:
 - ``sequential``: jobs run one after the other, and a failed job blocks
   the channel (requires a capacity of 1)
 - ``throttle``: minimum delay, in seconds, between the start of two jobs
-- ``paused``: stop running jobs in this channel and its sub-channels
+- ``paused``: stop running jobs in this channel and its subchannels
 
 **Job Runner Configuration Parameters**
 
