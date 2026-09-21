@@ -3,6 +3,10 @@
     "OCA/queue#440": "The changes from this PR are already present in the current source code.",
     "OCA/queue#511": "The changes from this PR are already present in the current source code.",
     "OCA/queue#537": "The changes from this PR are already present in the current source code.",
-    "OCA/queue#728": "The changes from this PR are already present in the current source code."
+    "OCA/queue#728": "The changes from this PR are already present in the current source code.",
+    "OCA/queue#840": "Migration to 19",
+    "OCA/queue#913": "Port to 19",
+    "OCA/queue#924": "Specific to 19",
+    "OCA/queue#969": "Already done"
   }
 }
