@@ -3,6 +3,7 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 import logging
 from collections import namedtuple
+from dataclasses import asdict, dataclass
 from functools import total_ordering
 from heapq import heappop, heappush
 from weakref import WeakValueDictionary
@@ -10,10 +11,24 @@ from weakref import WeakValueDictionary
 from ..exception import ChannelNotFound
 from ..job import CANCELLED, DONE, ENQUEUED, FAILED, PENDING, STARTED, WAIT_DEPENDENCIES
 
+RELOAD_PAYLOAD = "reload"
 NOT_DONE = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, STARTED, FAILED)
 JobSortingKey = namedtuple("SortingKey", "eta priority date_created seq")
 
 _logger = logging.getLogger(__name__)
+
+
+@dataclass
+class ChannelConfig:
+    """Configuration of a channel"""
+
+    name: str
+    capacity: int = 0
+    sequential: bool = False
+    throttle: int = 0
+    paused: bool = False
+    capacity_default: int = 0
+    sequential_default: bool = False
 
 
 class PriorityQueue:
@@ -1023,7 +1038,16 @@ class ChannelManager:
         for config in ChannelManager.parse_simple_config(config_string):
             self.get_channel_from_config(config)
 
-    def get_channel_from_config(self, config):
+    def configure(self, configs, db_name=None):
+        """Configure the channel manager from list of :class:`ChannelConfig`
+
+        :param db_name: used to show the database name in the
+        logs when using per-database channels
+        """
+        for config in configs:
+            self.get_channel_from_config(asdict(config), db_name=db_name)
+
+    def get_channel_from_config(self, config, db_name=None):
         """Return a Channel object from a parsed configuration.
 
         If the channel does not exist it is created.
@@ -1035,7 +1059,10 @@ class ChannelManager:
         """
         channel = self.get_channel_by_name(config["name"], autocreate=True)
         channel.configure(config)
-        _logger.info("Configured channel: %s", channel)
+        if db_name:
+            _logger.info("Configured channel: %s (db: %s)", channel, db_name)
+        else:
+            _logger.info("Configured channel: %s", channel)
         return channel
 
     def get_channel_by_name(
@@ -1173,3 +1200,8 @@ class ChannelManager:
 
     def get_wakeup_time(self):
         return self._root_channel.get_wakeup_time()
+
+    @property
+    def running_count(self) -> int:
+        """Number of jobs currently running"""
+        return len(self._root_channel._running)
