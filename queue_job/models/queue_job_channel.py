@@ -46,7 +46,7 @@ class QueueJobChannel(models.Model):
     capacity = fields.Integer(
         help="Maximum number of jobs running at the same time in this channel. "
         "0 means no limit, but they are still limited by the capacity of the parent "
-        "channel. On the root channel, 0 is limited by the global server-side "
+        "channel. On the root channel, 0 is limited by the global server-wide "
         "configuration."
     )
     sequential = fields.Boolean(

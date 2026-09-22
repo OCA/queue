@@ -474,12 +474,12 @@ class QueueJobRunner:
         if channel_config_string is None:
             channel_config_string = _channels()
 
-        self._server_side_channel_manager = None
+        self._server_wide_channel_manager = None
         if channel_config_string:
             channel_manager = ChannelManager()
             channel_manager.simple_configure(channel_config_string)
-            self._server_side_channel_manager = channel_manager
-            # max_capacity is always equal to the root channel in server-side
+            self._server_wide_channel_manager = channel_manager
+            # max_capacity is always equal to the root channel in server-wide
             # configuration
             max_capacity = channel_manager.get_channel_by_name("root").capacity
 
@@ -561,17 +561,6 @@ class QueueJobRunner:
         self._channel_managers = []
 
     @staticmethod
-    def _unique_channel_managers(channel_managers):
-        """Return unique channels with order kept to keep round robin stable"""
-        seen = set()
-        result = []
-        for channel_manager in channel_managers:
-            if id(channel_manager) not in seen:
-                seen.add(id(channel_manager))
-                result.append(channel_manager)
-        return result
-
-    @staticmethod
     def _create_paused_root_channel_manager(db_name=None):
         """Create a channel manager with a single root and paused channel
 
@@ -634,26 +623,27 @@ class QueueJobRunner:
             return self._create_paused_root_channel_manager(db_name=db.db_name)
         return channel_manager
 
-    def _reconfigure_db(self, db_name):
-        """Rebuild the channel manager for a database and reload its jobs"""
-        db = self.db_by_name.get(db_name)
-        if db is None:
-            return
-        if self._server_side_channel_manager:
-            channel_manager = self._server_side_channel_manager
-        else:
-            channel_manager = self._build_channel_manager(db)
-        with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
-            for job_data in cr:
-                channel_manager.notify(db_name, *job_data)
-        self._register_channel_manager(db_name, channel_manager)
+    def _register_db_server_wide(self, db):
+        """Register the server-wide channel manager for a DB and reload its jobs"""
+        db_name = db.db_name
+        channel_manager = self._server_wide_channel_manager
+        self._channel_manager_by_db[db_name] = channel_manager
+        self._channel_managers = [self._server_wide_channel_manager]
+        self._notify_existing_jobs(db, channel_manager)
+
+    def _configure_db(self, db):
+        """Build the channel manager for a database and reload its jobs"""
+        db_name = db.db_name
+        channel_manager = self._build_channel_manager(db)
+        self._channel_manager_by_db[db_name] = channel_manager
+        self._channel_managers = list(self._channel_manager_by_db.values())
+        self._notify_existing_jobs(db, channel_manager)
         _logger.info("channels configuration loaded for db %s", db_name)
 
-    def _register_channel_manager(self, db_name, channel_manager):
-        self._channel_manager_by_db[db_name] = channel_manager
-        self._channel_managers = self._unique_channel_managers(
-            self._channel_manager_by_db.values()
-        )
+    def _notify_existing_jobs(self, db, channel_manager):
+        with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
+            for job_data in cr:
+                channel_manager.notify(db.db_name, *job_data)
 
     def initialize_databases(self):
         for db_name in sorted(self.get_db_names()):
@@ -661,7 +651,10 @@ class QueueJobRunner:
             db = Database(db_name)
             if db.has_queue_job:
                 self.db_by_name[db_name] = db
-                self._reconfigure_db(db_name)
+                if self._server_wide_channel_manager:
+                    self._register_db_server_wide(db)
+                else:
+                    self._configure_db(db)
                 _logger.info("queue job runner ready for db %s", db_name)
             else:
                 db.close()
@@ -748,7 +741,7 @@ class QueueJobRunner:
                     break
                 notification = db.conn.notifies.pop()
                 payload = notification.payload
-                if payload == RELOAD_PAYLOAD and not self._server_side_channel_manager:
+                if payload == RELOAD_PAYLOAD and not self._server_wide_channel_manager:
                     reload_db_names.add(db.db_name)
                     continue
 
@@ -762,7 +755,7 @@ class QueueJobRunner:
                         channel_manager.remove_job(uuid)
 
         for db_name in reload_db_names:
-            self._reconfigure_db(db_name)
+            self._configure_db(self.db_by_name[db_name])
 
     def next_wakeup_time(self):
         # A wake-up time of 0 does not mean to wake immediately, but to stop

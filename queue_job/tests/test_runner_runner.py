@@ -55,10 +55,14 @@ class TestRunner(BaseCase):
             load_channels_config=mock.MagicMock(return_value=channels_config),
         )
 
+    def _register_channel_manager(self, jobrunner, db_name, channel_manager):
+        jobrunner._channel_manager_by_db[db_name] = channel_manager
+        jobrunner._channel_managers.append(channel_manager)
+
     def _new_channel_manager(self, jobrunner, db_name, channel_config, pending_jobs=0):
         channel_manager = ChannelManager()
         channel_manager.configure(channel_config)
-        jobrunner._register_channel_manager(db_name, channel_manager)
+        self._register_channel_manager(jobrunner, db_name, channel_manager)
         jobrunner.db_by_name[db_name] = self._mock_db(db_name, channel_config)
         for number in range(pending_jobs):
             channel_manager.notify(
@@ -189,7 +193,7 @@ class TestRunner(BaseCase):
         jobrunner = runner.QueueJobRunner(channel_config_string="root:3")
         self.assertEqual(jobrunner.max_capacity, 3)
 
-    def test_max_capacity_server_side_has_priority(self):
+    def test_max_capacity_server_wide_has_priority(self):
         jobrunner = runner.QueueJobRunner(
             channel_config_string="root:3", max_capacity=1
         )
@@ -324,13 +328,15 @@ class TestRunner(BaseCase):
         root = channel_manager.get_channel_by_name("root", autocreate=False)
         self.assertEqual(root.capacity, 3)
 
-    def test_server_side_channel_manager_register_unique(self):
+    def test_register_db_server_wide(self):
         jobrunner = runner.QueueJobRunner(channel_config_string="root:3")
-        global_manager = jobrunner._server_side_channel_manager
-        jobrunner._register_channel_manager("db_a", global_manager)
-        jobrunner._register_channel_manager("db_b", global_manager)
-        # channel manager is registered once
+        global_manager = jobrunner._server_wide_channel_manager
+        db = self._mock_db("db_a", None)
+        jobrunner._register_db_server_wide(db)
+
         self.assertEqual(len(jobrunner._channel_managers), 1)
+        self.assertEqual(jobrunner._channel_managers, [global_manager])
+        self.assertEqual(jobrunner._channel_manager_by_db[db.db_name], global_manager)
 
     def test_max_capacity_zero_no_dispatch(self):
         jobrunner = runner.QueueJobRunner(max_capacity=0)
@@ -362,45 +368,41 @@ class TestRunner(BaseCase):
         db = self._mock_db("db_a", [])
         db.conn.notifies = [mock.Mock(payload=runner.RELOAD_PAYLOAD)]
         jobrunner.db_by_name = {"db_a": db}
-        with mock.patch.object(jobrunner, "_reconfigure_db") as reconfigure:
-            jobrunner.process_notifications()
-        reconfigure.assert_called_once_with("db_a")
 
-    def test_notify_reload_ignored_with_server_side_channels(self):
+        with mock.patch.object(jobrunner, "_configure_db") as reconfigure:
+            jobrunner.process_notifications()
+        reconfigure.assert_called_once_with(db)
+
+    def test_notify_reload_ignored_with_server_wide_channels(self):
         jobrunner = runner.QueueJobRunner(channel_config_string="root:3")
         db = self._mock_db("db_a", [])
         db.conn.notifies = [mock.Mock(payload=runner.RELOAD_PAYLOAD)]
         jobrunner.db_by_name = {"db_a": db}
         jobrunner._channel_manager_by_db = {"db_a": mock.MagicMock()}
-        with mock.patch.object(jobrunner, "_reconfigure_db") as reconfigure:
+        with mock.patch.object(jobrunner, "_configure_db") as reconfigure:
             jobrunner.process_notifications()
         reconfigure.assert_not_called()
 
     def test_notify_job_started(self):
         jobrunner = runner.QueueJobRunner(max_capacity=3)
+        db = self._mock_db("db_a", None)
         channel_manager = ChannelManager()
         channel_manager.configure([ChannelConfig("root", 3)])
-        jobrunner._register_channel_manager("db_a", channel_manager)
+        jobrunner.db_by_name = {"db_a": db}
+        self._register_channel_manager(jobrunner, "db_a", channel_manager)
 
-        db = self._mock_db("db_a", None)
         db.conn.notifies = [mock.Mock(payload="job-1")]
         # channel, uuid, seq, date_created, priority, eta, state
         job_row = ("root", "job-1", 0, 0, 10, None, "started")
         db.select_jobs.return_value.__enter__.return_value.fetchone.return_value = (
             job_row
         )
-        jobrunner.db_by_name = {"db_a": db}
 
         jobrunner.process_notifications()
 
         db.select_jobs.assert_called_once_with("uuid = %s", ("job-1",))
         # the channel manager now counts the job as a running job
         self.assertEqual(channel_manager.running_count, 1)
-
-    def test_reconfigure_db_unknown_noop(self):
-        jobrunner = runner.QueueJobRunner(max_capacity=3)
-        jobrunner._reconfigure_db("unknown_db")
-        self.assertEqual(jobrunner._channel_manager_by_db, {})
 
     @mute_logger("odoo.addons.queue_job.jobrunner.runner")
     def test_build_channel_manager_invalid_configuration(self):
@@ -412,7 +414,7 @@ class TestRunner(BaseCase):
         root = channel_manager.get_channel_by_name("root")
         self.assertTrue(root.paused)
 
-    def test_reconfigure_db_select_jobs(self):
+    def test_notify_existing_jobs(self):
         jobrunner = runner.QueueJobRunner(max_capacity=3)
         db = self._mock_db("db_a", [ChannelConfig("root", 3)])
         # channel, uuid, seq, date_created, priority, eta, state
@@ -421,30 +423,14 @@ class TestRunner(BaseCase):
 
         jobrunner.db_by_name = {"db_a": db}
 
-        jobrunner._reconfigure_db("db_a")
+        channel_manager = jobrunner._build_channel_manager(db)
+        self._register_channel_manager(jobrunner, "db_a", channel_manager)
+
+        jobrunner._notify_existing_jobs(db, channel_manager)
 
         db.select_jobs.assert_called_once_with("state in %s", (runner.NOT_DONE,))
-        channel_manager = jobrunner._channel_manager_by_db["db_a"]
         pending_jobs = list(channel_manager.get_jobs_to_run(0))
         self.assertEqual([job.uuid for job in pending_jobs], ["db_a-job1"])
-
-    def test_reconfigure_db_server_side_channels_unique_channel_manager(self):
-        jobrunner = runner.QueueJobRunner(channel_config_string="root:3")
-        db_a = self._mock_db("db_a", [])
-        db_b = self._mock_db("db_b", [])
-        jobrunner.db_by_name = {"db_a": db_a, "db_b": db_b}
-
-        jobrunner._reconfigure_db("db_a")
-        jobrunner._reconfigure_db("db_b")
-
-        self.assertIs(
-            jobrunner._channel_manager_by_db["db_a"],
-            jobrunner._channel_manager_by_db["db_b"],
-        )
-        self.assertIs(
-            jobrunner._channel_manager_by_db["db_a"],
-            jobrunner._server_side_channel_manager,
-        )
 
     def test_close_databases_reset_state(self):
         jobrunner = runner.QueueJobRunner(max_capacity=3)
