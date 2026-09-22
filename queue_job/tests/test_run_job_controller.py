@@ -39,17 +39,17 @@ class TestRunJobController(TransactionCase):
         function.on_fail_method = "_test_on_fail"
         job = self.env["queue.job"].with_delay()._test_job(failure_rate=1)
         with (
-            self.assertRaises(JobError),
             patch(
                 "odoo.addons.queue_job.models.queue_job.QueueJob._test_on_fail"
             ) as mocked_hook,
             patch("odoo.addons.queue_job.job.Job.in_temporary_env") as mocked_temp_env,
+            self.assertRaises(JobError),
             mute_logger("odoo.addons.queue_job.controllers.main"),
         ):
             mocked_temp_env.return_value.__enter__.return_value = self.env
             RunJobController._runjob(self.env, job)
-            self.assertEqual(job.state, "failed")
-            self.assertEqual(mocked_hook.call_count, 1)
+        self.assertEqual(job.state, "failed")
+        self.assertEqual(mocked_hook.call_count, 1)
 
     @mute_logger("odoo.addons.queue_job.controllers.main")
     def test_runjob_on_fail_no_deadlock(self):
@@ -100,8 +100,8 @@ class TestRunJobController(TransactionCase):
     def test_runjob_on_fail_not_configured(self):
         job = self.env["queue.job"].with_delay()._test_job(failure_rate=1)
         with (
-            self.assertRaises(JobError),
             patch("odoo.addons.queue_job.job.Job.in_temporary_env") as mocked_temp_env,
+            self.assertRaises(JobError),
             mute_logger("odoo.addons.queue_job.controllers.main"),
         ):
             mocked_temp_env.return_value.__enter__.return_value = self.env
