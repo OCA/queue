@@ -13,8 +13,38 @@ from functools import total_ordering
 from random import randint
 
 import odoo
+from odoo.models import BaseModel
 
 from .exception import FailedJobError, NoSuchJobError, RetryableJobError
+
+try:
+    from contextlib import contextmanager, nullcontext
+except ImportError:  # Python 3.6
+    from contextlib import contextmanager
+
+    @contextmanager
+    def nullcontext():
+        yield
+
+
+def _rebind_to_cr(value, cr):
+    """Rebind any BaseModel inside ``value`` to the cursor ``cr``.
+
+    Recurses into lists, tuples and dicts. Preserves uid/su/context of each
+    inner env - only the cursor is swapped. Recordsets already bound to
+    ``cr`` and non-recordset values pass through untouched. Containers are
+    rebuilt, so in-place changes to the result are lost.
+    """
+    if isinstance(value, BaseModel):
+        if value.env.cr is cr:
+            return value
+        return value.with_env(value.env(cr=cr))
+    if isinstance(value, (list, tuple)):
+        return type(value)(_rebind_to_cr(v, cr) for v in value)
+    if isinstance(value, dict):
+        return {k: _rebind_to_cr(v, cr) for k, v in value.items()}
+    return value
+
 
 WAIT_DEPENDENCIES = "wait_dependencies"
 PENDING = "pending"
@@ -238,6 +268,56 @@ class Job:
         recordset = cls.db_records_from_uuids(env, job_uuids)
         return {cls._load_from_db_record(record) for record in recordset}
 
+    def add_lock_record(self) -> None:
+        """
+        Create row in db to be locked while the job is being performed.
+        """
+        self.env.cr.execute(
+            """
+            INSERT INTO
+                queue_job_lock (id, queue_job_id)
+            SELECT
+                id, id
+            FROM
+                queue_job
+            WHERE
+                uuid = %s
+            ON CONFLICT(id)
+            DO NOTHING;
+        """,
+            [self.uuid],
+        )
+
+    def lock(self) -> bool:
+        """Lock row of job that is being performed.
+
+        Return False if a job cannot be locked: it means that the job is not in
+        STARTED state or is already locked by another worker.
+        """
+        self.env.cr.execute(
+            """
+            SELECT
+                *
+            FROM
+                queue_job_lock
+            WHERE
+                queue_job_id in (
+                    SELECT
+                        id
+                    FROM
+                        queue_job
+                    WHERE
+                        uuid = %s
+                        AND state = %s
+                )
+            FOR NO KEY UPDATE SKIP LOCKED;
+        """,
+            [self.uuid, STARTED],
+        )
+
+        # 1 job should be locked
+        return bool(self.env.cr.fetchall())
+
     @classmethod
     def _load_from_db_record(cls, job_db_record):
         stored = job_db_record
@@ -437,17 +517,18 @@ class Job:
             raise TypeError("Job accepts only methods of Models")
 
         recordset = func.__self__
-        env = recordset.env
         self.method_name = func.__name__
         self.recordset = recordset
-
-        self.env = env
-        self.job_model = self.env["queue.job"]
-        self.job_model_name = "queue.job"
 
         self.job_config = (
             self.env["queue.job.function"].sudo().job_config(self.job_function_name)
         )
+        on_fail_method_name = self.job_config.on_fail_method_name
+        if on_fail_method_name and not _is_model_method(
+            getattr(self.recordset, on_fail_method_name, None)
+        ):
+            raise TypeError("Job accepts only methods of Models")
+        self.on_fail_method_name = on_fail_method_name
 
         self.state = PENDING
 
@@ -494,10 +575,10 @@ class Job:
         self.exc_message = None
         self.exc_info = None
 
-        if "company_id" in env.context:
-            company_id = env.context["company_id"]
+        if "company_id" in self.env.context:
+            company_id = self.env.context["company_id"]
         else:
-            company_id = env.company.id
+            company_id = self.env.company.id
         self.company_id = company_id
         self._eta = None
         self.eta = eta
@@ -522,7 +603,12 @@ class Job:
         """
         self.retry += 1
         try:
-            self.result = self.func(*tuple(self.args), **self.kwargs)
+            if self.job_config.allow_commit:
+                env_context_manager = self.in_temporary_env()
+            else:
+                env_context_manager = nullcontext()
+            with env_context_manager:
+                self.result = self.func(*tuple(self.args), **self.kwargs)
         except RetryableJobError as err:
             if err.ignore_retry:
                 self.retry -= 1
@@ -541,6 +627,16 @@ class Job:
             raise
 
         return self.result
+
+    @contextmanager
+    def in_temporary_env(self):
+        with self.env.registry.cursor() as new_cr:
+            env = self.env
+            try:
+                self._env = env(cr=new_cr)
+                yield
+            finally:
+                self._env = env
 
     def _get_common_dependent_jobs_query(self):
         return """
@@ -571,6 +667,9 @@ class Job:
             AND %s = ALL(jobs.parent_states)
             AND state = %s;
         """
+
+    def should_check_dependents(self):
+        return any(self.__reverse_depends_on_uuids)
 
     def enqueue_waiting(self):
         sql = self._get_common_dependent_jobs_query()
@@ -711,6 +810,32 @@ class Job:
         return self.db_records_from_uuids(self.env, [self.uuid])
 
     @property
+    def env(self):
+        return self.recordset.env
+
+    @env.setter
+    def _env(self, env):
+        self.recordset = self.recordset.with_env(env)
+
+    @property
+    def args(self):
+        """Positional arguments, rebound to the job's current cursor."""
+        return _rebind_to_cr(self._args, self.env.cr)
+
+    @args.setter
+    def args(self, value):
+        self._args = value
+
+    @property
+    def kwargs(self):
+        """Keyword arguments, rebound to the job's current cursor."""
+        return _rebind_to_cr(self._kwargs, self.env.cr)
+
+    @kwargs.setter
+    def kwargs(self, value):
+        self._kwargs = value
+
+    @property
     def func(self):
         recordset = self.recordset.with_context(job_uuid=self.uuid)
         return getattr(recordset, self.method_name)
@@ -774,7 +899,7 @@ class Job:
 
     @property
     def user_id(self):
-        return self.recordset.env.uid
+        return self.env.uid
 
     @property
     def eta(self):
@@ -830,6 +955,7 @@ class Job:
         self.state = STARTED
         self.date_started = datetime.now()
         self.worker_pid = os.getpid()
+        self.add_lock_record()
 
     def set_done(self, result=None):
         self.state = DONE
@@ -850,6 +976,13 @@ class Job:
         for k, v in kw.items():
             if v is not None:
                 setattr(self, k, v)
+
+    def on_fail(self, fail_vals):
+        if not self.on_fail_method_name:
+            return
+        on_fail_func = getattr(self.recordset, self.on_fail_method_name, None)
+        if on_fail_func:
+            on_fail_func(**fail_vals)
 
     def __repr__(self):
         return "<Job %s, priority:%d>" % (self.uuid, self.priority)

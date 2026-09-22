@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <!--
+            To be used in tests cfr. test/test_requeue_dead_job.py
+            These 'test' data are loaded as 'demo' data to have records within db
+            and avoid doing commit within tests
+        -->
+    <function
+        name="_create_test_started_job"
+        model="queue.job"
+        eval="('test_started_job',)"
+    />
+    <function
+        name="_create_test_enqueued_job"
+        model="queue.job"
+        eval="('test_enqueued_job',)"
+    />
+</odoo>

@@ -28,7 +28,9 @@ class QueueJobFunction(models.Model):
         "related_action_enable "
         "related_action_func_name "
         "related_action_kwargs "
-        "job_function_id ",
+        "job_function_id "
+        "allow_commit "
+        "on_fail_method_name",
     )
 
     def _default_channel(self):
@@ -47,6 +49,10 @@ class QueueJobFunction(models.Model):
         comodel_name="ir.model", string="Model", ondelete="cascade"
     )
     method = fields.Char()
+    on_fail_method = fields.Char(
+        help="Model function to be called if the job is failed and will not be "
+        "retried.",
+    )
 
     channel_id = fields.Many2one(
         comodel_name="queue.job.channel",
@@ -78,6 +84,12 @@ class QueueJobFunction(models.Model):
         "to the job. Configured as a dictionary with optional keys: "
         "enable, func_name, kwargs.\n"
         "See the module description for details.",
+    )
+    allow_commit = fields.Boolean(
+        help="Allows the job to commit transactions during execution. "
+        "Under the hood, this executes the job in a new database cursor, "
+        "which incurs an overhead as it requires an extra connection to "
+        "the database. "
     )
 
     @api.depends("model_id.model", "method")
@@ -143,6 +155,8 @@ class QueueJobFunction(models.Model):
             related_action_func_name=None,
             related_action_kwargs={},
             job_function_id=None,
+            allow_commit=False,
+            on_fail_method_name=None,
         )
 
     def _parse_retry_pattern(self):
@@ -178,6 +192,8 @@ class QueueJobFunction(models.Model):
             related_action_func_name=config.related_action.get("func_name"),
             related_action_kwargs=config.related_action.get("kwargs", {}),
             job_function_id=config.id,
+            allow_commit=config.allow_commit,
+            on_fail_method_name=config.on_fail_method,
         )
 
     def _retry_pattern_format_error_message(self):
