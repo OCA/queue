@@ -1,7 +1,7 @@
 There are two ways to configure the job runner:
 
 Set `channels` (or `ODOO_QUEUE_JOB_CHANNELS`) and every database shares the
-same channel tree (we will call it server-side channels):
+same channel tree (we will call it server-wide channels):
 
 ``` ini
 [queue_job]
@@ -52,7 +52,7 @@ the *Job Channels* menu **is applied live on the job runner**.
 > [!NOTE]
 > A new database still needs the jobrunner to be restarted.
 
-When using the server-side channels, the configuration is static and loaded at
+When using the server-wide channels, the configuration is static and loaded at
 startup of the jobrunner.
 
 The execution of channels by the job runner is defined by:
@@ -70,7 +70,7 @@ The execution of channels by the job runner is defined by:
 
 - Using environment variables:
   - Adjust environment variables (optional):
-    - `ODOO_QUEUE_JOB_CHANNELS=root:4` or any other channels for server-side
+    - `ODOO_QUEUE_JOB_CHANNELS=root:4` or any other channels for server-wide
       channels
     - `ODOO_QUEUE_JOB_MAX_CAPACITY=4`, max number of concurrent jobs (not used
       if `ODOO_QUEUE_JOB_CHANNELS` is set) for per-database channels
@@ -134,10 +134,10 @@ server_wide_modules = web,queue_job
     running Odoo is obviously not for production purposes.
 
 
-**Migrating from server-side channels to per-database channels**
+**Migrating from server-wide channels to per-database channels**
 
 As long as `channels` (or `ODOO_QUEUE_JOB_CHANNELS`) is set, the job
-runner keeps using the server-side channels.
+runner keeps using the server-wide channels.
 
 To move to channels per database:
 

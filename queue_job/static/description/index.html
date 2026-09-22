@@ -486,7 +486,7 @@ jobs:<a class="reference external" href="https://github.com/OCA/account-invoicin
 <h2><a class="toc-backref" href="#toc-entry-3">Configuration</a></h2>
 <p>There are two ways to configure the job runner:</p>
 <p>Set <tt class="docutils literal">channels</tt> (or <tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS</tt>) and every database
-shares the same channel tree (we will call it server-side channels):</p>
+shares the same channel tree (we will call it server-wide channels):</p>
 <pre class="code ini literal-block">
 <span class="k">[queue_job]</span><span class="w">
 </span><span class="na">channels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">root:10,root.priority:3,root.slow:1</span>
@@ -530,7 +530,7 @@ runner</strong>.</p>
 <p class="first admonition-title">Note</p>
 <p class="last">A new database still needs the jobrunner to be restarted.</p>
 </div>
-<p>When using the server-side channels, the configuration is static and
+<p>When using the server-wide channels, the configuration is static and
 loaded at startup of the jobrunner.</p>
 <p>The execution of channels by the job runner is defined by:</p>
 <ul class="simple">
@@ -547,7 +547,7 @@ the channel (requires a capacity of 1)</li>
 <li>Using environment variables:<ul>
 <li>Adjust environment variables (optional):<ul>
 <li><tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS=root:4</tt> or any other channels for
-server-side channels</li>
+server-wide channels</li>
 <li><tt class="docutils literal">ODOO_QUEUE_JOB_MAX_CAPACITY=4</tt>, max number of concurrent jobs
 (not used if <tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS</tt> is set) for per-database
 channels</li>
@@ -612,9 +612,9 @@ start immediately and in parallel.</li>
 <li>Tip: to enable debug logging for the queue job, use
 <tt class="docutils literal"><span class="pre">--log-handler=odoo.addons.queue_job:DEBUG</span></tt></li>
 </ul>
-<p><strong>Migrating from server-side channels to per-database channels</strong></p>
+<p><strong>Migrating from server-wide channels to per-database channels</strong></p>
 <p>As long as <tt class="docutils literal">channels</tt> (or <tt class="docutils literal">ODOO_QUEUE_JOB_CHANNELS</tt>) is set, the job
-runner keeps using the server-side channels.</p>
+runner keeps using the server-wide channels.</p>
 <p>To move to channels per database:</p>
 <ol class="arabic simple">
 <li>Configure the channels you need on each database, from the <em>Job

@@ -51,7 +51,7 @@
                     </group>
                     <group string="Job Runner">
                         <p class="text-muted" colspan="2">
-                            These properties will be used only if the server-side
+                            These properties will be used only if the server-wide
                             channels configuration is not used.
                         </p>
                         <group>

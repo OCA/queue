@@ -126,7 +126,7 @@ Configuration
 There are two ways to configure the job runner:
 
 Set ``channels`` (or ``ODOO_QUEUE_JOB_CHANNELS``) and every database
-shares the same channel tree (we will call it server-side channels):
+shares the same channel tree (we will call it server-wide channels):
 
 .. code:: ini
 
@@ -182,7 +182,7 @@ runner**.
 
    A new database still needs the jobrunner to be restarted.
 
-When using the server-side channels, the configuration is static and
+When using the server-wide channels, the configuration is static and
 loaded at startup of the jobrunner.
 
 The execution of channels by the job runner is defined by:
@@ -202,7 +202,7 @@ The execution of channels by the job runner is defined by:
   - Adjust environment variables (optional):
 
     - ``ODOO_QUEUE_JOB_CHANNELS=root:4`` or any other channels for
-      server-side channels
+      server-wide channels
     - ``ODOO_QUEUE_JOB_MAX_CAPACITY=4``, max number of concurrent jobs
       (not used if ``ODOO_QUEUE_JOB_CHANNELS`` is set) for per-database
       channels
@@ -264,10 +264,10 @@ The execution of channels by the job runner is defined by:
 - Tip: to enable debug logging for the queue job, use
   ``--log-handler=odoo.addons.queue_job:DEBUG``
 
-**Migrating from server-side channels to per-database channels**
+**Migrating from server-wide channels to per-database channels**
 
 As long as ``channels`` (or ``ODOO_QUEUE_JOB_CHANNELS``) is set, the job
-runner keeps using the server-side channels.
+runner keeps using the server-wide channels.
 
 To move to channels per database:
 
