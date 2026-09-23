@@ -319,69 +319,32 @@ class Database:
             )
 
     def _query_requeue_dead_jobs(self):
-        return """
-            UPDATE
-                queue_job
-            SET
-                state=(
-                    CASE
-                        WHEN
-                            max_retries IS NOT NULL AND
-                            max_retries != 0 AND -- infinite retries if max_retries is 0
-                            retry IS NOT NULL AND
-                            retry>max_retries
-                        THEN 'failed'
-                        ELSE 'pending'
-                    END),
-                retry=(
-                    CASE
-                        WHEN state='started'
-                        THEN COALESCE(retry,0)+1 ELSE retry
-                    END),
-                exc_name=(
-                    CASE
-                        WHEN
-                            max_retries IS NOT NULL AND
-                            max_retries != 0 AND -- infinite retries if max_retries is 0
-                            retry IS NOT NULL AND
-                            retry>max_retries
-                        THEN 'JobFoundDead'
-                        ELSE exc_name
-                    END),
-                exc_info=(
-                    CASE
-                        WHEN
-                            max_retries IS NOT NULL AND
-                            max_retries != 0 AND -- infinite retries if max_retries is 0
-                            retry IS NOT NULL AND
-                            retry>max_retries
-                        THEN 'Job found dead after too many retries'
-                        ELSE exc_info
-                    END)
-            WHERE
-                state IN ('enqueued','started')
-                AND date_enqueued < (now() AT TIME ZONE 'utc' - INTERVAL '10 sec')
-                AND (
-                    id in (
-                        SELECT
-                            queue_job_id
-                        FROM
-                            queue_job_lock
-                        WHERE
-                            queue_job_lock.queue_job_id = queue_job.id
-                        FOR NO KEY UPDATE SKIP LOCKED
-                    )
-                    OR NOT EXISTS (
-                        SELECT
-                            1
-                        FROM
-                            queue_job_lock
-                        WHERE
-                            queue_job_lock.queue_job_id = queue_job.id
-                    )
-                )
-            RETURNING uuid
-            """
+        return """\
+        WITH dead_job AS (
+         SELECT id,
+                (max_retries IS NOT NULL AND
+                 max_retries != 0 AND  -- infinite retries if max_retries is 0
+                 retry IS NOT NULL AND
+                 retry > max_retries) "stop_retry",
+                (CASE WHEN state='started'
+                 THEN COALESCE(retry, 0) + 1 ELSE retry END) "retry"
+           FROM queue_job
+          WHERE state IN ('enqueued', 'started')
+            AND date_enqueued < now() AT TIME ZONE 'utc' - INTERVAL '10 sec'
+            FOR NO KEY UPDATE SKIP LOCKED)
+
+        UPDATE queue_job
+           SET retry = dead_job.retry,
+               state = CASE WHEN stop_retry THEN 'failed' ELSE 'pending' END,
+               exc_name = CASE WHEN stop_retry THEN 'JobFoundDead' ELSE exc_name END,
+               exc_info =
+                   CASE WHEN stop_retry
+                   THEN 'Job found dead after too many retries'
+                   ELSE exc_info END
+          FROM dead_job
+         WHERE queue_job.id = dead_job.id
+
+        RETURNING uuid;"""
 
     def requeue_dead_jobs(self):
         """
