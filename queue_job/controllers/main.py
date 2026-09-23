@@ -19,7 +19,7 @@ from odoo.tools import config
 
 from ..delay import chain, group
 from ..exception import FailedJobError, NothingToDoJob, RetryableJobError
-from ..job import ENQUEUED, Job
+from ..job import ENQUEUED, STARTED, Job
 
 _logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE = 5
 def _prevent_commit(cr):
     """Context manager to prevent commits on a cursor.
 
-    Commiting while the job is not finished would release the job lock, causing
+    Committing while the job is not finished would release the job lock, causing
     it to be started again by the dead jobs requeuer.
     """
 
@@ -62,16 +62,12 @@ class RunJobController(http.Controller):
         - mark it as STARTED and commit the state change
         - acquire the job lock
 
-        If successful, return the Job instance, otherwise return None. This
-        function may fail to acquire the job is not in the expected state or is
-        already locked by another worker.
+        If successful, return the Job instance, otherwise return None.
+        This function may fail to acquire the job, if not in the expected state
+        or if locked by another worker.
         """
-        env.cr.execute(
-            "SELECT uuid FROM queue_job WHERE uuid=%s AND state=%s "
-            "FOR NO KEY UPDATE SKIP LOCKED",
-            (job_uuid, ENQUEUED),
-        )
-        if not env.cr.fetchone():
+        job = Job.load(env, job_uuid, raise_if_not_found=False)
+        if not job or not job.lock(ENQUEUED):
             _logger.warning(
                 "was requested to run job %s, but it does not exist, "
                 "or is not in state %s, or is being handled by another worker",
@@ -79,12 +75,10 @@ class RunJobController(http.Controller):
                 ENQUEUED,
             )
             return None
-        job = Job.load(env, job_uuid)
-        assert job and job.state == ENQUEUED
         job.set_started()
         job.store()
         env.cr.commit()
-        if not job.lock():
+        if not job.lock(STARTED):
             _logger.warning(
                 "was requested to run job %s, but it could not be locked",
                 job_uuid,
@@ -94,7 +88,7 @@ class RunJobController(http.Controller):
 
     @classmethod
     def _try_perform_job(cls, env, job):
-        """Try to perform the job, mark it done and commit if successful."""
+        """Try to perform the job, mark it DONE and commit if successful."""
         _logger.debug("%s started", job)
         # TODO refactor, the relation between env and job.env is not clear
         assert env.cr is job.env.cr

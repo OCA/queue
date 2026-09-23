@@ -15,10 +15,8 @@ class TestRequeueDeadJob(JobCommonCase):
     def test_acquire_enqueued_job(self):
         job_record = self._get_demo_job(uuid="test_enqueued_job")
         self.assertFalse(
-            self.env["queue.job.lock"].search(
-                [("queue_job_id", "=", job_record.id)],
-            ),
-            "A job lock record should not exist at this point",
+            self.is_job_locked(job_record),
+            "A job lock should not exist at this point",
         )
         with mock.patch.object(
             self.env.cr, "commit", mock.Mock(side_effect=self.env["base"].flush)
@@ -29,10 +27,8 @@ class TestRequeueDeadJob(JobCommonCase):
             self.assertEqual(job.uuid, "test_enqueued_job")
             self.assertEqual(job.state, "started")
             self.assertTrue(
-                self.env["queue.job.lock"].search(
-                    [("queue_job_id", "=", job_record.id)]
-                ),
-                "A job lock record should exist at this point",
+                self.is_job_locked(job_record),
+                "A job lock should exist at this point",
             )
 
     def test_acquire_started_job(self):
