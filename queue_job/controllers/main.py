@@ -17,7 +17,7 @@ from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 from odoo.tools import config
 
 from ..delay import chain, group
-from ..exception import FailedJobError, RetryableJobError
+from ..exception import FailedJobError, JobMethodNotFound, RetryableJobError
 from ..job import ENQUEUED, Job
 
 _logger = logging.getLogger(__name__)
@@ -78,7 +78,30 @@ class RunJobController(http.Controller):
                 ENQUEUED,
             )
             return None
-        job = Job.load(env, job_uuid)
+        try:
+            job = Job.load(env, job_uuid)
+        except JobMethodNotFound as exc:
+            # In case a job's method no longer exists, we don't want the runner
+            # to keep re-enqueuing it.
+            exc_name = f"{exc.__class__.__module__}.{exc.__class__.__name__}"
+            exc_message = str(exc)
+            failed_record = env["queue.job"].search([("uuid", "=", job_uuid)], limit=1)
+            if failed_record:
+                failed_record.write(
+                    {
+                        "state": "failed",
+                        "exc_name": exc_name,
+                        "exc_message": exc_message,
+                        "exc_info": exc_message,
+                    }
+                )
+            _logger.warning(
+                "Job %s references a non-existent method and was marked as failed",
+                job_uuid,
+            )
+            if not config["test_enable"]:
+                env.cr.commit()
+            return None
         assert job and job.state == ENQUEUED
         job.set_started()
         job.store()
