@@ -14,6 +14,7 @@ from odoo.addons.queue_job.delay import (
     chain,
     group,
 )
+from odoo.addons.queue_job.job import Job
 
 
 class TestDelayable(common.TransactionCase):
@@ -308,3 +309,38 @@ class TestDelayable(common.TransactionCase):
         node.on_done(node2).delay()
         self.assert_generated_job(node, node2)
         self.assert_dependencies({node: {}, node2: {node}})
+
+    def _replace_testing_method_under_another_name(self):
+        """Put a function named ``testing_method_renamed`` into the
+        ``testing_method`` slot, the way auditlog replaces write and unlink."""
+        cls = type(self.test_model)
+        original = cls.testing_method
+
+        def testing_method_renamed(self, *args, **kwargs):
+            return original(self, *args, **kwargs)
+
+        self.patch(cls, "testing_method", testing_method_renamed)
+
+    def test_delayable_keeps_requested_method_name(self):
+        self._replace_testing_method_under_another_name()
+        node = Delayable(self.test_model).testing_method(1)
+        node.delay()
+        job = node._generated_job
+        self.assertEqual(job.method_name, "testing_method")
+        self.assertEqual(job.db_record().method_name, "testing_method")
+        # Loading the job resolves the same name again
+        loaded = Job.load(self.env, job.uuid)
+        self.assertEqual(loaded.method_name, "testing_method")
+
+    def test_with_delay_keeps_requested_method_name(self):
+        self._replace_testing_method_under_another_name()
+        job = self.test_model.with_delay().testing_method(1)
+        self.assertEqual(job.method_name, "testing_method")
+
+    def test_delayable_split_keeps_requested_method_name(self):
+        self._replace_testing_method_under_another_name()
+        records = self.test_model.create([{"name": "a"}, {"name": "b"}])
+        group = Delayable(records).testing_method(1).split(1)
+        group.delay()
+        for node in group._delayables:
+            self.assertEqual(node._generated_job.method_name, "testing_method")
