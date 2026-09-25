@@ -4,6 +4,7 @@
 
 from odoo import _, api, exceptions, fields, models
 
+from ..jobrunner import runner
 from ..jobrunner.channels import RELOAD_PAYLOAD
 
 
@@ -57,15 +58,29 @@ class QueueJobChannel(models.Model):
         help="Minimum delay in seconds between the start of two jobs in this channel."
     )
     paused = fields.Boolean(
-        help="A paused channel (an its sub-channels) do not execute any jobs until "
+        help="A paused channel (an its subchannels) do not execute any jobs until "
         "resumed."
     )
     capacity_default = fields.Integer(
-        help="Default capacity for unconfigured sub-channels. "
-        "0 means they would have the same capacity as the current channel."
+        string="Subchannels Default Capacity",
+        help="Default capacity for unconfigured subchannels. "
+        "0 means they would have the same capacity as the current channel.",
     )
     sequential_default = fields.Boolean(
-        help="If sequential is enabled for unconfigured sub-channels."
+        string="Subchannels Default Sequential",
+        help="If sequential is enabled for unconfigured subchannels.",
+    )
+    effective_paused = fields.Boolean(
+        compute="_compute_effective_paused",
+        recursive=True,
+        help="If this channel is actually paused, depending on the parents.",
+    )
+    effective_capacity = fields.Integer(
+        compute="_compute_effective_capacity",
+        recursive=True,
+        help="Actual capacity of this channel. Its own capacity if set, "
+        "or the capacity of the closest parent. The root channel "
+        "is limited by the server-wide max_capacity/db_max_capacity configuration.",
     )
 
     _sql_constraints = [
@@ -111,6 +126,32 @@ class QueueJobChannel(models.Model):
             else:
                 complete_name = record.name
             record.complete_name = complete_name
+
+    @api.depends("paused", "parent_id.effective_paused")
+    def _compute_effective_paused(self):
+        for record in self:
+            record.effective_paused = record.paused or bool(
+                record.parent_id and record.parent_id.effective_paused
+            )
+
+    @api.depends("capacity", "parent_id.effective_capacity")
+    def _compute_effective_capacity(self):
+        for record in self:
+            if record.parent_id:
+                max_capacity = record.parent_id.effective_capacity
+            else:
+                max_capacity = record._root_max_capacity()
+            if record.capacity:
+                record.effective_capacity = min(record.capacity, max_capacity)
+            else:
+                record.effective_capacity = max_capacity
+
+    def _root_max_capacity(self):
+        """Server-wide capacity of the root channel for current database."""
+        rules = runner.parse_db_max_capacity(runner._db_max_capacity())
+        return runner.db_max_capacity_for(
+            self.env.cr.dbname, rules, default=runner._max_capacity()
+        )
 
     @api.constrains("parent_id", "name")
     def parent_required(self):

@@ -24,6 +24,13 @@
     />
 
     <menuitem
+        id="menu_queue_job_channel_tree"
+        action="action_queue_job_channel_tree"
+        sequence="13"
+        parent="menu_queue"
+    />
+
+    <menuitem
         id="menu_queue_job_function"
         action="action_queue_job_function"
         sequence="14"
