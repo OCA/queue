@@ -36,6 +36,52 @@ class TestJson(common.TransactionCase):
         for key in result_context:
             self.assertEqual(result_context[key], expected_context[key])
 
+    def test_encoder_recordset_context_keys(self):
+        demo_user = self.env.ref("base.user_demo")
+        context = {
+            **demo_user.context_get(),
+            "foo": "bar",
+            "baz": "zeb",
+            "queue_job_context_keys": ["foo"],
+        }
+        partner = self.env(user=demo_user, context=context).ref("base.main_partner")
+        value = partner
+        value_json = json.dumps(value, cls=JobEncoder)
+        expected_context = context.copy()
+        expected_context.pop("baz")
+        expected_context.pop("queue_job_context_keys")
+        expected_context.pop("uid")
+        expected = {
+            "uid": demo_user.id,
+            "_type": "odoo_recordset",
+            "model": "res.partner",
+            "ids": [partner.id],
+            "su": False,
+            "context": expected_context,
+        }
+        self.assertEqual(json.loads(value_json), expected)
+
+    def test_encoder_recordset_keep_context(self):
+        demo_user = self.env.ref("base.user_demo")
+        context = {
+            **demo_user.context_get(),
+            "foo": "bar",
+            "queue_job_keep_context": True,
+        }
+        partner = self.env(user=demo_user, context=context).ref("base.main_partner")
+        value = partner
+        value_json = json.dumps(value, cls=JobEncoder)
+        expected_context = context.copy()
+        expected = {
+            "uid": demo_user.id,
+            "_type": "odoo_recordset",
+            "model": "res.partner",
+            "ids": [partner.id],
+            "su": False,
+            "context": expected_context,
+        }
+        self.assertEqual(json.loads(value_json), expected)
+
     def test_encoder_recordset_list(self):
         demo_user = self.env.ref("base.user_demo")
         context = demo_user.context_get()
