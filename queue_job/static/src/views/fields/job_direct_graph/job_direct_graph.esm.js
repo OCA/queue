@@ -1,46 +1,50 @@
-/* @odoo-module */
 /* global vis */
 
+import {
+    Component,
+    onMounted,
+    onWillStart,
+    onWillUnmount,
+    signal,
+    usePlugin,
+    useProps,
+} from "@odoo/owl";
 import {loadCSS, loadJS} from "@web/core/assets";
+import {ActionPlugin} from "@web/webclient/actions/action_plugin";
 import {registry} from "@web/core/registry";
 import {standardFieldProps} from "@web/views/fields/standard_field_props";
 import {useService} from "@web/core/utils/hooks";
 
-const {Component, onWillStart, useEffect, useRef} = owl;
-
 const {document} = globalThis;
 
 class JobDirectGraph extends Component {
-    static props = {...standardFieldProps};
     static template = "queue.JobDirectGraph";
+    props = useProps({...standardFieldProps});
+    rootRef = signal.ref();
 
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
-        this.rootRef = useRef("root_vis");
+        this.action = usePlugin(ActionPlugin);
         this.network = null;
         this.forceRender = false;
         onWillStart(async () => {
             await loadJS("/queue_job/static/lib/vis/vis-network.min.js");
             loadCSS("/queue_job/static/lib/vis/vis-network.min.css");
         });
-        useEffect(
-            () => {
-                this.renderNetwork();
-                this._fitNetwork();
-                return () => {
-                    if (this.network) {
-                        this.$el.innerHTML = "";
-                    }
-                    return this.rootRef.el;
-                };
-            },
-            () => []
-        );
+        // Owl 2 useEffect(..., () => []): run once when mounted, clean on unmount
+        onMounted(() => {
+            this.renderNetwork();
+            this._fitNetwork();
+        });
+        onWillUnmount(() => {
+            if (this.network && this.$el) {
+                this.$el.innerHTML = "";
+            }
+        });
     }
 
     get $el() {
-        return this.rootRef.el;
+        return this.rootRef();
     }
 
     get resId() {
