@@ -141,7 +141,7 @@ class TestJson(common.TransactionCase):
         self.assertEqual(value, expected)
 
     def test_encoder_datetime(self):
-        value = ["a", 1, datetime(2017, 4, 19, 8, 48, 50, 1)]
+        value = ["a", 1, datetime(2017, 4, 19, 8, 48, 50, 1)]  # noqa: DTZ001
         value_json = json.dumps(value, cls=JobEncoder)
         expected = [
             "a",
@@ -155,7 +155,7 @@ class TestJson(common.TransactionCase):
             '["a", 1, {"_type": "datetime_isoformat",'
             '"value": "2017-04-19T08:48:50.000001"}]'
         )
-        expected = ["a", 1, datetime(2017, 4, 19, 8, 48, 50, 1)]
+        expected = ["a", 1, datetime(2017, 4, 19, 8, 48, 50, 1)]  # noqa: DTZ001
         value = json.loads(value_json, cls=JobDecoder, env=self.env)
         self.assertEqual(value, expected)
 
