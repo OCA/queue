@@ -16,5 +16,5 @@
         "data/queue_job_test_job.xml",
     ],
     "maintainers": ["sbidoul"],
-    "installable": True,
+    "installable": False,
 }
