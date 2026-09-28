@@ -42,6 +42,23 @@ SELECT_TIMEOUT = 60
 ERROR_RECOVERY_DELAY = 5
 PG_ADVISORY_LOCK_ID = 2293787760715711918
 
+# libpq connection parameters detecting a connection dropped by the network,
+# with the server setting holding the same value, if any
+KEEPALIVE_DEFAULTS = {
+    "keepalives": 1,
+    "keepalives_idle": 30,
+    "keepalives_interval": 10,
+    "keepalives_count": 3,
+    "tcp_user_timeout": 60000,
+}
+KEEPALIVE_SERVER_SETTINGS = {
+    "keepalives_idle": "tcp_keepalives_idle",
+    "keepalives_interval": "tcp_keepalives_interval",
+    "keepalives_count": "tcp_keepalives_count",
+    "tcp_user_timeout": "tcp_user_timeout",
+}
+LIBPQ_TCP_USER_TIMEOUT_VERSION = 120000
+
 _logger = logging.getLogger(__name__)
 
 select = selectors.DefaultSelector
@@ -155,13 +172,18 @@ def _odoo_now():
 def _connection_info_for(db_name):
     db_or_uri, connection_info = odoo.sql_db.connection_info_for(db_name)
 
-    for p in ("host", "port", "user", "password"):
+    for p in ("host", "port", "user", "password", *KEEPALIVE_DEFAULTS):
         cfg = os.environ.get(
             f"ODOO_QUEUE_JOB_JOBRUNNER_DB_{p.upper()}"
         ) or queue_job_config.get("jobrunner_db_" + p)
 
         if cfg:
             connection_info[p] = cfg
+
+    for p, default in KEEPALIVE_DEFAULTS.items():
+        connection_info.setdefault(p, default)
+    if psycopg2.extensions.libpq_version() < LIBPQ_TCP_USER_TIMEOUT_VERSION:
+        connection_info.pop("tcp_user_timeout")
 
     return connection_info
 
@@ -203,6 +225,7 @@ class Database:
         self.conn = psycopg2.connect(**connection_info)
         try:
             self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+            self._set_server_keepalives(connection_info)
             self.has_queue_job = self._has_queue_job()
             self.has_channel_config_columns = False
             if self.has_queue_job:
@@ -223,6 +246,22 @@ class Database:
         except Exception:
             pass
         self.conn = None
+
+    def _set_server_keepalives(self, connection_info):
+        """Apply the keepalive parameters on the server side of the connection
+
+        The server then ends the session, releasing the master lock, when the
+        job runner is no longer reachable, and another one can take over.
+        """
+        if not int(connection_info["keepalives"]):
+            return
+        with closing(self.conn.cursor()) as cr:
+            for param, setting in KEEPALIVE_SERVER_SETTINGS.items():
+                if param in connection_info:
+                    cr.execute(
+                        "SELECT set_config(%s, %s, false)",
+                        (setting, str(connection_info[param])),
+                    )
 
     def _acquire_master_lock(self):
         """Acquire the master runner lock or raise MasterElectionLost"""
