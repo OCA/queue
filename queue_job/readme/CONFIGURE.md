@@ -103,6 +103,18 @@ http_auth_user = jobrunner
 http_auth_password = s3cr3t
 ```
 
+- The job runner holds its lock on a database connection that stays open. To
+  detect this connection being dropped by the network (firewall, NAT timeout,
+  database failover), TCP keepalives and a TCP user timeout are enabled on it,
+  on the client and on the server side. They can be adjusted with the
+  following keys of the `[queue_job]` section, or the corresponding
+  `ODOO_QUEUE_JOB_JOBRUNNER_DB_*` environment variables:
+  - `jobrunner_db_keepalives`, default `1`, `0` disables all of them
+  - `jobrunner_db_keepalives_idle`, default `30` (seconds)
+  - `jobrunner_db_keepalives_interval`, default `10` (seconds)
+  - `jobrunner_db_keepalives_count`, default `3`
+  - `jobrunner_db_tcp_user_timeout`, default `60000` (milliseconds)
+
 - Odoo has to be started with `queue_job` as server-wide module, either using
   the command line option `--load=web,queue_job`, either by setting it in the
   Odoo configuration file, and `--workers` greater than 1.[^1]
