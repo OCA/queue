@@ -98,10 +98,14 @@ class RunJobController(http.Controller):
         # TODO refactor, the relation between env and job.env is not clear
         assert env.cr is job.env.cr
         with _prevent_commit(env.cr):
-            job.perform()
-            # Triggers any stored computed fields before calling 'set_done'
-            # so that will be part of the 'exec_time'
-            env.flush_all()
+            # On failure, rolling back the savepoint releases the locks taken
+            # by the job: the failure is handled from another cursor, which
+            # may write on the same records (e.g. the on fail hook).
+            # NOTE: Session-level advisory locks are not released by the rollback.
+            # On success, leaving the savepoint flushes, before 'set_done', so
+            # that the stored computed fields are part of the 'exec_time'.
+            with env.cr.savepoint():
+                job.perform()
             job.set_done()
             job.store()
             env.flush_all()
