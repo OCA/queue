@@ -12,7 +12,7 @@ from odoo.tools import config, html_escape, index_exists
 from odoo.addons.base_sparse_field.models.fields import Serialized
 
 from ..delay import Graph
-from ..exception import JobError, RetryableJobError
+from ..exception import JobError, JobMethodNotFound, RetryableJobError
 from ..fields import JobSerialized
 from ..job import (
     CANCELLED,
@@ -279,7 +279,15 @@ class QueueJob(models.Model):
     def open_related_action(self):
         """Open the related action associated to the job"""
         self.ensure_one()
-        job = Job.load(self.env, self.uuid)
+        try:
+            job = Job.load(self.env, self.uuid)
+        except JobMethodNotFound as exc:
+            raise exceptions.UserError(
+                _(
+                    "The job function is no longer available: %s",
+                    exc,
+                )
+            ) from exc
         action = job.related_action()
         if action is None:
             raise exceptions.UserError(_("No action available for this job"))
@@ -309,7 +317,10 @@ class QueueJob(models.Model):
         (date, result, ...).
         """
         for record in self:
-            job_ = Job.load(record.env, record.uuid)
+            try:
+                job_ = Job.load(record.env, record.uuid)
+            except JobMethodNotFound:
+                continue
             if state == DONE:
                 job_.set_done(result=result)
                 job_.store()
