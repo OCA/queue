@@ -1,11 +1,17 @@
-.o_field_job_directed_graph {
-    width: 600px;
-    height: 400px;
-    border: 1px solid lightgray;
+.o_queue_job_channel_tree {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
 
-    div.root_vis {
-        height: 100%;
-        width: 100%;
+    .o_queue_job_channel_tree_header {
+        padding: 8px 16px;
+        border-bottom: 1px solid $border-color;
+    }
+
+    .o_queue_job_channel_tree_canvas {
+        flex: 1 1 auto;
+        min-height: 0;
 
         // style vis-network tooltip matching odoo styling
         // as the default style does not really match...

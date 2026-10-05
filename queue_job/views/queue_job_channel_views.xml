@@ -28,6 +28,12 @@
                         bg_color="text-bg-danger"
                         invisible="not paused"
                     />
+                    <widget
+                        name="web_ribbon"
+                        text="Paused by parent"
+                        bg_color="text-bg-danger"
+                        invisible="not effective_paused or paused"
+                    />
                     <group>
                         <field
                             name="name"
@@ -51,11 +57,26 @@
                     </group>
                     <group string="Job Runner">
                         <p class="text-muted" colspan="2">
-                            These properties will be used only if the server-wide
-                            channels configuration is not used.
+                            The properties shown here are only
+                            relevant when the per-database
+                            channels are used, not when
+                            server-wide channels configuration
+                            is used.
                         </p>
                         <group>
-                            <field name="capacity" />
+                            <label for="capacity" />
+                            <div class="o_row">
+                                <field name="capacity" class="oe_inline" />
+                                <span class="text-muted">
+                                    (effective:
+                                    <field
+                                    name="effective_capacity"
+                                    nolabel="1"
+                                    readonly="1"
+                                    class="text-muted oe_inline"
+                                />)
+                                </span>
+                            </div>
                             <field name="sequential" />
                             <field name="throttle" />
                         </group>
@@ -76,6 +97,7 @@
             <list>
                 <field name="complete_name" />
                 <field name="capacity" />
+                <field name="effective_capacity" />
                 <field name="paused" widget="boolean_toggle" />
             </list>
         </field>
@@ -104,5 +126,10 @@
         <field name="view_mode">list,form</field>
         <field name="context">{}</field>
         <field name="view_id" ref="view_queue_job_channel_tree" />
+    </record>
+
+    <record id="action_queue_job_channel_tree" model="ir.actions.client">
+        <field name="name">Channels Tree</field>
+        <field name="tag">queue_job_channel_tree</field>
     </record>
 </odoo>

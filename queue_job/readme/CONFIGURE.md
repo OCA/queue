@@ -63,7 +63,7 @@ The execution of channels by the job runner is defined by:
 - `sequential`: jobs run one after the other, and a failed job blocks the
   channel (requires a capacity of 1)
 - `throttle`: minimum delay, in seconds, between the start of two jobs
-- `paused`: stop running jobs in this channel and its sub-channels
+- `paused`: stop running jobs in this channel and its subchannels
 
 
 **Job Runner Configuration Parameters**

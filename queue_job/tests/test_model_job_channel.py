@@ -9,6 +9,8 @@ import odoo
 from odoo import exceptions
 from odoo.tests import common
 
+from odoo.addons.queue_job.jobrunner import runner
+
 
 class TestJobChannel(common.TransactionCase):
     def setUp(self):
@@ -127,6 +129,56 @@ class TestJobChannel(common.TransactionCase):
                     "capacity_default": 2,
                 }
             )
+
+    def test_effective_capacity_root(self):
+        with (
+            mock.patch.object(runner, "_max_capacity", lambda: 42),
+            mock.patch.object(runner, "_db_max_capacity", lambda: ""),
+        ):
+            self.root_channel.capacity = 5
+            self.assertEqual(self.root_channel.effective_capacity, 5)
+
+            self.root_channel.capacity = 0
+            self.assertEqual(self.root_channel.effective_capacity, 42)
+
+    def test_effective_capacity_subchannel(self):
+        with (
+            # the root channel is restrained to _max_capacity, ensure
+            # it is high enough for the test
+            mock.patch.object(runner, "_max_capacity", lambda: 100),
+            mock.patch.object(runner, "_db_max_capacity", lambda: ""),
+        ):
+            self.root_channel.capacity = 33
+
+            channel = self.Channel.create(
+                {"name": "test", "parent_id": self.root_channel.id, "capacity": 0}
+            )
+
+            self.assertEqual(channel.effective_capacity, 33)
+
+            subchannel = self.Channel.create(
+                {"name": "test", "parent_id": channel.id, "capacity": 0}
+            )
+            self.assertEqual(subchannel.effective_capacity, 33)
+
+            channel.capacity = 18
+
+            self.assertEqual(channel.effective_capacity, 18)
+            self.assertEqual(subchannel.effective_capacity, 18)
+
+    def test_effective_paused(self):
+        channel = self.Channel.create(
+            {"name": "test", "parent_id": self.root_channel.id}
+        )
+        subchannel = self.Channel.create({"name": "test", "parent_id": channel.id})
+
+        self.assertFalse(channel.effective_paused)
+        self.assertFalse(subchannel.effective_paused)
+
+        channel.paused = True
+
+        self.assertTrue(channel.effective_paused)
+        self.assertTrue(subchannel.effective_paused)
 
     def test_action_pause(self):
         self.root_channel.action_pause()
