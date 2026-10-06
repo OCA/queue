@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_delay_export,delay.export.user,model_delay_export,base.group_user,1,0,0,0
+access_delay_export_sudo,delay.export.sudo,model_delay_export,base.group_no_one,1,1,1,1
