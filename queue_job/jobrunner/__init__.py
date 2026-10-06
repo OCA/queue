@@ -147,7 +147,8 @@ def prefork_worker_pop(server, pid):
 
 def threaded_start(server, *args, **kwargs):
     res = orig_threaded_start(server, *args, **kwargs)
-    _start_runner_thread("threaded server")
+    if not kwargs.get("stop"):
+        _start_runner_thread("threaded server")
     return res
 
 
