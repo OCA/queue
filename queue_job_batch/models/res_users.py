@@ -1,21 +1,20 @@
 # Copyright 2025 Camptocamp SA (https://www.camptocamp.com).
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from odoo import models
+from odoo import api, models
 
 
 class Users(models.Model):
     _name = "res.users"
     _inherit = ["res.users"]
 
+    @api.model
     def _init_store_data(self, store):
         res = super()._init_store_data(store)
-        store.add(
-            {
-                "hasQueueJobBatchUserGroup": self.env.user.has_group(
-                    "queue_job_batch.group_queue_job_batch_user"
-                ),
-            }
+        store.add_global_values(
+            hasQueueJobBatchUserGroup=self.env.user.has_group(
+                "queue_job_batch.group_queue_job_batch_user"
+            ),
         )
         return res
 

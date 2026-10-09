@@ -4,20 +4,20 @@
 from odoo.http import request
 
 from odoo.addons.mail.controllers.webclient import WebclientController
+from odoo.addons.mail.tools.discuss import Store
 
 
 class WebClient(WebclientController):
-    def _process_request_for_internal_user(self, store, **kwargs):
-        res = super()._process_request_for_internal_user(store, **kwargs)
-        if kwargs.get("systray_get_queue_job_batches"):
+    @classmethod
+    def _process_request_for_internal_user(self, store: Store, name, params):
+        res = super()._process_request_for_internal_user(store, name, params)
+        if name == "systray_get_queue_job_batches":
             # sudo: bus.bus: reading non-sensitive last id
             bus_last_id = request.env["bus.bus"].sudo()._bus_last_id()
             batches = request.env.user._get_queue_job_batches()
             store.add(batches)
-            store.add(
-                {
-                    "queueJobBatchCounter": len(batches),
-                    "queueJobBatchCounterBusId": bus_last_id,
-                }
+            store.add_global_values(
+                queueJobBatchCounter=len(batches),
+                queueJobBatchCounterBusId=bus_last_id,
             )
         return res

@@ -12,11 +12,15 @@ patch(Store.prototype, {
     queueJobBatchCounterBusId: 0,
     queueJobBatchCounter: 0,
 
-    /** @override */
-    get initMessagingParams() {
-        return {
-            ...super.initMessagingParams,
-            systray_get_queue_job_batches: true,
-        };
+    /**
+     * @override
+     * The counter has to be known before the systray menu is opened, so it is
+     * requested along with the rest of the initial store data.
+     */
+    async initialize() {
+        await Promise.all([
+            this.fetchStoreData("systray_get_queue_job_batches"),
+            super.initialize(...arguments),
+        ]);
     },
 });
