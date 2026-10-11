@@ -1,0 +1,3 @@
+- Arnaud Pineux (ACSONE SA/NV) authored the initial prototype.
+- Guewen Baconnier (Camptocamp)
+- Mitul Shah (TradeSolutions.Digital GmbH)
