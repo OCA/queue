@@ -1,0 +1,9 @@
+id,name,model_id,group_id/id,operation,domain
+access_queue_job_manager,queue job manager,queue.job,queue_job.group_queue_job_manager,ru,
+queue_job_comp_rule,Job Queue multi-company,queue.job,,crud,"['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]"
+access_queue_job_lock_manager,queue job lock manager,queue.job.lock,queue_job.group_queue_job_manager,r,
+access_queue_job_function_manager,queue job functions manager,queue.job.function,queue_job.group_queue_job_manager,crud,
+access_queue_job_channel_manager,queue job channel manager,queue.job.channel,queue_job.group_queue_job_manager,crud,
+access_queue_requeue_job,queue requeue job manager,queue.requeue.job,queue_job.group_queue_job_manager,crud,
+access_queue_jobs_to_done,queue jobs to done manager,queue.jobs.to.done,queue_job.group_queue_job_manager,crud,
+access_queue_jobs_to_cancelled,queue jobs to cancelled manager,queue.jobs.to.cancelled,queue_job.group_queue_job_manager,crud,

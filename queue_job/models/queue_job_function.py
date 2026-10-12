@@ -6,7 +6,7 @@ import logging
 import re
 from collections import namedtuple
 
-from odoo import api, exceptions, fields, models, tools
+from odoo import api, exceptions, fields, models
 
 from ..fields import JobSerialized
 
@@ -45,9 +45,7 @@ class QueueJobFunction(models.Model):
 
     # model and method should be required, but the required flag doesn't
     # let a chance to _inverse_name to be executed
-    model_id = fields.Many2one(
-        comodel_name="ir.model", string="Model", ondelete="cascade"
-    )
+    model_id = fields.Many2one(comodel_name="ir.model", ondelete="cascade")
     method = fields.Char()
     on_fail_method = fields.Char(
         help="Model function to be called if the job is failed and will not be "
@@ -56,7 +54,6 @@ class QueueJobFunction(models.Model):
 
     channel_id = fields.Many2one(
         comodel_name="queue.job.channel",
-        string="Channel",
         required=True,
         default=lambda r: r._default_channel(),
     )
@@ -187,7 +184,7 @@ class QueueJobFunction(models.Model):
             retry_pattern = {}
         return retry_pattern
 
-    @tools.ormcache("name")
+    @api.ormcache("name")
     def job_config(self, name):
         config = self.search([("name", "=", name)], limit=1)
         if not config:
@@ -279,15 +276,15 @@ class QueueJobFunction(models.Model):
                 new_vals_list.append(vals)
             vals_list = new_vals_list
         records |= super().create(vals_list)
-        self.env.registry.clear_cache()
+        self.env.transaction.invalidate_ormcache()
         return records
 
     def write(self, values):
         res = super().write(values)
-        self.env.registry.clear_cache()
+        self.env.transaction.invalidate_ormcache()
         return res
 
     def unlink(self):
         res = super().unlink()
-        self.env.registry.clear_cache()
+        self.env.transaction.invalidate_ormcache()
         return res

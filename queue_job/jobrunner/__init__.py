@@ -30,7 +30,7 @@ except ImportError:
             queue_job_config = dict(cp["queue_job"])
 
 
-from .runner import QueueJobRunner, _channels  # noqa: E402
+from .runner import QueueJobRunner, _channels
 
 _logger = logging.getLogger(__name__)
 

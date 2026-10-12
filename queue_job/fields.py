@@ -30,7 +30,7 @@ class JobSerialized(fields.Json):
     _base_type = None
 
     # these are the default values when we convert an empty value
-    _default_json_mapping = {
+    _default_json_mapping = {  # noqa: RUF012
         dict: "{}",
         list: "[]",
         tuple: "[]",
@@ -42,8 +42,8 @@ class JobSerialized(fields.Json):
     def __init__(self, string=SENTINEL, base_type=SENTINEL, **kwargs):
         super().__init__(string=string, _base_type=base_type, **kwargs)
 
-    def _setup_attrs(self, model, name):  # pylint: disable=missing-return
-        super()._setup_attrs(model, name)
+    def _setup_attrs__(self, model_class, name):  # pylint: disable=missing-return
+        super()._setup_attrs__(model_class, name)
         if self._base_type not in self._default_json_mapping:
             msg = f"{self._base_type} is not a supported base type"
             raise ValueError(msg)
