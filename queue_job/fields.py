@@ -103,7 +103,10 @@ class JobEncoder(json.JSONEncoder):
             }
         elif isinstance(obj, lazy):
             return obj._value
-        return json.JSONEncoder.default(self, obj)
+        try:
+            return json.JSONEncoder.default(self, obj)
+        except TypeError:
+            return None
 
 
 class JobDecoder(json.JSONDecoder):
