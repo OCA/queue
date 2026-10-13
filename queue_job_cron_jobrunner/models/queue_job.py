@@ -6,12 +6,7 @@ import logging
 import traceback
 from io import StringIO
 
-from psycopg2 import OperationalError
-
-from odoo import api, models, tools
-from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
-
-from odoo.addons.queue_job.controllers.main import PG_RETRY
+from odoo import api, models
 from odoo.addons.queue_job.exception import FailedJobError, RetryableJobError
 from odoo.addons.queue_job.job import Job
 
@@ -60,20 +55,13 @@ class QueueJob(models.Model):
 
         # Actual processing
         try:
-            try:
-                with self.env.cr.savepoint():
-                    job.perform()
-                    job.set_done()
-                    job.store()
-            except OperationalError as err:
-                # Automatically retry the typical transaction serialization errors
-                if err.pgcode not in PG_CONCURRENCY_ERRORS_TO_RETRY:
-                    raise
-                message = tools.ustr(err.pgerror, errors="replace")
-                job.postpone(result=message, seconds=PG_RETRY)
-                job.set_pending(reset_retry=False)
+            # Job.perform() turns the retryable PostgreSQL concurrency errors
+            # into RetryableJobError itself, so that max_retries applies to
+            # them; they arrive below with everything else.
+            with self.env.cr.savepoint():
+                job.perform()
+                job.set_done()
                 job.store()
-                _logger.debug("%s OperationalError, postponed", job)
 
         except RetryableJobError as err:
             # delay the job later, requeue

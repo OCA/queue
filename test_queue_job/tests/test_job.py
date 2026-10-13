@@ -5,6 +5,8 @@ import hashlib
 from datetime import datetime, timedelta
 from unittest import mock
 
+from psycopg2 import OperationalError
+
 import odoo.tests.common as common
 from odoo import Command
 
@@ -108,6 +110,36 @@ class TestJobsOnTestingMethod(JobCommonCase):
         with self.assertRaises(FailedJobError):
             test_job.perform()
         self.assertEqual(test_job.retry, 3)
+
+    def test_pg_concurrency_error_is_retryable_and_capped(self):
+        """A serialization failure is retried, and gives up at max_retries.
+
+        The runners used to convert these outside Job.perform(), which is the
+        only place max_retries is consulted, so such a job was postponed for
+        ever while its retry counter climbed past the limit.
+        """
+        test_job = Job(
+            self.method, kwargs={"raise_pg_concurrency": True}, max_retries=3
+        )
+        self.assertEqual(test_job.retry, 0)
+        with self.assertRaises(RetryableJobError):
+            test_job.perform()
+        self.assertEqual(test_job.retry, 1)
+        with self.assertRaises(RetryableJobError):
+            test_job.perform()
+        self.assertEqual(test_job.retry, 2)
+        with self.assertRaises(FailedJobError):
+            test_job.perform()
+        self.assertEqual(test_job.retry, 3)
+
+    def test_other_operational_error_is_not_retried(self):
+        error = OperationalError("undefined table")
+        test_job = Job(self.method, max_retries=3)
+        with mock.patch.object(
+            type(self.env["test.queue.job"]), "testing_method", side_effect=error
+        ):
+            with self.assertRaises(OperationalError):
+                test_job.perform()
 
     def test_infinite_retryable_error(self):
         test_job = Job(self.method, kwargs={"raise_retry": True}, max_retries=0)

@@ -4,11 +4,29 @@
 import functools
 from datetime import datetime, timedelta
 
+from psycopg2 import OperationalError, errorcodes
+
 from odoo import api, fields, models
 
 from odoo.addons.queue_job.delay import chain
 from odoo.addons.queue_job.exception import RetryableJobError
 from odoo.addons.queue_job.job import identity_exact
+
+
+class ConcurrencyError(OperationalError):
+    """A serialization failure, as psycopg2 raises it.
+
+    psycopg2 exposes pgcode read-only and errors.lookup() leaves it unset, so
+    the code has to be carried on a subclass.
+    """
+
+    @property
+    def pgcode(self):
+        return errorcodes.SERIALIZATION_FAILURE
+
+    @property
+    def pgerror(self):
+        return "could not serialize access due to concurrent update"
 
 
 class QueueJob(models.Model):
@@ -79,6 +97,8 @@ class ModelTestQueueJob(models.Model):
         """
         if kwargs.get("raise_retry"):
             raise RetryableJobError("Must be retried later")
+        if kwargs.get("raise_pg_concurrency"):
+            raise ConcurrencyError()
         if kwargs.get("return_context"):
             return self.env.context
         return args, kwargs
