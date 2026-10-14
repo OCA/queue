@@ -10,8 +10,17 @@ from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.http import request
+from odoo.tools.misc import split_every
 
-from odoo.addons.web.controllers.export import CSVExport, ExcelExport
+from odoo.addons.web.controllers.export import CSVExport, ExportXlsxWriter
+
+
+class ConstantMemoryXlsxWriter(ExportXlsxWriter):
+    def __setattr__(self, name, value):
+        if name == "workbook":
+            value.in_memory = False
+            value.constant_memory = True
+        return super().__setattr__(name, value)
 
 
 class DelayExport(models.Model):
@@ -51,7 +60,10 @@ class DelayExport(models.Model):
             fields_name = [field for field in fields_name if field["name"] != "id"]
 
         field_names = [f["name"] for f in fields_name]
-        import_data = records.export_data(field_names).get("datas", [])
+        import_data = []
+        for batch in split_every(models.PREFETCH_MAX, records.ids, model.browse):
+            import_data.extend(batch.export_data(field_names).get("datas", []))
+            self.env.invalidate_all()
 
         if import_compat:
             columns_headers = field_names
@@ -64,8 +76,13 @@ class DelayExport(models.Model):
                 "utf-8"
             )
         else:
-            xls = ExcelExport()
-            return xls.from_data(fields_name, columns_headers, import_data)
+            with ConstantMemoryXlsxWriter(
+                fields_name, columns_headers, len(import_data)
+            ) as xlsx_writer:
+                for row_index, row in enumerate(import_data):
+                    for cell_index, cell_value in enumerate(row):
+                        xlsx_writer.write_cell(row_index + 1, cell_index, cell_value)
+            return xlsx_writer.value
 
     @api.model
     def export(self, params):
