@@ -183,7 +183,10 @@ def _connection_info_for(db_name):
 
     for p, default in KEEPALIVE_DEFAULTS.items():
         connection_info.setdefault(p, default)
-    if psycopg2.extensions.libpq_version() < LIBPQ_TCP_USER_TIMEOUT_VERSION:
+    if (
+        not int(connection_info["keepalives"])
+        or psycopg2.extensions.libpq_version() < LIBPQ_TCP_USER_TIMEOUT_VERSION
+    ):
         connection_info.pop("tcp_user_timeout")
 
     return connection_info

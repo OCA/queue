@@ -523,6 +523,19 @@ class TestRunner(BaseCase):
             connection_info = runner._connection_info_for("db_a")
         self.assertNotIn("tcp_user_timeout", connection_info)
 
+    def test_connection_info_keepalive_disabled(self):
+        with mock.patch.dict(
+            os.environ,
+            {
+                "ODOO_QUEUE_JOB_JOBRUNNER_DB_KEEPALIVES": "0",
+                "ODOO_QUEUE_JOB_JOBRUNNER_DB_TCP_USER_TIMEOUT": "30000",
+            },
+            clear=True,
+        ):
+            connection_info = runner._connection_info_for("db_a")
+        self.assertEqual(connection_info["keepalives"], "0")
+        self.assertNotIn("tcp_user_timeout", connection_info)
+
     def _mock_connection_db(self, server_version=160000):
         db = runner.Database.__new__(runner.Database)
         db.conn = mock.MagicMock(server_version=server_version)
