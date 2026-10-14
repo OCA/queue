@@ -523,9 +523,9 @@ class TestRunner(BaseCase):
             connection_info = runner._connection_info_for("db_a")
         self.assertNotIn("tcp_user_timeout", connection_info)
 
-    def _mock_connection_db(self):
+    def _mock_connection_db(self, server_version=160000):
         db = runner.Database.__new__(runner.Database)
-        db.conn = mock.MagicMock()
+        db.conn = mock.MagicMock(server_version=server_version)
         return db, db.conn.cursor.return_value
 
     def test_set_server_keepalives(self):
@@ -545,3 +545,15 @@ class TestRunner(BaseCase):
         db, cr = self._mock_connection_db()
         db._set_server_keepalives({**runner.KEEPALIVE_DEFAULTS, "keepalives": "0"})
         cr.execute.assert_not_called()
+
+    def test_set_server_keepalives_no_tcp_user_timeout_on_old_server(self):
+        db, cr = self._mock_connection_db(server_version=110000)
+        db._set_server_keepalives(dict(runner.KEEPALIVE_DEFAULTS))
+        self.assertEqual(
+            [call.args[1] for call in cr.execute.call_args_list],
+            [
+                ("tcp_keepalives_idle", "30"),
+                ("tcp_keepalives_interval", "10"),
+                ("tcp_keepalives_count", "3"),
+            ],
+        )

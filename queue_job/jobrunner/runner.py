@@ -58,6 +58,7 @@ KEEPALIVE_SERVER_SETTINGS = {
     "tcp_user_timeout": "tcp_user_timeout",
 }
 LIBPQ_TCP_USER_TIMEOUT_VERSION = 120000
+PG_TCP_USER_TIMEOUT_VERSION = 120000
 
 _logger = logging.getLogger(__name__)
 
@@ -255,8 +256,11 @@ class Database:
         """
         if not int(connection_info["keepalives"]):
             return
+        server_settings = dict(KEEPALIVE_SERVER_SETTINGS)
+        if self.conn.server_version < PG_TCP_USER_TIMEOUT_VERSION:
+            server_settings.pop("tcp_user_timeout")
         with closing(self.conn.cursor()) as cr:
-            for param, setting in KEEPALIVE_SERVER_SETTINGS.items():
+            for param, setting in server_settings.items():
                 if param in connection_info:
                     cr.execute(
                         "SELECT set_config(%s, %s, false)",

@@ -113,7 +113,8 @@ http_auth_password = s3cr3t
   - `jobrunner_db_keepalives_idle`, default `30` (seconds)
   - `jobrunner_db_keepalives_interval`, default `10` (seconds)
   - `jobrunner_db_keepalives_count`, default `3`
-  - `jobrunner_db_tcp_user_timeout`, default `60000` (milliseconds)
+  - `jobrunner_db_tcp_user_timeout`, default `60000` (milliseconds), ignored
+    with libpq or PostgreSQL older than 12
 
 - Odoo has to be started with `queue_job` as server-wide module, either using
   the command line option `--load=web,queue_job`, either by setting it in the
