@@ -181,12 +181,16 @@ def _connection_info_for(db_name):
         if cfg:
             connection_info[p] = cfg
 
+    tcp_user_timeout_configured = "tcp_user_timeout" in connection_info
     for p, default in KEEPALIVE_DEFAULTS.items():
         connection_info.setdefault(p, default)
-    if (
-        not int(connection_info["keepalives"])
-        or psycopg2.extensions.libpq_version() < LIBPQ_TCP_USER_TIMEOUT_VERSION
-    ):
+    if not int(connection_info["keepalives"]):
+        connection_info.pop("tcp_user_timeout")
+    elif psycopg2.extensions.libpq_version() < LIBPQ_TCP_USER_TIMEOUT_VERSION:
+        if tcp_user_timeout_configured:
+            _logger.warning(
+                "jobrunner_db_tcp_user_timeout is ignored, it requires libpq >= 12"
+            )
         connection_info.pop("tcp_user_timeout")
 
     return connection_info

@@ -523,6 +523,22 @@ class TestRunner(BaseCase):
             connection_info = runner._connection_info_for("db_a")
         self.assertNotIn("tcp_user_timeout", connection_info)
 
+    def test_connection_info_tcp_user_timeout_configured_on_old_libpq(self):
+        with (
+            mock.patch.dict(
+                os.environ,
+                {"ODOO_QUEUE_JOB_JOBRUNNER_DB_TCP_USER_TIMEOUT": "30000"},
+                clear=True,
+            ),
+            mock.patch.object(
+                runner.psycopg2.extensions, "libpq_version", return_value=110000
+            ),
+            self.assertLogs(runner._logger, level="WARNING") as logs,
+        ):
+            connection_info = runner._connection_info_for("db_a")
+        self.assertNotIn("tcp_user_timeout", connection_info)
+        self.assertIn("jobrunner_db_tcp_user_timeout is ignored", logs.output[0])
+
     def test_connection_info_keepalive_disabled(self):
         with mock.patch.dict(
             os.environ,
