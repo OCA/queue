@@ -1,0 +1,1 @@
+odoo-addon-base_export_async @ git+https://github.com/OCA/queue.git@refs/pull/849/head#subdirectory=base_export_async
