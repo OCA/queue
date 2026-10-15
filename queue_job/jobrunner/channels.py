@@ -2,6 +2,8 @@
 # Copyright 2015-2016 Camptocamp SA
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 import logging
+import math
+import weakref
 from collections import namedtuple
 from functools import total_ordering
 from heapq import heappop, heappush
@@ -9,6 +11,7 @@ from weakref import WeakValueDictionary
 
 from ..exception import ChannelNotFound
 from ..job import CANCELLED, DONE, ENQUEUED, FAILED, PENDING, STARTED, WAIT_DEPENDENCIES
+from . import metrics
 
 NOT_DONE = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, STARTED, FAILED)
 JobSortingKey = namedtuple("SortingKey", "eta priority date_created seq")
@@ -409,14 +412,70 @@ class Channel:
         self.parent = parent
         if self.parent:
             self.parent.children[name] = self
+            self.parent._register_channel_gauges()
         self.children = {}
         self._queue = ChannelQueue()
         self._running = set()
         self._failed = set()
+        self._waiting_dependencies = set()
         self._pause_until = 0  # utc seconds since the epoch
         self.capacity = capacity
         self.throttle = throttle  # seconds
         self.sequential = sequential
+        self._metrics_labels = None
+        self._register_channel_gauges()
+
+    def __del__(self):
+        self._unregister_channel_gauges()
+
+    def _register_channel_gauges(self) -> None:
+        self._unregister_channel_gauges()
+        self._metrics_labels = {
+            "channel": self.fullname,
+            "root": not bool(self.parent),
+            "leaf": not bool(self.children),
+        }
+        metrics.channel_capacity.labels(**self._metrics_labels).set_function(
+            weakref.proxy(self)._capacity_gauge
+        )
+        metrics.channel_pending.labels(**self._metrics_labels).set_function(
+            weakref.proxy(self)._pending_gauge
+        )
+        metrics.channel_running.labels(**self._metrics_labels).set_function(
+            weakref.proxy(self)._running_gauge
+        )
+        metrics.channel_failed.labels(**self._metrics_labels).set_function(
+            weakref.proxy(self)._failed_gauge
+        )
+        metrics.channel_waiting_dependencies.labels(
+            **self._metrics_labels
+        ).set_function(weakref.proxy(self)._waiting_dependencies_gauge)
+
+    def _unregister_channel_gauges(self) -> None:
+        if not self._metrics_labels:
+            return
+        metrics.channel_capacity.remove_by_labels(self._metrics_labels)
+        metrics.channel_pending.remove_by_labels(self._metrics_labels)
+        metrics.channel_running.remove_by_labels(self._metrics_labels)
+        metrics.channel_failed.remove_by_labels(self._metrics_labels)
+        metrics.channel_waiting_dependencies.remove_by_labels(self._metrics_labels)
+
+    def _capacity_gauge(self) -> float:
+        if self.capacity is None:
+            return math.inf
+        return self.capacity
+
+    def _pending_gauge(self) -> float:
+        return len(self._queue)
+
+    def _running_gauge(self) -> float:
+        return len(self._running)
+
+    def _failed_gauge(self) -> float:
+        return len(self._failed)
+
+    def _waiting_dependencies_gauge(self) -> float:
+        return len(self._waiting_dependencies)
 
     @property
     def sequential(self):
@@ -457,7 +516,7 @@ class Channel:
         capacity = "∞" if self.capacity is None else str(self.capacity)
         return (
             f"{self.fullname}(C:{capacity},Q:{len(self._queue)},"
-            f"R:{len(self._running)},F:{len(self._failed)})"
+            f"R:{len(self._running)},F:{len(self._failed)},W:{len(self._waiting_dependencies)})"
         )
 
     def remove(self, job):
@@ -465,6 +524,7 @@ class Channel:
         self._queue.remove(job)
         self._running.discard(job)
         self._failed.discard(job)
+        self._waiting_dependencies.discard(job)
         if self.parent:
             self.parent.remove(job)
 
@@ -486,6 +546,7 @@ class Channel:
             self._queue.add(job)
             self._running.discard(job)
             self._failed.discard(job)
+            self._waiting_dependencies.discard(job)
             if self.parent:
                 self.parent.remove(job)
             _logger.debug("job %s marked pending in channel %s", job.uuid, self)
@@ -499,6 +560,7 @@ class Channel:
             self._queue.remove(job)
             self._running.add(job)
             self._failed.discard(job)
+            self._waiting_dependencies.discard(job)
             if self.parent:
                 self.parent.set_running(job)
             _logger.debug("job %s marked running in channel %s", job.uuid, self)
@@ -509,9 +571,22 @@ class Channel:
             self._queue.remove(job)
             self._running.discard(job)
             self._failed.add(job)
+            self._waiting_dependencies.discard(job)
             if self.parent:
                 self.parent.remove(job)
             _logger.debug("job %s marked failed in channel %s", job.uuid, self)
+
+    def set_waiting_dependencies(self, job):
+        if job not in self._waiting_dependencies:
+            self._queue.remove(job)
+            self._running.discard(job)
+            self._failed.discard(job)
+            self._waiting_dependencies.add(job)
+            if self.parent:
+                self.parent.remove(job)
+            _logger.debug(
+                "job %s marked waiting dependencies in channel %s", job.uuid, self
+            )
 
     def has_capacity(self):
         if self.sequential and self._failed:
@@ -1056,7 +1131,7 @@ class ChannelManager:
             job.channel.set_failed(job)
         elif state == WAIT_DEPENDENCIES:
             # wait until all parent jobs are done
-            pass
+            job.channel.set_waiting_dependencies(job)
         else:
             _logger.error("unexpected state %s for job %s", state, job)
 
@@ -1077,3 +1152,6 @@ class ChannelManager:
 
     def get_wakeup_time(self):
         return self._root_channel.get_wakeup_time()
+
+    def _jobs_to_do_gauge(self) -> float:
+        return len(self._jobs_by_uuid)
