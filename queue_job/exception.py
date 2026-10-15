@@ -18,6 +18,10 @@ class FailedJobError(JobError):
     """A job had an error having to be resolved."""
 
 
+class MaxRetryJobError(FailedJobError):
+    """A job has hit its maximum number of retries and failed."""
+
+
 class RetryableJobError(JobError):
     """A job had an error but can be retried.
 
