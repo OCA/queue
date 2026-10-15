@@ -4,7 +4,6 @@
 
 import logging
 from threading import Thread
-import time
 from configparser import ConfigParser
 
 from odoo.service import server
@@ -50,7 +49,7 @@ class QueueJobRunnerThread(Thread):
 
     def run(self):
         # sleep a bit to let the workers start at ease
-        time.sleep(START_DELAY)
+        self.runner.sleep(START_DELAY)
         self.runner.run()
 
     def stop(self):
@@ -80,7 +79,7 @@ class WorkerJobRunner(server.Worker):
             self.runner = QueueJobRunner.from_environ_or_config()
             self._recover = False
         _logger.debug("WorkerJobRunner (%s) starting up", self.pid)
-        time.sleep(START_DELAY)
+        self.runner.sleep(START_DELAY)
         self.runner.run()
 
     def signal_time_expired_handler(self, n, stack):
