@@ -73,11 +73,18 @@ class TestQueueJobCron(TransactionCase):
             }
         )
         cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
-        cron._callback("Test queue job cron", action.id)
+        # ir.cron._callback() commits the cursor on success (core, since the
+        # removal of the pool signaling mechanism): calling it directly needs
+        # a test-mode registry, otherwise the commit is rejected by the
+        # TransactionCase cursor guard ("Cannot commit or rollback a cursor
+        # from inside a test").
+        with self.enter_registry_test_mode():
+            cron._callback("Test queue job cron", action.id)
         nb_partners_after_cron = self.env["res.partner"].search_count([])
         self.assertEqual(nb_partners_after_cron, nb_partners + 1)
         cron.write({"run_as_queue_job": True})
-        cron._callback("Test queue job cron", action.id)
+        with self.enter_registry_test_mode():
+            cron._callback("Test queue job cron", action.id)
         nb_partners_after_cron = self.env["res.partner"].search_count([])
         self.assertEqual(nb_partners_after_cron, nb_partners + 1)
         nb_jobs_after_cron = self.env["queue.job"].search_count([])
