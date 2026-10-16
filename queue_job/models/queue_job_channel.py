@@ -37,7 +37,7 @@ class QueueJobChannel(models.Model):
             if not record.name:
                 complete_name = ""  # new record
             elif record.parent_id:
-                complete_name = ".".join([record.parent_id.complete_name, record.name])
+                complete_name = f"{record.parent_id.complete_name}.{record.name}"
             else:
                 complete_name = record.name
             record.complete_name = complete_name

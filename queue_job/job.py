@@ -461,7 +461,7 @@ class Job:
         if self.priority is None:
             self.priority = DEFAULT_PRIORITY
 
-        self.date_created = datetime.now()
+        self.date_created = datetime.now()  # noqa: DTZ005
         self._description = description
 
         if isinstance(identity_key, str):
@@ -524,7 +524,7 @@ class Job:
             elif not self.max_retries:  # infinite retries
                 raise
             elif self.retry >= self.max_retries:
-                type_, value, traceback = sys.exc_info()
+                type_, value, _traceback = sys.exc_info()
                 # change the exception type but keep the original
                 # traceback and message:
                 # http://blog.ianbicking.org/2007/09/12/re-raising-exceptions/
@@ -745,9 +745,8 @@ class Job:
 
     @property
     def identity_key(self):
-        if self._identity_key is None:
-            if self._identity_key_func:
-                self._identity_key = self._identity_key_func(self)
+        if self._identity_key is None and self._identity_key_func:
+            self._identity_key = self._identity_key_func(self)
         return self._identity_key
 
     @identity_key.setter
@@ -808,9 +807,9 @@ class Job:
         if not value:
             self._eta = None
         elif isinstance(value, timedelta):
-            self._eta = datetime.now() + value
+            self._eta = datetime.now() + value  # noqa: DTZ005
         elif isinstance(value, int):
-            self._eta = datetime.now() + timedelta(seconds=value)
+            self._eta = datetime.now() + timedelta(seconds=value)  # noqa: DTZ005
         else:
             self._eta = value
 
@@ -845,13 +844,13 @@ class Job:
 
     def set_enqueued(self):
         self.state = ENQUEUED
-        self.date_enqueued = datetime.now()
+        self.date_enqueued = datetime.now()  # noqa: DTZ005
         self.date_started = None
         self.worker_pid = None
 
     def set_started(self):
         self.state = STARTED
-        self.date_started = datetime.now()
+        self.date_started = datetime.now()  # noqa: DTZ005
         self.worker_pid = os.getpid()
         self.add_lock_record()
 
@@ -859,13 +858,13 @@ class Job:
         self.state = DONE
         self.exc_name = None
         self.exc_info = None
-        self.date_done = datetime.now()
+        self.date_done = datetime.now()  # noqa: DTZ005
         if result is not None:
             self.result = result
 
     def set_cancelled(self, result=None):
         self.state = CANCELLED
-        self.date_cancelled = datetime.now()
+        self.date_cancelled = datetime.now()  # noqa: DTZ005
         if result is not None:
             self.result = result
 
@@ -925,7 +924,7 @@ class Job:
         if not funcname:
             funcname = record._default_related_action
         if not isinstance(funcname, str):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY004
                 "related_action must be the name of the method on queue.job as string"
             )
         action = getattr(record, funcname)

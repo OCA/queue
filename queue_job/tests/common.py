@@ -92,13 +92,15 @@ def trap_jobs():
             # to the database)
             jobs_tester.perform_enqueued_jobs()
     """
-    with mock.patch(
-        "odoo.addons.queue_job.delay.Job",
-        name="Job Class",
-        unsafe=True,
-    ) as job_cls_mock:
-        with JobsTrap(job_cls_mock) as trap:
-            yield trap
+    with (
+        mock.patch(
+            "odoo.addons.queue_job.delay.Job",
+            name="Job Class",
+            unsafe=True,
+        ) as job_cls_mock,
+        JobsTrap(job_cls_mock) as trap,
+    ):
+        yield trap
 
 
 class JobCall(typing.NamedTuple):

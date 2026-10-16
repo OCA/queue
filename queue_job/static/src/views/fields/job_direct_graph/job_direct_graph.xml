@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="queue.JobDirectGraph">
-        <div id="props.id" t-ref="root_vis" class="root_vis" />
+        <div id="props.id" t-ref="this.rootRef" class="root_vis" />
     </t>
 
 </templates>

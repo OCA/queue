@@ -1,5 +1,6 @@
 # Copyright 2019 ACSONE SA/NV (<http://acsone.eu>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+from odoo import api
 from odoo.tests.common import TransactionCase
 
 
@@ -73,7 +74,20 @@ class TestQueueJobCron(TransactionCase):
             }
         )
         cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
-        cron._callback("Test queue job cron", action.id)
+        # ir.cron._callback() commits the cursor on success (core, since the
+        # removal of the pool signaling mechanism). Calling it directly in a
+        # TransactionCase needs a registry test-mode cursor (same pattern as
+        # TestTestCursor in test_registry_signaling.py): entering
+        # enter_registry_test_mode() alone is not enough, self.cr/self.env
+        # still point to the original, commit/rollback-forbidding cursor
+        # until a new one is fetched from the registry.
+        with self.enter_registry_test_mode():
+            test_cr = self.registry.cursor()
+            self.addCleanup(test_cr.close)
+            test_env = api.Environment(test_cr, self.env.uid, self.env.context)
+            test_env["ir.cron"].browse(cron.id)._callback(
+                "Test queue job cron", action.id
+            )
         nb_partners_after_cron = self.env["res.partner"].search_count([])
         self.assertEqual(nb_partners_after_cron, nb_partners + 1)
         cron.write({"run_as_queue_job": True})

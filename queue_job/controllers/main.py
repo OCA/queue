@@ -13,7 +13,7 @@ from psycopg2 import OperationalError, errorcodes
 from werkzeug.exceptions import BadRequest, Forbidden
 
 from odoo import SUPERUSER_ID, api, http
-from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
+from odoo.sql_db import PG_CONCURRENCY_EXCEPTIONS_TO_RETRY
 from odoo.tools import config
 
 from ..delay import chain, group
@@ -123,7 +123,7 @@ class RunJobController(http.Controller):
             except OperationalError as err:
                 # Automatically retry the typical transaction serialization
                 # errors
-                if err.pgcode not in PG_CONCURRENCY_ERRORS_TO_RETRY:
+                if not isinstance(err, PG_CONCURRENCY_EXCEPTIONS_TO_RETRY):
                     raise
                 if tries >= DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE:
                     _logger.error(
@@ -148,7 +148,7 @@ class RunJobController(http.Controller):
     @classmethod
     def _runjob(cls, env: api.Environment, job: Job) -> None:
         def retry_postpone(job, message, seconds=None):
-            job.env.clear()
+            job.env.transaction.clear()
             with job.in_temporary_env():
                 job.postpone(result=message, seconds=seconds)
                 job.set_pending(reset_retry=False)
@@ -160,7 +160,7 @@ class RunJobController(http.Controller):
             except OperationalError as err:
                 # Automatically retry the typical transaction serialization
                 # errors
-                if err.pgcode not in PG_CONCURRENCY_ERRORS_TO_RETRY:
+                if not isinstance(err, PG_CONCURRENCY_EXCEPTIONS_TO_RETRY):
                     raise
 
                 _logger.debug("%s OperationalError, postponed", job)
@@ -181,7 +181,7 @@ class RunJobController(http.Controller):
             traceback.print_exc(file=buff)
             traceback_txt = buff.getvalue()
             _logger.error(traceback_txt)
-            job.env.clear()
+            job.env.transaction.clear()
             with job.in_temporary_env():
                 vals = cls._get_failure_values(job, traceback_txt, orig_exception)
                 job.set_failed(**vals)
@@ -388,6 +388,5 @@ class RunJobController(http.Controller):
 
         root_delayable.delay()
 
-        return (
-            f"graph uuid: {list(root_delayable._head())[0]._generated_job.graph_uuid}"
-        )
+        head = next(iter(root_delayable._head()))
+        return f"graph uuid: {head._generated_job.graph_uuid}"
