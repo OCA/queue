@@ -30,7 +30,7 @@ except ImportError:
             queue_job_config = dict(cp["queue_job"])
 
 
-from .runner import QueueJobRunner, _channels  # noqa: E402
+from .runner import QueueJobRunner, _channels
 
 _logger = logging.getLogger(__name__)
 
@@ -151,7 +151,8 @@ def prefork_worker_pop(server, pid):
 
 def threaded_start(server, *args, **kwargs):
     res = orig_threaded_start(server, *args, **kwargs)
-    _start_runner_thread("threaded server")
+    if not kwargs.get("stop"):
+        _start_runner_thread("threaded server")
     return res
 
 
