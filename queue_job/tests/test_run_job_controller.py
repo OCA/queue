@@ -41,22 +41,22 @@ class TestRunJobController(TransactionCase):
             patch(
                 "odoo.addons.queue_job.models.queue_job.QueueJob._test_on_fail"
             ) as mocked_hook,
-            patch("odoo.addons.queue_job.job.Job.in_temporary_env") as mocked_temp_env,
+            patch.object(self.env.cr, "commit") as mocked_commit,
             self.assertRaises(JobError),
             mute_logger("odoo.addons.queue_job.controllers.main"),
         ):
-            mocked_temp_env.return_value.__enter__.return_value = self.env
             RunJobController._runjob(self.env, job)
         self.assertEqual(job.state, "failed")
+        self.assertEqual(mocked_commit.call_count, 1)
         self.assertEqual(mocked_hook.call_count, 1)
 
     def test_runjob_on_fail_not_configured(self):
         job = self.env["queue.job"].with_delay()._test_job(failure_rate=1)
         with (
-            patch("odoo.addons.queue_job.job.Job.in_temporary_env") as mocked_temp_env,
+            patch.object(self.env.cr, "commit") as mocked_commit,
             self.assertRaises(JobError),
             mute_logger("odoo.addons.queue_job.controllers.main"),
         ):
-            mocked_temp_env.return_value.__enter__.return_value = self.env
             RunJobController._runjob(self.env, job)
         self.assertEqual(job.state, "failed")
+        self.assertEqual(mocked_commit.call_count, 1)
