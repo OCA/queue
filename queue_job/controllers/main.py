@@ -18,7 +18,7 @@ from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 from odoo.tools import config
 
 from ..delay import chain, group
-from ..exception import FailedJobError, NothingToDoJob, RetryableJobError
+from ..exception import FailedJobError, JobError, NothingToDoJob, RetryableJobError
 from ..job import ENQUEUED, Job
 
 _logger = logging.getLogger(__name__)
@@ -26,6 +26,17 @@ _logger = logging.getLogger(__name__)
 PG_RETRY = 5  # seconds
 
 DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE = 5
+
+
+def _concurrency_error(err):
+    while err is not None and not isinstance(err, JobError):
+        if (
+            isinstance(err, OperationalError)
+            and err.pgcode in PG_CONCURRENCY_ERRORS_TO_RETRY
+        ):
+            return err
+        err = err.__cause__ or err.__context__
+    return None
 
 
 @contextmanager
@@ -153,15 +164,16 @@ class RunJobController(http.Controller):
         try:
             try:
                 cls._try_perform_job(env, job)
-            except OperationalError as err:
+            except Exception as err:
                 # Automatically retry the typical transaction serialization
                 # errors
-                if err.pgcode not in PG_CONCURRENCY_ERRORS_TO_RETRY:
+                cause = _concurrency_error(err)
+                if cause is None:
                     raise
 
                 _logger.debug("%s OperationalError, postponed", job)
                 raise RetryableJobError(
-                    tools.ustr(err.pgerror, errors="replace"), seconds=PG_RETRY
+                    tools.ustr(cause.pgerror, errors="replace"), seconds=PG_RETRY
                 ) from err
 
         except NothingToDoJob as err:
