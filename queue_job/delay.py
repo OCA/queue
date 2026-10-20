@@ -443,6 +443,7 @@ class Delayable:
         "recordset",
         "_graph",
         "_job_method",
+        "_job_method_name",
         "_job_args",
         "_job_kwargs",
         "_generated_job",
@@ -471,6 +472,7 @@ class Delayable:
         self.identity_key = identity_key
 
         self._job_method = None
+        self._job_method_name = ""
         self._job_args = ()
         self._job_kwargs = {}
 
@@ -484,8 +486,7 @@ class Delayable:
 
     def __repr__(self):
         return (
-            f"Delayable({self.recordset}."
-            f"{self._job_method.__name__ if self._job_method else ''}"
+            f"Delayable({self.recordset}.{self._job_method_name}"
             f"({self._job_args}, {self._job_kwargs}))"
         )
 
@@ -548,7 +549,8 @@ class Delayable:
                 identity_key=self.identity_key,
             )
             # Update the __self__
-            delayable._job_method = getattr(recordset, self._job_method.__name__)
+            delayable._job_method = getattr(recordset, self._job_method_name)
+            delayable._job_method_name = self._job_method_name
             delayable._job_args = self._job_args
             delayable._job_kwargs = self._job_kwargs
 
@@ -557,7 +559,7 @@ class Delayable:
         description = self.description or (
             self._job_method.__doc__.splitlines()[0].strip()
             if self._job_method.__doc__
-            else f"{self.recordset._name}.{self._job_method.__name__}"
+            else f"{self.recordset._name}.{self._job_method_name}"
         )
         for index, delayable in enumerate(delayables):
             delayable.set(
@@ -574,6 +576,7 @@ class Delayable:
             return self._generated_job
         self._generated_job = Job(
             self._job_method,
+            method_name=self._job_method_name,
             args=self._job_args,
             kwargs=self._job_kwargs,
             priority=self.priority,
@@ -599,6 +602,10 @@ class Delayable:
             )
         recordset_method = getattr(self.recordset, name)
         self._job_method = recordset_method
+        # Keep the name that was looked up: the method found under it may
+        # carry another __name__ (e.g. replaced by auditlog), and the job must
+        # resolve the same attribute again when it is loaded and run.
+        self._job_method_name = name
         return self._store_args
 
     def _execute_direct(self):

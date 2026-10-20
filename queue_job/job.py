@@ -310,6 +310,7 @@ class Job:
 
         job_ = cls(
             method,
+            method_name=method_name,
             args=args,
             kwargs=kwargs,
             priority=stored.priority,
@@ -385,6 +386,7 @@ class Job:
         description=None,
         channel=None,
         identity_key=None,
+        method_name=None,
     ):
         """Create a Job
 
@@ -409,6 +411,9 @@ class Job:
         :param identity_key: A hash to uniquely identify a job, or a function
                              that returns this hash (the function takes the job
                              as argument)
+        :param method_name: name of the method on the recordset. Defaults to
+                            ``func.__name__``; pass it when the method was
+                            looked up under a different name than its own.
         """
         if args is None:
             args = ()
@@ -424,7 +429,7 @@ class Job:
             raise TypeError("Job accepts only methods of Models")
 
         recordset = func.__self__
-        self.method_name = func.__name__
+        self.method_name = method_name or func.__name__
         self.recordset = recordset
 
         self.job_config = (
@@ -781,7 +786,7 @@ class Job:
         elif self.func.__doc__:
             return self.func.__doc__.splitlines()[0].strip()
         else:
-            return f"{self.model_name}.{self.func.__name__}"
+            return f"{self.model_name}.{self.method_name}"
 
     @property
     def uuid(self):
