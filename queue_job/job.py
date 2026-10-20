@@ -8,6 +8,7 @@ import os
 import sys
 import uuid
 import weakref
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from functools import total_ordering
 from random import randint
@@ -16,15 +17,6 @@ import odoo
 from odoo.models import BaseModel
 
 from .exception import FailedJobError, NoSuchJobError, RetryableJobError
-
-try:
-    from contextlib import contextmanager, nullcontext
-except ImportError:  # Python 3.6
-    from contextlib import contextmanager
-
-    @contextmanager
-    def nullcontext():
-        yield
 
 
 def _rebind_to_cr(value, cr):
@@ -573,7 +565,7 @@ class Job:
             if self.job_config.allow_commit:
                 env_context_manager = self.in_temporary_env()
             else:
-                env_context_manager = nullcontext()
+                env_context_manager = self.env.cr.savepoint()
             with env_context_manager:
                 self.result = self.func(*tuple(self.args), **self.kwargs)
         except RetryableJobError as err:
