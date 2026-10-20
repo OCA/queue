@@ -4,11 +4,13 @@
 import logging
 import os
 
+from odoo import tools
+
 _logger = logging.getLogger(__name__)
 
 
 def must_run_without_delay(env):
-    """Retrun true if jobs have to run immediately.
+    """Return True if jobs have to run immediately.
 
     :param env: `odoo.api.Environment` instance
     """
@@ -36,5 +38,6 @@ def must_run_without_delay(env):
             return True
 
     if env.context.get("queue_job__no_delay"):
-        _logger.warning("`queue_job__no_delay` ctx key found. NO JOB scheduled.")
+        if not tools.config["test_enable"]:
+            _logger.info("`queue_job__no_delay` ctx key found. NO JOB scheduled.")
         return True
