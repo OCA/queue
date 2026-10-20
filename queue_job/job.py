@@ -546,48 +546,45 @@ class Job:
             finally:
                 self._env = env
 
-    def _get_common_dependent_jobs_query(self):
-        return """
-            UPDATE queue_job
-            SET state = %s
-            FROM (
-            SELECT child.id, array_agg(parent.state) as parent_states
-            FROM queue_job job
-            JOIN LATERAL
-              json_array_elements_text(
-                  job.dependencies::json->'reverse_depends_on'
-              ) child_deps ON true
-            JOIN queue_job child
-            ON child.graph_uuid = job.graph_uuid
-            AND child.uuid = child_deps
-            JOIN LATERAL
-                json_array_elements_text(
-                  child.dependencies::json->'depends_on'
-                ) parent_deps ON true
-            JOIN queue_job parent
-            ON parent.graph_uuid = job.graph_uuid
-            AND parent.uuid = parent_deps
-            WHERE job.uuid = %s
-            GROUP BY child.id
-            ) jobs
-            WHERE
-            queue_job.id = jobs.id
-            AND %s = ALL(jobs.parent_states)
-            AND state = %s;
-        """
-
     def should_check_dependents(self):
         return any(self.__reverse_depends_on_uuids)
 
     def enqueue_waiting(self):
-        sql = self._get_common_dependent_jobs_query()
-        self.env.cr.execute(sql, (PENDING, self.uuid, DONE, WAIT_DEPENDENCIES))
-        self.env["queue.job"].invalidate_model(["state"])
+        dependents = (
+            self.env["queue.job"]
+            .sudo()
+            .search(
+                [
+                    ("graph_uuid", "=", self.graph_uuid),
+                    ("state", "=", WAIT_DEPENDENCIES),
+                    ("dependency_ids", "any", [("uuid", "=", self.uuid)]),
+                    ("dependency_ids", "not any", [("state", "!=", DONE)]),
+                ]
+            )
+        )
+        dependents.state = PENDING
 
     def cancel_dependent_jobs(self):
-        sql = self._get_common_dependent_jobs_query()
-        self.env.cr.execute(sql, (CANCELLED, self.uuid, CANCELLED, WAIT_DEPENDENCIES))
-        self.env["queue.job"].invalidate_model(["state"])
+        """Cancel the jobs waiting on this one, and their own dependents
+
+        A dependent job can no longer run once one of its dependencies is
+        cancelled, whatever the state of the others.
+        """
+        dependents = self.db_record().dependent_ids
+        while dependents:
+            dependents = dependents.filtered(
+                lambda dependent: dependent.state == WAIT_DEPENDENCIES
+            )
+            dependents.write(
+                {
+                    "state": CANCELLED,
+                    "date_cancelled": self.date_cancelled,
+                    "result": self.env._(
+                        "Cancelled because a job it depends on was cancelled"
+                    ),
+                }
+            )
+            dependents = dependents.dependent_ids
 
     def store(self):
         """Store the Job"""
