@@ -623,6 +623,171 @@ class TestJobModel(JobCommonCase):
         # Check the state
         self.assertEqual(record_root.state, CANCELLED)
         self.assertEqual(record_child.state, CANCELLED)
+        self.assertTrue(record_child.date_cancelled)
+
+    def test_button_cancel_dependencies_cascade(self):
+        """Cancelling a job cancels all its descendants.
+
+        Scenario:
+            1. Store a chain of three jobs: root -> child -> grandchild.
+            2. Cancel the root job.
+        Expected:
+            - The child and the grandchild are cancelled too.
+        """
+        job_root = Job(self.env["test.queue.job"].testing_method)
+        job_child = Job(self.env["test.queue.job"].testing_method)
+        job_grandchild = Job(self.env["test.queue.job"].testing_method)
+        job_child.add_depends({job_root})
+        job_grandchild.add_depends({job_child})
+
+        DelayableGraph._ensure_same_graph_uuid([job_root, job_child, job_grandchild])
+        job_root.store()
+        job_child.store()
+        job_grandchild.store()
+
+        record_root = job_root.db_record()
+        record_child = job_child.db_record()
+        record_grandchild = job_grandchild.db_record()
+        record_root.button_cancelled()
+        self.assertEqual(record_root.state, CANCELLED)
+        self.assertEqual(record_child.state, CANCELLED)
+        self.assertEqual(record_grandchild.state, CANCELLED)
+        self.assertEqual(record_grandchild.date_cancelled, record_root.date_cancelled)
+        self.assertEqual(
+            record_grandchild.result,
+            "Cancelled because a job it depends on was cancelled",
+        )
+
+    def test_button_cancel_dependencies_selected(self):
+        """Cancelling a job along with its dependent cancels the dependent once.
+
+        Scenario:
+            1. Store a job depending on another one.
+            2. Select both jobs and cancel them.
+        Expected:
+            - The dependent is cancelled as a dependent of the first job.
+        """
+        job_root = Job(self.env["test.queue.job"].testing_method)
+        job_child = Job(self.env["test.queue.job"].testing_method)
+        job_child.add_depends({job_root})
+
+        DelayableGraph._ensure_same_graph_uuid([job_root, job_child])
+        job_root.store()
+        job_child.store()
+
+        record_root = job_root.db_record()
+        record_child = job_child.db_record()
+        (record_root | record_child).button_cancelled()
+        self.assertEqual(record_child.state, CANCELLED)
+        self.assertEqual(record_child.date_cancelled, record_root.date_cancelled)
+        self.assertEqual(
+            record_child.result,
+            "Cancelled because a job it depends on was cancelled",
+        )
+
+    def test_button_cancel_dependencies_other_parent_done(self):
+        """Cancelling a parent cancels a child whose other parent is done.
+
+        Scenario:
+            1. Store a job depending on two parent jobs.
+            2. Set the first parent to done.
+            3. Cancel the second parent.
+        Expected:
+            - The child is cancelled.
+        """
+        job_root_1 = Job(self.env["test.queue.job"].testing_method)
+        job_root_2 = Job(self.env["test.queue.job"].testing_method)
+        job_child = Job(self.env["test.queue.job"].testing_method)
+        job_child.add_depends({job_root_1, job_root_2})
+
+        DelayableGraph._ensure_same_graph_uuid([job_root_1, job_root_2, job_child])
+        job_root_1.store()
+        job_root_2.store()
+        job_child.store()
+
+        record_root_1 = job_root_1.db_record()
+        record_root_2 = job_root_2.db_record()
+        record_child = job_child.db_record()
+        record_root_1.button_done()
+        self.assertEqual(record_child.state, WAIT_DEPENDENCIES)
+        record_root_2.button_cancelled()
+        self.assertEqual(record_child.state, CANCELLED)
+
+    def test_button_done_dependencies_other_parent_cancelled(self):
+        """Cancelling a parent cancels a child whose other parent is not done yet.
+
+        Scenario:
+            1. Store a job depending on two parent jobs.
+            2. Cancel the first parent.
+            3. Set the second parent to done.
+        Expected:
+            - The child is cancelled as soon as the first parent is.
+            - It stays cancelled once the second parent is done.
+        """
+        job_root_1 = Job(self.env["test.queue.job"].testing_method)
+        job_root_2 = Job(self.env["test.queue.job"].testing_method)
+        job_child = Job(self.env["test.queue.job"].testing_method)
+        job_child.add_depends({job_root_1, job_root_2})
+
+        DelayableGraph._ensure_same_graph_uuid([job_root_1, job_root_2, job_child])
+        job_root_1.store()
+        job_root_2.store()
+        job_child.store()
+
+        record_root_1 = job_root_1.db_record()
+        record_root_2 = job_root_2.db_record()
+        record_child = job_child.db_record()
+        record_root_1.button_cancelled()
+        self.assertEqual(record_child.state, CANCELLED)
+        record_root_2.button_done()
+        self.assertEqual(record_child.state, CANCELLED)
+
+    def test_search_dependencies(self):
+        """Jobs can be searched by their dependencies and dependents.
+
+        Scenario:
+            1. Store a job depending on two parent jobs.
+            2. Set the first parent to failed.
+        Expected:
+            - The child is found from either parent, and the parents from the child.
+            - The child is found as waiting on a failed job, the parents are not.
+        """
+        job_root_1 = Job(self.env["test.queue.job"].testing_method)
+        job_root_2 = Job(self.env["test.queue.job"].testing_method)
+        job_child = Job(self.env["test.queue.job"].testing_method)
+        job_child.add_depends({job_root_1, job_root_2})
+
+        DelayableGraph._ensure_same_graph_uuid([job_root_1, job_root_2, job_child])
+        job_root_1.store()
+        job_root_2.store()
+        job_child.store()
+
+        record_root_1 = job_root_1.db_record()
+        record_root_2 = job_root_2.db_record()
+        record_child = job_child.db_record()
+        record_root_1.state = FAILED
+        job_model = self.env["queue.job"]
+        graph = [("graph_uuid", "=", job_child.graph_uuid)]
+        self.assertEqual(
+            job_model.search(graph + [("dependency_ids", "in", record_root_1.ids)]),
+            record_child,
+        )
+        self.assertEqual(
+            job_model.search(graph + [("dependent_ids", "in", record_child.ids)]),
+            record_root_1 | record_root_2,
+        )
+        self.assertEqual(
+            job_model.search(
+                graph + [("dependency_ids", "any", [("state", "=", FAILED)])]
+            ),
+            record_child,
+        )
+        self.assertEqual(
+            job_model.search(
+                graph + [("dependency_ids", "not any", [("state", "=", FAILED)])]
+            ),
+            record_root_1 | record_root_2,
+        )
 
     def test_requeue(self):
         stored = self._create_job()
