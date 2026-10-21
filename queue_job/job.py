@@ -8,6 +8,7 @@ import os
 import sys
 import uuid
 import weakref
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from functools import total_ordering
 from random import randint
@@ -16,15 +17,6 @@ import odoo
 from odoo.models import BaseModel
 
 from .exception import FailedJobError, NoSuchJobError, RetryableJobError
-
-try:
-    from contextlib import contextmanager, nullcontext
-except ImportError:  # Python 3.6
-    from contextlib import contextmanager
-
-    @contextmanager
-    def nullcontext():
-        yield
 
 
 def _rebind_to_cr(value, cr):
@@ -606,7 +598,12 @@ class Job:
             if self.job_config.allow_commit:
                 env_context_manager = self.in_temporary_env()
             else:
-                env_context_manager = nullcontext()
+                # On failure, it rolls back the failed transaction to the savepoint.
+                # It frees locks and restores the connection to a usable state for
+                # failure handling (e.g. on_fail hook, using the same cursor)
+                # On success, the savepoint flushes pending writes, before 'set_done',
+                # so that the stored computed fields are part of the 'exec_time'.
+                env_context_manager = self.env.cr.savepoint()
             with env_context_manager:
                 self.result = self.func(*tuple(self.args), **self.kwargs)
         except RetryableJobError as err:
