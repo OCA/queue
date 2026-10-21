@@ -8,7 +8,7 @@ import os
 import sys
 import uuid
 import weakref
-from contextlib import contextmanager, nullcontext
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from random import randint
 
@@ -518,7 +518,7 @@ class Job:
             if self.job_config.allow_commit:
                 env_context_manager = self.in_temporary_env()
             else:
-                env_context_manager = nullcontext()
+                env_context_manager = self.env.cr.savepoint()
             with env_context_manager:
                 self.result = self.func(*tuple(self.args), **self.kwargs)
         except RetryableJobError as err:
