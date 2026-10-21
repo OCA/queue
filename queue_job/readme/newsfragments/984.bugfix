@@ -1,0 +1,3 @@
+The job runner detects a database connection dropped by the network, and the
+database releases the job runner lock. Before, the job runner stopped
+dispatching jobs without any error until it was restarted.

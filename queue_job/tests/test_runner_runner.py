@@ -486,3 +486,103 @@ class TestRunner(BaseCase):
         channel_manager_b.notify("db_b", "root", "db_b-0", 0, 0, 10, 200, "pending")
         channel_manager_c.notify("db_c", "root", "db_b-0", 0, 0, 10, 0, "pending")
         self.assertEqual(jobrunner.next_wakeup_time(), 200)
+
+    def test_connection_info_keepalive_default(self):
+        with mock.patch.dict(os.environ, {}, clear=True):
+            connection_info = runner._connection_info_for("db_a")
+        for param, value in runner.KEEPALIVE_DEFAULTS.items():
+            self.assertEqual(connection_info[param], value)
+
+    def test_connection_info_keepalive_from_env(self):
+        with mock.patch.dict(
+            os.environ,
+            {"ODOO_QUEUE_JOB_JOBRUNNER_DB_KEEPALIVES_IDLE": "120"},
+            clear=True,
+        ):
+            connection_info = runner._connection_info_for("db_a")
+        self.assertEqual(connection_info["keepalives_idle"], "120")
+        self.assertEqual(connection_info["keepalives_count"], 3)
+
+    def test_connection_info_keepalive_from_odoo_config(self):
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(
+                runner, "queue_job_config", {"jobrunner_db_tcp_user_timeout": "0"}
+            ),
+        ):
+            connection_info = runner._connection_info_for("db_a")
+        self.assertEqual(connection_info["tcp_user_timeout"], "0")
+
+    def test_connection_info_no_tcp_user_timeout_on_old_libpq(self):
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(
+                runner.psycopg2.extensions, "libpq_version", return_value=110000
+            ),
+        ):
+            connection_info = runner._connection_info_for("db_a")
+        self.assertNotIn("tcp_user_timeout", connection_info)
+
+    def test_connection_info_tcp_user_timeout_configured_on_old_libpq(self):
+        with (
+            mock.patch.dict(
+                os.environ,
+                {"ODOO_QUEUE_JOB_JOBRUNNER_DB_TCP_USER_TIMEOUT": "30000"},
+                clear=True,
+            ),
+            mock.patch.object(
+                runner.psycopg2.extensions, "libpq_version", return_value=110000
+            ),
+            self.assertLogs(runner._logger, level="WARNING") as logs,
+        ):
+            connection_info = runner._connection_info_for("db_a")
+        self.assertNotIn("tcp_user_timeout", connection_info)
+        self.assertIn("jobrunner_db_tcp_user_timeout is ignored", logs.output[0])
+
+    def test_connection_info_keepalive_disabled(self):
+        with mock.patch.dict(
+            os.environ,
+            {
+                "ODOO_QUEUE_JOB_JOBRUNNER_DB_KEEPALIVES": "0",
+                "ODOO_QUEUE_JOB_JOBRUNNER_DB_TCP_USER_TIMEOUT": "30000",
+            },
+            clear=True,
+        ):
+            connection_info = runner._connection_info_for("db_a")
+        self.assertEqual(connection_info["keepalives"], "0")
+        self.assertNotIn("tcp_user_timeout", connection_info)
+
+    def _mock_connection_db(self, server_version=160000):
+        db = runner.Database.__new__(runner.Database)
+        db.conn = mock.MagicMock(server_version=server_version)
+        return db, db.conn.cursor.return_value
+
+    def test_set_server_keepalives(self):
+        db, cr = self._mock_connection_db()
+        db._set_server_keepalives(dict(runner.KEEPALIVE_DEFAULTS))
+        self.assertEqual(
+            [call.args[1] for call in cr.execute.call_args_list],
+            [
+                ("tcp_keepalives_idle", "30"),
+                ("tcp_keepalives_interval", "10"),
+                ("tcp_keepalives_count", "3"),
+                ("tcp_user_timeout", "60000"),
+            ],
+        )
+
+    def test_set_server_keepalives_disabled(self):
+        db, cr = self._mock_connection_db()
+        db._set_server_keepalives({**runner.KEEPALIVE_DEFAULTS, "keepalives": "0"})
+        cr.execute.assert_not_called()
+
+    def test_set_server_keepalives_no_tcp_user_timeout_on_old_server(self):
+        db, cr = self._mock_connection_db(server_version=110000)
+        db._set_server_keepalives(dict(runner.KEEPALIVE_DEFAULTS))
+        self.assertEqual(
+            [call.args[1] for call in cr.execute.call_args_list],
+            [
+                ("tcp_keepalives_idle", "30"),
+                ("tcp_keepalives_interval", "10"),
+                ("tcp_keepalives_count", "3"),
+            ],
+        )
