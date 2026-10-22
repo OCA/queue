@@ -7,16 +7,6 @@
             <field name="res_model">queue.job</field>
             <field name="default" eval="True" />
         </record>
-        <record id="ir_cron_autovacuum_queue_jobs" model="ir.cron">
-            <field name="name">AutoVacuum Job Queue</field>
-            <field ref="model_queue_job" name="model_id" />
-            <field eval="True" name="active" />
-            <field name="user_id" ref="base.user_root" />
-            <field name="interval_number">1</field>
-            <field name="interval_type">days</field>
-            <field name="state">code</field>
-            <field name="code">model.autovacuum()</field>
-        </record>
     </data>
     <data noupdate="0">
         <record model="queue.job.channel" id="channel_root">
