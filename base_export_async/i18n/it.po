@@ -1,0 +1,160 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* base_export_async
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 12.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2024-04-04 11:38+0000\n"
+"Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
+"Language-Team: none\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.17\n"
+
+#. module: base_export_async
+#. odoo-javascript
+#: code:addons/base_export_async/static/src/xml/base.xml:0
+#, python-format
+msgid "(You will receive the export by email)"
+msgstr "(Verrà inviata l'esportazione vie e-mail)"
+
+#. module: base_export_async
+#: model:mail.template,body_html:base_export_async.delay_export_mail_template
+msgid ""
+"<p>Your export is available <a t-attf-href=\"{{ object.url }}\" target="
+"\"_blank\">here</a>.</p>\n"
+"            <p>It will be automatically deleted the <t t-out=\"object."
+"expiration_date\"></t>.</p>\n"
+"            <br>\n"
+"            <p>\n"
+"                <span style=\"color: #808080;\">This is an automated message "
+"please do not reply.</span>\n"
+"            </p>\n"
+"        "
+msgstr ""
+"<p>L'esportazione è disponibile <a t-attf-href=\"{{ object.url }}\" target="
+"\"_blank\">qui</a>.</p>\n"
+"            <p>Verrà cancellata automaticamente il <t t-out=\"object."
+"expiration_date\"></t>.</p>\n"
+"            <br>\n"
+"            <p>\n"
+"                <span style=\"color: #808080;\">Questo è un messaggio "
+"atomatico, non rispondere.</span>\n"
+"            </p>\n"
+"        "
+
+#. module: base_export_async
+#: model:ir.model,name:base_export_async.model_delay_export
+msgid "Asynchronous Export"
+msgstr "Esportazione asincrona"
+
+#. module: base_export_async
+#. odoo-javascript
+#: code:addons/base_export_async/static/src/xml/base.xml:0
+#, python-format
+msgid "Asynchronous export"
+msgstr "Esportazione asincrona"
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__create_uid
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__create_date
+msgid "Created on"
+msgstr "Creato il"
+
+#. module: base_export_async
+#: model:mail.template,name:base_export_async.delay_export_mail_template
+msgid "Delay Export"
+msgstr "Ritarda esportazione"
+
+#. module: base_export_async
+#: model:ir.actions.server,name:base_export_async.to_delete_attachment_ir_actions_server
+#: model:ir.cron,cron_name:base_export_async.to_delete_attachment
+msgid "Delete Generated Exports"
+msgstr "Cancella esportazioni generate"
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__display_name
+msgid "Display Name"
+msgstr "Nome visualizzato"
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__expiration_date
+msgid "Expiration Date"
+msgstr "Data di scadenza"
+
+#. module: base_export_async
+#: model:mail.template,subject:base_export_async.delay_export_mail_template
+msgid "Export {{ object.model_description }} {{ datetime.date.today() }}"
+msgstr "Esportazione {{ object.model_description }} {{ datetime.date.today() }}"
+
+#. module: base_export_async
+#. odoo-javascript
+#: code:addons/base_export_async/static/src/js/list_controller.esm.js:0
+#, python-format
+msgid "External ID"
+msgstr "ID esterno"
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__id
+msgid "ID"
+msgstr "ID"
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export____last_update
+msgid "Last Modified on"
+msgstr "Ultima modifica il"
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__write_uid
+msgid "Last Updated by"
+msgstr "Ultimo aggiornamento di"
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__write_date
+msgid "Last Updated on"
+msgstr "Ultimo aggiornamento il"
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__model_description
+msgid "Model Description"
+msgstr "Descrizione modello"
+
+#. module: base_export_async
+#. odoo-javascript
+#: code:addons/base_export_async/static/src/js/data_export.esm.js:0
+#, python-format
+msgid "Please select fields to save export list..."
+msgstr "Selezionare campi per salvare elenco esportazione..."
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__url
+msgid "Url"
+msgstr "URL"
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__user_ids
+msgid "Users"
+msgstr "Utenti"
+
+#. module: base_export_async
+#. odoo-python
+#: code:addons/base_export_async/models/delay_export.py:0
+#, python-format
+msgid "You must set an email address to your user."
+msgstr "Bisogna impostare una e-mail nel proprio utente."
+
+#. module: base_export_async
+#. odoo-javascript
+#: code:addons/base_export_async/static/src/js/list_controller.esm.js:0
+#, python-format
+msgid "You will receive the export file by email as soon as it is finished."
+msgstr "Verrà inviato via e-mail il file esportazione appena sarà completato."
