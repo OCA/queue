@@ -1,5 +1,4 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
-from contextlib import closing
 from unittest.mock import patch
 
 from odoo.tests.common import TransactionCase
@@ -74,7 +73,7 @@ class TestRunJobController(TransactionCase):
         # The hook writes on the same partner from another cursor. Its changes
         # are rolled back on close, and the lock timeout avoids waiting forever.
         def on_fail(**kwargs):
-            with closing(self.registry.cursor()) as other_cr:
+            with self.registry.cursor() as other_cr:
                 other_cr.execute("SET LOCAL lock_timeout = '2s'")
                 other_cr.execute(
                     "UPDATE res_partner SET name = 'Written by hook' WHERE id = %s",

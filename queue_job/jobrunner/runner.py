@@ -24,7 +24,7 @@ import os
 import selectors
 import threading
 import time
-from contextlib import closing, contextmanager
+from contextlib import contextmanager
 
 import psycopg2
 import requests
@@ -145,14 +145,14 @@ class Database:
 
     def _acquire_master_lock(self):
         """Acquire the master runner lock or raise MasterElectionLost"""
-        with closing(self.conn.cursor()) as cr:
+        with self.conn.cursor() as cr:
             cr.execute("SELECT pg_try_advisory_lock(%s)", (PG_ADVISORY_LOCK_ID,))
             if not cr.fetchone()[0]:
                 msg = f"could not acquire master runner lock on {self.db_name}"
                 raise MasterElectionLost(msg)
 
     def _has_queue_job(self):
-        with closing(self.conn.cursor()) as cr:
+        with self.conn.cursor() as cr:
             cr.execute(
                 "SELECT 1 FROM pg_tables WHERE tablename=%s", ("ir_module_module",)
             )
@@ -181,7 +181,7 @@ class Database:
             return True
 
     def _initialize(self):
-        with closing(self.conn.cursor()) as cr:
+        with self.conn.cursor() as cr:
             cr.execute("LISTEN queue_job")
 
     @contextmanager
@@ -195,17 +195,17 @@ class Database:
             "priority, EXTRACT(EPOCH FROM eta), state "
             f"FROM queue_job WHERE {where}"
         )
-        with closing(self.conn.cursor("select_jobs", withhold=True)) as cr:
+        with self.conn.cursor("select_jobs", withhold=True) as cr:
             cr.execute(query, args)
             yield cr
 
     def keep_alive(self):
         query = "SELECT 1"
-        with closing(self.conn.cursor()) as cr:
+        with self.conn.cursor() as cr:
             cr.execute(query)
 
     def set_job_enqueued(self, uuid):
-        with closing(self.conn.cursor()) as cr:
+        with self.conn.cursor() as cr:
             cr.execute(
                 "UPDATE queue_job SET state=%s, "
                 "date_enqueued=date_trunc('seconds', "
@@ -305,7 +305,7 @@ class Database:
         the controller receiving the request).
         """
 
-        with closing(self.conn.cursor()) as cr:
+        with self.conn.cursor() as cr:
             query = self._query_requeue_dead_jobs()
 
             cr.execute(query)
