@@ -4,10 +4,10 @@
 import logging
 import random
 import time
-from datetime import datetime, timedelta
 
 from odoo import api, exceptions, fields, models
-from odoo.tools import config, html_escape
+from odoo.fields import Domain
+from odoo.tools import html_escape
 from odoo.tools.sql import create_index
 
 from odoo.addons.base_sparse_field.models.fields import Serialized
@@ -144,7 +144,7 @@ class QueueJob(models.Model):
             ),
             comment=("Queue Job: partial index for identity_key on active states"),
         )
-        # Used by <queue.job>.autovacuum
+        # Used by <queue.job>._gc_old_jobs
         create_index(
             cr,
             "queue_job_channel_date_done_date_created_index",
@@ -408,33 +408,41 @@ class QueueJob(models.Model):
         """
         return [("state", "=", "failed")]
 
-    def autovacuum(self):
-        """Delete all jobs done based on the removal interval defined on the
-           channel
+    @api.autovacuum
+    def _gc_old_jobs(self):
+        """Delete the jobs done or cancelled before the removal interval of
+        their channel, in batches of 1000.
 
-        Called from a cron.
+        Jobs of an unknown channel (renamed, deleted) use the removal interval
+        of the root channel.
+
+        Called from the base autovacuum cron, which commits after each batch
+        and calls it again while it returns remaining jobs.
         """
-        for channel in self.env["queue.job.channel"].search([]):  # pylint: disable=no-search-all
-            deadline = datetime.now() - timedelta(days=int(channel.removal_interval))
-            # Delete in chunks using a stable order (matches composite index)
-            while True:
-                jobs = self.search(
-                    [
-                        "|",
-                        ("date_done", "<=", deadline),
-                        ("date_cancelled", "<=", deadline),
-                        ("channel", "=", channel.complete_name),
-                    ],
-                    order="date_done, date_created",
-                    limit=1000,
-                )
-                if jobs:
-                    jobs.sudo().unlink()
-                    if not config["test_enable"]:
-                        self.env.cr.commit()  # pylint: disable=E8102
-                else:
-                    break
-        return True
+        channels = self.env["queue.job.channel"].search([])  # pylint: disable=no-search-all
+        root = self.env.ref("queue_job.channel_root")
+        intervals = [
+            (Domain("channel", "=", channel.complete_name), channel.removal_interval)
+            for channel in channels
+        ]
+        intervals.append(
+            (
+                Domain("channel", "not in", channels.mapped("complete_name")),
+                root.removal_interval,
+            )
+        )
+        domain = Domain.OR(
+            channel_domain
+            & (
+                Domain("date_done", "<=", f"-{days}d")
+                | Domain("date_cancelled", "<=", f"-{days}d")
+            )
+            for channel_domain, days in intervals
+        )
+        limit = 1000
+        jobs = self.search(domain, order="date_done, date_created", limit=limit + 1)
+        jobs[:limit].sudo().unlink()
+        return len(jobs[:limit]), len(jobs) > limit
 
     def related_action_open_record(self):
         """Open a form view with the record(s) of the job.
