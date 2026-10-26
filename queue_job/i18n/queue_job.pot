@@ -110,6 +110,12 @@ msgstr ""
 
 #. module: queue_job
 #. odoo-python
+#: code:addons/queue_job/job.py:0
+msgid "Cancelled because a job it depends on was cancelled"
+msgstr ""
+
+#. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "Cancelled by %s"
 msgstr ""
@@ -220,6 +226,16 @@ msgstr ""
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__dependency_graph
 msgid "Dependency Graph"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependency_ids
+msgid "Dependency Jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependent_ids
+msgid "Dependent Jobs"
 msgstr ""
 
 #. module: queue_job
@@ -458,9 +474,19 @@ msgid "Jobs"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__dependent_ids
+msgid "Jobs depending on this job."
+msgstr ""
+
+#. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "Jobs for graph %s"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__dependency_ids
+msgid "Jobs this job depends on."
 msgstr ""
 
 #. module: queue_job
