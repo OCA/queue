@@ -22,7 +22,7 @@ class TestJobSubscribe(common.TransactionCase):
                     "partner_id": self.other_partner_a.id,
                     "login": "my_login a",
                     "name": "my user",
-                    "groups_id": [(4, grp_queue_job_manager)],
+                    "group_ids": [(4, grp_queue_job_manager)],
                 }
             )
         )
@@ -34,7 +34,7 @@ class TestJobSubscribe(common.TransactionCase):
                 "partner_id": self.other_partner_b.id,
                 "login": "my_login_b",
                 "name": "my user 1",
-                "groups_id": [(4, grp_queue_job_manager)],
+                "group_ids": [(4, grp_queue_job_manager)],
             }
         )
 
@@ -58,7 +58,7 @@ class TestJobSubscribe(common.TransactionCase):
         #################################
         stored = self._create_failed_job()
         users = self.env["res.users"].search(
-            [("groups_id", "=", self.ref("queue_job.group_queue_job_manager"))]
+            [("group_ids", "=", self.ref("queue_job.group_queue_job_manager"))]
         )
         self.assertEqual(len(stored.message_follower_ids), len(users))
         expected_partners = [u.partner_id for u in users]
@@ -81,7 +81,7 @@ class TestJobSubscribe(common.TransactionCase):
         stored = self._create_failed_job()
         users = self.env["res.users"].search(
             [
-                ("groups_id", "=", self.ref("queue_job.group_queue_job_manager")),
+                ("group_ids", "=", self.ref("queue_job.group_queue_job_manager")),
                 ("subscribe_job", "=", True),
             ]
         )
