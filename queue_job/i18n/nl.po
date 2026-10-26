@@ -77,11 +77,6 @@ msgid "Attachment Count"
 msgstr ""
 
 #. module: queue_job
-#: model:ir.actions.server,name:queue_job.ir_cron_autovacuum_queue_jobs_ir_actions_server
-msgid "AutoVacuum Job Queue"
-msgstr ""
-
-#. module: queue_job
 #: model:ir.model,name:queue_job.model_base
 msgid "Base"
 msgstr ""
