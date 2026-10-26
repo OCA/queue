@@ -57,6 +57,19 @@ msgid "Activity Type Icon"
 msgstr ""
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__allow_commit
+msgid "Allow Commit"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job_function__allow_commit
+msgid ""
+"Allows the job to commit transactions during execution. Under the hood, this "
+"executes the job in a new database cursor, which incurs an overhead as it "
+"requires an extra connection to the database. "
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__args
 msgid "Args"
 msgstr "位置参数"
@@ -169,6 +182,7 @@ msgstr "创建日期"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_uid
@@ -182,6 +196,7 @@ msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__create_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__create_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__create_date
@@ -229,6 +244,7 @@ msgstr "说明"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__display_name
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__display_name
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__display_name
@@ -360,6 +376,7 @@ msgstr "分组"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function__id
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__id
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__id
@@ -380,12 +397,6 @@ msgstr "指示异常活动的图标。"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__identity_key
 msgid "Identity Key"
 msgstr "身份密钥"
-
-#. module: queue_job
-#: code:addons/queue_job/models/queue_job.py:0
-#, fuzzy, python-format
-msgid "If both parameters are 0, ALL jobs will be requeued!"
-msgstr "所选作业将重新排队。"
 
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__message_needaction
@@ -472,13 +483,6 @@ msgid "Jobs"
 msgstr "作业"
 
 #. module: queue_job
-#: model:ir.actions.server,name:queue_job.ir_cron_queue_job_garbage_collector_ir_actions_server
-#: model:ir.cron,cron_name:queue_job.ir_cron_queue_job_garbage_collector
-#: model:ir.cron,name:queue_job.ir_cron_queue_job_garbage_collector
-msgid "Jobs Garbage Collector"
-msgstr ""
-
-#. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:0
 #, python-format
 msgid "Jobs for graph %s"
@@ -509,6 +513,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:queue_job.field_queue_job____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_function____last_update
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done____last_update
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job____last_update
@@ -517,6 +522,7 @@ msgstr "最后修改日"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_uid
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_uid
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_uid
@@ -525,6 +531,7 @@ msgstr "最后更新者"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__write_date
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_cancelled__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_jobs_to_done__write_date
 #: model:ir.model.fields,field_description:queue_job.field_queue_requeue_job__write_date
@@ -574,6 +581,12 @@ msgstr "方法名称"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Model"
 msgstr "模型"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job_function__on_fail_method
+msgid ""
+"Model function to be called if the job is failed and will not be retried."
+msgstr ""
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job_function.py:0
@@ -645,6 +658,11 @@ msgid "Number of unread messages"
 msgstr "未读消息数量"
 
 #. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_function__on_fail_method
+msgid "On Fail Method"
+msgstr ""
+
+#. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job_channel__parent_id
 msgid "Parent Channel"
 msgstr "父频道"
@@ -686,8 +704,14 @@ msgstr "队列"
 
 #. module: queue_job
 #: model:ir.model,name:queue_job.model_queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job_lock__queue_job_id
 msgid "Queue Job"
 msgstr "队列作业"
+
+#. module: queue_job
+#: model:ir.model,name:queue_job.model_queue_job_lock
+msgid "Queue Job Lock"
+msgstr ""
 
 #. module: queue_job
 #: code:addons/queue_job/models/queue_job.py:0
@@ -924,8 +948,8 @@ msgstr "UUID"
 msgid ""
 "Unexpected format of Related Action for {}.\n"
 "Example of valid format:\n"
-"{{\"enable\": True, \"func_name\": \"related_action_foo\", "
-"\"kwargs\" {{\"limit\": 10}}}}"
+"{{\"enable\": True, \"func_name\": \"related_action_foo\", \"kwargs\" "
+"{{\"limit\": 10}}}}"
 msgstr ""
 
 #. module: queue_job
@@ -978,6 +1002,10 @@ msgstr "重新排队向导所选的作业"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__worker_pid
 msgid "Worker Pid"
 msgstr ""
+
+#, fuzzy, python-format
+#~ msgid "If both parameters are 0, ALL jobs will be requeued!"
+#~ msgstr "所选作业将重新排队。"
 
 #~ msgid "SMS Delivery error"
 #~ msgstr "短信传递错误"
