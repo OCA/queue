@@ -6,17 +6,17 @@ import random
 from datetime import datetime, timedelta
 
 from odoo import _, api, exceptions, fields, models
-from odoo.osv import expression
 from odoo.tools import config, html_escape, index_exists
 
 from odoo.addons.base_sparse_field.models.fields import Serialized
 
 from ..delay import Graph
-from ..exception import JobError
+from ..exception import JobError, RetryableJobError
 from ..fields import JobSerialized
 from ..job import (
     CANCELLED,
     DONE,
+    ENQUEUED,
     FAILED,
     PENDING,
     STARTED,
@@ -104,6 +104,7 @@ class QueueJob(models.Model):
     date_done = fields.Datetime(readonly=True)
     exec_time = fields.Float(
         string="Execution Time (avg)",
+        readonly=True,
         group_operator="avg",
         help="Time required to execute this job in seconds. Average when grouped.",
     )
@@ -327,18 +328,26 @@ class QueueJob(models.Model):
                 raise ValueError("State not supported: %s" % state)
 
     def button_done(self):
+        # If job was set to STARTED or CANCELLED, do not set it to DONE
+        states_from = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, FAILED)
         result = _("Manually set to done by %s") % self.env.user.name
-        self._change_job_state(DONE, result=result)
+        records = self.filtered(lambda job_: job_.state in states_from)
+        records._change_job_state(DONE, result=result)
         return True
 
     def button_cancelled(self):
+        # If job was set to DONE do not cancel it
+        states_from = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, FAILED)
         result = _("Cancelled by %s") % self.env.user.name
-        self._change_job_state(CANCELLED, result=result)
+        records = self.filtered(lambda job_: job_.state in states_from)
+        records._change_job_state(CANCELLED, result=result)
         return True
 
     def requeue(self):
-        jobs_to_requeue = self.filtered(lambda job_: job_.state != WAIT_DEPENDENCIES)
-        jobs_to_requeue._change_job_state(PENDING)
+        # If job is already in queue or started, do not requeue it
+        states_from = (FAILED, DONE, CANCELLED)
+        records = self.filtered(lambda job_: job_.state in states_from)
+        records._change_job_state(PENDING)
         return True
 
     def _message_post_on_failure(self):
@@ -346,8 +355,11 @@ class QueueJob(models.Model):
         # at every job creation
         domain = self._subscribe_users_domain()
         base_users = self.env["res.users"].search(domain)
+        suscribe_job_creator = self._subscribe_job_creator()
         for record in self:
-            users = base_users | record.user_id
+            users = base_users
+            if suscribe_job_creator:
+                users |= record.user_id
             record.message_subscribe(partner_ids=users.mapped("partner_id").ids)
             msg = record._message_failed_job()
             if msg:
@@ -363,6 +375,14 @@ class QueueJob(models.Model):
         if companies:
             domain.append(("company_id", "in", companies.ids))
         return domain
+
+    @api.model
+    def _subscribe_job_creator(self):
+        """
+        Whether the user that created the job should be subscribed to the job,
+        in addition to users determined by `_subscribe_users_domain`
+        """
+        return True
 
     def _message_failed_job(self):
         """Return a message which will be posted on the job when it is failed.
@@ -405,61 +425,12 @@ class QueueJob(models.Model):
                     limit=1000,
                 )
                 if jobs:
-                    jobs.unlink()
+                    jobs.sudo().unlink()
                     if not config["test_enable"]:
                         self.env.cr.commit()  # pylint: disable=E8102
                 else:
                     break
         return True
-
-    def requeue_stuck_jobs(self, enqueued_delta=5, started_delta=0):
-        """Fix jobs that are in a bad states
-
-        :param in_queue_delta: lookup time in minutes for jobs
-                                that are in enqueued state
-
-        :param started_delta: lookup time in minutes for jobs
-                                that are in enqueued state,
-                                0 means that it is not checked
-        """
-        self._get_stuck_jobs_to_requeue(
-            enqueued_delta=enqueued_delta, started_delta=started_delta
-        ).requeue()
-        return True
-
-    def _get_stuck_jobs_domain(self, queue_dl, started_dl):
-        domain = []
-        now = fields.datetime.now()
-        if queue_dl:
-            queue_dl = now - timedelta(minutes=queue_dl)
-            domain.append(
-                [
-                    "&",
-                    ("date_enqueued", "<=", fields.Datetime.to_string(queue_dl)),
-                    ("state", "=", "enqueued"),
-                ]
-            )
-        if started_dl:
-            started_dl = now - timedelta(minutes=started_dl)
-            domain.append(
-                [
-                    "&",
-                    ("date_started", "<=", fields.Datetime.to_string(started_dl)),
-                    ("state", "=", "started"),
-                ]
-            )
-        if not domain:
-            raise exceptions.ValidationError(
-                _("If both parameters are 0, ALL jobs will be requeued!")
-            )
-        return expression.OR(domain)
-
-    def _get_stuck_jobs_to_requeue(self, enqueued_delta, started_delta):
-        job_model = self.env["queue.job"]
-        stuck_jobs = job_model.search(
-            self._get_stuck_jobs_domain(enqueued_delta, started_delta)
-        )
-        return stuck_jobs
 
     def related_action_open_record(self):
         """Open a form view with the record(s) of the job.
@@ -494,7 +465,24 @@ class QueueJob(models.Model):
             )
         return action
 
-    def _test_job(self, failure_rate=0):
+    def _test_job(
+        self,
+        failure_rate=0,
+        commit_within_job=False,
+        failure_retry_seconds=0,
+    ):
         _logger.info("Running test job.")
         if random.random() <= failure_rate:
-            raise JobError("Job failed")
+            if failure_retry_seconds:
+                raise RetryableJobError(
+                    f"Retryable job failed, will be retried in "
+                    f"{failure_retry_seconds} seconds",
+                    seconds=failure_retry_seconds,
+                )
+            else:
+                raise JobError("Job failed")
+        if commit_within_job:
+            self.env.cr.commit()  # pylint: disable=invalid-commit
+
+    def _test_on_fail(self, **kw):
+        pass

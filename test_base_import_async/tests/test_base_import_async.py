@@ -65,6 +65,8 @@ class TestBaseImportAsync(common.SavepointCase):
         cls.import_obj = cls.env["base_import.import"]
         cls.move_obj = cls.env["account.move"]
         cls.job_obj = cls.env["queue.job"]
+        # Start fresh, remove jobs
+        cls.job_obj.search([]).unlink()
 
     def _read_test_file(self, file_name):
         file_name = os.path.join(os.path.dirname(__file__), file_name)

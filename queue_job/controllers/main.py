@@ -6,14 +6,16 @@ import logging
 import random
 import time
 import traceback
+from contextlib import contextmanager
 from io import StringIO
+from typing import Union
 
 from psycopg2 import OperationalError, errorcodes
 from werkzeug.exceptions import BadRequest, Forbidden
 
-import odoo
-from odoo import _, http, tools
+from odoo import SUPERUSER_ID, _, api, http, tools
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
+from odoo.tools import config
 
 from ..delay import chain, group
 from ..exception import FailedJobError, NothingToDoJob, RetryableJobError
@@ -26,36 +28,106 @@ PG_RETRY = 5  # seconds
 DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE = 5
 
 
+@contextmanager
+def _prevent_commit(cr):
+    """Context manager to prevent commits on a cursor.
+
+    Commiting while the job is not finished would release the job lock, causing
+    it to be started again by the dead jobs requeuer.
+    """
+
+    def forbidden_commit(*args, **kwargs):
+        raise RuntimeError(
+            "Commit is forbidden in queue jobs. "
+            'You may want to enable the "Allow Commit" option on the Job '
+            "Function. Alternatively, if the current job is a cron running as "
+            "queue job, you can modify it to run as a normal cron. More details on: "
+            "https://github.com/OCA/queue/wiki/Upgrade-warning:-commits-inside-jobs"
+        )
+
+    original_commit = cr.commit
+    cr.commit = forbidden_commit
+    try:
+        yield
+    finally:
+        cr.commit = original_commit
+
+
 class RunJobController(http.Controller):
-    def _try_perform_job(self, env, job):
-        """Try to perform the job."""
+    @classmethod
+    def _acquire_job(cls, env: api.Environment, job_uuid: str) -> Union[Job, None]:
+        """Acquire a job for execution.
+
+        - make sure it is in ENQUEUED state
+        - mark it as STARTED and commit the state change
+        - acquire the job lock
+
+        If successful, return the Job instance, otherwise return None. This
+        function may fail to acquire the job is not in the expected state or is
+        already locked by another worker.
+        """
+        env.cr.execute(
+            "SELECT uuid FROM queue_job WHERE uuid=%s AND state=%s "
+            "FOR NO KEY UPDATE SKIP LOCKED",
+            (job_uuid, ENQUEUED),
+        )
+        if not env.cr.fetchone():
+            _logger.warning(
+                "was requested to run job %s, but it does not exist, "
+                "or is not in state %s, or is being handled by another worker",
+                job_uuid,
+                ENQUEUED,
+            )
+            return None
+        job = Job.load(env, job_uuid)
+        assert job and job.state == ENQUEUED
         job.set_started()
         job.store()
         env.cr.commit()
-        _logger.debug("%s started", job)
+        if not job.lock():
+            _logger.warning(
+                "was requested to run job %s, but it could not be locked",
+                job_uuid,
+            )
+            return None
+        return job
 
-        job.perform()
-        # Triggers any stored computed fields before calling 'set_done'
-        # so that will be part of the 'exec_time'
-        env["base"].flush()
-        job.set_done()
-        job.store()
-        env["base"].flush()
-        env.cr.commit()
+    @classmethod
+    def _try_perform_job(cls, env, job):
+        """Try to perform the job, mark it done and commit if successful."""
+        _logger.debug("%s started", job)
+        # TODO refactor, the relation between env and job.env is not clear
+        assert env.cr is job.env.cr
+        with _prevent_commit(env.cr):
+            job.perform()
+            # Triggers any stored computed fields before calling 'set_done'
+            # so that will be part of the 'exec_time'
+            env["base"].flush()
+            job.set_done()
+            job.store()
+            env["base"].flush()
+        if not config["test_enable"]:
+            env.cr.commit()
         _logger.debug("%s done", job)
 
-    def _enqueue_dependent_jobs(self, env, job):
+    @classmethod
+    def _enqueue_dependent_jobs(cls, env, job):
+        if not job.should_check_dependents():
+            return
+
+        _logger.debug("%s enqueue depends started", job)
         tries = 0
         while True:
             try:
-                job.enqueue_waiting()
+                with job.env.cr.savepoint():
+                    job.enqueue_waiting()
             except OperationalError as err:
                 # Automatically retry the typical transaction serialization
                 # errors
                 if err.pgcode not in PG_CONCURRENCY_ERRORS_TO_RETRY:
                     raise
                 if tries >= DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE:
-                    _logger.info(
+                    _logger.error(
                         "%s, maximum number of tries reached to update dependencies",
                         errorcodes.lookup(err.pgcode),
                     )
@@ -72,42 +144,20 @@ class RunJobController(http.Controller):
                 time.sleep(wait_time)
             else:
                 break
+        _logger.debug("%s enqueue depends done", job)
 
-    @http.route("/queue_job/runjob", type="http", auth="none", save_session=False)
-    def runjob(self, db, job_uuid, **kw):
-        http.request.session.db = db
-        env = http.request.env(user=odoo.SUPERUSER_ID)
-
+    @classmethod
+    def _runjob(cls, env: api.Environment, job: Job) -> None:
         def retry_postpone(job, message, seconds=None):
             job.env.clear()
-            with odoo.api.Environment.manage():
-                with odoo.registry(job.env.cr.dbname).cursor() as new_cr:
-                    job.env = job.env(cr=new_cr)
-                    job.postpone(result=message, seconds=seconds)
-                    job.set_pending(reset_retry=False)
-                    job.store()
-                    new_cr.commit()
-
-        # ensure the job to run is in the correct state and lock the record
-        env.cr.execute(
-            "SELECT state FROM queue_job WHERE uuid=%s AND state=%s FOR UPDATE",
-            (job_uuid, ENQUEUED),
-        )
-        if not env.cr.fetchone():
-            _logger.warning(
-                "was requested to run job %s, but it does not exist, "
-                "or is not in state %s",
-                job_uuid,
-                ENQUEUED,
-            )
-            return ""
-
-        job = Job.load(env, job_uuid)
-        assert job and job.state == ENQUEUED
+            with job.in_temporary_env():
+                job.postpone(result=message, seconds=seconds)
+                job.set_pending(reset_retry=False)
+                job.store()
 
         try:
             try:
-                self._try_perform_job(env, job)
+                cls._try_perform_job(env, job)
             except OperationalError as err:
                 # Automatically retry the typical transaction serialization
                 # errors
@@ -136,7 +186,7 @@ class RunJobController(http.Controller):
             # traceback in the logs we should have the traceback when all
             # retries are exhausted
             env.cr.rollback()
-            return ""
+            return
 
         except (FailedJobError, Exception) as orig_exception:
             buff = StringIO()
@@ -144,34 +194,48 @@ class RunJobController(http.Controller):
             traceback_txt = buff.getvalue()
             _logger.error(traceback_txt)
             job.env.clear()
-            with odoo.api.Environment.manage():
-                with odoo.registry(job.env.cr.dbname).cursor() as new_cr:
-                    job.env = job.env(cr=new_cr)
-                    vals = self._get_failure_values(job, traceback_txt, orig_exception)
-                    job.set_failed(**vals)
-                    job.store()
-                    new_cr.commit()
-                    buff.close()
+            with job.in_temporary_env():
+                vals = cls._get_failure_values(job, traceback_txt, orig_exception)
+                job.set_failed(**vals)
+                job.store()
+                job.on_fail(vals)
+                buff.close()
             raise
 
-        _logger.debug("%s enqueue depends started", job)
-        self._enqueue_dependent_jobs(env, job)
-        _logger.debug("%s enqueue depends done", job)
+        cls._enqueue_dependent_jobs(env, job)
 
-        return ""
-
-    def _get_failure_values(self, job, traceback_txt, orig_exception):
+    @classmethod
+    def _get_failure_values(cls, job, traceback_txt, orig_exception):
         """Collect relevant data from exception."""
         exception_name = orig_exception.__class__.__name__
         if hasattr(orig_exception, "__module__"):
             exception_name = orig_exception.__module__ + "." + exception_name
-        exc_message = getattr(orig_exception, "name", str(orig_exception))
+        exc_message = (
+            orig_exception.args[0] if orig_exception.args else str(orig_exception)
+        )
         return {
             "exc_info": traceback_txt,
             "exc_name": exception_name,
             "exc_message": exc_message,
         }
 
+    @http.route(
+        "/queue_job/runjob",
+        type="http",
+        auth="none",
+        save_session=False,
+        readonly=False,
+    )
+    def runjob(self, db, job_uuid, **kw):
+        http.request.session.db = db
+        env = http.request.env(user=SUPERUSER_ID)
+        job = self._acquire_job(env, job_uuid)
+        if not job:
+            return ""
+        self._runjob(env, job)
+        return ""
+
+    # flake8: noqa: C901
     @http.route("/queue_job/create_test_job", type="http", auth="user")
     def create_test_job(
         self,
@@ -181,6 +245,8 @@ class RunJobController(http.Controller):
         description="Test job",
         size=1,
         failure_rate=0,
+        commit_within_job=False,
+        failure_retry_seconds=0,
     ):
         """Create test jobs
 
@@ -222,6 +288,12 @@ class RunJobController(http.Controller):
             except ValueError:
                 max_retries = None
 
+        if failure_retry_seconds is not None:
+            try:
+                failure_retry_seconds = int(failure_retry_seconds)
+            except ValueError:
+                failure_retry_seconds = 0
+
         if size == 1:
             return self._create_single_test_job(
                 priority=priority,
@@ -229,6 +301,8 @@ class RunJobController(http.Controller):
                 channel=channel,
                 description=description,
                 failure_rate=failure_rate,
+                commit_within_job=commit_within_job,
+                failure_retry_seconds=failure_retry_seconds,
             )
 
         if size > 1:
@@ -239,6 +313,8 @@ class RunJobController(http.Controller):
                 channel=channel,
                 description=description,
                 failure_rate=failure_rate,
+                commit_within_job=commit_within_job,
+                failure_retry_seconds=failure_retry_seconds,
             )
         return ""
 
@@ -250,6 +326,8 @@ class RunJobController(http.Controller):
         description="Test job",
         size=1,
         failure_rate=0,
+        commit_within_job=False,
+        failure_retry_seconds=0,
     ):
         delayed = (
             http.request.env["queue.job"]
@@ -259,7 +337,11 @@ class RunJobController(http.Controller):
                 channel=channel,
                 description=description,
             )
-            ._test_job(failure_rate=failure_rate)
+            ._test_job(
+                failure_rate=failure_rate,
+                commit_within_job=commit_within_job,
+                failure_retry_seconds=failure_retry_seconds,
+            )
         )
         return "job uuid: %s" % (delayed.db_record().uuid,)
 
@@ -274,6 +356,8 @@ class RunJobController(http.Controller):
         channel=None,
         description="Test job",
         failure_rate=0,
+        commit_within_job=False,
+        failure_retry_seconds=0,
     ):
         model = http.request.env["queue.job"]
         current_count = 0
@@ -296,7 +380,11 @@ class RunJobController(http.Controller):
                         max_retries=max_retries,
                         channel=channel,
                         description="%s #%d" % (description, current_count),
-                    )._test_job(failure_rate=failure_rate)
+                    )._test_job(
+                        failure_rate=failure_rate,
+                        commit_within_job=commit_within_job,
+                        failure_retry_seconds=failure_retry_seconds,
+                    )
                 )
 
             grouping = random.choice(possible_grouping_methods)
