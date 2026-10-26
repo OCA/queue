@@ -99,9 +99,6 @@ class RunJobController(http.Controller):
         assert env.cr is job.env.cr
         with _prevent_commit(env.cr):
             job.perform()
-            # Triggers any stored computed fields before calling 'set_done'
-            # so that will be part of the 'exec_time'
-            env.flush_all()
             job.set_done()
             job.store()
             env.flush_all()
@@ -147,13 +144,6 @@ class RunJobController(http.Controller):
 
     @classmethod
     def _runjob(cls, env: api.Environment, job: Job) -> None:
-        def retry_postpone(job, message, seconds=None):
-            job.env.clear()
-            with job.in_temporary_env():
-                job.postpone(result=message, seconds=seconds)
-                job.set_pending(reset_retry=False)
-                job.store()
-
         try:
             try:
                 cls._try_perform_job(env, job)
@@ -168,26 +158,27 @@ class RunJobController(http.Controller):
 
         except RetryableJobError as err:
             # delay the job later, requeue
-            retry_postpone(job, str(err), seconds=err.seconds)
+            job.env.clear()
+            job.postpone(result=str(err), seconds=err.seconds)
+            job.set_pending(reset_retry=False)
+            job.store()
             _logger.debug("%s postponed", job)
             # Do not trigger the error up because we don't want an exception
             # traceback in the logs we should have the traceback when all
             # retries are exhausted
-            env.cr.rollback()
             return
 
         except (FailedJobError, Exception) as orig_exception:
-            buff = StringIO()
-            traceback.print_exc(file=buff)
-            traceback_txt = buff.getvalue()
+            with StringIO() as buff:
+                traceback.print_exc(file=buff)
+                traceback_txt = buff.getvalue()
             _logger.error(traceback_txt)
             job.env.clear()
-            with job.in_temporary_env():
-                vals = cls._get_failure_values(job, traceback_txt, orig_exception)
-                job.set_failed(**vals)
-                job.store()
-                job.on_fail(vals)
-                buff.close()
+            vals = cls._get_failure_values(job, traceback_txt, orig_exception)
+            job.set_failed(**vals)
+            job.store()
+            job.on_fail(vals)
+            env.cr.commit()
             raise
 
         cls._enqueue_dependent_jobs(env, job)
