@@ -33,6 +33,18 @@ class TestJobChannel(common.TransactionCase):
         self.assertEqual(channel2.name, "test")
         self.assertEqual(channel2.complete_name, "root.test.test")
 
+    def test_channel_create_default_parent(self):
+        channel = self.Channel.create({"name": "test"})
+        self.assertEqual(channel.parent_id, self.root_channel)
+        self.assertEqual(channel.complete_name, "root.test")
+
+    def test_channel_write_empty_parent(self):
+        channel = self.Channel.create({"name": "test"})
+        with self.assertRaisesRegex(
+            exceptions.ValidationError, "Parent channel required."
+        ):
+            channel.parent_id = False
+
     @odoo.tools.mute_logger("odoo.sql_db")
     def test_channel_complete_name_uniq(self):
         channel = self.Channel.create(

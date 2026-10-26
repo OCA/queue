@@ -28,7 +28,9 @@ class TestJobChannels(common.TransactionCase):
 
     def test_channel_tree(self):
         with self.assertRaises(exceptions.ValidationError):
-            self.channel_model.create({"name": "sub"})
+            self.channel_model.create({"name": "sub", "parent_id": False})
+        channel = self.channel_model.create({"name": "sub"})
+        self.assertEqual(channel.parent_id, self.root_channel)
 
     def test_channel_root(self):
         with self.assertRaises(exceptions.UserError):
