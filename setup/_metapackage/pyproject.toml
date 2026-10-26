@@ -1,8 +1,9 @@
 [project]
 name = "odoo-addons-oca-queue"
-version = "19.0.20260104.0"
+version = "19.0.20261026.0"
 dependencies = [
     "odoo-addon-queue_job==19.0.*",
+    "odoo-addon-queue_job_subscribe==19.0.*",
     "odoo-addon-test_queue_job==19.0.*",
 ]
 classifiers=[
