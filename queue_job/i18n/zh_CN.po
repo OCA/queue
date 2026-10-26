@@ -117,6 +117,12 @@ msgstr "已取消"
 
 #. module: queue_job
 #. odoo-python
+#: code:addons/queue_job/job.py:0
+msgid "Cancelled because a job it depends on was cancelled"
+msgstr ""
+
+#. module: queue_job
+#. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "Cancelled by %s"
 msgstr "被%s取消"
@@ -228,6 +234,16 @@ msgstr "依赖项"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__dependency_graph
 msgid "Dependency Graph"
 msgstr "依赖关系图"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependency_ids
+msgid "Dependency Jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependent_ids
+msgid "Dependent Jobs"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__name
@@ -465,10 +481,20 @@ msgid "Jobs"
 msgstr "作业"
 
 #. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__dependent_ids
+msgid "Jobs depending on this job."
+msgstr ""
+
+#. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "Jobs for graph %s"
 msgstr "图表 %s 的作业"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__dependency_ids
+msgid "Jobs this job depends on."
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__kwargs
