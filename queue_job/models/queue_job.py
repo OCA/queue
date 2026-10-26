@@ -374,7 +374,7 @@ class QueueJob(models.Model):
         if not group:
             return None
         companies = self.mapped("company_id")
-        domain = [("group_ids", "=", group.id)]
+        domain = [("all_group_ids", "in", group.ids)]
         if companies:
             domain.append(("company_id", "in", companies.ids))
         return domain
