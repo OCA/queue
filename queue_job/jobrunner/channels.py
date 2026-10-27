@@ -179,7 +179,7 @@ class ChannelJob:
 
     """
 
-    __slots__ = ("db_name", "channel", "uuid", "_sorting_key", "__weakref__")
+    __slots__ = ("db_name", "channel", "uuid", "_sorting_key", "__weakref__")  # noqa: RUF023
 
     def __init__(self, db_name, channel, uuid, seq, date_created, priority, eta):
         self.db_name = db_name

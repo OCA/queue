@@ -314,7 +314,7 @@ class DelayableChain:
     delayable/chain/group object of the graph.
     """
 
-    __slots__ = ("_graph", "__head", "__tail")
+    __slots__ = ("__head", "__tail", "_graph")
 
     def __init__(self, *delayables):
         self._graph = DelayableGraph()
@@ -371,7 +371,7 @@ class DelayableGroup:
     delayable/chain/group object of the graph.
     """
 
-    __slots__ = ("_graph", "_delayables")
+    __slots__ = ("_delayables", "_graph")
 
     def __init__(self, *delayables):
         self._graph = DelayableGraph()

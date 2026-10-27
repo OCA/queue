@@ -39,7 +39,6 @@ class TestRunJobHttp(HttpCase):
 
         def spy(cls, env, job_uuid):
             captured["default_env_uid"] = env.transaction.default_env.uid
-            return None
 
         with mock.patch.object(RunJobController, "_acquire_job", classmethod(spy)):
             response = self.url_open(
