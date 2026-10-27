@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-09-03 11:46+0000\n"
+"PO-Revision-Date: 2026-10-27 13:46+0000\n"
 "Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: none\n"
 "Language: it\n"
@@ -123,7 +123,7 @@ msgstr "Annullata"
 #. odoo-python
 #: code:addons/queue_job/job.py:0
 msgid "Cancelled because a job it depends on was cancelled"
-msgstr ""
+msgstr "Annullato perché un lavoro da cui dipende è stato cannullato"
 
 #. module: queue_job
 #. odoo-python
@@ -242,12 +242,12 @@ msgstr "Grafico dipendenza"
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__dependency_ids
 msgid "Dependency Jobs"
-msgstr ""
+msgstr "Dipendenza lavori"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__dependent_ids
 msgid "Dependent Jobs"
-msgstr ""
+msgstr "Lavori dipendenti"
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__name
@@ -487,7 +487,7 @@ msgstr "Lavori"
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__dependent_ids
 msgid "Jobs depending on this job."
-msgstr ""
+msgstr "Lavori che dipendono da questo lavoro."
 
 #. module: queue_job
 #. odoo-python
@@ -498,7 +498,7 @@ msgstr "Lavori per grafico %s"
 #. module: queue_job
 #: model:ir.model.fields,help:queue_job.field_queue_job__dependency_ids
 msgid "Jobs this job depends on."
-msgstr ""
+msgstr "Lavori da cui dipende questo lavoro."
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__kwargs
