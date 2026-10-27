@@ -4,7 +4,7 @@
 import os
 from unittest import mock
 
-import odoo.tests.common as common
+from odoo.tests import common
 from odoo.tools import mute_logger
 
 from odoo.addons.queue_job.delay import Delayable

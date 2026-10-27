@@ -5,8 +5,8 @@ import hashlib
 from datetime import datetime, timedelta
 from unittest import mock
 
-import odoo.tests.common as common
 from odoo import Command
+from odoo.tests import common
 
 from odoo.addons.queue_job import identity_exact
 from odoo.addons.queue_job.controllers.main import RunJobController

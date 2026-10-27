@@ -5,7 +5,7 @@
 import gc
 import logging
 
-import odoo.tests.common as common
+from odoo.tests import common
 
 from odoo.addons.queue_job.delay import (
     Delayable,
