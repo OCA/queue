@@ -58,7 +58,7 @@ class Graph:
     instances, although ultimately it is used for this purpose.
     """
 
-    __slots__ = "_graph"
+    __slots__ = ("_graph",)
 
     def __init__(self, graph=None):
         if graph:

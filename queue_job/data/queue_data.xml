@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <data noupdate="1">
         <!-- Queue-job-related subtypes for messaging / Chatter -->
@@ -9,7 +9,7 @@
         </record>
     </data>
     <data noupdate="0">
-        <record model="queue.job.channel" id="channel_root">
+        <record id="channel_root" model="queue.job.channel">
             <field name="name">root</field>
         </record>
     </data>

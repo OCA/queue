@@ -35,7 +35,7 @@ class QueueJob(models.Model):
 
     _name = "queue.job"
     _description = "Queue Job"
-    _inherit = ["mail.thread", "mail.activity.mixin"]
+    _inherit = ["mail.thread", "mail.activity.mixin"]  # noqa: RUF012
     _log_access = False
 
     _order = "date_created DESC, date_done DESC"
@@ -70,9 +70,7 @@ class QueueJob(models.Model):
         help="Single shared identifier of a Graph. Empty for a single job.",
     )
     user_id = fields.Many2one(comodel_name="res.users", string="User ID")
-    company_id = fields.Many2one(
-        comodel_name="res.company", string="Company", index=True
-    )
+    company_id = fields.Many2one(comodel_name="res.company", index=True)
     name = fields.Char(string="Description", readonly=True)
 
     model_name = fields.Char(string="Model", readonly=True)
@@ -135,7 +133,6 @@ class QueueJob(models.Model):
     channel_method_name = fields.Char(string="Complete Method Name", readonly=True)
     job_function_id = fields.Many2one(
         comodel_name="queue.job.function",
-        string="Job Function",
         readonly=True,
     )
 
@@ -179,16 +176,12 @@ class QueueJob(models.Model):
         for record in self:
             dependencies = record.dependencies or {}
             record.dependency_ids = self.browse().concat(
-                *(
-                    jobs_by_uuid.get(uuid, self.browse())
-                    for uuid in dependencies.get("depends_on", [])
-                )
+                jobs_by_uuid.get(uuid, self.browse())
+                for uuid in dependencies.get("depends_on", [])
             )
             record.dependent_ids = self.browse().concat(
-                *(
-                    jobs_by_uuid.get(uuid, self.browse())
-                    for uuid in dependencies.get("reverse_depends_on", [])
-                )
+                jobs_by_uuid.get(uuid, self.browse())
+                for uuid in dependencies.get("reverse_depends_on", [])
             )
 
     def _search_dependency_ids(self, operator, value):
@@ -205,7 +198,7 @@ class QueueJob(models.Model):
             return NotImplemented
         jobs = self._search(value)
         return Domain.custom(
-            to_sql=lambda model, alias, query: SQL(
+            to_sql=lambda table: SQL(
                 """
                 EXISTS (
                     SELECT 1
@@ -214,7 +207,7 @@ class QueueJob(models.Model):
                     WHERE dep_job.id IN %s
                 )
                 """,
-                model._field_to_sql(alias, "dependencies"),
+                table.dependencies,
                 key,
                 jobs.subselect(),
             )
