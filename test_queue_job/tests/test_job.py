@@ -24,6 +24,7 @@ from odoo.addons.queue_job.job import (
     ENQUEUED,
     FAILED,
     PENDING,
+    PG_RETRY,
     RETRY_INTERVAL,
     STARTED,
     WAIT_DEPENDENCIES,
@@ -131,6 +132,25 @@ class TestJobsOnTestingMethod(JobCommonCase):
         with self.assertRaises(FailedJobError):
             test_job.perform()
         self.assertEqual(test_job.retry, 3)
+
+    def test_pg_concurrency_error_waits_pg_retry_without_a_pattern(self):
+        test_job = Job(
+            self.method, kwargs={"raise_pg_concurrency": True}, max_retries=3
+        )
+        with self.assertRaises(RetryableJobError) as caught:
+            test_job.perform()
+        seconds = test_job._get_retry_seconds(caught.exception.seconds)
+        self.assertEqual(seconds, PG_RETRY)
+
+    def test_pg_concurrency_error_follows_the_jobs_retry_pattern(self):
+        """A job function declaring a retry_pattern gets its own delay."""
+        method = self.env["test.queue.job"].job_with_retry_pattern__pg_concurrency
+        test_job = Job(method, max_retries=3)
+        with self.assertRaises(RetryableJobError) as caught:
+            test_job.perform()
+        self.assertIsNone(caught.exception.seconds)
+        seconds = test_job._get_retry_seconds(caught.exception.seconds)
+        self.assertEqual(seconds, 60)
 
     def test_other_operational_error_is_not_retried(self):
         error = OperationalError("undefined table")

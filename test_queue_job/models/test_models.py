@@ -125,6 +125,9 @@ class ModelTestQueueJob(models.Model):
     def job_with_retry_pattern__no_zero(self):
         return
 
+    def job_with_retry_pattern__pg_concurrency(self):
+        raise ConcurrencyError()
+
     def mapped(self, func):
         return super().mapped(func)
 

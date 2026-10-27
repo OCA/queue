@@ -7,6 +7,7 @@ import traceback
 from io import StringIO
 
 from odoo import api, models
+
 from odoo.addons.queue_job.exception import FailedJobError, RetryableJobError
 from odoo.addons.queue_job.job import Job
 
@@ -65,7 +66,7 @@ class QueueJob(models.Model):
 
         except RetryableJobError as err:
             # delay the job later, requeue
-            job.postpone(result=str(err), seconds=5)
+            job.postpone(result=str(err), seconds=err.seconds)
             job.set_pending(reset_retry=False)
             job.store()
             _logger.debug("%s postponed", job)

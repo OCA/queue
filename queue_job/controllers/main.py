@@ -18,7 +18,10 @@ from odoo.tools import config
 
 from ..delay import chain, group
 from ..exception import FailedJobError, RetryableJobError
-from ..job import ENQUEUED, Job
+
+# PG_RETRY now lives in job.py, and is re-exported here so that existing
+# imports from this module keep working.
+from ..job import ENQUEUED, PG_RETRY, Job  # noqa: F401
 
 _logger = logging.getLogger(__name__)
 
