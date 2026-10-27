@@ -1,5 +1,6 @@
 # Copyright 2019 Versada UAB
 # License LGPL-3 or later (https://www.gnu.org/licenses/lgpl).
+# ruff: noqa: DTZ005
 
 from datetime import datetime, timedelta
 

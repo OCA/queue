@@ -1,0 +1,4 @@
+id,name,model_id,group_id/id,operation,domain
+access_test_queue_job,access_test_queue_job,test.queue.job,queue_job.group_queue_job_manager,crud,
+access_test_queue_channel,access_test_queue_channel,test.queue.channel,queue_job.group_queue_job_manager,crud,
+access_test_related_action,access_test_related_action,test.related.action,queue_job.group_queue_job_manager,crud,

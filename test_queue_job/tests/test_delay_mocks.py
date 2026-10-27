@@ -1,5 +1,6 @@
 # Copyright 2021 Guewen Baconnier
 # license lgpl-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
+# ruff: noqa: C408
 
 import os
 from unittest import mock

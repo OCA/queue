@@ -1,5 +1,6 @@
 # Copyright 2016 Camptocamp SA
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
+# ruff: noqa: DTZ001, DTZ005
 
 import hashlib
 from datetime import datetime, timedelta
@@ -230,7 +231,10 @@ class TestJobsOnTestingMethod(JobCommonCase):
         job_read = Job.load(self.env, test_job.uuid)
         self.assertEqual(test_job.func.__func__, job_read.func.__func__)
         result_ctx = job_read.func(*tuple(test_job.args), **test_job.kwargs)
-        self.assertEqual(result_ctx.get("allowed_company_ids"), company.ids)
+        self.assertEqual(job_read.company_id, company.id)
+        # since 20.0, with_company() leaves the context unchanged for the
+        # current company
+        self.assertNotIn("allowed_company_ids", result_ctx)
 
     def test_company_complex(self):
         company1 = self.env.ref("base.main_company")
@@ -253,7 +257,10 @@ class TestJobsOnTestingMethod(JobCommonCase):
         job_read = Job.load(self.env, test_job.uuid)
         self.assertEqual(test_job.func.__func__, job_read.func.__func__)
         result_ctx = job_read.func(*tuple(test_job.args), **test_job.kwargs)
-        self.assertEqual(result_ctx.get("allowed_company_ids"), company2.ids)
+        # since 20.0, with_company() keeps the other allowed companies
+        self.assertEqual(
+            result_ctx.get("allowed_company_ids"), (company2 | company1).ids
+        )
 
     def test_store(self):
         test_job = Job(self.method)
