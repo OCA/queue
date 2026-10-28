@@ -18,11 +18,12 @@ from odoo.tools import config
 
 from ..delay import chain, group
 from ..exception import FailedJobError, RetryableJobError
-from ..job import ENQUEUED, Job
+
+# PG_RETRY now lives in job.py, and is re-exported here so that existing
+# imports from this module keep working.
+from ..job import ENQUEUED, PG_RETRY, Job  # noqa: F401
 
 _logger = logging.getLogger(__name__)
-
-PG_RETRY = 5  # seconds
 
 DEPENDS_MAX_TRIES_ON_CONCURRENCY_FAILURE = 5
 
@@ -159,16 +160,10 @@ class RunJobController(http.Controller):
                 job.store()
 
         try:
-            try:
-                cls._try_perform_job(env, job)
-            except OperationalError as err:
-                # Automatically retry the typical transaction serialization
-                # errors
-                if err.pgcode not in PG_CONCURRENCY_ERRORS_TO_RETRY:
-                    raise
-
-                _logger.debug("%s OperationalError, postponed", job)
-                raise RetryableJobError(err.pgerror, seconds=PG_RETRY) from err
+            # Job.perform() turns the retryable PostgreSQL concurrency errors
+            # into RetryableJobError itself, so that max_retries applies to
+            # them; there is nothing to convert here.
+            cls._try_perform_job(env, job)
 
         except RetryableJobError as err:
             # delay the job later, requeue
