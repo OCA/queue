@@ -34,7 +34,7 @@ Features:
 - Views for jobs, jobs are stored in PostgreSQL
 - Jobrunner: execute the jobs, highly efficient thanks to PostgreSQL's
   NOTIFY
-- Channels: give a capacity for the root channel and its sub-channels
+- Channels: give a capacity for the root channel and its subchannels
   and segregate jobs in them. Allow for instance to restrict heavy jobs
   to be executed one at a time while little ones are executed 4 at a
   times.
