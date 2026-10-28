@@ -1,6 +1,5 @@
 # Copyright 2025 ACSONE SA/NV
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
-from contextlib import closing
 from datetime import datetime, timedelta
 
 from odoo.tests import tagged
@@ -61,7 +60,7 @@ class TestRequeueDeadJob(JobCommonCase):
         job_obj.set_started()
         job_obj.lock()
 
-        with closing(self.env.registry.cursor()) as new_cr:
+        with self.env.registry.cursor() as new_cr:
             locks = self.get_locks(job_obj.uuid, new_cr)
 
             # Row should be locked
