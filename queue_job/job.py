@@ -8,7 +8,7 @@ import os
 import sys
 import uuid
 import weakref
-from contextlib import contextmanager, nullcontext
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from random import randint
 
@@ -224,16 +224,16 @@ class Job:
     """
 
     @classmethod
-    def load(cls, env, job_uuid):
+    def load(cls, env, job_uuid, raise_if_not_found=True):
         """Read a single job from the Database
 
         Raise an error if the job is not found.
         """
         stored = cls.db_records_from_uuids(env, [job_uuid])
-        if not stored:
-            msg = f"Job {job_uuid} does no longer exist in the storage."
-            raise NoSuchJobError(msg)
-        return cls._load_from_db_record(stored)
+        if stored:
+            return cls._load_from_db_record(stored)
+        if raise_if_not_found:
+            raise NoSuchJobError(f"Job {job_uuid} does no longer exist in the storage.")
 
     @classmethod
     def load_many(cls, env, job_uuids):
@@ -244,55 +244,23 @@ class Job:
         recordset = cls.db_records_from_uuids(env, job_uuids)
         return {cls._load_from_db_record(record) for record in recordset}
 
-    def add_lock_record(self) -> None:
-        """
-        Create row in db to be locked while the job is being performed.
-        """
-        self.env.cr.execute(
-            """
-            INSERT INTO
-                queue_job_lock (id, queue_job_id)
-            SELECT
-                id, id
-            FROM
-                queue_job
-            WHERE
-                uuid = %s
-            ON CONFLICT(id)
-            DO NOTHING;
-        """,
-            [self.uuid],
-        )
-
-    def lock(self) -> bool:
-        """Lock row of job that is being performed.
+    def lock(self, state) -> bool:
+        """Lock job that is being performed.
 
         Return False if a job cannot be locked: it means that the job is not in
-        STARTED state or is already locked by another worker.
+        expected state or is already locked by another worker.
+        Lock is released at the commit or rollback of the transaction.
         """
-        self.env.cr.execute(
-            """
-            SELECT
-                *
-            FROM
-                queue_job_lock
-            WHERE
-                queue_job_id in (
-                    SELECT
-                        id
-                    FROM
-                        queue_job
-                    WHERE
-                        uuid = %s
-                        AND state = %s
-                )
-            FOR NO KEY UPDATE SKIP LOCKED;
-        """,
-            [self.uuid, STARTED],
+        lock_query = (
+            "SELECT uuid FROM queue_job WHERE uuid=%s AND state=%s"
+            "   FOR NO KEY UPDATE SKIP LOCKED;"
         )
-
-        # 1 job should be locked
-        return bool(self.env.cr.fetchall())
+        self.env.cr.execute(lock_query, [self.uuid, state])
+        if not self.env.cr.fetchone():
+            _logger.debug("Lock NOT acquired on %s Job %s", state, self.uuid)
+            return False
+        _logger.debug("Lock acquired on %s Job %s", state, self.uuid)
+        return True
 
     @classmethod
     def _load_from_db_record(cls, job_db_record):
@@ -514,7 +482,12 @@ class Job:
             if self.job_config.allow_commit:
                 env_context_manager = self.in_temporary_env()
             else:
-                env_context_manager = nullcontext()
+                # On failure, it rolls back the failed transaction to the savepoint.
+                # It frees locks and restores the connection to a usable state for
+                # failure handling (e.g. on_fail hook, using the same cursor)
+                # On success, the savepoint flushes pending writes, before 'set_done',
+                # so that the stored computed fields are part of the 'exec_time'.
+                env_context_manager = self.env.cr.savepoint()
             with env_context_manager:
                 self.result = self.func(*tuple(self.args), **self.kwargs)
         except RetryableJobError as err:
@@ -850,7 +823,6 @@ class Job:
         self.state = STARTED
         self.date_started = datetime.now()
         self.worker_pid = os.getpid()
-        self.add_lock_record()
 
     def set_done(self, result=None):
         self.state = DONE
