@@ -3,12 +3,15 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from datetime import timedelta
+from unittest.mock import patch
 
 from freezegun import freeze_time
 
 from odoo import fields
 from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger
+
+from odoo.addons.queue_job.exception import RetryableJobError
 
 
 class TestQueueJob(TransactionCase):
@@ -97,3 +100,46 @@ class TestQueueJob(TransactionCase):
             self.env["res.partner"].with_delay(priority=30).create({"name": "test"})
 
         self.assertEqual(self.env["queue.job"]._acquire_one_job(), job.db_record())
+
+    def _run_retryable_job(self, seconds=None, retry_pattern=None):
+        """Process a job raising RetryableJobError as the cron runner does"""
+        if retry_pattern:
+            self.env["queue.job.function"].create(
+                {"name": "<res.partner>.create", "retry_pattern": retry_pattern}
+            )
+        job = self.env["res.partner"].with_delay().create({"name": "test"})
+        job_record = job.db_record()
+        partner_model = type(self.env["res.partner"])
+
+        def create(self, vals_list):
+            raise RetryableJobError("Try again later", seconds=seconds)
+
+        with (
+            freeze_time("2022-02-22 22:22:22"),
+            patch.object(partner_model, "create", create),
+        ):
+            job_record._process(commit=False)
+        self.assertEqual(job_record.state, "pending")
+        self.assertEqual(job_record.retry, 1)
+        return job_record
+
+    def test_queue_job_retryable_error_seconds(self):
+        """RetryableJobError(seconds=N) postpones the job by N seconds"""
+        job_record = self._run_retryable_job(seconds=120)
+        self.assertEqual(
+            job_record.eta, fields.Datetime.to_datetime("2022-02-22 22:24:22")
+        )
+
+    def test_queue_job_retryable_error_retry_pattern(self):
+        """Without seconds, the retry pattern of the job function applies"""
+        job_record = self._run_retryable_job(retry_pattern={1: 300})
+        self.assertEqual(
+            job_record.eta, fields.Datetime.to_datetime("2022-02-22 22:27:22")
+        )
+
+    def test_queue_job_retryable_error_default(self):
+        """Without seconds or retry pattern, the job is postponed by 5 seconds"""
+        job_record = self._run_retryable_job()
+        self.assertEqual(
+            job_record.eta, fields.Datetime.to_datetime("2022-02-22 22:22:27")
+        )
