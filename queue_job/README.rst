@@ -213,6 +213,9 @@ The execution of channels by the job runner is defined by:
       ``--http-interface`` or ``localhost`` if unset
     - ``ODOO_QUEUE_JOB_HTTP_AUTH_USER=jobrunner``, default empty
     - ``ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t``, default empty
+    - ``ODOO_QUEUE_JOB_METRICS_LISTEN_ADDRESS=127.0.0.1``, default
+      127.0.0.1
+    - ``ODOO_QUEUE_JOB_METRICS_PORT=9000``, default empty
 
 - Using the Odoo configuration file (set either ``channels``, either
   ``max_capacity`` and/or ``db_max_capacity``)

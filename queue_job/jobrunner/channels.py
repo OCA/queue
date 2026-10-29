@@ -440,7 +440,6 @@ class Channel:
         self.parent = parent
         if self.parent:
             self.parent.children[name] = self
-            self.parent._register_channel_gauges()
         self.children = {}
         self._queue = ChannelQueue()
         self._running = set()
@@ -456,14 +455,12 @@ class Channel:
         self.sequential_default = sequential_default
         self.paused = paused
         self._metrics_labels = None
-        self._register_channel_gauges()
 
-    def __del__(self):
-        self._unregister_channel_gauges()
-
-    def _register_channel_gauges(self) -> None:
-        self._unregister_channel_gauges()
+    def register_metrics(self, db_name) -> None:
+        """Register gauges for a specific database in this channel."""
+        self.unregister_metrics()
         self._metrics_labels = {
+            "db": db_name,
             "channel": self.fullname,
             "root": not bool(self.parent),
             "leaf": not bool(self.children),
@@ -484,7 +481,7 @@ class Channel:
             **self._metrics_labels
         ).set_function(weakref.proxy(self)._waiting_dependencies_gauge)
 
-    def _unregister_channel_gauges(self) -> None:
+    def unregister_metrics(self) -> None:
         if not self._metrics_labels:
             return
         metrics.channel_capacity.remove_by_labels(self._metrics_labels)
@@ -492,6 +489,7 @@ class Channel:
         metrics.channel_running.remove_by_labels(self._metrics_labels)
         metrics.channel_failed.remove_by_labels(self._metrics_labels)
         metrics.channel_waiting_dependencies.remove_by_labels(self._metrics_labels)
+        self._metrics_labels = None
 
     def _capacity_gauge(self) -> float:
         if self.capacity is None:
@@ -1284,3 +1282,13 @@ class ChannelManager:
 
     def _jobs_to_do_gauge(self) -> float:
         return len(self._jobs_by_uuid)
+
+    def register_metrics(self, db_name):
+        for channel in self._channels_by_name.values():
+            channel.register_metrics(db_name)
+        metrics.jobs_to_do.labels({"db": db_name}).set_function(self._jobs_to_do_gauge)
+
+    def unregister_metrics(self, db_name):
+        for channel in self._channels_by_name.values():
+            channel.unregister_metrics()
+        metrics.jobs_to_do.remove_by_labels({"db": db_name})

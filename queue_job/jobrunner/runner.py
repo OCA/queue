@@ -492,6 +492,7 @@ class QueueJobRunner:
             channel_manager = ChannelManager()
             channel_manager.simple_configure(channel_config_string)
             self._server_wide_channel_manager = channel_manager
+            self._server_wide_channel_manager.register_metrics(db_name=None)
             # max_capacity is always equal to the root channel in server-wide
             # configuration
             max_capacity = channel_manager.get_channel_by_name("root").capacity
@@ -525,7 +526,6 @@ class QueueJobRunner:
         else:
             self._metrics_server = None
             _logger.info("jobrunner metrics server not configured")
-        metrics.jobs_to_do.set_function(self.channel_manager._jobs_to_do_gauge)
 
     def __del__(self):
         # pylint: disable=except-pass
@@ -662,10 +662,13 @@ class QueueJobRunner:
         """Build the channel manager for a database and reload its jobs"""
         db_name = db.db_name
         channel_manager = self._build_channel_manager(db)
+        if db_name in self._channel_manager_by_db:
+            self._channel_manager_by_db[db_name].unregister_metrics(db_name)
         self._channel_manager_by_db[db_name] = channel_manager
         self._channel_managers = list(self._channel_manager_by_db.values())
         self._notify_existing_jobs(db, channel_manager)
         _logger.info("channels configuration loaded for db %s", db_name)
+        channel_manager.register_metrics(db_name)
 
     def _notify_existing_jobs(self, db, channel_manager):
         with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
