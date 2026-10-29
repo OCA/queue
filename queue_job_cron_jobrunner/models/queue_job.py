@@ -17,6 +17,9 @@ from odoo.addons.queue_job.job import Job
 
 _logger = logging.getLogger(__name__)
 
+# Delay of a RetryableJobError without seconds nor retry pattern
+RETRY_SECONDS = 5
+
 
 class QueueJob(models.Model):
     _inherit = "queue.job"
@@ -76,8 +79,13 @@ class QueueJob(models.Model):
                 _logger.debug("%s OperationalError, postponed", job)
 
         except RetryableJobError as err:
-            # delay the job later, requeue
-            job.postpone(result=str(err), seconds=5)
+            # delay the job later, requeue: as in queue_job's controller, honour
+            # the seconds of the exception, then the retry pattern of the job
+            # function; without both, keep the short delay of the cron runner
+            seconds = err.seconds
+            if not seconds and not job.job_config.retry_pattern:
+                seconds = RETRY_SECONDS
+            job.postpone(result=str(err), seconds=seconds)
             job.set_pending(reset_retry=False)
             job.store()
             _logger.debug("%s postponed", job)
