@@ -1,12 +1,11 @@
 [project]
 name = "odoo-addons-oca-queue"
-version = "19.0.20260104.0"
+version = "20.0.20261029.0"
 dependencies = [
-    "odoo-addon-queue_job==19.0.*",
-    "odoo-addon-test_queue_job==19.0.*",
+    "odoo-addon-queue_job==20.0.*",
 ]
 classifiers=[
     "Programming Language :: Python",
     "Framework :: Odoo",
-    "Framework :: Odoo :: 19.0",
+    "Framework :: Odoo :: 20.0",
 ]
