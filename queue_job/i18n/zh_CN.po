@@ -82,11 +82,6 @@ msgid "Attachment Count"
 msgstr "附件数量"
 
 #. module: queue_job
-#: model:ir.actions.server,name:queue_job.ir_cron_autovacuum_queue_jobs_ir_actions_server
-msgid "AutoVacuum Job Queue"
-msgstr "自动清空作业队列"
-
-#. module: queue_job
 #: model:ir.model,name:queue_job.model_base
 msgid "Base"
 msgstr "基础"
@@ -119,6 +114,12 @@ msgstr "取消作业"
 #: model_terms:ir.ui.view,arch_db:queue_job.view_queue_job_search
 msgid "Cancelled"
 msgstr "已取消"
+
+#. module: queue_job
+#. odoo-python
+#: code:addons/queue_job/job.py:0
+msgid "Cancelled because a job it depends on was cancelled"
+msgstr ""
 
 #. module: queue_job
 #. odoo-python
@@ -233,6 +234,16 @@ msgstr "依赖项"
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__dependency_graph
 msgid "Dependency Graph"
 msgstr "依赖关系图"
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependency_ids
+msgid "Dependency Jobs"
+msgstr ""
+
+#. module: queue_job
+#: model:ir.model.fields,field_description:queue_job.field_queue_job__dependent_ids
+msgid "Dependent Jobs"
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__name
@@ -470,10 +481,20 @@ msgid "Jobs"
 msgstr "作业"
 
 #. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__dependent_ids
+msgid "Jobs depending on this job."
+msgstr ""
+
+#. module: queue_job
 #. odoo-python
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "Jobs for graph %s"
 msgstr "图表 %s 的作业"
+
+#. module: queue_job
+#: model:ir.model.fields,help:queue_job.field_queue_job__dependency_ids
+msgid "Jobs this job depends on."
+msgstr ""
 
 #. module: queue_job
 #: model:ir.model.fields,field_description:queue_job.field_queue_job__kwargs
@@ -947,6 +968,9 @@ msgstr "工作进程PID"
 #: code:addons/queue_job/models/queue_job.py:0
 msgid "id"
 msgstr ""
+
+#~ msgid "AutoVacuum Job Queue"
+#~ msgstr "自动清空作业队列"
 
 #~ msgid "Group By"
 #~ msgstr "分组"

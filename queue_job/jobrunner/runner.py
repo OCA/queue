@@ -31,6 +31,7 @@ import requests
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 import odoo
+from odoo.modules.db import list_dbs
 from odoo.tools import config
 
 from . import queue_job_config
@@ -72,7 +73,7 @@ def _odoo_now():
 
 
 def _connection_info_for(db_name):
-    db_or_uri, connection_info = odoo.sql_db.connection_info_for(db_name)
+    _db_or_uri, connection_info = odoo.sql_db.connection_info_for(db_name)
 
     for p in ("host", "port", "user", "password"):
         cfg = os.environ.get(
@@ -139,7 +140,7 @@ class Database:
         # del
         try:
             self.conn.close()
-        except Exception:
+        except Exception:  # noqa: BLE001, S110
             pass
         self.conn = None
 
@@ -335,6 +336,7 @@ class QueueJobRunner:
         self.channel_manager.simple_configure(channel_config_string)
         self.db_by_name = {}
         self._stop = False
+        self._stop_event = threading.Event()
         self._stop_pipe = os.pipe()
 
     def __del__(self):
@@ -382,7 +384,7 @@ class QueueJobRunner:
         db_names = config["db_name"]
         if db_names:
             return db_names
-        return odoo.service.db.list_dbs(True)
+        return list_dbs(force=True)
 
     def close_databases(self, remove_jobs=True):
         for db_name, db in self.db_by_name.items():
@@ -474,7 +476,7 @@ class QueueJobRunner:
         # if timeout remains a large negative number, it is most
         # probably a bug
         _logger.debug("select() timeout: %.2f sec", timeout)
-        if timeout > 0:
+        if timeout > 0:  # noqa: SIM102
             if conns and not self._stop:
                 with select() as sel:
                     for conn in conns:
@@ -486,9 +488,18 @@ class QueueJobRunner:
                             continue
                         key.fileobj.poll()
 
+    def sleep(self, seconds):
+        """Wait for ``seconds``, or less if :meth:`stop` is called meanwhile.
+
+        A plain ``time.sleep`` would hold the thread, and so the server
+        shutdown that joins it, for up to the whole delay.
+        """
+        self._stop_event.wait(seconds)
+
     def stop(self):
         _logger.info("graceful stop requested")
         self._stop = True
+        self._stop_event.set()
         # wakeup the select() in wait_notification
         os.write(self._stop_pipe[1], b".")
 
@@ -520,12 +531,12 @@ class QueueJobRunner:
                     ERROR_RECOVERY_DELAY,
                 )
                 self.close_databases()
-                time.sleep(ERROR_RECOVERY_DELAY)
+                self.sleep(ERROR_RECOVERY_DELAY)
             except Exception:
                 _logger.exception(
                     "exception: sleeping %ds and retrying", ERROR_RECOVERY_DELAY
                 )
                 self.close_databases()
-                time.sleep(ERROR_RECOVERY_DELAY)
+                self.sleep(ERROR_RECOVERY_DELAY)
         self.close_databases(remove_jobs=False)
         _logger.info("stopped")

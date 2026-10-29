@@ -2,7 +2,8 @@
 
 from unittest import mock
 
-from odoo import SUPERUSER_ID, http
+from odoo import SUPERUSER_ID
+from odoo.http.requestlib import Request
 from odoo.tests.common import HttpCase, tagged
 
 from ..controllers.main import RunJobController
@@ -39,7 +40,6 @@ class TestRunJobHttp(HttpCase):
 
         def spy(cls, env, job_uuid):
             captured["default_env_uid"] = env.transaction.default_env.uid
-            return None
 
         with mock.patch.object(RunJobController, "_acquire_job", classmethod(spy)):
             response = self.url_open(
@@ -79,7 +79,7 @@ class TestRunJobHttp(HttpCase):
             update its environment.
             """
 
-        with mock.patch.object(http.Request, "update_env", no_op_update_env):
+        with mock.patch.object(Request, "update_env", no_op_update_env):
             default_env_uid = self._capture_default_env_uid_at_acquire()
 
         self.assertIsNone(default_env_uid)

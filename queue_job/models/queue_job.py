@@ -4,10 +4,10 @@
 import logging
 import random
 import time
-from datetime import datetime, timedelta
 
 from odoo import api, exceptions, fields, models
-from odoo.tools import config, html_escape
+from odoo.fields import Domain
+from odoo.tools import SQL, html_escape
 from odoo.tools.sql import create_index
 
 from odoo.addons.base_sparse_field.models.fields import Serialized
@@ -35,7 +35,7 @@ class QueueJob(models.Model):
 
     _name = "queue.job"
     _description = "Queue Job"
-    _inherit = ["mail.thread", "mail.activity.mixin"]
+    _inherit = ["mail.thread", "mail.activity.mixin"]  # noqa: RUF012
     _log_access = False
 
     _order = "date_created DESC, date_done DESC"
@@ -70,9 +70,7 @@ class QueueJob(models.Model):
         help="Single shared identifier of a Graph. Empty for a single job.",
     )
     user_id = fields.Many2one(comodel_name="res.users", string="User ID")
-    company_id = fields.Many2one(
-        comodel_name="res.company", string="Company", index=True
-    )
+    company_id = fields.Many2one(comodel_name="res.company", index=True)
     name = fields.Char(string="Description", readonly=True)
 
     model_name = fields.Char(string="Model", readonly=True)
@@ -83,6 +81,20 @@ class QueueJob(models.Model):
         base_type=models.BaseModel,
     )
     dependencies = Serialized(readonly=True)
+    dependency_ids = fields.Many2many(
+        comodel_name="queue.job",
+        compute="_compute_dependency_ids",
+        search="_search_dependency_ids",
+        string="Dependency Jobs",
+        help="Jobs this job depends on.",
+    )
+    dependent_ids = fields.Many2many(
+        comodel_name="queue.job",
+        compute="_compute_dependency_ids",
+        search="_search_dependent_ids",
+        string="Dependent Jobs",
+        help="Jobs depending on this job.",
+    )
     # dependency graph as expected by the field widget
     dependency_graph = Serialized(compute="_compute_dependency_graph")
     graph_jobs_count = fields.Integer(compute="_compute_graph_jobs_count")
@@ -121,7 +133,6 @@ class QueueJob(models.Model):
     channel_method_name = fields.Char(string="Complete Method Name", readonly=True)
     job_function_id = fields.Many2one(
         comodel_name="queue.job.function",
-        string="Job Function",
         readonly=True,
     )
 
@@ -144,13 +155,62 @@ class QueueJob(models.Model):
             ),
             comment=("Queue Job: partial index for identity_key on active states"),
         )
-        # Used by <queue.job>.autovacuum
+        # Used by <queue.job>._gc_old_jobs
         create_index(
             cr,
             "queue_job_channel_date_done_date_created_index",
             "queue_job",
             ["channel", "date_done", "date_created"],
             comment="Queue Job: index to accelerate autovacuum",
+        )
+
+    @api.depends("dependencies")
+    def _compute_dependency_ids(self):
+        uuids = set()
+        for record in self:
+            dependencies = record.dependencies or {}
+            uuids.update(dependencies.get("depends_on", []))
+            uuids.update(dependencies.get("reverse_depends_on", []))
+        jobs = self.search([("uuid", "in", list(uuids))])
+        jobs_by_uuid = jobs.grouped("uuid")
+        for record in self:
+            dependencies = record.dependencies or {}
+            record.dependency_ids = self.browse().concat(
+                jobs_by_uuid.get(uuid, self.browse())
+                for uuid in dependencies.get("depends_on", [])
+            )
+            record.dependent_ids = self.browse().concat(
+                jobs_by_uuid.get(uuid, self.browse())
+                for uuid in dependencies.get("reverse_depends_on", [])
+            )
+
+    def _search_dependency_ids(self, operator, value):
+        return self._search_dependencies("depends_on", operator, value)
+
+    def _search_dependent_ids(self, operator, value):
+        return self._search_dependencies("reverse_depends_on", operator, value)
+
+    def _search_dependencies(self, key, operator, value):
+        """Search the jobs having one of the given jobs in ``dependencies[key]``"""
+        if operator == "in":
+            operator, value = "any", Domain("id", "in", value)
+        if operator != "any":
+            return NotImplemented
+        jobs = self._search(value)
+        return Domain.custom(
+            to_sql=lambda table: SQL(
+                """
+                EXISTS (
+                    SELECT 1
+                    FROM json_array_elements_text(%s::json -> %s) AS dep(uuid)
+                    JOIN queue_job AS dep_job ON dep_job.uuid = dep.uuid
+                    WHERE dep_job.id IN %s
+                )
+                """,
+                table.dependencies,
+                key,
+                jobs.subselect(),
+            )
         )
 
     @api.depends("dependencies")
@@ -342,8 +402,11 @@ class QueueJob(models.Model):
         # If job was set to DONE do not cancel it
         states_from = (WAIT_DEPENDENCIES, PENDING, ENQUEUED, FAILED)
         result = self.env._("Cancelled by %s", self.env.user.name)
-        records = self.filtered(lambda job_: job_.state in states_from)
-        records._change_job_state(CANCELLED, result=result)
+        for record in self:
+            # Cancelling a job also cancels its dependents, some of them may
+            # be in self already
+            if record.state in states_from:
+                record._change_job_state(CANCELLED, result=result)
         return True
 
     def requeue(self):
@@ -374,7 +437,7 @@ class QueueJob(models.Model):
         if not group:
             return None
         companies = self.mapped("company_id")
-        domain = [("group_ids", "=", group.id)]
+        domain = [("all_group_ids", "in", group.ids)]
         if companies:
             domain.append(("company_id", "in", companies.ids))
         return domain
@@ -408,33 +471,41 @@ class QueueJob(models.Model):
         """
         return [("state", "=", "failed")]
 
-    def autovacuum(self):
-        """Delete all jobs done based on the removal interval defined on the
-           channel
+    @api.autovacuum
+    def _gc_old_jobs(self):
+        """Delete the jobs done or cancelled before the removal interval of
+        their channel, in batches of 1000.
 
-        Called from a cron.
+        Jobs of an unknown channel (renamed, deleted) use the removal interval
+        of the root channel.
+
+        Called from the base autovacuum cron, which commits after each batch
+        and calls it again while it returns remaining jobs.
         """
-        for channel in self.env["queue.job.channel"].search([]):  # pylint: disable=no-search-all
-            deadline = datetime.now() - timedelta(days=int(channel.removal_interval))
-            # Delete in chunks using a stable order (matches composite index)
-            while True:
-                jobs = self.search(
-                    [
-                        "|",
-                        ("date_done", "<=", deadline),
-                        ("date_cancelled", "<=", deadline),
-                        ("channel", "=", channel.complete_name),
-                    ],
-                    order="date_done, date_created",
-                    limit=1000,
-                )
-                if jobs:
-                    jobs.sudo().unlink()
-                    if not config["test_enable"]:
-                        self.env.cr.commit()  # pylint: disable=E8102
-                else:
-                    break
-        return True
+        channels = self.env["queue.job.channel"].search([])  # pylint: disable=no-search-all
+        root = self.env.ref("queue_job.channel_root")
+        intervals = [
+            (Domain("channel", "=", channel.complete_name), channel.removal_interval)
+            for channel in channels
+        ]
+        intervals.append(
+            (
+                Domain("channel", "not in", channels.mapped("complete_name")),
+                root.removal_interval,
+            )
+        )
+        domain = Domain.OR(
+            channel_domain
+            & (
+                Domain("date_done", "<=", f"-{days}d")
+                | Domain("date_cancelled", "<=", f"-{days}d")
+            )
+            for channel_domain, days in intervals
+        )
+        limit = 1000
+        jobs = self.search(domain, order="date_done, date_created", limit=limit + 1)
+        jobs[:limit].sudo().unlink()
+        return len(jobs[:limit]), len(jobs) > limit
 
     def related_action_open_record(self):
         """Open a form view with the record(s) of the job.

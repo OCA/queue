@@ -461,7 +461,7 @@ class Job:
         if self.priority is None:
             self.priority = DEFAULT_PRIORITY
 
-        self.date_created = datetime.now()
+        self.date_created = datetime.now()  # noqa: DTZ005
         self._description = description
 
         if isinstance(identity_key, str):
@@ -524,7 +524,7 @@ class Job:
             elif not self.max_retries:  # infinite retries
                 raise
             elif self.retry >= self.max_retries:
-                type_, value, traceback = sys.exc_info()
+                type_, value, _traceback = sys.exc_info()
                 # change the exception type but keep the original
                 # traceback and message:
                 # http://blog.ianbicking.org/2007/09/12/re-raising-exceptions/
@@ -546,48 +546,45 @@ class Job:
             finally:
                 self._env = env
 
-    def _get_common_dependent_jobs_query(self):
-        return """
-            UPDATE queue_job
-            SET state = %s
-            FROM (
-            SELECT child.id, array_agg(parent.state) as parent_states
-            FROM queue_job job
-            JOIN LATERAL
-              json_array_elements_text(
-                  job.dependencies::json->'reverse_depends_on'
-              ) child_deps ON true
-            JOIN queue_job child
-            ON child.graph_uuid = job.graph_uuid
-            AND child.uuid = child_deps
-            JOIN LATERAL
-                json_array_elements_text(
-                  child.dependencies::json->'depends_on'
-                ) parent_deps ON true
-            JOIN queue_job parent
-            ON parent.graph_uuid = job.graph_uuid
-            AND parent.uuid = parent_deps
-            WHERE job.uuid = %s
-            GROUP BY child.id
-            ) jobs
-            WHERE
-            queue_job.id = jobs.id
-            AND %s = ALL(jobs.parent_states)
-            AND state = %s;
-        """
-
     def should_check_dependents(self):
         return any(self.__reverse_depends_on_uuids)
 
     def enqueue_waiting(self):
-        sql = self._get_common_dependent_jobs_query()
-        self.env.cr.execute(sql, (PENDING, self.uuid, DONE, WAIT_DEPENDENCIES))
-        self.env["queue.job"].invalidate_model(["state"])
+        dependents = (
+            self.env["queue.job"]
+            .sudo()
+            .search(
+                [
+                    ("graph_uuid", "=", self.graph_uuid),
+                    ("state", "=", WAIT_DEPENDENCIES),
+                    ("dependency_ids", "any", [("uuid", "=", self.uuid)]),
+                    ("dependency_ids", "not any", [("state", "!=", DONE)]),
+                ]
+            )
+        )
+        dependents.state = PENDING
 
     def cancel_dependent_jobs(self):
-        sql = self._get_common_dependent_jobs_query()
-        self.env.cr.execute(sql, (CANCELLED, self.uuid, CANCELLED, WAIT_DEPENDENCIES))
-        self.env["queue.job"].invalidate_model(["state"])
+        """Cancel the jobs waiting on this one, and their own dependents
+
+        A dependent job can no longer run once one of its dependencies is
+        cancelled, whatever the state of the others.
+        """
+        dependents = self.db_record().dependent_ids
+        while dependents:
+            dependents = dependents.filtered(
+                lambda dependent: dependent.state == WAIT_DEPENDENCIES
+            )
+            dependents.write(
+                {
+                    "state": CANCELLED,
+                    "date_cancelled": self.date_cancelled,
+                    "result": self.env._(
+                        "Cancelled because a job it depends on was cancelled"
+                    ),
+                }
+            )
+            dependents = dependents.dependent_ids
 
     def store(self):
         """Store the Job"""
@@ -745,9 +742,8 @@ class Job:
 
     @property
     def identity_key(self):
-        if self._identity_key is None:
-            if self._identity_key_func:
-                self._identity_key = self._identity_key_func(self)
+        if self._identity_key is None and self._identity_key_func:
+            self._identity_key = self._identity_key_func(self)
         return self._identity_key
 
     @identity_key.setter
@@ -808,9 +804,9 @@ class Job:
         if not value:
             self._eta = None
         elif isinstance(value, timedelta):
-            self._eta = datetime.now() + value
+            self._eta = datetime.now() + value  # noqa: DTZ005
         elif isinstance(value, int):
-            self._eta = datetime.now() + timedelta(seconds=value)
+            self._eta = datetime.now() + timedelta(seconds=value)  # noqa: DTZ005
         else:
             self._eta = value
 
@@ -845,13 +841,13 @@ class Job:
 
     def set_enqueued(self):
         self.state = ENQUEUED
-        self.date_enqueued = datetime.now()
+        self.date_enqueued = datetime.now()  # noqa: DTZ005
         self.date_started = None
         self.worker_pid = None
 
     def set_started(self):
         self.state = STARTED
-        self.date_started = datetime.now()
+        self.date_started = datetime.now()  # noqa: DTZ005
         self.worker_pid = os.getpid()
         self.add_lock_record()
 
@@ -859,13 +855,13 @@ class Job:
         self.state = DONE
         self.exc_name = None
         self.exc_info = None
-        self.date_done = datetime.now()
+        self.date_done = datetime.now()  # noqa: DTZ005
         if result is not None:
             self.result = result
 
     def set_cancelled(self, result=None):
         self.state = CANCELLED
-        self.date_cancelled = datetime.now()
+        self.date_cancelled = datetime.now()  # noqa: DTZ005
         if result is not None:
             self.result = result
 
@@ -925,7 +921,7 @@ class Job:
         if not funcname:
             funcname = record._default_related_action
         if not isinstance(funcname, str):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY004
                 "related_action must be the name of the method on queue.job as string"
             )
         action = getattr(record, funcname)
