@@ -1,5 +1,5 @@
-import odoo.tests.common as common
 from odoo import exceptions
+from odoo.tests import common
 
 
 class TestJobFunction(common.TransactionCase):

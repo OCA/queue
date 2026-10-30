@@ -56,7 +56,7 @@ class QueueJob(models.Model):
                 "state": "enqueued",
                 "model_name": "queue.job",
                 "method_name": "write",
-                "date_enqueued": datetime.now() - timedelta(minutes=1),
+                "date_enqueued": datetime.now() - timedelta(minutes=1),  # noqa: DTZ005
             }
         )
 

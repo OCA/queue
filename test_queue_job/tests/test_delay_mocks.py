@@ -1,10 +1,11 @@
 # Copyright 2021 Guewen Baconnier
 # license lgpl-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
+# ruff: noqa: C408
 
 import os
 from unittest import mock
 
-import odoo.tests.common as common
+from odoo.tests import common
 from odoo.tools import mute_logger
 
 from odoo.addons.queue_job.delay import Delayable

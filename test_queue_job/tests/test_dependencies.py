@@ -1,7 +1,7 @@
 # Copyright 2019 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
-import odoo.tests.common as common
+from odoo.tests import common
 
 from odoo.addons.queue_job.delay import DelayableGraph, chain, group
 from odoo.addons.queue_job.job import PENDING, WAIT_DEPENDENCIES, Job

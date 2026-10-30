@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <odoo noupdate="1">
-    <record model="queue.job.channel" id="channel_sub">
+    <record id="channel_sub" model="queue.job.channel">
         <field name="name">sub</field>
         <field name="parent_id" ref="queue_job.channel_root" />
     </record>
-    <record model="queue.job.channel" id="channel_subsub">
+    <record id="channel_subsub" model="queue.job.channel">
         <field name="name">subsub</field>
         <field name="parent_id" ref="channel_sub" />
     </record>

@@ -1,5 +1,6 @@
 # Copyright 2025 ACSONE SA/NV
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+# ruff: noqa: DTZ005
 from contextlib import closing
 from datetime import datetime, timedelta
 
