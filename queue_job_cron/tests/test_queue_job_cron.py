@@ -1,6 +1,11 @@
 # Copyright 2019 ACSONE SA/NV (<http://acsone.eu>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+from unittest import mock
+
+from psycopg2.errors import LockNotAvailable
+
 from odoo import api
+from odoo.sql_db import db_connect
 from odoo.tests import Form
 from odoo.tests.common import TransactionCase
 
@@ -8,8 +13,24 @@ from odoo.addons.queue_job.controllers.main import _prevent_commit
 
 
 class TestQueueJobCron(TransactionCase):
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.cron = cls.env["ir.cron"].create(
+            {
+                "name": "Test queue job cron run",
+                "model_id": cls.env.ref("base.model_res_partner").id,
+                "state": "code",
+                "code": "model",
+                "interval_number": 1,
+                "interval_type": "days",
+                "run_as_queue_job": True,
+            }
+        )
+
+    def _run(self, code):
+        self.cron.code = code
+        self.cron._run_job_as_queue_job(server_action=self.cron.ir_actions_server_id)
 
     def test_queue_job_cron(self):
         QueueJob = self.env["queue.job"]
@@ -42,8 +63,7 @@ class TestQueueJobCron(TransactionCase):
 
     def test_queue_job_cron_run(self):
         cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
-        IrCron = self.env["ir.cron"]
-        IrCron._run_job_as_queue_job(server_action=cron.ir_actions_server_id)
+        cron._run_job_as_queue_job(server_action=cron.ir_actions_server_id)
 
     def test_queue_job_no_parallelism(self):
         cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
@@ -140,3 +160,24 @@ class TestQueueJobCron(TransactionCase):
         action = self.env["ir.actions.server"].browse(action_id)
         with _prevent_commit(self.cr):
             cron._run_job_as_queue_job(server_action=action)  # must not raise
+
+    def test_running_cron_is_locked(self):
+        cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
+        action = self.cron.ir_actions_server_id
+        other_cr = db_connect(self.env.cr.dbname).cursor()
+        try:
+            other_cr.execute(
+                "SELECT id FROM ir_cron WHERE id = %s FOR NO KEY UPDATE", [cron.id]
+            )
+            with self.assertRaises(LockNotAvailable), self.env.cr.savepoint():
+                cron._run_job_as_queue_job(server_action=action)
+        finally:
+            other_cr.close()
+
+    def test_parallel_run_allowed(self):
+        self.cron.no_parallel_queue_job_run = False
+        with mock.patch.object(
+            type(self.cron), "_lock_running_cron", autospec=True
+        ) as lock:
+            self._run("model")
+        lock.assert_not_called()

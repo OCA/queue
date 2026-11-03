@@ -3,6 +3,7 @@
 import logging
 
 from odoo import api, fields, models
+from odoo.tools import SQL
 
 from odoo.addons.queue_job.job import identity_exact
 
@@ -14,10 +15,11 @@ class IrCron(models.Model):
 
     no_parallel_queue_job_run = fields.Boolean(
         help="Avoid parallel run. "
-        "If the cron job is already running, the new one will be skipped. "
-        "By default, odoo never runs the same cron job in parallel. This "
-        "option is therefore set to True by default when job is run as a "
-        "queue job.",
+        "If a job of this cron is already pending, the new one will be "
+        "skipped. If one is already running, the new one is postponed until "
+        "it ends. By default, odoo never runs the same cron job in parallel. "
+        "This option is therefore set to True by default when job is run as "
+        "a queue job.",
         default=True,
     )
 
@@ -55,10 +57,46 @@ class IrCron(models.Model):
             self.allow_commit = False
 
     def _run_job_as_queue_job(self, server_action):
+        self.ensure_one()
+        if self.no_parallel_queue_job_run:
+            self._lock_running_cron()
         if not self.allow_commit:
             return server_action.run()
         with self.env.registry.cursor() as new_cr:
-            return server_action.with_env(self.env(cr=new_cr)).run()
+            new_env = self.env(cr=new_cr)
+            res = server_action.with_env(new_env).run()
+            triggered = bool(
+                new_env["ir.cron.trigger"]
+                .sudo()
+                .search_count(
+                    [
+                        ("cron_id", "=", self.id),
+                        ("call_at", "<=", fields.Datetime.now()),
+                    ],
+                    limit=1,
+                )
+            )
+        if triggered:
+            # the cron worker skipped the triggers committed while we held the
+            # row lock: wake it up once the job cursor commits
+            self.env.cr.postcommit.add(self._notifydb)
+        return res
+
+    def _lock_running_cron(self):
+        """Hold the cron row until the job ends, as the native cron worker
+        does while it runs a cron: the worker acquires crons with
+        FOR NO KEY UPDATE SKIP LOCKED, so it won't enqueue this cron again
+        (e.g. from a trigger committed mid-run with allow_commit) before this
+        job ends. When another run holds it, LockNotAvailable is turned into a
+        postponed retry by queue_job.
+        """
+        self.env.cr.execute(
+            SQL(
+                "SELECT id FROM ir_cron WHERE id = %s FOR NO KEY UPDATE NOWAIT",
+                self.id,
+            ),
+            log_exceptions=False,
+        )
 
     def method_direct_trigger(self):
         for cron in self:
