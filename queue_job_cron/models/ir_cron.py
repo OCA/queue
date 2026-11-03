@@ -60,22 +60,19 @@ class IrCron(models.Model):
         self.ensure_one()
         if self.no_parallel_queue_job_run:
             self._lock_running_cron()
-        if not self.allow_commit:
-            return server_action.run()
-        with self.env.registry.cursor() as new_cr:
-            new_env = self.env(cr=new_cr)
-            res = server_action.with_env(new_env).run()
-            triggered = bool(
-                new_env["ir.cron.trigger"]
-                .sudo()
-                .search_count(
-                    [
-                        ("cron_id", "=", self.id),
-                        ("call_at", "<=", fields.Datetime.now()),
-                    ],
-                    limit=1,
-                )
+        if self.allow_commit:
+            with self.env.registry.cursor() as new_cr:
+                new_env = self.env(cr=new_cr)
+                res, deactivate, triggered = self.with_env(
+                    new_env
+                )._run_server_action_with_progress(server_action.with_env(new_env))
+        else:
+            res, deactivate, triggered = self._run_server_action_with_progress(
+                server_action
             )
+        if deactivate:
+            # on the job cursor: the dedicated one would wait on our row lock
+            self.active = False
         if triggered:
             # the cron worker skipped the triggers committed while we held the
             # row lock: wake it up once the job cursor commits
@@ -97,6 +94,32 @@ class IrCron(models.Model):
             ),
             log_exceptions=False,
         )
+
+    def _run_server_action_with_progress(self, server_action):
+        """Run the server action with the progress API wired as the native
+        cron runner does, since _notify_progress is a no-op without a
+        progress record in context. Re-trigger the cron instead of looping
+        over batches.
+
+        :return: a triple ``(result, deactivate, triggered)``, ``result``
+            being the return value of the server action
+        """
+        cron, progress = self._add_progress()
+        res = server_action.with_env(cron.env).run()
+        if progress.done and progress.remaining:
+            cron._trigger()
+        triggered = bool(
+            self.env["ir.cron.trigger"]
+            .sudo()
+            .search_count(
+                [
+                    ("cron_id", "=", self.id),
+                    ("call_at", "<=", fields.Datetime.now()),
+                ],
+                limit=1,
+            )
+        )
+        return res, progress.deactivate and not progress.remaining, triggered
 
     def method_direct_trigger(self):
         for cron in self:

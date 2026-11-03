@@ -32,6 +32,9 @@ class TestQueueJobCron(TransactionCase):
         self.cron.code = code
         self.cron._run_job_as_queue_job(server_action=self.cron.ir_actions_server_id)
 
+    def _triggers(self):
+        return self.env["ir.cron.trigger"].search([("cron_id", "=", self.cron.id)])
+
     def test_queue_job_cron(self):
         QueueJob = self.env["queue.job"]
         default_channel = self.env.ref("queue_job_cron.channel_root_ir_cron")
@@ -160,6 +163,23 @@ class TestQueueJobCron(TransactionCase):
         action = self.env["ir.actions.server"].browse(action_id)
         with _prevent_commit(self.cr):
             cron._run_job_as_queue_job(server_action=action)  # must not raise
+
+    def test_no_progress(self):
+        self._run("model")
+        self.assertTrue(self.cron.active)
+        self.assertFalse(self._triggers())
+
+    def test_progress_remaining_retriggers(self):
+        self._run("env['ir.cron']._notify_progress(done=1, remaining=1)")
+        self.assertTrue(self.cron.active)
+        self.assertTrue(self._triggers())
+
+    def test_progress_done_deactivates(self):
+        self._run(
+            "env['ir.cron']._notify_progress(done=1, remaining=0, deactivate=True)"
+        )
+        self.assertFalse(self.cron.active)
+        self.assertFalse(self._triggers())
 
     def test_running_cron_is_locked(self):
         cron = self.env.ref("queue_job.ir_cron_autovacuum_queue_jobs")
