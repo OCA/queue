@@ -10,7 +10,7 @@ _logger = logging.getLogger(__name__)
 
 
 def must_run_without_delay(env):
-    """Retrun true if jobs have to run immediately.
+    """Return True if jobs have to run immediately.
 
     :param env: `odoo.api.Environment` instance
     """

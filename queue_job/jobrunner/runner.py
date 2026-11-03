@@ -128,7 +128,7 @@ import os
 import selectors
 import threading
 import time
-from contextlib import closing, contextmanager
+from contextlib import contextmanager
 
 import psycopg2
 import requests
@@ -249,14 +249,14 @@ class Database:
 
     def _acquire_master_lock(self):
         """Acquire the master runner lock or raise MasterElectionLost"""
-        with closing(self.conn.cursor()) as cr:
+        with self.conn.cursor() as cr:
             cr.execute("SELECT pg_try_advisory_lock(%s)", (PG_ADVISORY_LOCK_ID,))
             if not cr.fetchone()[0]:
                 msg = f"could not acquire master runner lock on {self.db_name}"
                 raise MasterElectionLost(msg)
 
     def _has_queue_job(self):
-        with closing(self.conn.cursor()) as cr:
+        with self.conn.cursor() as cr:
             cr.execute(
                 "SELECT 1 FROM pg_tables WHERE tablename=%s", ("ir_module_module",)
             )
@@ -285,7 +285,7 @@ class Database:
             return True
 
     def _initialize(self):
-        with closing(self.conn.cursor()) as cr:
+        with self.conn.cursor() as cr:
             cr.execute("LISTEN queue_job")
 
     @contextmanager
@@ -299,17 +299,17 @@ class Database:
             "priority, EXTRACT(EPOCH FROM eta), state "
             "FROM queue_job WHERE %s" % (where,)
         )
-        with closing(self.conn.cursor("select_jobs", withhold=True)) as cr:
+        with self.conn.cursor("select_jobs", withhold=True) as cr:
             cr.execute(query, args)
             yield cr
 
     def keep_alive(self):
         query = "SELECT 1"
-        with closing(self.conn.cursor()) as cr:
+        with self.conn.cursor() as cr:
             cr.execute(query)
 
     def set_job_enqueued(self, uuid):
-        with closing(self.conn.cursor()) as cr:
+        with self.conn.cursor() as cr:
             cr.execute(
                 "UPDATE queue_job SET state=%s, "
                 "date_enqueued=date_trunc('seconds', "
@@ -319,69 +319,32 @@ class Database:
             )
 
     def _query_requeue_dead_jobs(self):
-        return """
-            UPDATE
-                queue_job
-            SET
-                state=(
-                    CASE
-                        WHEN
-                            max_retries IS NOT NULL AND
-                            max_retries != 0 AND -- infinite retries if max_retries is 0
-                            retry IS NOT NULL AND
-                            retry>max_retries
-                        THEN 'failed'
-                        ELSE 'pending'
-                    END),
-                retry=(
-                    CASE
-                        WHEN state='started'
-                        THEN COALESCE(retry,0)+1 ELSE retry
-                    END),
-                exc_name=(
-                    CASE
-                        WHEN
-                            max_retries IS NOT NULL AND
-                            max_retries != 0 AND -- infinite retries if max_retries is 0
-                            retry IS NOT NULL AND
-                            retry>max_retries
-                        THEN 'JobFoundDead'
-                        ELSE exc_name
-                    END),
-                exc_info=(
-                    CASE
-                        WHEN
-                            max_retries IS NOT NULL AND
-                            max_retries != 0 AND -- infinite retries if max_retries is 0
-                            retry IS NOT NULL AND
-                            retry>max_retries
-                        THEN 'Job found dead after too many retries'
-                        ELSE exc_info
-                    END)
-            WHERE
-                state IN ('enqueued','started')
-                AND date_enqueued < (now() AT TIME ZONE 'utc' - INTERVAL '10 sec')
-                AND (
-                    id in (
-                        SELECT
-                            queue_job_id
-                        FROM
-                            queue_job_lock
-                        WHERE
-                            queue_job_lock.queue_job_id = queue_job.id
-                        FOR NO KEY UPDATE SKIP LOCKED
-                    )
-                    OR NOT EXISTS (
-                        SELECT
-                            1
-                        FROM
-                            queue_job_lock
-                        WHERE
-                            queue_job_lock.queue_job_id = queue_job.id
-                    )
-                )
-            RETURNING uuid
-            """
+        return """\
+        WITH dead_job AS (
+         SELECT id,
+                (max_retries IS NOT NULL AND
+                 max_retries != 0 AND  -- infinite retries if max_retries is 0
+                 retry IS NOT NULL AND
+                 retry > max_retries) "stop_retry",
+                (CASE WHEN state='started'
+                 THEN COALESCE(retry, 0) + 1 ELSE retry END) "retry"
+           FROM queue_job
+          WHERE state IN ('enqueued', 'started')
+            AND date_enqueued < now() AT TIME ZONE 'utc' - INTERVAL '10 sec'
+            FOR NO KEY UPDATE SKIP LOCKED)
+
+        UPDATE queue_job
+           SET retry = dead_job.retry,
+               state = CASE WHEN stop_retry THEN 'failed' ELSE 'pending' END,
+               exc_name = CASE WHEN stop_retry THEN 'JobFoundDead' ELSE exc_name END,
+               exc_info =
+                   CASE WHEN stop_retry
+                   THEN 'Job found dead after too many retries'
+                   ELSE exc_info END
+          FROM dead_job
+         WHERE queue_job.id = dead_job.id
+
+        RETURNING uuid;"""
 
     def requeue_dead_jobs(self):
         """
@@ -409,7 +372,7 @@ class Database:
         the controller receiving the request).
         """
 
-        with closing(self.conn.cursor()) as cr:
+        with self.conn.cursor() as cr:
             query = self._query_requeue_dead_jobs()
 
             cr.execute(query)
