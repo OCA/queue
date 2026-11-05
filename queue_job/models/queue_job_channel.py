@@ -32,7 +32,10 @@ class QueueJobChannel(models.Model):
         compute="_compute_complete_name", store=True, readonly=True, recursive=True
     )
     parent_id = fields.Many2one(
-        comodel_name="queue.job.channel", string="Parent Channel", ondelete="restrict"
+        comodel_name="queue.job.channel",
+        string="Parent Channel",
+        ondelete="restrict",
+        default=lambda self: self._default_parent_id(),
     )
     job_function_ids = fields.One2many(
         comodel_name="queue.job.function",
@@ -153,6 +156,13 @@ class QueueJobChannel(models.Model):
             self.env.cr.dbname, rules, default=runner._max_capacity()
         )
 
+    def _default_parent_id(self):
+        # empty while the root channel itself is being created at install
+        return (
+            self.env.ref("queue_job.channel_root", raise_if_not_found=False)
+            or self.browse()
+        )
+
     @api.constrains("parent_id", "name")
     def parent_required(self):
         for record in self:
@@ -169,7 +179,7 @@ class QueueJobChannel(models.Model):
             new_vals_list = []
             for vals in vals_list:
                 name = vals.get("name")
-                parent_id = vals.get("parent_id")
+                parent_id = vals.get("parent_id", self._default_parent_id().id)
                 if name and parent_id:
                     existing = self.search(
                         [("name", "=", name), ("parent_id", "=", parent_id)]

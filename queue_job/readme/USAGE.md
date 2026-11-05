@@ -168,7 +168,6 @@ Example of channel:
 ``` XML
 <record id="channel_sale" model="queue.job.channel">
     <field name="name">sale</field>
-    <field name="parent_id" ref="queue_job.channel_root" />
 </record>
 ```
 
