@@ -462,8 +462,6 @@ class Channel:
         self._metrics_labels = {
             "db": db_name,
             "channel": self.fullname,
-            "root": not bool(self.parent),
-            "leaf": not bool(self.children),
         }
         metrics.channel_capacity.labels(**self._metrics_labels).set_function(
             weakref.proxy(self)._capacity_gauge

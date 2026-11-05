@@ -5,7 +5,7 @@ from prometheus_client import CollectorRegistry, Counter, Gauge, MetricsHandler
 
 _registry = CollectorRegistry()
 
-_channel_label_names = ("db", "channel", "root", "leaf")
+_channel_label_names = ("db", "channel")
 channel_capacity = Gauge(
     "queue_job_channel_capacity",
     documentation="Channel Capacity",
