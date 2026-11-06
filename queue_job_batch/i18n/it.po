@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2025-02-21 18:06+0000\n"
+"PO-Revision-Date: 2026-11-06 14:46+0000\n"
 "Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: none\n"
 "Language: it\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.6.2\n"
+"X-Generator: Weblate 5.15.2\n"
 
 #. module: queue_job_batch
 #: model:ir.model.fields,field_description:queue_job_batch.field_queue_job_batch__message_needaction
@@ -285,7 +285,7 @@ msgstr "Numero di messaggi con errore di consegna"
 #: model:ir.model.fields.selection,name:queue_job_batch.selection__queue_job_batch__state__pending
 #: model_terms:ir.ui.view,arch_db:queue_job_batch.view_queue_job_batch_search
 msgid "Pending"
-msgstr "In sospeso"
+msgstr "In attesa"
 
 #. module: queue_job_batch
 #. odoo-javascript
