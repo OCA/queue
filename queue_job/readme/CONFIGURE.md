@@ -65,7 +65,6 @@ The execution of channels by the job runner is defined by:
 - `throttle`: minimum delay, in seconds, between the start of two jobs
 - `paused`: stop running jobs in this channel and its subchannels
 
-
 **Job Runner Configuration Parameters**
 
 - Using environment variables:
@@ -82,6 +81,8 @@ The execution of channels by the job runner is defined by:
       or `localhost` if unset
     - `ODOO_QUEUE_JOB_HTTP_AUTH_USER=jobrunner`, default empty
     - `ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD=s3cr3t`, default empty
+    - `ODOO_QUEUE_JOB_METRICS_LISTEN_ADDRESS=127.0.0.1`, default 127.0.0.1
+    - `ODOO_QUEUE_JOB_METRICS_PORT=9000`, default empty
 - Using the Odoo configuration file (set either `channels`, either
   `max_capacity` and/or `db_max_capacity`)
 
@@ -132,7 +133,6 @@ server_wide_modules = web,queue_job
 
 [^1]: It works with the threaded Odoo server too, although this way of
     running Odoo is obviously not for production purposes.
-
 
 **Migrating from server-wide channels to per-database channels**
 
