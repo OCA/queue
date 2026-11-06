@@ -429,8 +429,8 @@ only start when the previous one is done:
            .delay()
        )
 
-Enqueing Job Options
-~~~~~~~~~~~~~~~~~~~~
+Enqueuing Job Options
+~~~~~~~~~~~~~~~~~~~~~
 
 - priority: default is 10, the closest it is to 0, the faster it will be
   executed

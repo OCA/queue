@@ -89,7 +89,9 @@ class QueueJobFunction(models.Model):
         help="Allows the job to commit transactions during execution. "
         "Under the hood, this executes the job in a new database cursor, "
         "which incurs an overhead as it requires an extra connection to "
-        "the database. "
+        "the database.\n"
+        "Important: the new cursor cannot alter the queue.job record, "
+        "because the runner keeps an exclusive lock on it."
     )
 
     @api.depends("model_id.model", "method")
