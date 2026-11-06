@@ -11,6 +11,7 @@
                     name="no_parallel_queue_job_run"
                     invisible="not run_as_queue_job"
                 />
+                <field name="allow_commit" invisible="not run_as_queue_job" />
                 <field
                     name="channel_id"
                     invisible="not run_as_queue_job"
