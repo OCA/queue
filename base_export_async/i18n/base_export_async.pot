@@ -1,0 +1,144 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* base_export_async
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: base_export_async
+#. odoo-javascript
+#: code:addons/base_export_async/static/src/xml/base.xml:0
+#, python-format
+msgid "(You will receive the export by email)"
+msgstr ""
+
+#. module: base_export_async
+#: model:mail.template,body_html:base_export_async.delay_export_mail_template
+msgid ""
+"<p>Your export is available <a t-attf-href=\"{{ object.url }}\" target=\"_blank\">here</a>.</p>\n"
+"            <p>It will be automatically deleted the <t t-out=\"object.expiration_date\"></t>.</p>\n"
+"            <br>\n"
+"            <p>\n"
+"                <span style=\"color: #808080;\">This is an automated message please do not reply.</span>\n"
+"            </p>\n"
+"        "
+msgstr ""
+
+#. module: base_export_async
+#: model:ir.model,name:base_export_async.model_delay_export
+msgid "Asynchronous Export"
+msgstr ""
+
+#. module: base_export_async
+#. odoo-javascript
+#: code:addons/base_export_async/static/src/xml/base.xml:0
+#, python-format
+msgid "Asynchronous export"
+msgstr ""
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: base_export_async
+#: model:mail.template,name:base_export_async.delay_export_mail_template
+msgid "Delay Export"
+msgstr ""
+
+#. module: base_export_async
+#: model:ir.actions.server,name:base_export_async.to_delete_attachment_ir_actions_server
+#: model:ir.cron,cron_name:base_export_async.to_delete_attachment
+msgid "Delete Generated Exports"
+msgstr ""
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__expiration_date
+msgid "Expiration Date"
+msgstr ""
+
+#. module: base_export_async
+#: model:mail.template,subject:base_export_async.delay_export_mail_template
+msgid "Export {{ object.model_description }} {{ datetime.date.today() }}"
+msgstr ""
+
+#. module: base_export_async
+#. odoo-javascript
+#: code:addons/base_export_async/static/src/js/list_controller.esm.js:0
+#, python-format
+msgid "External ID"
+msgstr ""
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__id
+msgid "ID"
+msgstr ""
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__model_description
+msgid "Model Description"
+msgstr ""
+
+#. module: base_export_async
+#. odoo-javascript
+#: code:addons/base_export_async/static/src/js/data_export.esm.js:0
+#, python-format
+msgid "Please select fields to save export list..."
+msgstr ""
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__url
+msgid "Url"
+msgstr ""
+
+#. module: base_export_async
+#: model:ir.model.fields,field_description:base_export_async.field_delay_export__user_ids
+msgid "Users"
+msgstr ""
+
+#. module: base_export_async
+#. odoo-python
+#: code:addons/base_export_async/models/delay_export.py:0
+#, python-format
+msgid "You must set an email address to your user."
+msgstr ""
+
+#. module: base_export_async
+#. odoo-javascript
+#: code:addons/base_export_async/static/src/js/list_controller.esm.js:0
+#, python-format
+msgid "You will receive the export file by email as soon as it is finished."
+msgstr ""
