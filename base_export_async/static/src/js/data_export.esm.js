@@ -1,0 +1,30 @@
+import {ExportDataDialog} from "@web/views/view_dialogs/export_data_dialog";
+import {_t} from "@web/core/l10n/translation";
+import {patch} from "@web/core/utils/patch";
+
+patch(ExportDataDialog.prototype, {
+    patchName: "base_export_async",
+    setup() {
+        super.setup();
+        this.state.async = false;
+    },
+    onToggleExportAsync(value) {
+        this.state.async = value;
+    },
+    async onClickExportButton() {
+        if (!this.state.exportList.length) {
+            return this.notification.add(
+                _t("Please select fields to save export list..."),
+                {
+                    type: "danger",
+                }
+            );
+        }
+        await this.props.download(
+            this.state.exportList,
+            this.state.isCompatible,
+            this.availableFormats[this.state.selectedFormat].tag,
+            this.state.async
+        );
+    },
+});
