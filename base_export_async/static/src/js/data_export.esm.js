@@ -1,5 +1,6 @@
 /** @odoo-module */
 import {ExportDataDialog} from "@web/views/view_dialogs/export_data_dialog";
+import {_t} from "@web/core/l10n/translation";
 import {patch} from "@web/core/utils/patch";
 
 patch(ExportDataDialog.prototype, {
@@ -13,7 +14,7 @@ patch(ExportDataDialog.prototype, {
     async onClickExportButton() {
         if (!this.state.exportList.length) {
             return this.notification.add(
-                this.env._t("Please select fields to save export list..."),
+                _t("Please select fields to save export list..."),
                 {
                     type: "danger",
                 }

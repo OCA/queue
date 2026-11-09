@@ -17,7 +17,7 @@ patch(ListController.prototype, {
             type: field.field_type || field.type,
         }));
         if (import_compat) {
-            exportedFields.unshift({name: "id", label: this.env._t("External ID")});
+            exportedFields.unshift({name: "id", label: _t("External ID")});
         }
         if (async) {
             /*
