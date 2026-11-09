@@ -463,7 +463,7 @@ class Database:
 
             for (uuid,) in cr.fetchall():
                 _logger.warning("Re-queued dead job with uuid: %s", uuid)
-                metrics.dead_jobs_requeued_total.labels(db=self.db_name).inc()
+                metrics.dead_jobs_requeued_total.labels(db=metrics.db_label(self.db_name)).inc()
 
 
 class QueueJobRunner:
@@ -711,7 +711,7 @@ class QueueJobRunner:
     def _dispatch_job(self, job):
         _logger.info("asking Odoo to run job %s on db %s", job.uuid, job.db_name)
         self.db_by_name[job.db_name].set_job_enqueued(job.uuid)
-        metrics.jobs_scheduled_total.labels(db=job.db_name).inc()
+        metrics.jobs_scheduled_total.labels(db=metrics.db_label(job.db_name)).inc()
         _async_http_get(
             self.scheme,
             self.host,

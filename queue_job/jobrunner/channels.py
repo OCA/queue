@@ -460,7 +460,7 @@ class Channel:
         """Register gauges for a specific database in this channel."""
         self.unregister_metrics()
         self._metrics_labels = {
-            "db": db_name,
+            "db": metrics.db_label(db_name),
             "channel": self.fullname,
         }
         metrics.channel_capacity.labels(**self._metrics_labels).set_function(
@@ -1284,9 +1284,11 @@ class ChannelManager:
     def register_metrics(self, db_name):
         for channel in self._channels_by_name.values():
             channel.register_metrics(db_name)
-        metrics.jobs_to_do.labels({"db": db_name}).set_function(self._jobs_to_do_gauge)
+        metrics.jobs_to_do.labels(db=metrics.db_label(db_name)).set_function(
+            self._jobs_to_do_gauge
+        )
 
     def unregister_metrics(self, db_name):
         for channel in self._channels_by_name.values():
             channel.unregister_metrics()
-        metrics.jobs_to_do.remove_by_labels({"db": db_name})
+        metrics.jobs_to_do.remove_by_labels({"db": metrics.db_label(db_name)})

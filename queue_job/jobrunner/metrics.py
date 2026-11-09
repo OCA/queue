@@ -61,6 +61,10 @@ dead_jobs_requeued_total = Counter(
 )
 
 
+def db_label(db_name: str | None) -> str:
+    return db_name or ""
+
+
 def make_metrics_server(bind_addr, port) -> HTTPServer:
     infos = socket.getaddrinfo(
         bind_addr,
