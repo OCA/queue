@@ -513,19 +513,7 @@ class QueueJobRunner:
         self.db_by_name = {}
         self._stop = False
         self._stop_pipe = os.pipe()
-        metrics_listen_address, metrics_port = _metrics_config()
-        if metrics_listen_address and metrics_port:
-            self._metrics_server = metrics.make_metrics_server(
-                metrics_listen_address, metrics_port
-            )
-            _logger.info(
-                "jobrunner metrics served on http://%s:%d/metrics",
-                metrics_listen_address,
-                metrics_port,
-            )
-        else:
-            self._metrics_server = None
-            _logger.info("jobrunner metrics server not configured")
+        self._metrics_server = None
 
     def __del__(self):
         # pylint: disable=except-pass
@@ -688,6 +676,27 @@ class QueueJobRunner:
                 _logger.info("queue job runner ready for db %s", db_name)
             else:
                 db.close()
+
+    def initialize_metrics_server(self):
+        metrics_listen_address, metrics_port = _metrics_config()
+        if metrics_listen_address and metrics_port:
+            self._metrics_server = metrics.make_metrics_server(
+                metrics_listen_address, metrics_port
+            )
+            _logger.info(
+                "jobrunner metrics served on http://%s:%d/metrics",
+                metrics_listen_address,
+                metrics_port,
+            )
+        else:
+            self._metrics_server = None
+            _logger.info("jobrunner metrics server not configured")
+
+    def shutdown_metrics_server(self):
+        if not self._metrics_server:
+            return
+        self._metrics_server.server_close()
+        self._metrics_server = None
 
     def requeue_dead_jobs(self):
         for db in self.db_by_name.values():
@@ -866,11 +875,17 @@ class QueueJobRunner:
         while not self._stop:
             # outer loop does exception recovery
             try:
+                # shutdown metrics server if one exists, because if we loose
+                # the leader election, we don't want it to listen and never respond
+                self.shutdown_metrics_server()
                 _logger.debug("initializing database connections")
                 # TODO: how to detect new databases or databases
                 #       on which queue_job is installed after server start?
                 self.initialize_databases()
                 _logger.info("database connections ready")
+                # at this point we have acquired the leader lock, so we can
+                # start the metrics server
+                self.initialize_metrics_server()
                 # inner loop does the normal processing
                 while not self._stop:
                     self.requeue_dead_jobs()
