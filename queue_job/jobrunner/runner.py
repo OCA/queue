@@ -35,7 +35,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import odoo
 from odoo.tools import config
 
-from . import queue_job_config
+from . import metrics, queue_job_config
 from .channels import ENQUEUED, NOT_DONE, RELOAD_PAYLOAD, ChannelConfig, ChannelManager
 
 SELECT_TIMEOUT = 60
@@ -164,6 +164,18 @@ def _connection_info_for(db_name):
             connection_info[p] = cfg
 
     return connection_info
+
+
+def _metrics_config() -> tuple[str, int | None]:
+    listen_address = (
+        os.environ.get("ODOO_QUEUE_JOB_METRICS_LISTEN_ADDRESS")
+        or queue_job_config.get("metrics_listen_address")
+        or "127.0.0.1"
+    )
+    port = os.environ.get("ODOO_QUEUE_JOB_METRICS_PORT") or queue_job_config.get(
+        "metrics_port"
+    )
+    return listen_address, int(port) if port else None
 
 
 def _async_http_get(scheme, host, port, user, password, db_name, job_uuid):
@@ -451,6 +463,7 @@ class Database:
 
             for (uuid,) in cr.fetchall():
                 _logger.warning("Re-queued dead job with uuid: %s", uuid)
+                metrics.dead_jobs_requeued_total.labels(db=metrics.db_label(self.db_name)).inc()
 
 
 class QueueJobRunner:
@@ -479,6 +492,7 @@ class QueueJobRunner:
             channel_manager = ChannelManager()
             channel_manager.simple_configure(channel_config_string)
             self._server_wide_channel_manager = channel_manager
+            self._server_wide_channel_manager.register_metrics(db_name=None)
             # max_capacity is always equal to the root channel in server-wide
             # configuration
             max_capacity = channel_manager.get_channel_by_name("root").capacity
@@ -499,6 +513,7 @@ class QueueJobRunner:
         self.db_by_name = {}
         self._stop = False
         self._stop_pipe = os.pipe()
+        self._metrics_server = None
 
     def __del__(self):
         # pylint: disable=except-pass
@@ -635,10 +650,13 @@ class QueueJobRunner:
         """Build the channel manager for a database and reload its jobs"""
         db_name = db.db_name
         channel_manager = self._build_channel_manager(db)
+        if db_name in self._channel_manager_by_db:
+            self._channel_manager_by_db[db_name].unregister_metrics(db_name)
         self._channel_manager_by_db[db_name] = channel_manager
         self._channel_managers = list(self._channel_manager_by_db.values())
         self._notify_existing_jobs(db, channel_manager)
         _logger.info("channels configuration loaded for db %s", db_name)
+        channel_manager.register_metrics(db_name)
 
     def _notify_existing_jobs(self, db, channel_manager):
         with db.select_jobs("state in %s", (NOT_DONE,)) as cr:
@@ -659,6 +677,27 @@ class QueueJobRunner:
             else:
                 db.close()
 
+    def initialize_metrics_server(self):
+        metrics_listen_address, metrics_port = _metrics_config()
+        if metrics_listen_address and metrics_port:
+            self._metrics_server = metrics.make_metrics_server(
+                metrics_listen_address, metrics_port
+            )
+            _logger.info(
+                "jobrunner metrics served on http://%s:%d/metrics",
+                metrics_listen_address,
+                metrics_port,
+            )
+        else:
+            self._metrics_server = None
+            _logger.info("jobrunner metrics server not configured")
+
+    def shutdown_metrics_server(self):
+        if not self._metrics_server:
+            return
+        self._metrics_server.server_close()
+        self._metrics_server = None
+
     def requeue_dead_jobs(self):
         for db in self.db_by_name.values():
             if db.has_queue_job:
@@ -672,6 +711,7 @@ class QueueJobRunner:
     def _dispatch_job(self, job):
         _logger.info("asking Odoo to run job %s on db %s", job.uuid, job.db_name)
         self.db_by_name[job.db_name].set_job_enqueued(job.uuid)
+        metrics.jobs_scheduled_total.labels(db=metrics.db_label(job.db_name)).inc()
         _async_http_get(
             self.scheme,
             self.host,
@@ -783,6 +823,8 @@ class QueueJobRunner:
         # we'll select() on database connections and the stop pipe
         conns = [db.conn for db in self.db_by_name.values()]
         conns.append(self._stop_pipe[0])
+        if self._metrics_server:
+            conns.append(self._metrics_server.fileno())
         # look if the channels specify a wakeup time
         wakeup_time = self.next_wakeup_time()
         if not wakeup_time:
@@ -809,7 +851,18 @@ class QueueJobRunner:
                         if key.fileobj == self._stop_pipe[0]:
                             # stop-pipe is not a conn so doesn't need poll()
                             continue
-                        key.fileobj.poll()
+                        elif (
+                            self._metrics_server
+                            and key.fileobj == self._metrics_server.fileno()
+                        ):
+                            # TODO: Room for improvement? handle_request does a
+                            # select() which is redundant here because we know
+                            # the socket is ready. _handle_request_noblock()
+                            # seems better suited but is not public.
+                            self._metrics_server.handle_request()
+                        else:
+                            # db conn
+                            key.fileobj.poll()
 
     def stop(self):
         _logger.info("graceful stop requested")
@@ -822,11 +875,17 @@ class QueueJobRunner:
         while not self._stop:
             # outer loop does exception recovery
             try:
+                # shutdown metrics server if one exists, because if we loose
+                # the leader election, we don't want it to listen and never respond
+                self.shutdown_metrics_server()
                 _logger.debug("initializing database connections")
                 # TODO: how to detect new databases or databases
                 #       on which queue_job is installed after server start?
                 self.initialize_databases()
                 _logger.info("database connections ready")
+                # at this point we have acquired the leader lock, so we can
+                # start the metrics server
+                self.initialize_metrics_server()
                 # inner loop does the normal processing
                 while not self._stop:
                     self.requeue_dead_jobs()
