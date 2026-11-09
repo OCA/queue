@@ -3,6 +3,7 @@
 import logging
 
 from odoo import api, fields, models
+from odoo.tools import SQL
 
 from odoo.addons.queue_job.job import identity_exact
 
@@ -14,15 +15,23 @@ class IrCron(models.Model):
 
     no_parallel_queue_job_run = fields.Boolean(
         help="Avoid parallel run. "
-        "If the cron job is already running, the new one will be skipped. "
-        "By default, odoo never runs the same cron job in parallel. This "
-        "option is therefore set to True by default when job is run as a "
-        "queue job.",
+        "If a job of this cron is already pending, the new one will be "
+        "skipped. If one is already running, the new one is postponed until "
+        "it ends. By default, odoo never runs the same cron job in parallel. "
+        "This option is therefore set to True by default when job is run as "
+        "a queue job.",
         default=True,
     )
 
     run_as_queue_job = fields.Boolean(
         help="Specify if this cron should be ran as a queue job"
+    )
+    allow_commit = fields.Boolean(
+        help="Run this cron's server action in a dedicated database cursor "
+        "when executed as a queue job, allowing it to commit partial "
+        "progress during execution. Incurs the overhead of an extra "
+        "database connection. Only effective when 'Run as Queue Job' is "
+        "enabled.",
     )
     channel_id = fields.Many2one(
         comodel_name="queue.job.channel",
@@ -42,8 +51,75 @@ class IrCron(models.Model):
             else:
                 cron.channel_id = False
 
+    @api.onchange("run_as_queue_job")
+    def _onchange_run_as_queue_job(self):
+        if not self.run_as_queue_job:
+            self.allow_commit = False
+
     def _run_job_as_queue_job(self, server_action):
-        return server_action.run()
+        self.ensure_one()
+        if self.no_parallel_queue_job_run:
+            self._lock_running_cron()
+        if self.allow_commit:
+            with self.env.registry.cursor() as new_cr:
+                new_env = self.env(cr=new_cr)
+                res, deactivate, triggered = self.with_env(
+                    new_env
+                )._run_server_action_with_progress(server_action.with_env(new_env))
+        else:
+            res, deactivate, triggered = self._run_server_action_with_progress(
+                server_action
+            )
+        if deactivate:
+            # on the job cursor: the dedicated one would wait on our row lock
+            self.active = False
+        if triggered:
+            # the cron worker skipped the triggers committed while we held the
+            # row lock: wake it up once the job cursor commits
+            self.env.cr.postcommit.add(self._notifydb)
+        return res
+
+    def _lock_running_cron(self):
+        """Hold the cron row until the job ends, as the native cron worker
+        does while it runs a cron: the worker acquires crons with
+        FOR NO KEY UPDATE SKIP LOCKED, so it won't enqueue this cron again
+        (e.g. from a trigger committed mid-run with allow_commit) before this
+        job ends. When another run holds it, LockNotAvailable is turned into a
+        postponed retry by queue_job.
+        """
+        self.env.cr.execute(
+            SQL(
+                "SELECT id FROM ir_cron WHERE id = %s FOR NO KEY UPDATE NOWAIT",
+                self.id,
+            ),
+            log_exceptions=False,
+        )
+
+    def _run_server_action_with_progress(self, server_action):
+        """Run the server action with the progress API wired as the native
+        cron runner does, since _notify_progress is a no-op without a
+        progress record in context. Re-trigger the cron instead of looping
+        over batches.
+
+        :return: a triple ``(result, deactivate, triggered)``, ``result``
+            being the return value of the server action
+        """
+        cron, progress = self._add_progress()
+        res = server_action.with_env(cron.env).run()
+        if progress.done and progress.remaining:
+            cron._trigger()
+        triggered = bool(
+            self.env["ir.cron.trigger"]
+            .sudo()
+            .search_count(
+                [
+                    ("cron_id", "=", self.id),
+                    ("call_at", "<=", fields.Datetime.now()),
+                ],
+                limit=1,
+            )
+        )
+        return res, progress.deactivate and not progress.remaining, triggered
 
     def method_direct_trigger(self):
         for cron in self:
