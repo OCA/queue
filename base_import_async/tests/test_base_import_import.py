@@ -3,6 +3,8 @@
 
 from odoo.tests.common import RecordCapturer, TransactionCase
 
+from odoo.addons.queue_job.tests.common import trap_jobs
+
 from ..models.base_import_import import OPT_USE_QUEUE
 
 
@@ -97,3 +99,27 @@ class TestBaseImportImport(TransactionCase):
             opts,
         )
         self.assertTrue(any(msg["type"] == "error" for msg in results["messages"]))
+
+    def test_async_import_uses_batch_limit_as_chunk_size(self):
+        values = [["name"], ["partner 1"], ["partner 2"], ["partner 3"]]
+        import_wizard = self.import_wizard.create(
+            {
+                "res_model": self.res_partners._name,
+                "file": "\n".join([";".join(row) for row in values]),
+                "file_type": "text/csv",
+                "file_name": "partners.csv",
+            }
+        )
+        # "limit" is the batch size set in the import dialog
+        opts = {
+            "quoting": '"',
+            "separator": ";",
+            "has_headers": True,
+            "limit": 1,
+            OPT_USE_QUEUE: True,
+        }
+        with trap_jobs() as trap:
+            import_wizard.execute_import(["name"], [], opts)
+            trap.assert_jobs_count(1, only=import_wizard._split_file)
+            trap.perform_enqueued_jobs()
+            trap.assert_jobs_count(3, only=import_wizard._import_one_chunk)
