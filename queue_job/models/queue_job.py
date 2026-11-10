@@ -8,7 +8,6 @@ import time
 from odoo import api, exceptions, fields, models
 from odoo.fields import Domain
 from odoo.tools import SQL, html_escape
-from odoo.tools.sql import create_index
 
 from odoo.addons.base_sparse_field.models.fields import Serialized
 
@@ -139,33 +138,20 @@ class QueueJob(models.Model):
         readonly=True,
     )
 
-    channel = fields.Char(index=True)
+    channel = fields.Char()
 
     identity_key = fields.Char(readonly=True)
     worker_pid = fields.Integer(readonly=True)
 
-    def init(self):
-        cr = self.env.cr
-        # Used by Job.job_record_with_same_identity_key
-        create_index(
-            cr,
-            "queue_job_identity_key_state_partial_index",
-            "queue_job",
-            ["identity_key"],
-            where=(
-                "state in ('pending','enqueued','wait_dependencies') "
-                "AND identity_key IS NOT NULL"
-            ),
-            comment=("Queue Job: partial index for identity_key on active states"),
-        )
-        # Used by <queue.job>._gc_old_jobs
-        create_index(
-            cr,
-            "queue_job_channel_date_done_date_created_index",
-            "queue_job",
-            ["channel", "date_done", "date_created"],
-            comment="Queue Job: index to accelerate autovacuum",
-        )
+    # Used by Job.job_record_with_same_identity_key
+    _identity_key_state_partial_index = models.Index(
+        "(identity_key) WHERE state in ('pending','enqueued','wait_dependencies') "
+        "AND identity_key IS NOT NULL"
+    )
+    # Used by <queue.job>._gc_old_jobs
+    _channel_date_done_date_created_index = models.Index(
+        "(channel, date_done, date_created)"
+    )
 
     @api.depends("dependencies")
     def _compute_dependency_ids(self):
