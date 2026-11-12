@@ -35,7 +35,7 @@ class QueueJob(models.Model):
 
     _name = "queue.job"
     _description = "Queue Job"
-    _inherit = ["mail.thread", "mail.activity.mixin"]  # noqa: RUF012
+    _inherit = ["mail.thread", "mail.activity.mixin"]
     _log_access = False
 
     _order = "date_created DESC, date_done DESC"

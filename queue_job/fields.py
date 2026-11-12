@@ -30,7 +30,7 @@ class JobSerialized(fields.Json):
     _base_type = None
 
     # these are the default values when we convert an empty value
-    _default_json_mapping = {  # noqa: RUF012
+    _default_json_mapping = {
         dict: "{}",
         list: "[]",
         tuple: "[]",
