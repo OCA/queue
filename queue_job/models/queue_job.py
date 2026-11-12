@@ -70,9 +70,7 @@ class QueueJob(models.Model):
         help="Single shared identifier of a Graph. Empty for a single job.",
     )
     user_id = fields.Many2one(comodel_name="res.users", string="User ID")
-    company_id = fields.Many2one(
-        comodel_name="res.company", string="Company", index=True
-    )
+    company_id = fields.Many2one(comodel_name="res.company", index=True)
     name = fields.Char(string="Description", readonly=True)
 
     model_name = fields.Char(string="Model", readonly=True)
@@ -135,7 +133,6 @@ class QueueJob(models.Model):
     channel_method_name = fields.Char(string="Complete Method Name", readonly=True)
     job_function_id = fields.Many2one(
         comodel_name="queue.job.function",
-        string="Job Function",
         readonly=True,
     )
 

@@ -45,9 +45,7 @@ class QueueJobFunction(models.Model):
 
     # model and method should be required, but the required flag doesn't
     # let a chance to _inverse_name to be executed
-    model_id = fields.Many2one(
-        comodel_name="ir.model", string="Model", ondelete="cascade"
-    )
+    model_id = fields.Many2one(comodel_name="ir.model", ondelete="cascade")
     method = fields.Char()
     on_fail_method = fields.Char(
         help="Model function to be called if the job is failed and will not be "
@@ -56,7 +54,6 @@ class QueueJobFunction(models.Model):
 
     channel_id = fields.Many2one(
         comodel_name="queue.job.channel",
-        string="Channel",
         required=True,
         default=lambda r: r._default_channel(),
     )
