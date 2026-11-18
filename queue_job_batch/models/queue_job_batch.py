@@ -2,9 +2,11 @@
 # Copyright 2023 ForgeFlow S.L. (http://www.forgeflow.com)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
+
 from odoo import api, fields, models
 
 from odoo.addons.mail.tools.discuss import Store
+from odoo.addons.queue_job.exception import RetryableJobError
 
 
 class QueueJobBatch(models.Model):
@@ -74,6 +76,18 @@ class QueueJobBatch(models.Model):
         elif "enqueued" in job_states:
             return "enqueued"
         return "pending"
+
+    def check_done(self):
+        if self.job_count != self.finished_job_count + self.failed_job_count:
+            raise RetryableJobError(
+                "%s: %d total jobs != %d finished + %d failed"
+                % (
+                    self.name,
+                    self.job_count,
+                    self.finished_job_count,
+                    self.failed_job_count,
+                )
+            )
 
     def check_state(self):
         grouped = self.env["queue.job"].read_group(
