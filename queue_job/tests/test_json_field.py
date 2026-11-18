@@ -154,6 +154,18 @@ class TestJson(common.TransactionCase):
         value = json.loads(value_json, cls=JobDecoder, env=self.env)
         self.assertEqual(value, expected)
 
+    def test_encoder_object(self):
+        value = [object()]
+        value_json = json.dumps(value, cls=JobEncoder)
+        expected = [None]
+        self.assertEqual(json.loads(value_json), expected)
+
+    def test_decoder_object(self):
+        value_json = "[null]"
+        expected = [None]
+        value = json.loads(value_json, cls=JobDecoder, env=self.env)
+        self.assertEqual(value, expected)
+
     def test_encoder_etree(self):
         etree_el = etree.Element("root", attr="val")
         etree_el.append(etree.Element("child", attr="val"))
