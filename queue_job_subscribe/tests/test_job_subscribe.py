@@ -1,6 +1,7 @@
 # Copyright 2016 Cédric Pigeon
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+from odoo import Command
 from odoo.tests import common
 
 from odoo.addons.queue_job.job import Job
@@ -22,7 +23,7 @@ class TestJobSubscribe(common.TransactionCase):
                     "partner_id": self.other_partner_a.id,
                     "login": "my_login a",
                     "name": "my user",
-                    "group_ids": [(4, grp_queue_job_manager)],
+                    "group_ids": [Command.link(grp_queue_job_manager)],
                 }
             )
         )
@@ -34,7 +35,7 @@ class TestJobSubscribe(common.TransactionCase):
                 "partner_id": self.other_partner_b.id,
                 "login": "my_login_b",
                 "name": "my user 1",
-                "group_ids": [(4, grp_queue_job_manager)],
+                "group_ids": [Command.link(grp_queue_job_manager)],
             }
         )
 
