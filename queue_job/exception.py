@@ -18,6 +18,19 @@ class FailedJobError(JobError):
     """A job had an error having to be resolved."""
 
 
+class JobMethodNotFound(FailedJobError):
+    """The job's target method no longer exists on the model."""
+
+    def __init__(self, model_name, method_name):
+        self.model_name = model_name
+        self.method_name = method_name
+        super().__init__(
+            f"Method '{method_name}' does not exist on model '{model_name}'."
+            f" The job function may have been removed or the module providing"
+            f" it was uninstalled after this job was created."
+        )
+
+
 class RetryableJobError(JobError):
     """A job had an error but can be retried.
 

@@ -112,3 +112,14 @@ class TestRelatedAction(common.TransactionCase):
             "url": "https://en.wikipedia.org/wiki/Discworld",
         }
         self.assertEqual(job_.related_action(), expected)
+
+    def test_open_related_action_missing_method(self):
+        job_ = self.model.with_delay().testing_related_action__no()
+        stored = job_.db_record()
+        self.env.cr.execute(
+            "UPDATE queue_job SET method_name = %s WHERE uuid = %s",
+            ("gone_xyz", job_.uuid),
+        )
+        self.env["queue.job"].invalidate_model()
+        with self.assertRaises(exceptions.UserError):
+            stored.open_related_action()
