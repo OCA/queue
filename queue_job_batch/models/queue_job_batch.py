@@ -2,6 +2,8 @@
 # Copyright 2023 ForgeFlow S.L. (http://www.forgeflow.com)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
+from collections import defaultdict
+
 from odoo import api, fields, models
 
 from odoo.addons.mail.tools.discuss import Store
@@ -58,6 +60,7 @@ class QueueJobBatch(models.Model):
     completeness = fields.Float(
         compute="_compute_job_count",
     )
+    execution_time = fields.Float(compute="_compute_job_count")
     failed_percentage = fields.Float(
         compute="_compute_job_count",
     )
@@ -117,15 +120,17 @@ class QueueJobBatch(models.Model):
     def _compute_job_count(self):
         grouped = self.env["queue.job"].read_group(
             [("job_batch_id", "in", self.ids)],
-            ["job_batch_id", "state"],
+            ["job_batch_id", "state", "exec_time"],
             ["job_batch_id", "state"],
             lazy=False,
         )
         counts = {}
+        times = defaultdict(float)
         for g in grouped:
             batch_id = g["job_batch_id"][0]
             counts.setdefault(batch_id, {})
             counts[batch_id][g["state"]] = g["__count"]
+            times[batch_id] += g["exec_time"]
 
         for rec in self:
             by_state = counts.get(rec.id, {})
@@ -137,6 +142,7 @@ class QueueJobBatch(models.Model):
             rec.failed_job_count = failed
             rec.finished_job_count = done
             rec.completeness = done / max(1, total)
+            rec.execution_time = times[rec.id] * total
             rec.failed_percentage = failed / max(1, total)
 
     @api.model
