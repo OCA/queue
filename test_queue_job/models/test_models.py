@@ -4,11 +4,29 @@
 import functools
 from datetime import datetime, timedelta
 
+from psycopg2 import OperationalError, errorcodes
+
 from odoo import api, fields, models
 
 from odoo.addons.queue_job.delay import chain
 from odoo.addons.queue_job.exception import RetryableJobError
 from odoo.addons.queue_job.job import identity_exact
+
+
+class ConcurrencyError(OperationalError):
+    """A serialization failure, as psycopg2 raises it.
+
+    psycopg2 exposes pgcode read-only and errors.lookup() leaves it unset, so
+    the code has to be carried on a subclass.
+    """
+
+    @property
+    def pgcode(self):
+        return errorcodes.SERIALIZATION_FAILURE
+
+    @property
+    def pgerror(self):
+        return "could not serialize access due to concurrent update"
 
 
 class QueueJob(models.Model):
@@ -79,6 +97,8 @@ class ModelTestQueueJob(models.Model):
         """
         if kwargs.get("raise_retry"):
             raise RetryableJobError("Must be retried later")
+        if kwargs.get("raise_pg_concurrency"):
+            raise ConcurrencyError()
         if kwargs.get("return_context"):
             return self.env.context
         return args, kwargs
@@ -104,6 +124,17 @@ class ModelTestQueueJob(models.Model):
 
     def job_with_retry_pattern__no_zero(self):
         return
+
+    def job_with_retry_pattern__pg_concurrency(self):
+        raise ConcurrencyError()
+
+    def job_writing_a_record(self, record):
+        """Write without flushing, the way a job function normally does.
+
+        The UPDATE is left to the next flush, which is where PostgreSQL
+        reports a conflicting concurrent update rather than from here.
+        """
+        record.name = "written by the job"
 
     def mapped(self, func):
         return super().mapped(func)

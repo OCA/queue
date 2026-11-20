@@ -21,6 +21,14 @@
         <field name="retry_pattern" eval="{3: 180}" />
     </record>
     <record
+        id="job_function_test_queue_job_job_with_retry_pattern__pg_concurrency"
+        model="queue.job.function"
+    >
+        <field name="model_id" ref="test_queue_job.model_test_queue_job" />
+        <field name="method">job_with_retry_pattern__pg_concurrency</field>
+        <field name="retry_pattern" eval="{1: 60}" />
+    </record>
+    <record
         id="job_function_test_queue_job_job_commit_with_arg_records"
         model="queue.job.function"
     >
