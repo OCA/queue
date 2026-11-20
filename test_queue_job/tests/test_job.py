@@ -30,6 +30,7 @@ from odoo.addons.queue_job.job import (
     WAIT_DEPENDENCIES,
     Job,
 )
+from odoo.addons.test_queue_job.models.test_models import ConcurrencyError
 
 from .common import JobCommonCase
 
@@ -151,6 +152,58 @@ class TestJobsOnTestingMethod(JobCommonCase):
         self.assertIsNone(caught.exception.seconds)
         seconds = test_job._get_retry_seconds(caught.exception.seconds)
         self.assertEqual(seconds, 60)
+
+    def test_pg_concurrency_error_on_flush_is_retryable_and_capped(self):
+        """A serialization failure raised by the flush is retried too.
+
+        A job function rarely raises it itself: it writes, and PostgreSQL
+        reports the conflict when the write reaches the database. The runners
+        call perform() inside a savepoint, so that flush happens on leaving
+        it - after perform() has returned - and the failure used to escape
+        the conversion entirely and fail the job on its first attempt.
+        """
+        record = self.env["test.queue.job"].create({"name": "to be written"})
+        self.env.flush_all()
+        method = self.env["test.queue.job"].job_writing_a_record
+        test_job = Job(method, args=(record,), max_retries=2)
+
+        # The savepoint is the runners' own, and is left before the patch so
+        # that its closing flush is the real one.
+        with self.env.cr.savepoint():
+            with mock.patch.object(
+                type(record), "flush_model", side_effect=ConcurrencyError
+            ):
+                with self.assertRaises(RetryableJobError):
+                    test_job.perform()
+                self.assertEqual(test_job.retry, 1)
+                with self.assertRaises(FailedJobError):
+                    test_job.perform()
+                self.assertEqual(test_job.retry, 2)
+
+    def test_pg_concurrency_error_on_flush_reaches_the_runner_retryable(self):
+        """Through the runner, in the shape the failure takes in production.
+
+        _try_perform_job wraps perform() in a savepoint, and the flush that
+        reports the conflict happens on leaving it. Before the flush moved
+        inside perform(), that OperationalError came straight back out of
+        here, past the runner's 'except RetryableJobError', and the job was
+        marked failed on its first attempt instead of being postponed.
+        """
+        record = self.env["test.queue.job"].create({"name": "to be written"})
+        self.env.flush_all()
+        job = (
+            self.env["test.queue.job"]
+            .with_delay(max_retries=2)
+            .job_writing_a_record(record)
+        )
+
+        with mock.patch.object(
+            type(record), "flush_model", side_effect=ConcurrencyError
+        ):
+            with self.assertRaises(RetryableJobError):
+                RunJobController._try_perform_job(self.env, job)
+
+        self.assertEqual(job.retry, 1)
 
     def test_other_operational_error_is_not_retried(self):
         error = OperationalError("undefined table")

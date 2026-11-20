@@ -128,6 +128,14 @@ class ModelTestQueueJob(models.Model):
     def job_with_retry_pattern__pg_concurrency(self):
         raise ConcurrencyError()
 
+    def job_writing_a_record(self, record):
+        """Write without flushing, the way a job function normally does.
+
+        The UPDATE is left to the next flush, which is where PostgreSQL
+        reports a conflicting concurrent update rather than from here.
+        """
+        record.name = "written by the job"
+
     def mapped(self, func):
         return super().mapped(func)
 

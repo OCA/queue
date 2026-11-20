@@ -522,6 +522,13 @@ class Job:
                     env_context_manager = nullcontext()
                 with env_context_manager:
                     self.result = self.func(*tuple(self.args), **self.kwargs)
+                # Most job functions write without flushing, so the conflicting
+                # update is reported when their work reaches the database. The
+                # runners call perform() inside a savepoint, and leaving it is
+                # what flushes, so the failure would be raised after this try
+                # has been left and escape the conversion below. Flush here
+                # instead, while it can still become a RetryableJobError.
+                self.env.flush_all()
             except OperationalError as err:
                 # The typical transaction serialization errors are retryable,
                 # and converting them here rather than in the runners is what
