@@ -2,13 +2,20 @@
 # @author Iván Todorovich <ivan.todorovich@camptocamp.com>
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
+import warnings
 from datetime import timedelta
+from unittest.mock import patch
 
 from freezegun import freeze_time
+from psycopg2 import OperationalError
 
 from odoo import fields
+from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger
+
+from odoo.addons.queue_job.controllers.main import PG_RETRY
+from odoo.addons.queue_job.job import Job
 
 
 class TestQueueJob(TransactionCase):
@@ -35,6 +42,39 @@ class TestQueueJob(TransactionCase):
         self.assertTriggerAt(fields.Datetime.now(), "Trigger should've been created")
         job_record.eta = fields.Datetime.now() + timedelta(hours=1)
         self.assertTriggerAt(job_record.eta, "A new trigger should've been created")
+
+    @freeze_time("2022-02-22 22:22:22")
+    @mute_logger("odoo.addons.queue_job_cron_jobrunner.models.queue_job")
+    def test_queue_job_process_concurrency_error(self):
+        """A PostgreSQL concurrency error postpones the job without using
+        deprecated Odoo APIs (e.g. tools.ustr)"""
+        job_record = (
+            self.env["res.partner"].with_delay().create({"name": "test"}).db_record()
+        )
+
+        # pgcode/pgerror are read-only on psycopg2 errors: override them
+        # in a subclass instead.
+        class SerializationFailure(OperationalError):
+            pgcode = list(PG_CONCURRENCY_ERRORS_TO_RETRY)[0]
+            pgerror = "could not serialize access"
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", DeprecationWarning)
+            with patch.object(Job, "perform", side_effect=SerializationFailure("boom")):
+                job_record._process()
+
+        own_warnings = [
+            str(w.message)
+            for w in caught
+            if issubclass(w.category, DeprecationWarning)
+            and w.filename.endswith("queue_job_cron_jobrunner/models/queue_job.py")
+        ]
+        self.assertFalse(own_warnings)
+        self.assertEqual(job_record.state, "pending")
+        self.assertEqual(job_record.result, "could not serialize access")
+        self.assertEqual(
+            job_record.eta, fields.Datetime.now() + timedelta(seconds=PG_RETRY)
+        )
 
     @mute_logger("odoo.addons.queue_job_cron_jobrunner.models.queue_job")
     def test_queue_job_process(self):
